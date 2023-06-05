@@ -13,7 +13,7 @@
         };
       in
       {
-        packages = rec {
+        packages = {
           default = pkgs.haskellPackages.callCabal2nix "garn" ./. { };
         };
         devShells = {
@@ -23,6 +23,11 @@
               hpack
               cabal-install
               (ghc.withPackages (p: self.packages.${system}.default.buildInputs))
+              (haskell-language-server.override {
+                dynamic = true;
+                supportedGhcVersions = [ "928" ];
+              })
+              deno
             ];
           };
         };

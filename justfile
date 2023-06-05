@@ -46,4 +46,3 @@ watch *args="":
   #!/usr/bin/env bash
 
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
-

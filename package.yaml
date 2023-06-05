@@ -25,7 +25,6 @@ default-extensions:
   - LambdaCase
   - MultiParamTypeClasses
   - MultiWayIf
-  - NoImplicitPrelude
   - OverloadedLabels
   - OverloadedStrings
   - PolyKinds
@@ -41,11 +40,12 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
-
+  - shake
+  - getopt-generics
+  - interpolate
 
 ghc-options:
   - -Wall
-  - -Werror
   - -with-rtsopts=-T
 
 tests:
@@ -61,3 +61,16 @@ tests:
     dependencies:
       - hspec
       - hspec-discover
+      - mockery
+      - silently
+      - directory
+
+library:
+  source-dirs:
+    - src
+
+executables:
+  garner:
+    main: exe/garner.hs
+    dependencies:
+      - garner
