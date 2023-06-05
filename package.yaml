@@ -1,0 +1,63 @@
+name: garner
+version: 0.1.0.0
+github: "jkarni/garnix"
+license: AllRightsReserved
+author: "Julian K. Arni"
+maintainer: "jkarni@riseup.net"
+copyright: "AllRightsReserved"
+
+default-extensions:
+  - BangPatterns
+  - ConstraintKinds
+  - DataKinds
+  - DeriveAnyClass
+  - DeriveFunctor
+  - DeriveTraversable
+  - DeriveGeneric
+  - DerivingStrategies
+  - DerivingVia
+  - FunctionalDependencies
+  - FlexibleContexts
+  - FlexibleInstances
+  - GADTs
+  - GeneralizedNewtypeDeriving
+  - InstanceSigs
+  - LambdaCase
+  - MultiParamTypeClasses
+  - MultiWayIf
+  - NoImplicitPrelude
+  - OverloadedLabels
+  - OverloadedStrings
+  - PolyKinds
+  - QuantifiedConstraints
+  - RankNTypes
+  - RecordWildCards
+  - TupleSections
+  - TypeApplications
+  - TypeFamilies
+  - TypeOperators
+  - ScopedTypeVariables
+  - StandaloneDeriving
+
+dependencies:
+  - base >= 4.7 && < 5
+
+
+ghc-options:
+  - -Wall
+  - -Werror
+  - -with-rtsopts=-T
+
+tests:
+  spec:
+    main: Spec.hs
+    source-dirs:
+      - test/spec
+      - src
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - hspec
+      - hspec-discover
