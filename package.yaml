@@ -6,6 +6,10 @@ author: "garnix"
 maintainer: "contact@garnix.io"
 copyright: "AllRightsReserved"
 
+data-files:
+  - ts/haskell.ts
+  - ts/runner.ts
+
 default-extensions:
   - BangPatterns
   - ConstraintKinds
@@ -25,6 +29,7 @@ default-extensions:
   - LambdaCase
   - MultiParamTypeClasses
   - MultiWayIf
+  - NamedFieldPuns
   - OverloadedLabels
   - PolyKinds
   - QuantifiedConstraints
@@ -42,6 +47,7 @@ dependencies:
   - shake
   - getopt-generics
   - interpolate
+  - process
 
 ghc-options:
   - -Wall

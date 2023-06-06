@@ -14,7 +14,8 @@ export type Package = {
 export const mkHaskell = (args : MkHaskellArgs) : Package => {
    return {
       tag: "package",
-      nixExpression: `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "${args.name}" ${args.src} {} ) // { meta.mainProgram = "${args.executable}"; }`
+      nixExpression: `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "${args.name}" ${args.src} { } ).override { } // { meta.mainProgram = "${args.executable}"; }`
+
    }
 
 }

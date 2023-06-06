@@ -28,6 +28,7 @@
             buildInputs = with pkgs; [
               ghcid
               hpack
+              ormolu
               cabal-install
               (ghc.withPackages (p: self.packages.${system}.default.buildInputs))
               self.packages.${system}.default.buildInputs
