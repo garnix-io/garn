@@ -3,7 +3,6 @@
 module GarnerSpec where
 
 import Data.String.Interpolate (i)
-import Development.Shake
 import Garner
 import System.Directory
 import System.Environment (withArgs)
@@ -44,6 +43,9 @@ spec = do
               dependencies:
                - base
         |]
-      output <- capture_ $ withArgs ["run", "foo"] $ runWith
-        (Options { tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+      output <-
+        capture_ $
+          withArgs ["run", "foo"] $
+            runWith
+              (Options {tsRunnerFilename = repoDir <> "/ts/runner.ts"})
       output `shouldBe` "haskell test output\n"

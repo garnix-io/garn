@@ -1,9 +1,9 @@
 name: garner
 version: 0.1.0.0
-github: "jkarni/garnix"
+github: "garnix-io/garner"
 license: AllRightsReserved
-author: "Julian K. Arni"
-maintainer: "jkarni@riseup.net"
+author: "garnix"
+maintainer: "contact@garnix.io"
 copyright: "AllRightsReserved"
 
 default-extensions:
@@ -26,7 +26,6 @@ default-extensions:
   - MultiParamTypeClasses
   - MultiWayIf
   - OverloadedLabels
-  - OverloadedStrings
   - PolyKinds
   - QuantifiedConstraints
   - RankNTypes
