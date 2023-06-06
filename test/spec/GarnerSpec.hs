@@ -20,18 +20,18 @@ spec = do
       writeFile
         "garner.ts"
         [i|
-           import "#{repoDir}/ts/haskell.ts"
+           import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
            export const foo = mkHaskell({
-             compiler: "ghc-9.4.2",
-             src: "."
+             compiler: "ghc94",
+             src: "./."
            })
         |]
       writeFile
         "Main.hs"
         [i|
           main :: IO ()
-          main = putStrLn "foo"
+          main = putStrLn "haskell test output"
         |]
       writeFile
         "package.yaml"
@@ -39,6 +39,9 @@ spec = do
           executables:
             garner-test:
               main: Main.hs
+              dependencies:
+               - base
         |]
-      output <- capture_ $ withArgs ["run", "foo"] run
-      output `shouldBe` "foo"
+      output <- capture_ $ withArgs ["run", "foo"] $ runWith
+        (Options { tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+      output `shouldBe` "haskell test output\n"

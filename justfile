@@ -24,9 +24,6 @@ ormolu mode:
     $(find . -name '*.hs' | grep -v '^./dist-newstyle/')
 
 hpack:
-  #!/usr/bin/env bash
-
-  cd backend
   hpack
 
 hpack-check:
@@ -42,7 +39,7 @@ hpack-check:
       error "package.yaml has changed, please run hpack"
 
 
-watch *args="":
+watch *args="": hpack
   #!/usr/bin/env bash
 
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
