@@ -1,5 +1,7 @@
 
 type MkHaskellArgs = {
+  name: string,
+  executable: string,
   compiler: string,
   src: string
 }
@@ -12,7 +14,7 @@ export type Package = {
 export const mkHaskell = (args : MkHaskellArgs) : Package => {
    return {
       tag: "package",
-      nixExpression: `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "foo" ${args.src} {} ) // { meta.mainProgram = "garner-test"; }`
+      nixExpression: `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "${args.name}" ${args.src} {} ) // { meta.mainProgram = "${args.executable}"; }`
    }
 
 }

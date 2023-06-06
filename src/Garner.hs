@@ -13,14 +13,16 @@ run :: IO ()
 run = runWith Options { tsRunnerFilename = "todo" }
 
 runWith :: Options -> IO ()
-runWith opts = withCli $ \("run" :: String) ("foo" :: String) -> do
-  writeFile
-    "main.ts"
-    [i|
-      import * as config from "./garner.ts"
-      import { writeFlake } from "#{tsRunnerFilename opts}"
+runWith opts = withCli $ \(cmd :: String) (target :: String) -> case cmd of
+  "run" -> do
+    writeFile
+      "main.ts"
+      [i|
+        import * as config from "./garner.ts"
+        import { writeFlake } from "#{tsRunnerFilename opts}"
 
-      writeFlake(config)
-    |]
-  cmd_ ("deno run --allow-write main.ts" :: String) :: IO ()
-  cmd_ ("nix run -L .#foo" :: String) :: IO ()
+        writeFlake(config)
+      |]
+    cmd_ ("deno run --check --allow-write main.ts" :: String) :: IO ()
+    cmd_ ("nix run -L .#" <> target) :: IO ()
+  _ -> error $ "Command " <> cmd <> " not supported."
