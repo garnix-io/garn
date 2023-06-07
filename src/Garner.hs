@@ -5,8 +5,10 @@ module Garner where
 import Data.String.Interpolate (i)
 import Development.Shake (cmd_)
 import Paths_garner
-import System.IO (Handle)
+import System.Directory
+import System.IO (Handle, hClose, hPutStr)
 import qualified System.IO
+import System.IO.Temp
 import System.Process
 import WithCli
 
@@ -47,15 +49,18 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
 
 makeFlake :: Options -> IO ()
 makeFlake opts = do
-  writeFile
-    "main.ts"
-    [i|
-        import * as config from "./garner.ts"
+  dir <- getCurrentDirectory
+  withSystemTempFile "garner-main-ts" $ \mainPath mainHandle -> do
+    hPutStr
+      mainHandle
+      [i|
+        import * as config from "#{dir}/garner.ts"
         import { writeFlake } from "#{tsRunnerFilename opts}"
 
         writeFlake(config)
       |]
-  cmd_ "deno run --quiet --check --allow-write main.ts"
+    hClose mainHandle
+    cmd_ "deno run --quiet --check --allow-write" mainPath
 
 nixArgs :: [String]
 nixArgs = ["-L", "--extra-experimental-features", "nix-command flakes"]

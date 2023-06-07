@@ -2,6 +2,7 @@
 
 module GarnerSpec where
 
+import Data.List (sort)
 import Data.String.Interpolate (i)
 import GHC.IO.IOMode (IOMode (ReadMode))
 import Garner
@@ -26,8 +27,14 @@ spec = do
               runWith
                 (Options {stdin = System.IO.stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
         output `shouldBe` "haskell test output\n"
-      it "writes flake files" pending
-      it "doesn't write any other files" pending
+      it "writes flake.{lock,nix}, but no other files" $ do
+        writeHaskellProject repoDir
+        filesBefore <- listDirectory "."
+        withArgs ["run", "foo"] $
+          runWith
+            (Options {stdin = System.IO.stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+        filesAfter <- sort <$> listDirectory "."
+        filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
     describe "enter" $ do
       it "has the right GHC version" $ do
         writeHaskellProject repoDir
