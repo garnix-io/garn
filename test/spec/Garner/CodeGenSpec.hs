@@ -26,7 +26,20 @@ spec = do
       return $ check output
     it "ignores things that are not derivations" pending
     it "only generates valid typescript" pending
-    it "generates nice JSDoc comments" pending
+    golden "generates nice JSDoc comments" $ \check -> do
+      output <-
+        fromToplevelDerivation
+          "pkgs"
+          [i|
+            {
+              foo = derivation {
+                system = "x86_64-linux";
+                name = "fooderivation";
+                builder = "foo";
+              } // { meta.description = "This is the bestest derivation."; };
+            }
+          |]
+      return $ check output
 
 golden :: Example a => String -> ((String -> Golden String) -> a) -> SpecWith (Arg a)
 golden description test =
