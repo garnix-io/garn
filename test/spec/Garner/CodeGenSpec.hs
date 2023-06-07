@@ -36,7 +36,7 @@ spec = do
                 system = "x86_64-linux";
                 name = "fooderivation";
                 builder = "foo";
-              } // { meta.description = "This is the bestest derivation"; };
+              } // { meta.description = "This is the bestest derivation."; };
             }
           |]
       return $ check output
