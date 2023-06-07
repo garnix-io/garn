@@ -1,4 +1,4 @@
-check: hpack fmt test
+check: hpack fmt test example
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
@@ -19,7 +19,7 @@ hpack:
   hpack
 
 test: hpack
-  cabal test
+  cabal test --test-show-details=streaming
 
 watch *args="": hpack
   #!/usr/bin/env bash

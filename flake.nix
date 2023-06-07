@@ -13,7 +13,7 @@
         };
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
-        ourHaskell = pkgs.haskell.packages.ghc961;
+        ourHaskell = pkgs.haskell.packages.ghc945;
       in
       {
         packages = {
@@ -47,16 +47,15 @@
           default = pkgs.mkShell {
             buildInputs = with pkgs; [
               ghcid
-              hpack
               ormolu
               cabal-install
               (ourHaskell.ghc.withPackages (p: self.packages.${system}.default.buildInputs))
               self.packages.${system}.default.buildInputs
               (haskell-language-server.override {
                 dynamic = true;
-                supportedGhcVersions = [ "961" ];
+                supportedGhcVersions = [ "945" ];
               })
-              haskellPackages.cabal2nix
+              ourHaskell.cabal2nix
               nodePackages.prettier
             ];
           };
