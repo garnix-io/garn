@@ -18,12 +18,20 @@ fromToplevelDerivation varName rootExpr = do
   where
     nixExpr =
       [i| let root = #{rootExpr};
-              go = attr: ''
-                export const ${attr} = mkDerivation({
-                  attribute = `''${root}.${attr}`;
+              mkDoc = value:
+                if value ? meta.description
+                then ''
+                  /**
+                   * ${value.meta.description}
+                   */
+                ''
+                else "";
+              go = name: value: mkDoc value + ''
+                export const ${name} = mkDerivation({
+                  attribute = `''${root}.${name}`;
                 })
               '';
           in
           "const root = \\\"#{varName}\\\";\n\n" +
-          builtins.concatStringsSep "\n" (map go (builtins.attrNames root))
+          builtins.concatStringsSep "\n" (builtins.attrValues (builtins.mapAttrs go root))
     |]
