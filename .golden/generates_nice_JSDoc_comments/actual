@@ -1,7 +1,7 @@
 const root = "pkgs";
 
 /**
- * This is the bestest derivation
+ * This is the bestest derivation.
  */
 export const foo = mkDerivation({
   attribute = `${root}.foo`;
