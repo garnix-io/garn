@@ -56,9 +56,12 @@
                 supportedGhcVersions = [ "928" ];
               })
               haskellPackages.cabal2nix
+              nodePackages.prettier
+              ormolu
             ];
           };
         };
+        formatter = pkgs.nixpkgs-fmt;
       }
     );
 }

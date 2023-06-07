@@ -1,43 +1,25 @@
-fmt: fmt-nix fmt-haskell
+check: hpack fmt test
+
+fmt: fmt-nix fmt-haskell fmt-typescript
 
 fmt-nix:
-  nix fmt
-
-check: fmt-nix-check fmt-haskell-check hpack-check
-
-fmt-nix-check:
-  nixpkgs-fmt --check .
+  nixpkgs-fmt *.nix
 
 fmt-haskell:
-  just ormolu inplace
-
-fmt-haskell-check:
-  just ormolu check
-
-ormolu mode:
   #!/usr/bin/env bash
 
-  cd backend
   ormolu \
-    --cabal-default-extensions \
-    --mode {{ mode }} \
+    --mode inplace \
     $(find . -name '*.hs' | grep -v '^./dist-newstyle/')
+
+fmt-typescript:
+  prettier --write 'ts/**/*.ts'
 
 hpack:
   hpack
 
-hpack-check:
-  #!/usr/bin/env runhaskell
-
-  import Control.Monad
-  import System.Process
-
-  main = do
-    oldCabal <- readFile "backend/garnix.cabal"
-    newCabal <- readProcess "hpack" (words "backend -") ""
-    when (oldCabal /= newCabal) $
-      error "package.yaml has changed, please run hpack"
-
+test: hpack
+  cabal test
 
 watch *args="": hpack
   #!/usr/bin/env bash
