@@ -44,10 +44,12 @@ default-extensions:
 
 dependencies:
   - base >= 4.7 && < 5
+  - aeson
   - shake
   - getopt-generics
   - interpolate
   - process
+  - text
 
 ghc-options:
   - -Wall
@@ -66,9 +68,11 @@ tests:
     dependencies:
       - hspec
       - hspec-discover
+      - hspec-golden
       - mockery
       - silently
       - directory
+
 
 library:
   source-dirs:
