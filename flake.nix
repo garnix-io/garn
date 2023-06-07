@@ -13,6 +13,7 @@
         };
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
+        ourHaskell = pkgs.haskell.packages.ghc961;
       in
       {
         packages = {
@@ -34,7 +35,7 @@
                       ! (builtins.elem repoPath ignored);
                 };
             in
-            (pkgs.haskellPackages.callCabal2nix "garn" src { }).overrideAttrs
+            (ourHaskell.callCabal2nix "garn" src { }).overrideAttrs
               (
                 original: {
                   buildInputs = original.buildInputs ++ [ pkgs.deno pkgs.nix ];
@@ -49,15 +50,14 @@
               hpack
               ormolu
               cabal-install
-              (ghc.withPackages (p: self.packages.${system}.default.buildInputs))
+              (ourHaskell.ghc.withPackages (p: self.packages.${system}.default.buildInputs))
               self.packages.${system}.default.buildInputs
               (haskell-language-server.override {
                 dynamic = true;
-                supportedGhcVersions = [ "928" ];
+                supportedGhcVersions = [ "961" ];
               })
               haskellPackages.cabal2nix
               nodePackages.prettier
-              ormolu
             ];
           };
         };
