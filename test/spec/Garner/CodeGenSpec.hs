@@ -14,13 +14,16 @@ spec = do
       output <-
         fromToplevelDerivation
           "pkgs"
-          [i| {
+          [i|
+            {
               foo = derivation {
                 system = "x86_64-linux";
                 name = "fooderivation";
                 builder = "foo";
               };
-            }|]
+            }
+          |]
       return $ defaultGolden "hello" output
     it "ignores things that are not derivations" pending
     it "only generates valid typescript" pending
+    it "generates nice JSDoc comments" pending

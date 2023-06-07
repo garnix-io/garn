@@ -54,6 +54,7 @@ dependencies:
 ghc-options:
   - -Wall
   - -with-rtsopts=-T
+  - -Wno-name-shadowing
 
 tests:
   spec:
@@ -72,7 +73,6 @@ tests:
       - mockery
       - silently
       - directory
-
 
 library:
   source-dirs:
