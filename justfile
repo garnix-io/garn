@@ -43,3 +43,11 @@ watch *args="": hpack
   #!/usr/bin/env bash
 
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
+
+example:
+  #!/usr/bin/env bash
+
+  set -eux
+
+  cd examples
+  nix -L run ..#default -- run garnerTest

@@ -29,7 +29,7 @@ spec = do
       it "writes flake files" pending
       it "doesn't write any other files" pending
     describe "enter" $ do
-      fit "has the right GHC version" $ do
+      it "has the right GHC version" $ do
         writeHaskellProject repoDir
         writeFile "stdin" "ghc --numeric-version\nexit\n"
         output <-
@@ -37,7 +37,7 @@ spec = do
             withFile "stdin" ReadMode $ \stdin ->
               withArgs ["enter", "foo"] $
                 runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
-        output `shouldBe` "9.4.1\n"
+        output `shouldStartWith` "9.4"
 
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
@@ -46,14 +46,12 @@ writeHaskellProject repoDir = do
     [i|
       import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
-
       export const foo = mkHaskell({
         name: "mkHaskell-test",
         executable: "garner-test",
         compiler: "ghc94",
         src: "./."
       })
-
     |]
   writeFile
     "Main.hs"

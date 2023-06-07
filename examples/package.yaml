@@ -1,0 +1,5 @@
+executables:
+  garnerTest:
+    main: Main.hs
+    dependencies:
+      - base

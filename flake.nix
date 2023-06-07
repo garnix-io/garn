@@ -11,11 +11,30 @@
           inherit system;
           config.allowUnfree = true;
         };
+        strings = pkgs.lib.strings;
+        lists = pkgs.lib.lists;
       in
       {
         packages = {
           default =
-            (pkgs.haskellPackages.callCabal2nix "garn" ./. { }).overrideAttrs
+            let
+              # directories shouldn't have leading or trailing slashes
+              ignored = [ "examples" "justfile" ];
+              src = builtins.path
+                {
+                  path = ./.;
+                  name = "garner-source";
+                  filter = path: type:
+                    let
+                      repoPath =
+                        builtins.concatStringsSep "/"
+                          (lists.drop 4
+                            (strings.splitString "/" path));
+                    in
+                      ! (builtins.elem repoPath ignored);
+                };
+            in
+            (pkgs.haskellPackages.callCabal2nix "garn" src { }).overrideAttrs
               (
                 original: {
                   buildInputs = original.buildInputs ++ [ pkgs.deno pkgs.nix ];

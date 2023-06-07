@@ -1,8 +1,8 @@
-import { mkHaskell } from "../ts/haskell.ts"
+import { mkHaskell } from "../ts/haskell.ts";
 
-export const foo = mkHaskell({
+export const garnerTest = mkHaskell({
   name: "mkHaskell-test",
-  executable: "garner-test",
+  executable: "garnerTest",
   compiler: "ghc94",
-  src: "./."
-})
+  src: "./.",
+});

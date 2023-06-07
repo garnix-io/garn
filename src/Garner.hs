@@ -2,7 +2,6 @@
 
 module Garner where
 
-import Control.Monad
 import Data.String.Interpolate (i)
 import Development.Shake (cmd_)
 import Paths_garner
@@ -35,14 +34,15 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
     let devProc =
           ( proc
               "nix"
-              ["develop", "-L", ".#" <> target]
+              ["develop", "-L", ".#" <> target, "-c", "bash"]
           )
             { std_in = UseHandle $ stdin opts,
               std_out = Inherit,
               std_err = Inherit
             }
-    (_, _, _, procHandle) <- createProcess devProc
-    void $ waitForProcess procHandle
+    _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
+      waitForProcess procHandle
+    pure ()
   _ -> error $ "Command " <> command <> " not supported."
 
 makeFlake :: Options -> IO ()
@@ -55,7 +55,7 @@ makeFlake opts = do
 
         writeFlake(config)
       |]
-  cmd_ "deno run --check --allow-write main.ts"
+  cmd_ "deno run --quiet --check --allow-write main.ts"
 
 nixArgs :: [String]
 nixArgs = ["-L", "--extra-experimental-features", "nix-command flakes"]

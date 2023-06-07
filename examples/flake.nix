@@ -10,6 +10,6 @@
            in
         {
            
-    foo = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { } ).override { ghc = pkgs.haskell.compiler.941; } // { meta.mainProgram = "garner-test"; };
+    garnerTest = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { } ).override { } // { meta.mainProgram = "garnerTest"; };
         };
      }
