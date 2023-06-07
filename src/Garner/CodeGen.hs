@@ -26,12 +26,17 @@ fromToplevelDerivation varName rootExpr = do
                    */
                 ''
                 else "";
-              go = name: value: mkDoc value + ''
+
+              mkAll = name: value: mkDoc value + ''
                 export const ${name} = mkDerivation({
                   attribute = `''${root}.${name}`;
                 })
               '';
+              mk = name: value:
+                if (value.type or "") == "derivation"
+                then mkAll name value
+                else "";
           in
           "const root = \\\"#{varName}\\\";\n\n" +
-          builtins.concatStringsSep "\n" (builtins.attrValues (builtins.mapAttrs go root))
+          builtins.concatStringsSep "" (builtins.attrValues (builtins.mapAttrs mk root))
     |]

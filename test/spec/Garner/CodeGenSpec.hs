@@ -11,8 +11,8 @@ spec :: Spec
 spec = do
   describe "fromToplevelDerivation" $ do
     golden "extracts top-level derivations" $ \check -> do
-      output <-
-        fromToplevelDerivation
+      check
+        <$> fromToplevelDerivation
           "pkgs"
           [i|
             {
@@ -23,12 +23,25 @@ spec = do
               };
             }
           |]
-      return $ check output
-    it "ignores things that are not derivations" pending
+    golden "ignores things that are not derivations" $ \check -> do
+      check
+        <$> fromToplevelDerivation
+          "pkgs"
+          [i|
+            {
+              foo = derivation {
+                system = "x86_64-linux";
+                name = "fooderivation";
+                builder = "foo";
+              };
+              bar = 3;
+              baz = { isay = "hey"; };
+            }
+          |]
     it "only generates valid typescript" pending
     golden "generates nice JSDoc comments" $ \check -> do
-      output <-
-        fromToplevelDerivation
+      check
+        <$> fromToplevelDerivation
           "pkgs"
           [i|
             {
@@ -39,7 +52,6 @@ spec = do
               } // { meta.description = "This is the bestest derivation."; };
             }
           |]
-      return $ check output
 
 golden :: Example a => String -> ((String -> Golden String) -> a) -> SpecWith (Arg a)
 golden description test =
