@@ -44,10 +44,10 @@ watch *args="": hpack
 
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
 
-example:
+example *args="run garnerTest":
   #!/usr/bin/env bash
 
   set -eux
 
   cd examples
-  nix -L run ..#default -- run garnerTest
+  nix -L run ..#default -- {{ args }}
