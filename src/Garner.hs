@@ -50,7 +50,7 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
 makeFlake :: Options -> IO ()
 makeFlake opts = do
   dir <- getCurrentDirectory
-  withSystemTempFile "garner-main-ts" $ \mainPath mainHandle -> do
+  withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
     hPutStr
       mainHandle
       [i|
