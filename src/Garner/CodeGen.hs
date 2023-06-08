@@ -33,7 +33,7 @@ fromToplevelDerivation varName rootExpr = do
                 })
               '';
               mk = name: value:
-                if (value.type or "") == "derivation"
+                if (value.type or null) == "derivation"
                 then mkAll name value
                 else "";
           in
