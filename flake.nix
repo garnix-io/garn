@@ -16,6 +16,7 @@
         ourHaskell = pkgs.haskell.packages.ghc945;
       in
       {
+        lib = pkgs.lib;
         packages = {
           default =
             let

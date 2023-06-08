@@ -1,0 +1,5 @@
+const root = "pkgs";
+
+export const foo = mkDerivation({
+  attribute = `${root}.foo`;
+})
