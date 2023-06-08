@@ -38,6 +38,21 @@ spec = do
               baz = { isay = "hey"; };
             }
           |]
+    golden "ignores attributes that throw" $ \check -> do
+      output <-
+        fromToplevelDerivation
+          "pkgs"
+          [i|
+            {
+              foo = derivation {
+                system = "x86_64-linux";
+                name = "fooderivation";
+                builder = "foo";
+              };
+              throwing = throw "test error message";
+            }
+          |]
+      return $ check output
     it "only generates valid typescript" pending
     golden "generates nice JSDoc comments" $ \check -> do
       check
@@ -53,7 +68,7 @@ spec = do
             }
           |]
 
-golden :: Example a => String -> ((String -> Golden String) -> a) -> SpecWith (Arg a)
+golden :: (Example a) => String -> ((String -> Golden String) -> a) -> SpecWith (Arg a)
 golden description test =
   it description $
     test (defaultGolden $ fmap cleanChar description)

@@ -11,13 +11,17 @@ import Development.Shake
 
 fromToplevelDerivation :: String -> String -> IO String
 fromToplevelDerivation varName rootExpr = do
-  Stdout json <- cmd "nix eval --json --expr" [nixExpr]
+  system :: String <- do
+    Stdout json <- cmd "nix eval --impure --json --expr builtins.currentSystem"
+    return $ either error id $ eitherDecode json
+  Stdout json <- cmd "nix eval" (".#lib." <> system) "--json --apply" [nixExpr]
   case eitherDecode json of
     Right tsCode -> pure tsCode
     Left e -> error e
   where
     nixExpr =
-      [i| let root = #{rootExpr};
+      [i| lib :
+          let root = #{rootExpr};
               mkDoc = value:
                 if value ? meta.description
                 then ''
@@ -26,17 +30,21 @@ fromToplevelDerivation varName rootExpr = do
                    */
                 ''
                 else "";
-
-              mkAll = name: value: mkDoc value + ''
+              mk = name: value: mkDoc value + ''
                 export const ${name} = mkDerivation({
                   attribute = `''${root}.${name}`;
                 })
               '';
-              mk = name: value:
-                if (value.type or null) == "derivation"
-                then mkAll name value
-                else "";
+              pickDerivations = lib.attrsets.filterAttrs
+                (name : value : (value.type or null) == "derivation");
+              removeThrowing = lib.attrsets.filterAttrs
+                (name : maybeThrowing : (builtins.tryEval maybeThrowing).success);
           in
           "const root = \\\"#{varName}\\\";\n\n" +
-          builtins.concatStringsSep "" (builtins.attrValues (builtins.mapAttrs mk root))
+          lib.strings.concatStrings
+            (lib.mapAttrsToList mk
+              (pickDerivations
+                (removeThrowing root)
+              )
+            )
     |]
