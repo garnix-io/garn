@@ -68,6 +68,7 @@ tests:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
+      - -fdefer-typed-holes
     dependencies:
       - hspec
       - hspec-discover

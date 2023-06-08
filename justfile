@@ -39,3 +39,4 @@ example *args="run garnerTest":
 
 codegen: hpack
   cabal run codegen -- pkgs "import <nixpkgs> {}"
+  deno check ts/*.ts

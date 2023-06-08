@@ -1,8 +1,10 @@
+import { mkDerivation } from "../../ts/base.ts";
+
 const root = "pkgs";
 
 /**
  * This is the bestest derivation.
  */
 export const foo = mkDerivation({
-  attribute = `${root}.foo`;
-})
+  attribute: `${root}.foo`,
+});
