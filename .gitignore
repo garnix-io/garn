@@ -1,3 +1,4 @@
 /*.cabal
 /dist-newstyle/
 /result
+/ts/nixpkgs.ts

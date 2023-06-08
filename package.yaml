@@ -85,3 +85,8 @@ executables:
     main: exe/garner.hs
     dependencies:
       - garner
+
+  codegen:
+    main: exe/codegen.hs
+    dependencies:
+      - garner

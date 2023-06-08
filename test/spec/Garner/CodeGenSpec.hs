@@ -53,6 +53,29 @@ spec = do
             }
           |]
       return $ check output
+    golden "ignores attributes that are marked broken" $ \check -> do
+      check
+        <$> fromToplevelDerivation
+          "pkgs"
+          [i|
+            {
+              broken = derivation {
+                system = "x86_64-linux";
+                name = "broken";
+                builder = "foo";
+              } // { meta.broken = true; };
+              broken2 = derivation {
+                system = "x86_64-linux";
+                name = "broken2";
+                builder = "foo";
+              } // { meta.broken = throw "broken!"; };
+              foo = derivation {
+                system = "x86_64-linux";
+                name = "foo";
+                builder = "foo";
+              } // { meta.broken = false; };
+            }
+          |]
     it "only generates valid typescript" pending
     golden "generates nice JSDoc comments" $ \check -> do
       check

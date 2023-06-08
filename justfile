@@ -1,3 +1,6 @@
+list:
+  just --list
+
 check: hpack fmt test example
 
 fmt: fmt-nix fmt-haskell fmt-typescript
@@ -33,3 +36,6 @@ example *args="run garnerTest":
 
   cd examples
   nix -L run ..#default -- {{ args }}
+
+codegen: hpack
+  cabal run codegen -- pkgs "import <nixpkgs> {}"
