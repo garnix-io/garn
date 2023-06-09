@@ -42,19 +42,6 @@ check-examples:
   just run-example run hello
 
 codegen: hpack
-  #!/usr/bin/env runhaskell
-
-  {-# LANGUAGE QuasiQuotes #-}
-
-  import Data.String.Interpolate
-  import Development.Shake
-  import System.Directory
-
-  main = do
-    putStrLn "generating nixpkgs.ts..."
-    StdoutTrim (system :: String) <- cmd "nix eval --impure --raw --expr builtins.currentSystem"
-    cmd_ "cabal run codegen"
-    putStrLn "typechecking nixpkgs.ts..."
-    tsFiles <- listDirectory "ts"
-    cmd_ "deno check" $ fmap ("ts/" <>) tsFiles
-    putStrLn "done"
+  cabal run codegen
+  deno check ts/*.ts
+  echo done
