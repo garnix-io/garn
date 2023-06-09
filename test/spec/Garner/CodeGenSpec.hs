@@ -112,6 +112,21 @@ spec = do
           };
         }
       |]
+    checkTs "removes conflicts due to sanitization" $
+      [i|
+        {
+          foo-a = derivation {
+            system = "x86_64-linux";
+            name = "fooderivation1";
+            builder = "foo";
+          };
+          foo_a = derivation {
+            system = "x86_64-linux";
+            name = "fooderivation2";
+            builder = "foo";
+          };
+        }
+      |]
 
 checkTs :: String -> String -> SpecWith ()
 checkTs description nixExpression = do

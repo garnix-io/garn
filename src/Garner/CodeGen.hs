@@ -9,6 +9,7 @@ where
 import Data.Aeson (FromJSON, eitherDecode)
 import Data.List (intercalate)
 import Data.Map (Map, toAscList)
+import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
@@ -30,17 +31,19 @@ fromToplevelDerivation garnerLibRoot varName rootExpr = do
   pkgs :: Map String PkgInfo <- case eitherDecode json of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in " <> cs json)
+  let sanitizedPkgs = Map.mapKeys sanitize pkgs
   return $
     unindent
       [i|
     import { mkDerivation } from "#{garnerLibRoot}/base.ts";
 
     |]
-      <> pkgsString varName pkgs
+      <> pkgsString varName sanitizedPkgs
   where
     nixExpr =
       [i| lib :
           let mk = name: value: {
+                attribute = name;
                 description = if value ? meta.description
                   then value.meta.description
                   else null;
@@ -62,7 +65,9 @@ fromToplevelDerivation garnerLibRoot varName rootExpr = do
     |]
 
 data PkgInfo = PkgInfo
-  {description :: Maybe String}
+  { description :: Maybe String,
+    attribute :: String
+  }
   deriving stock (Eq, Show, Generic)
   deriving anyclass (FromJSON)
 
@@ -82,8 +87,8 @@ formatPkg varName (name, pkgInfo) =
   pkgDoc pkgInfo
     <> unindent
       [i|
-            export const #{sanitize name} = mkDerivation({
-              attribute: `#{varName}.#{name}`,
+            export const #{name} = mkDerivation({
+              attribute: `#{varName}.#{attribute pkgInfo}`,
             });
         |]
 

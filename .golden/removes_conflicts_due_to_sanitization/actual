@@ -1,0 +1,5 @@
+import { mkDerivation } from "../../ts/base.ts";
+
+export const foo_a = mkDerivation({
+  attribute: `pkgs.foo_a`,
+});
