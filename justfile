@@ -42,5 +42,20 @@ check-examples:
   just run-example run hello
 
 codegen: hpack
-  cabal run codegen -- pkgs "import <nixpkgs> { config.allowAliases = false; }"
-  deno check ts/*.ts
+  #!/usr/bin/env runhaskell
+
+  {-# LANGUAGE QuasiQuotes #-}
+
+  import Data.String.Interpolate
+  import Development.Shake
+  import System.Directory
+
+  main = do
+    putStrLn "generating nixpkgs.ts..."
+    cmd_ "cabal run codegen -- pkgs" [[i|
+      import <nixpkgs> { config.allowAliases = false; }
+    |]]
+    putStrLn "typechecking nixpkgs.ts..."
+    tsFiles <- listDirectory "ts"
+    cmd_ "deno check" $ fmap ("ts/" <>) tsFiles
+    putStrLn "done"
