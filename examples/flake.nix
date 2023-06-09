@@ -10,6 +10,7 @@
            in
         {
            
-    garnerTest = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { } ).override { } // { meta.mainProgram = "garnerTest"; };
+    haskellExecutable = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { } ).override { } // { meta.mainProgram = "garnerTest"; };
+    hello = pkgs.hello;
         };
      }

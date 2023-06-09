@@ -58,6 +58,8 @@
               })
               ourHaskell.cabal2nix
               nodePackages.prettier
+              nixpkgs-fmt
+              fd
             ];
           };
         };

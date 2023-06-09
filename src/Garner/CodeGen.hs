@@ -1,50 +1,147 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 module Garner.CodeGen
-  ( fromToplevelDerivation,
+  ( run,
+    fromToplevelDerivation,
   )
 where
 
-import Data.Aeson (eitherDecode)
+import Data.Aeson (FromJSON, eitherDecode)
+import Data.Functor ((<&>))
+import Data.List (intercalate)
+import Data.Map (Map, toAscList)
+import qualified Data.Map as Map
+import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
+import Data.String.Interpolate.Util (unindent)
 import Development.Shake
+import GHC.Generics (Generic)
+import WithCli (withCli)
 
-fromToplevelDerivation :: String -> String -> IO String
-fromToplevelDerivation varName rootExpr = do
+run :: IO ()
+run = withCli $ \varName rootExpr -> do
+  code <- fromToplevelDerivation "." varName rootExpr
+  writeFile "ts/nixpkgs.ts" code
+
+fromToplevelDerivation :: String -> String -> String -> IO String
+fromToplevelDerivation garnerLibRoot varName rootExpr = do
   system :: String <- do
     Stdout json <- cmd "nix eval --impure --json --expr builtins.currentSystem"
-    return $ either error id $ eitherDecode json
-  Stdout json <- cmd "nix eval" (".#lib." <> system) "--json --apply" [nixExpr]
-  case eitherDecode json of
-    Right tsCode -> pure tsCode
-    Left e -> error e
+    pure $ either error id $ eitherDecode json
+  Stdout json <- cmd "nix eval --impure" (".#lib." <> system) "--json --apply" [nixExpr]
+  pkgs :: Map String PkgInfo <- case eitherDecode json of
+    Right pkgs -> pure pkgs
+    Left e -> error (e <> " in " <> cs json)
+  let sanitizedPkgs = Map.mapKeys sanitize pkgs
+  pure $
+    unindent
+      [i|
+        import { mkPackage } from "#{garnerLibRoot}/base.ts";
+
+      |]
+      <> pkgsString varName sanitizedPkgs
   where
     nixExpr =
-      [i| lib :
-          let root = #{rootExpr};
-              mkDoc = value:
-                if value ? meta.description
-                then ''
-                  /**
-                   * ${value.meta.description}
-                   */
-                ''
-                else "";
-              mk = name: value: mkDoc value + ''
-                export const ${name} = mkDerivation({
-                  attribute = `''${root}.${name}`;
-                })
-              '';
-              pickDerivations = lib.attrsets.filterAttrs
-                (name : value : (value.type or null) == "derivation");
-              removeThrowing = lib.attrsets.filterAttrs
-                (name : maybeThrowing : (builtins.tryEval maybeThrowing).success);
-          in
-          "const root = \\\"#{varName}\\\";\n\n" +
-          lib.strings.concatStrings
-            (lib.mapAttrsToList mk
-              (pickDerivations
-                (removeThrowing root)
-              )
-            )
-    |]
+      [i|
+        lib :
+        let mk = name: value: {
+              attribute = name;
+              description = if value ? meta.description
+                then value.meta.description
+                else null;
+            };
+            isNotBroken = value:
+                let broken = (builtins.tryEval (value.meta.broken or false));
+                in broken.success && !broken.value;
+            doesNotThrow = value : (builtins.tryEval value).success;
+            filterAttrs = lib.attrsets.filterAttrs
+              (name: value:
+                    doesNotThrow value
+                && lib.isDerivation value
+                && isNotBroken value);
+        in
+          (lib.mapAttrs mk
+            (filterAttrs (#{rootExpr}))
+          )
+      |]
+
+data PkgInfo = PkgInfo
+  { description :: Maybe String,
+    attribute :: String
+  }
+  deriving stock (Eq, Show, Generic)
+  deriving anyclass (FromJSON)
+
+pkgDoc :: PkgInfo -> String
+pkgDoc pkgInfo = case description pkgInfo of
+  Nothing -> ""
+  Just doc ->
+    unindent
+      [i|
+        /**
+         * #{doc}
+         */
+      |]
+
+formatPkg :: String -> (String, PkgInfo) -> String
+formatPkg varName (name, pkgInfo) =
+  pkgDoc pkgInfo
+    <> unindent
+      [i|
+        export const #{name} = mkPackage({
+          attribute: `#{varName}.#{attribute pkgInfo}`,
+        });
+      |]
+
+pkgsString :: String -> Map String PkgInfo -> String
+pkgsString varName pkgs =
+  intercalate "\n" $ formatPkg varName <$> toAscList pkgs
+
+sanitize :: String -> String
+sanitize str
+  | str `elem` tsKeywords = str <> "_"
+  | otherwise =
+      str <&> \case
+        '-' -> '_'
+        x -> x
+
+tsKeywords :: [String]
+tsKeywords =
+  [ "arguments", -- Only in strict mode
+    "break",
+    "case",
+    "catch",
+    "class",
+    "const",
+    "continue",
+    "debugger",
+    "default",
+    "delete",
+    "do",
+    "else",
+    "enum",
+    "export",
+    "extends",
+    "false",
+    "finally",
+    "for",
+    "function",
+    "if",
+    "import",
+    "in",
+    "instanceOf",
+    "new",
+    "null",
+    "return",
+    "super",
+    "switch",
+    "this",
+    "throw",
+    "true",
+    "try",
+    "typeOf",
+    "var",
+    "void",
+    "while",
+    "with"
+  ]

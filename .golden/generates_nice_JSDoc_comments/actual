@@ -1,8 +1,15 @@
-const root = "pkgs";
+import { mkPackage } from "../../ts/base.ts";
+
+/**
+ * This one - eh, not so good!
+ */
+export const bar = mkPackage({
+  attribute: `pkgs.bar`,
+});
 
 /**
  * This is the bestest derivation.
  */
-export const foo = mkDerivation({
-  attribute = `${root}.foo`;
-})
+export const foo = mkPackage({
+  attribute: `pkgs.foo`,
+});

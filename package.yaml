@@ -45,11 +45,13 @@ default-extensions:
 dependencies:
   - base >= 4.7 && < 5
   - aeson
+  - containers
   - directory
   - getopt-generics
   - interpolate
   - process
   - shake
+  - string-conversions
   - temporary
   - text
 
@@ -68,6 +70,7 @@ tests:
       - -threaded
       - -rtsopts
       - -with-rtsopts=-N
+      - -fdefer-typed-holes
     dependencies:
       - hspec
       - hspec-discover
@@ -83,5 +86,10 @@ library:
 executables:
   garner:
     main: exe/garner.hs
+    dependencies:
+      - garner
+
+  codegen:
+    main: exe/codegen.hs
     dependencies:
       - garner

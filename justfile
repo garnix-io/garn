@@ -1,4 +1,7 @@
-check: hpack fmt test example
+list:
+  just --list
+
+ci: hpack fmt test codegen check-examples
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
@@ -13,7 +16,7 @@ fmt-haskell:
     $(find . -name '*.hs' | grep -v '^./dist-newstyle/')
 
 fmt-typescript:
-  prettier --write 'ts/**/*.ts'
+  prettier --write $(fd .ts ts | grep -v nixpkgs.ts)
 
 hpack:
   hpack
@@ -26,10 +29,18 @@ watch *args="": hpack
 
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
 
-example *args="run garnerTest":
+run-example *args="run haskellExecutable": hpack
   #!/usr/bin/env bash
 
   set -eux
 
   cd examples
-  nix -L run ..#default -- {{ args }}
+  cabal run garner:garner -- {{ args }}
+
+check-examples:
+  just run-example run haskellExecutable
+  just run-example run hello
+
+codegen: hpack
+  cabal run codegen -- pkgs "import <nixpkgs> { config.allowAliases = false; }"
+  deno check ts/*.ts
