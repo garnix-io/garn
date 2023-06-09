@@ -1,0 +1,21 @@
+import { mkDerivation } from "../../ts/base.ts";
+
+export const catch_ = mkDerivation({
+  attribute: `pkgs.catch`,
+});
+
+export const foo_a = mkDerivation({
+  attribute: `pkgs.foo-a`,
+});
+
+export const instanceOf_ = mkDerivation({
+  attribute: `pkgs.instanceOf`,
+});
+
+export const super_ = mkDerivation({
+  attribute: `pkgs.super`,
+});
+
+export const void_ = mkDerivation({
+  attribute: `pkgs.void`,
+});

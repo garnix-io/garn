@@ -1,10 +1,15 @@
 import { mkDerivation } from "../../ts/base.ts";
 
-const root = "pkgs";
+/**
+ * This one - eh, not so good!
+ */
+export const bar = mkDerivation({
+  attribute: `pkgs.bar`,
+});
 
 /**
  * This is the bestest derivation.
  */
 export const foo = mkDerivation({
-  attribute: `${root}.foo`,
+  attribute: `pkgs.foo`,
 });

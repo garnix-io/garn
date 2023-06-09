@@ -66,7 +66,6 @@ spec = do
           } // { meta.broken = false; };
         }
       |]
-    it "only generates valid typescript" pending
     checkTs "generates nice JSDoc comments" $
       [i|
         {
@@ -75,6 +74,42 @@ spec = do
             name = "fooderivation";
             builder = "foo";
           } // { meta.description = "This is the bestest derivation."; };
+
+          bar = derivation {
+            system = "x86_64-linux";
+            name = "fooderivation";
+            builder = "foo";
+          } // { meta.description = "This one - eh, not so good!"; };
+        }
+      |]
+    checkTs "sanitizes package names" $
+      [i|
+        {
+          foo-a = derivation {
+            system = "x86_64-linux";
+            name = "fooderivation";
+            builder = "foo";
+          };
+          catch = derivation {
+            system = "x86_64-linux";
+            name = "keyword";
+            builder = "foo";
+          };
+          super = derivation {
+            system = "x86_64-linux";
+            name = "keyword";
+            builder = "foo";
+          };
+          void = derivation {
+            system = "x86_64-linux";
+            name = "keyword";
+            builder = "foo";
+          };
+          instanceOf = derivation {
+            system = "x86_64-linux";
+            name = "keyword";
+            builder = "foo";
+          };
         }
       |]
 

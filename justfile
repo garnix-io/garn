@@ -38,5 +38,5 @@ example *args="run garnerTest":
   nix -L run ..#default -- {{ args }}
 
 codegen: hpack
-  cabal run codegen -- pkgs "import <nixpkgs> {}"
+  cabal run codegen -- pkgs "import <nixpkgs> { config.allowAliases = false; }"
   deno check ts/*.ts

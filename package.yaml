@@ -45,11 +45,13 @@ default-extensions:
 dependencies:
   - base >= 4.7 && < 5
   - aeson
+  - containers
   - directory
   - getopt-generics
   - interpolate
   - process
   - shake
+  - string-conversions
   - temporary
   - text
 
