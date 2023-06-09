@@ -1,15 +1,15 @@
-import { mkDerivation } from "../../ts/base.ts";
+import { mkPackage } from "../../ts/base.ts";
 
 /**
  * This one - eh, not so good!
  */
-export const bar = mkDerivation({
+export const bar = mkPackage({
   attribute: `pkgs.bar`,
 });
 
 /**
  * This is the bestest derivation.
  */
-export const foo = mkDerivation({
+export const foo = mkPackage({
   attribute: `pkgs.foo`,
 });

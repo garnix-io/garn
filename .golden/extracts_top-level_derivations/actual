@@ -1,5 +1,5 @@
-import { mkDerivation } from "../../ts/base.ts";
+import { mkPackage } from "../../ts/base.ts";
 
-export const foo = mkDerivation({
+export const foo = mkPackage({
   attribute: `pkgs.foo`,
 });
