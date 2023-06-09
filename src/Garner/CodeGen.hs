@@ -19,8 +19,20 @@ import GHC.Generics (Generic)
 import WithCli (withCli)
 
 run :: IO ()
-run = withCli $ \varName rootExpr -> do
-  code <- fromToplevelDerivation "." varName rootExpr
+run = withCli $ do
+  StdoutTrim (system :: String) <- cmd "nix eval --impure --raw --expr builtins.currentSystem"
+  let varName = "pkgs"
+      nixpkgsExpression =
+        [i|
+          let commit = "23.05";
+              sha256 = "10wn0l08j9lgqcw8177nh2ljrnxdrpri7bp0g7nvrsn9rkawvlbf";
+              pkgsSrc = builtins.fetchTarball {
+                url = "https://github.com/NixOS/nixpkgs/archive/${commit}.tar.gz";
+                inherit sha256;
+              };
+          in import pkgsSrc { system = "#{system}"; }
+        |]
+  code <- fromToplevelDerivation "." varName nixpkgsExpression
   writeFile "ts/nixpkgs.ts" code
 
 fromToplevelDerivation :: String -> String -> String -> IO String
