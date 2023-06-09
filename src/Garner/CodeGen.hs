@@ -7,6 +7,7 @@ module Garner.CodeGen
 where
 
 import Data.Aeson (FromJSON, eitherDecode)
+import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Map (Map, toAscList)
 import qualified Data.Map as Map
@@ -26,43 +27,43 @@ fromToplevelDerivation :: String -> String -> String -> IO String
 fromToplevelDerivation garnerLibRoot varName rootExpr = do
   system :: String <- do
     Stdout json <- cmd "nix eval --impure --json --expr builtins.currentSystem"
-    return $ either error id $ eitherDecode json
+    pure $ either error id $ eitherDecode json
   Stdout json <- cmd "nix eval --impure" (".#lib." <> system) "--json --apply" [nixExpr]
   pkgs :: Map String PkgInfo <- case eitherDecode json of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in " <> cs json)
   let sanitizedPkgs = Map.mapKeys sanitize pkgs
-  return $
+  pure $
     unindent
       [i|
-    import { mkDerivation } from "#{garnerLibRoot}/base.ts";
+        import { mkDerivation } from "#{garnerLibRoot}/base.ts";
 
-    |]
+      |]
       <> pkgsString varName sanitizedPkgs
   where
     nixExpr =
-      [i| lib :
-          let mk = name: value: {
-                attribute = name;
-                description = if value ? meta.description
-                  then value.meta.description
-                  else null;
-              };
-              isNotBroken = value:
-                 let broken = (builtins.tryEval (value.meta.broken or false));
-                  in broken.success && !broken.value;
-              doesNotThrow = value : (builtins.tryEval value).success;
-              filterAttrs = lib.attrsets.filterAttrs
-                (name: value:
-                     doesNotThrow value
-                  && lib.isDerivation value
-                  && isNotBroken value);
-          in
-            (lib.mapAttrs mk
-              (filterAttrs (#{rootExpr}))
-            )
-
-    |]
+      [i|
+        lib :
+        let mk = name: value: {
+              attribute = name;
+              description = if value ? meta.description
+                then value.meta.description
+                else null;
+            };
+            isNotBroken = value:
+                let broken = (builtins.tryEval (value.meta.broken or false));
+                in broken.success && !broken.value;
+            doesNotThrow = value : (builtins.tryEval value).success;
+            filterAttrs = lib.attrsets.filterAttrs
+              (name: value:
+                    doesNotThrow value
+                && lib.isDerivation value
+                && isNotBroken value);
+        in
+          (lib.mapAttrs mk
+            (filterAttrs (#{rootExpr}))
+          )
+      |]
 
 data PkgInfo = PkgInfo
   { description :: Maybe String,
@@ -77,20 +78,20 @@ pkgDoc pkgInfo = case description pkgInfo of
   Just doc ->
     unindent
       [i|
-             /**
-              * #{doc}
-              */
-          |]
+        /**
+         * #{doc}
+         */
+      |]
 
 formatPkg :: String -> (String, PkgInfo) -> String
 formatPkg varName (name, pkgInfo) =
   pkgDoc pkgInfo
     <> unindent
       [i|
-            export const #{name} = mkDerivation({
-              attribute: `#{varName}.#{attribute pkgInfo}`,
-            });
-        |]
+        export const #{name} = mkDerivation({
+          attribute: `#{varName}.#{attribute pkgInfo}`,
+        });
+      |]
 
 pkgsString :: String -> Map String PkgInfo -> String
 pkgsString varName pkgs =
@@ -100,9 +101,9 @@ sanitize :: String -> String
 sanitize str
   | str `elem` tsKeywords = str <> "_"
   | otherwise =
-      let replaceChar '-' = '_'
-          replaceChar x = x
-       in fmap replaceChar str
+      str <&> \case
+        '-' -> '_'
+        x -> x
 
 tsKeywords :: [String]
 tsKeywords =
