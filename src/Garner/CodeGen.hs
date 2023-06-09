@@ -28,7 +28,7 @@ fromToplevelDerivation garnerLibRoot varName rootExpr = do
   system :: String <- do
     Stdout json <- cmd "nix eval --impure --json --expr builtins.currentSystem"
     pure $ either error id $ eitherDecode json
-  Stdout json <- cmd "nix eval --impure" (".#lib." <> system) "--json --apply" [nixExpr]
+  Stdout json <- cmd "nix eval" (".#lib." <> system) "--json --apply" [nixExpr]
   pkgs :: Map String PkgInfo <- case eitherDecode json of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in " <> cs json)

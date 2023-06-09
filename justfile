@@ -52,8 +52,18 @@ codegen: hpack
 
   main = do
     putStrLn "generating nixpkgs.ts..."
+    StdoutTrim (system :: String) <- cmd "nix eval --impure --raw --expr builtins.currentSystem"
     cmd_ "cabal run codegen -- pkgs" [[i|
-      import <nixpkgs> { config.allowAliases = false; }
+      let commit = "23.05";
+          sha256 = "10wn0l08j9lgqcw8177nh2ljrnxdrpri7bp0g7nvrsn9rkawvlbf";
+          pkgsSrc = builtins.fetchTarball {
+            url = "https://github.com/NixOS/nixpkgs/archive/${commit}.tar.gz";
+            sha256 =
+              if sha256 == null || sha256 == ""
+                then "0000000000000000000000000000000000000000000000000000"
+                else sha256;
+          };
+      in import pkgsSrc { system = "#{system}"; }
     |]]
     putStrLn "typechecking nixpkgs.ts..."
     tsFiles <- listDirectory "ts"
