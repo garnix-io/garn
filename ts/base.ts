@@ -1,3 +1,6 @@
-export const mkDerivation = <T>(_: T) => {
-  throw "not impl (base)";
-};
+import { Package } from "./haskell.ts";
+
+export const mkDerivation = (args: { attribute: string }): Package => ({
+  tag: "package",
+  nixExpression: args.attribute,
+});
