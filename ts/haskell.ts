@@ -1,13 +1,10 @@
+import { Package } from "./base.ts";
+
 type MkHaskellArgs = {
   name: string;
   executable: string;
   compiler: string;
   src: string;
-};
-
-export type Package = {
-  tag: "package";
-  nixExpression: string;
 };
 
 export const mkHaskell = (args: MkHaskellArgs): Package => {

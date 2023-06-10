@@ -1,4 +1,7 @@
-import { Package } from "./haskell.ts";
+export type Package = {
+  tag: "package";
+  nixExpression: string;
+};
 
 export const mkPackage = (args: { attribute: string }): Package => ({
   tag: "package",
