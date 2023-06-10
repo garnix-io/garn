@@ -1,4 +1,4 @@
-import { Package } from "./haskell.ts";
+import { Package } from "./base.ts";
 
 const encoder = new TextEncoder();
 
