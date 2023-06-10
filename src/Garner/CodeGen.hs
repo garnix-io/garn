@@ -30,7 +30,10 @@ run = withCli $ do
                 url = "https://github.com/NixOS/nixpkgs/archive/${commit}.tar.gz";
                 inherit sha256;
               };
-          in import pkgsSrc { system = "#{system}"; }
+          in import pkgsSrc {
+            system = "#{system}";
+            config.allowAliases = false;
+          }
         |]
   code <- fromToplevelDerivation "." varName nixpkgsExpression
   writeFile "ts/nixpkgs.ts" code
