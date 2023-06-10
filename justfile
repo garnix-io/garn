@@ -42,5 +42,6 @@ check-examples:
   just run-example run hello
 
 codegen: hpack
-  cabal run codegen -- pkgs "import <nixpkgs> { config.allowAliases = false; }"
+  cabal run codegen
   deno check ts/*.ts
+  echo done
