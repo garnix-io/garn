@@ -1,4 +1,4 @@
-import { Package } from "./base.ts";
+import { mkPackage, Package } from "./base.ts";
 
 type MkHaskellArgs = {
   name: string;
@@ -8,8 +8,9 @@ type MkHaskellArgs = {
 };
 
 export const mkHaskell = (args: MkHaskellArgs): Package => {
-  return {
-    tag: "package",
-    nixExpression: `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "${args.name}" ${args.src} { } ).override { } // { meta.mainProgram = "${args.executable}"; }`,
-  };
+  const attribute = `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "${args.name}" ${args.src} { } ) // { meta.mainProgram = "${args.executable}"; }`;
+  return mkPackage({
+    attribute,
+    env: (attr: string) => `${attr}.env`,
+  });
 };

@@ -3,3 +3,4 @@ executables:
     main: Main.hs
     dependencies:
       - base
+      - string-conversions

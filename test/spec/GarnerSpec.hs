@@ -45,6 +45,33 @@ spec = do
               withArgs ["enter", "foo"] $
                 runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
         output `shouldStartWith` "9.4"
+      it "registers Haskell dependencies with ghc-pkg" $ do
+        writeHaskellProject repoDir
+        writeFile "stdin" "ghc-pkg list | grep string-conversions\nexit\n"
+        output <-
+          capture_ $
+            withFile "stdin" ReadMode $ \stdin ->
+              withArgs ["enter", "foo"] $
+                runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+        dropWhile (== ' ') output `shouldStartWith` "string-conversions"
+      it "works for simple packages that don't provide an 'env' attribute" $ do
+        writeFile
+          "garner.ts"
+          [i|
+            import { mkPackage } from "#{repoDir}/ts/base.ts"
+
+            export const foo = mkPackage({
+              attribute: "pkgs.abcde",
+            })
+        |]
+        -- 'abcde' depends on perl, so we check it's available
+        writeFile "stdin" "perl -e 'print(42)'\nexit\n"
+        output <-
+          capture_ $
+            withFile "stdin" ReadMode $ \stdin ->
+              withArgs ["enter", "foo"] $
+                runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+        dropWhile (== ' ') output `shouldStartWith` "42"
 
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
@@ -74,4 +101,5 @@ writeHaskellProject repoDir = do
           main: Main.hs
           dependencies:
            - base
+           - string-conversions
     |]
