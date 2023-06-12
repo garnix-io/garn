@@ -13,7 +13,7 @@ export const mkPackage = (args: {
   envExpression: args.env
     ? args.env
     : (nixExpression) =>
-    ` let expr = ${nixExpression};
+        ` let expr = ${nixExpression};
       in if ${nixExpression} ? env
          then ${nixExpression}.env
          else pkgs.mkShell({

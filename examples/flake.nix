@@ -23,10 +23,18 @@
              };
              in {
                  
-     haskellExecutable = self.packages.${system}.haskellExecutable.env;
-     hello = pkgs.mkShell({
-         inputsFrom = [ self.packages.${system}.hello ];
-        });
+     haskellExecutable =  let expr = self.packages.${system}.haskellExecutable;
+      in if self.packages.${system}.haskellExecutable ? env
+         then self.packages.${system}.haskellExecutable.env
+         else pkgs.mkShell({
+           inputsFrom = [ self.packages.${system}.haskellExecutable ];
+         });
+     hello =  let expr = self.packages.${system}.hello;
+      in if self.packages.${system}.hello ? env
+         then self.packages.${system}.hello.env
+         else pkgs.mkShell({
+           inputsFrom = [ self.packages.${system}.hello ];
+         });
              });
         };
      }

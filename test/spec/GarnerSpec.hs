@@ -27,29 +27,18 @@ spec = do
     describe "run" $ do
       it "runs a simple Haskell program" $ do
         writeHaskellProject repoDir
-        output <-
-          capture_ $
-            withArgs ["run", "foo"] $
-              runWith
-                (Options {stdin = System.IO.stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+        output <- runGarnerWithStdin ["run", "foo"] "" repoDir
         output `shouldBe` "haskell test output\n"
       it "writes flake.{lock,nix}, but no other files" $ do
         writeHaskellProject repoDir
         filesBefore <- listDirectory "."
-        withArgs ["run", "foo"] $
-          runWith
-            (Options {stdin = System.IO.stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
-        filesAfter <- sort <$> listDirectory "."
+        _ <- runGarnerWithStdin ["run", "foo"] "" repoDir
+        filesAfter <- sort . filter (/= "stdin") <$> listDirectory "."
         filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
     describe "enter" $ do
       it "has the right GHC version" $ do
         writeHaskellProject repoDir
-        writeFile "stdin" "ghc --numeric-version\nexit\n"
-        output <-
-          capture_ $
-            withFile "stdin" ReadMode $ \stdin ->
-              withArgs ["enter", "foo"] $
-                runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+        output <- runGarnerWithStdin ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir
         output `shouldStartWith` "9.4"
       it "registers Haskell dependencies with ghc-pkg" $ do
         let addHaskellDep yaml =
@@ -62,12 +51,7 @@ spec = do
                   <>~ ["string-conversions"]
         writeHaskellProject repoDir
         modifyPackageYaml addHaskellDep
-        writeFile "stdin" "ghc-pkg list | grep string-conversions\nexit\n"
-        output <-
-          capture_ $
-            withFile "stdin" ReadMode $ \stdin ->
-              withArgs ["enter", "foo"] $
-                runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+        output <- runGarnerWithStdin ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir
         dropWhile (== ' ') output `shouldStartWith` "string-conversions"
       it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
         writeFile
@@ -85,13 +69,8 @@ spec = do
               `,
             })
         |]
-        writeFile "stdin" "hello\nexit\n"
-        output <-
-          capture_ $
-            withFile "stdin" ReadMode $ \stdin ->
-              withArgs ["enter", "foo"] $
-                runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
-        dropWhile (== ' ') output `shouldBe` "Hello, world!\n"
+        output <- runGarnerWithStdin ["enter", "foo"] "hello\nexit\n" repoDir
+        output `shouldBe` "Hello, world!\n"
 
 modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
 modifyPackageYaml modifier = do
@@ -127,3 +106,11 @@ writeHaskellProject repoDir = do
           dependencies:
            - base
     |]
+
+runGarnerWithStdin :: [String] -> String -> FilePath -> IO String
+runGarnerWithStdin args stdin repoDir = do
+  writeFile "stdin" stdin
+  capture_ $
+    withFile "stdin" ReadMode $ \stdin ->
+      withArgs args $
+        runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
