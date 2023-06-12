@@ -11,9 +11,12 @@ fmt-nix:
 fmt-haskell:
   #!/usr/bin/env bash
 
+  set eux
+
   ormolu \
     --mode inplace \
     $(find . -name '*.hs' | grep -v '^./dist-newstyle/')
+  fhi $(find . -name '*.hs' | grep -v '^./dist-newstyle/')
 
 fmt-typescript:
   prettier --write $(fd .ts ts | grep -v nixpkgs.ts)
