@@ -6,14 +6,17 @@ export type Package = {
 
 export const mkPackage = (args: {
   attribute: string;
-  env?: (x: string) => string;
+  env?: (nixExpression: string) => string;
 }): Package => ({
   tag: "package",
   nixExpression: args.attribute,
   envExpression: args.env
     ? args.env
-    : (x) =>
-        `pkgs.mkShell({
-         inputsFrom = [ ${x} ];
-        })`,
+    : (nixExpression) =>
+    ` let expr = ${nixExpression};
+      in if ${nixExpression} ? env
+         then ${nixExpression}.env
+         else pkgs.mkShell({
+           inputsFrom = [ ${nixExpression} ];
+         })`,
 });

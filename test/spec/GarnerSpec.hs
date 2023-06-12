@@ -1,9 +1,15 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module GarnerSpec where
 
+import Control.Lens (from, (&), (<>~))
+import qualified Data.Aeson as Aeson
+import Data.Aeson.Lens
 import Data.List (sort)
 import Data.String.Interpolate (i)
+import Data.Vector.Generic.Lens (vector)
+import qualified Data.Yaml as Yaml
 import GHC.IO.IOMode (IOMode (ReadMode))
 import Garner
 import System.Directory
@@ -46,7 +52,16 @@ spec = do
                 runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
         output `shouldStartWith` "9.4"
       it "registers Haskell dependencies with ghc-pkg" $ do
+        let addHaskellDep yaml =
+              yaml
+                & key "executables"
+                  . key "garner-test"
+                  . key "dependencies"
+                  . _Array
+                  . from vector
+                  <>~ ["string-conversions"]
         writeHaskellProject repoDir
+        modifyPackageYaml addHaskellDep
         writeFile "stdin" "ghc-pkg list | grep string-conversions\nexit\n"
         output <-
           capture_ $
@@ -54,24 +69,34 @@ spec = do
               withArgs ["enter", "foo"] $
                 runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
         dropWhile (== ' ') output `shouldStartWith` "string-conversions"
-      it "works for simple packages that don't provide an 'env' attribute" $ do
+      it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
         writeFile
           "garner.ts"
           [i|
             import { mkPackage } from "#{repoDir}/ts/base.ts"
 
             export const foo = mkPackage({
-              attribute: "pkgs.abcde",
+              attribute: `
+                pkgs.stdenv.mkDerivation({
+                  name = "blah";
+                  src = ./.;
+                  buildInputs = [ pkgs.hello ];
+                })
+              `,
             })
         |]
-        -- 'abcde' depends on perl, so we check it's available
-        writeFile "stdin" "perl -e 'print(42)'\nexit\n"
+        writeFile "stdin" "hello\nexit\n"
         output <-
           capture_ $
             withFile "stdin" ReadMode $ \stdin ->
               withArgs ["enter", "foo"] $
                 runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
-        dropWhile (== ' ') output `shouldStartWith` "42"
+        dropWhile (== ' ') output `shouldBe` "Hello, world!\n"
+
+modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
+modifyPackageYaml modifier = do
+  decoded <- Yaml.decodeFileThrow "package.yaml"
+  Yaml.encodeFile "package.yaml" $ modifier decoded
 
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
@@ -101,5 +126,4 @@ writeHaskellProject repoDir = do
           main: Main.hs
           dependencies:
            - base
-           - string-conversions
     |]
