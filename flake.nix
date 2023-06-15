@@ -1,10 +1,9 @@
 {
-  description = "Flake utils demo";
-
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
+  inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
 
-  outputs = { self, nixpkgs, flake-utils }:
+  outputs = { self, nixpkgs, flake-utils, fhi }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import "${nixpkgs}" {
@@ -60,6 +59,7 @@
               nodePackages.prettier
               nixpkgs-fmt
               fd
+              fhi.packages.${system}.default
             ];
           };
         };
