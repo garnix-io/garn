@@ -11,7 +11,7 @@ fmt-nix:
 fmt-haskell:
   #!/usr/bin/env bash
 
-  set eux
+  set -eux
 
   ormolu \
     --mode inplace \
