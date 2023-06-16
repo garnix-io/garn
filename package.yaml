@@ -76,8 +76,11 @@ tests:
       - hspec-discover
       - hspec-discover
       - hspec-golden
+      - lens
+      - lens-aeson
       - mockery
       - silently
+      - yaml
 
 library:
   source-dirs:
