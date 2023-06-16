@@ -19,24 +19,24 @@ const formatFlake = (config: Record<string, Package>): string => {
              systems = ["x86_64-linux"];
              forAllSystems = nixpkgs.lib.genAttrs systems;
            in
-        {
-           packages = forAllSystems (system:
-             let pkgs = import "\${nixpkgs}" {
-               config.allowUnfree = true;
-               inherit system;
+             {
+                packages = forAllSystems (system:
+                  let pkgs = import "\${nixpkgs}" {
+                    config.allowUnfree = true;
+                    inherit system;
+                  };
+                  in {
+                      ${packages}
+                  });
+                devShells = forAllSystems (system:
+                  let pkgs = import "\${nixpkgs}" {
+                    config.allowUnfree = true;
+                    inherit system;
+                  };
+                  in {
+                      ${shells}
+                  });
              };
-             in {
-                 ${packages}
-             });
-           devShells = forAllSystems (system:
-             let pkgs = import "\${nixpkgs}" {
-               config.allowUnfree = true;
-               inherit system;
-             };
-             in {
-                 ${shells}
-             });
-        };
      }`;
 };
 

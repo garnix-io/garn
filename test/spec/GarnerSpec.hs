@@ -3,7 +3,8 @@
 
 module GarnerSpec where
 
-import Control.Lens (from, (&), (<>~))
+import Control.Exception (bracket)
+import Control.Lens (from, (<>~))
 import qualified Data.Aeson as Aeson
 import Data.Aeson.Lens
 import Data.List (sort)
@@ -14,8 +15,9 @@ import GHC.IO.IOMode (IOMode (ReadMode))
 import Garner
 import System.Directory
 import System.Environment (withArgs)
-import System.IO (stdin, withFile)
+import System.IO (Handle, withFile)
 import System.IO.Silently (capture_)
+import System.IO.Temp
 import Test.Hspec
 import Test.Mockery.Directory (inTempDirectory)
 
@@ -27,31 +29,29 @@ spec = do
     describe "run" $ do
       it "runs a simple Haskell program" $ do
         writeHaskellProject repoDir
-        output <- runGarnerWithStdin ["run", "foo"] "" repoDir
+        output <- runGarner ["run", "foo"] "" repoDir
         output `shouldBe` "haskell test output\n"
       it "writes flake.{lock,nix}, but no other files" $ do
         writeHaskellProject repoDir
         filesBefore <- listDirectory "."
-        _ <- runGarnerWithStdin ["run", "foo"] "" repoDir
-        filesAfter <- sort . filter (/= "stdin") <$> listDirectory "."
+        _ <- runGarner ["run", "foo"] "" repoDir
+        filesAfter <- sort <$> listDirectory "."
         filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
     describe "enter" $ do
       it "has the right GHC version" $ do
         writeHaskellProject repoDir
-        output <- runGarnerWithStdin ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir
+        output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir
         output `shouldStartWith` "9.4"
       it "registers Haskell dependencies with ghc-pkg" $ do
-        let addHaskellDep yaml =
-              yaml
-                & key "executables"
-                  . key "garner-test"
-                  . key "dependencies"
-                  . _Array
-                  . from vector
-                  <>~ ["string-conversions"]
         writeHaskellProject repoDir
-        modifyPackageYaml addHaskellDep
-        output <- runGarnerWithStdin ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir
+        modifyPackageYaml $
+          key "executables"
+            . key "garner-test"
+            . key "dependencies"
+            . _Array
+            . from vector
+            <>~ ["string-conversions"]
+        output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir
         dropWhile (== ' ') output `shouldStartWith` "string-conversions"
       it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
         writeFile
@@ -69,7 +69,7 @@ spec = do
               `,
             })
         |]
-        output <- runGarnerWithStdin ["enter", "foo"] "hello\nexit\n" repoDir
+        output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir
         output `shouldBe` "Hello, world!\n"
 
 modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
@@ -107,10 +107,16 @@ writeHaskellProject repoDir = do
            - base
     |]
 
-runGarnerWithStdin :: [String] -> String -> FilePath -> IO String
-runGarnerWithStdin args stdin repoDir = do
-  writeFile "stdin" stdin
+runGarner :: [String] -> String -> FilePath -> IO String
+runGarner args stdin repoDir = do
   capture_ $
-    withFile "stdin" ReadMode $ \stdin ->
+    withTempFile $ \stdin ->
       withArgs args $
         runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+  where
+    withTempFile :: (Handle -> IO a) -> IO a
+    withTempFile action =
+      bracket
+        (writeSystemTempFile "garner-test-stdin" stdin)
+        removeFile
+        (\file -> withFile file ReadMode action)
