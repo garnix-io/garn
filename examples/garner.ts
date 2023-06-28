@@ -1,5 +1,5 @@
-import { mkHaskell } from "../ts/haskell.ts";
-import * as nixpkgs from "../ts/nixpkgs.ts";
+import { mkHaskell } from "http://localhost:8777/haskell.ts";
+import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
 
 export const haskellExecutable = mkHaskell({
   name: "mkHaskell-test",
