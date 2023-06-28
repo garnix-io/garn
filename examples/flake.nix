@@ -5,24 +5,24 @@
              systems = ["x86_64-linux"];
              forAllSystems = nixpkgs.lib.genAttrs systems;
            in
-        {
-           packages = forAllSystems (system:
-             let pkgs = import "${nixpkgs}" {
-               config.allowUnfree = true;
-               inherit system;
-             };
-             in {
-                 
+             {
+                packages = forAllSystems (system:
+                  let pkgs = import "${nixpkgs}" {
+                    config.allowUnfree = true;
+                    inherit system;
+                  };
+                  in {
+                      
     haskellExecutable = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { } ) // { meta.mainProgram = "garnerTest"; };
     hello = pkgs.hello;
-             });
-           devShells = forAllSystems (system:
-             let pkgs = import "${nixpkgs}" {
-               config.allowUnfree = true;
-               inherit system;
-             };
-             in {
-                 
+                  });
+                devShells = forAllSystems (system:
+                  let pkgs = import "${nixpkgs}" {
+                    config.allowUnfree = true;
+                    inherit system;
+                  };
+                  in {
+                      
      haskellExecutable =  let expr = self.packages.${system}.haskellExecutable;
       in if self.packages.${system}.haskellExecutable ? env
          then self.packages.${system}.haskellExecutable.env
@@ -35,6 +35,6 @@
          else pkgs.mkShell({
            inputsFrom = [ self.packages.${system}.hello ];
          });
-             });
-        };
+                  });
+             };
      }
