@@ -32,7 +32,6 @@ watch *args="": hpack
 
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
 
-
 fileserver:
   #!/usr/bin/env runhaskell
 
@@ -60,7 +59,6 @@ fileserver:
 
   port :: Int
   port = 8777
-
 
 run-example *args="run haskellExecutable": hpack
   #!/usr/bin/env bash
