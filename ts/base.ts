@@ -4,9 +4,7 @@ export type Package = {
   envExpression: (nixExpression: string) => string;
 };
 
-export const mkPackage = (args: {
-  attribute: string;
-}): Package => ({
+export const mkPackage = (args: { attribute: string }): Package => ({
   tag: "package",
   nixExpression: args.attribute,
   envExpression: (nixExpression) =>

@@ -68,7 +68,7 @@ spec = do
                 })
               `,
             })
-        |]
+          |]
         output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir
         output `shouldBe` "Hello, world!\n"
 
