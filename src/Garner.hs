@@ -1,11 +1,18 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Garner where
+module Garner
+  ( Options (..),
+    run,
+    runWith,
+  )
+where
 
+import Data.Maybe (fromMaybe)
 import Data.String.Interpolate (i)
 import Development.Shake (cmd_)
 import Paths_garner
 import System.Directory
+import System.Environment (lookupEnv)
 import System.IO (Handle, hClose, hPutStr)
 import qualified System.IO
 import System.IO.Temp
@@ -33,10 +40,11 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
     cmd_ "nix run" nixArgs (".#" <> target)
   "enter" -> do
     makeFlake opts
+    shell <- findUserShell
     let devProc =
           ( proc
               "nix"
-              ["develop", "-L", ".#" <> target, "-c", "bash"]
+              ("develop" : nixArgs <> [".#" <> target, "--command", shell])
           )
             { std_in = UseHandle $ stdin opts,
               std_out = Inherit,
@@ -62,5 +70,12 @@ makeFlake opts = do
     hClose mainHandle
     cmd_ "deno run --quiet --check --allow-write" mainPath
 
+findUserShell :: IO String
+findUserShell = fromMaybe "bash" <$> lookupEnv "SHELL"
+
 nixArgs :: [String]
-nixArgs = ["-L", "--extra-experimental-features", "nix-command flakes"]
+nixArgs =
+  [ "--print-build-logs",
+    "--extra-experimental-features",
+    "nix-command flakes"
+  ]
