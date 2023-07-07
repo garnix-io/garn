@@ -71,6 +71,7 @@
               nixpkgs-fmt
               fd
               fhi.packages.${system}.default
+              just
             ];
           };
         };
