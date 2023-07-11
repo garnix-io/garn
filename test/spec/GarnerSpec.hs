@@ -20,6 +20,7 @@ import System.IO.Silently (capture_)
 import System.IO.Temp
 import Test.Hspec
 import Test.Mockery.Directory (inTempDirectory)
+import Test.Mockery.Environment (withModifiedEnvironment)
 
 spec :: Spec
 spec = do
@@ -71,6 +72,22 @@ spec = do
           |]
         output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir
         output `shouldBe` "Hello, world!\n"
+      it "starts the shell defined in $SHELL" $ do
+        writeHaskellProject repoDir
+        output <-
+          withModifiedEnvironment [("SHELL", "bash")] $
+            runGarner ["enter", "foo"] shellTestCommand repoDir
+        output `shouldBe` "using bash"
+        output <-
+          withModifiedEnvironment [("SHELL", "zsh")] $
+            runGarner ["enter", "foo"] shellTestCommand repoDir
+        output `shouldBe` "using zsh"
+      it "defaults to bash" $ do
+        writeHaskellProject repoDir
+        output <-
+          withModifiedEnvironment [("SHELL", "")] $
+            runGarner ["enter", "foo"] shellTestCommand repoDir
+        output `shouldBe` "using bash"
 
 modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
 modifyPackageYaml modifier = do
@@ -120,3 +137,17 @@ runGarner args stdin repoDir = do
         (writeSystemTempFile "garner-test-stdin" stdin)
         removeFile
         (\file -> withFile file ReadMode action)
+
+shellTestCommand :: String
+shellTestCommand =
+  [i|
+    if [[ -v BASH_VERSION ]]; then
+        echo -n "using bash"
+    else
+        if [[ -v ZSH_VERSION ]]; then
+            echo -n "using zsh"
+        else
+            echo -n "using unknown shell"
+        fi
+    fi
+  |]
