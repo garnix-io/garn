@@ -1,0 +1,33 @@
+{
+        inputs.nixpkgs.url = "github:NixOS/nixpkgs";
+        outputs = { self, nixpkgs } :
+           let
+             systems = ["x86_64-linux"];
+             forAllSystems = nixpkgs.lib.genAttrs systems;
+           in
+             {
+                packages = forAllSystems (system:
+                  let pkgs = import "${nixpkgs}" {
+                    config.allowUnfree = true;
+                    inherit system;
+                  };
+                  in {
+                      
+    foo = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { } ) // { meta.mainProgram = "garner-test"; };
+                  });
+                devShells = forAllSystems (system:
+                  let pkgs = import "${nixpkgs}" {
+                    config.allowUnfree = true;
+                    inherit system;
+                  };
+                  in {
+                      
+     foo =  let expr = self.packages.${system}.foo;
+      in if self.packages.${system}.foo ? env
+         then self.packages.${system}.foo.env
+         else pkgs.mkShell({
+           inputsFrom = [ self.packages.${system}.foo ];
+         });
+                  });
+             };
+     }
