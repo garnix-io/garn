@@ -33,9 +33,10 @@ name for your typescript frontend: frontend
 
 You can now try:
 $ garner start # this will spin up the haskell backend and the typescript frontend
-$
-
-$ garner help
+$ garner test # run all tests
+  $ garner test backend # run all backend tests
+  $ garner test frontend # run all backend tests
+$ garner help # show the garner help
 ```
 
 That creates `garner.ts`:
