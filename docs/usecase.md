@@ -35,7 +35,7 @@ You can now try:
 $ garner start # this will spin up the haskell backend and the typescript frontend
 $ garner test # run all tests
   $ garner test backend # run all backend tests
-  $ garner test frontend # run all backend tests
+  $ garner test frontend # run all frontend tests
 $ garner help # show the garner help
 ```
 
