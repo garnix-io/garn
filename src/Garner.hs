@@ -69,7 +69,7 @@ makeFlake opts = do
       |]
     hClose mainHandle
     cmd_ "deno run --quiet --check --allow-write" mainPath
-    cmd_ [EchoStderr False, EchoStdout False] "nix fmt"
+    cmd_ [EchoStderr False, EchoStdout False] "nix fmt ./flake.nix"
 
 findUserShell :: IO String
 findUserShell = fromMaybe "bash" <$> lookupEnv "SHELL"
