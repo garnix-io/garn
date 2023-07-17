@@ -20,7 +20,7 @@ import WithCli (withCli)
 
 run :: IO ()
 run = withCli $ do
-  StdoutTrim (system :: String) <- cmd "nix eval --impure --raw --expr builtins.currentSystem"
+  StdoutTrim (system :: String) <- cmd "nix" nixArgs "eval --impure --raw --expr builtins.currentSystem"
   let varName = "pkgs"
       nixpkgsExpression =
         [i|
@@ -41,9 +41,9 @@ run = withCli $ do
 fromToplevelDerivation :: String -> String -> String -> IO String
 fromToplevelDerivation garnerLibRoot varName rootExpr = do
   system :: String <- do
-    Stdout json <- cmd "nix eval --impure --json --expr builtins.currentSystem"
+    Stdout json <- cmd "nix" nixArgs "eval --impure --json --expr builtins.currentSystem"
     pure $ either error id $ eitherDecode json
-  Stdout json <- cmd "nix eval" (".#lib." <> system) "--json --apply" [nixExpr]
+  Stdout json <- cmd "nix" nixArgs "eval" (".#lib." <> system) "--json --apply" [nixExpr]
   pkgs :: Map String PkgInfo <- case eitherDecode json of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in " <> cs json)
@@ -160,3 +160,6 @@ tsKeywords =
     "while",
     "with"
   ]
+
+nixArgs :: [String]
+nixArgs = ["--extra-experimental-features", "flakes nix-command"]
