@@ -42,7 +42,7 @@
             (ourHaskell.callCabal2nix "garn" src { }).overrideAttrs
               (
                 original: {
-                  nativebuildInputs = original.nativeBuildInputs ++ [
+                  nativeBuildInputs = original.nativeBuildInputs ++ [
                     pkgs.deno
                     pkgs.nix
                     pkgs.zsh
