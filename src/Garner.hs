@@ -75,8 +75,4 @@ findUserShell :: IO String
 findUserShell = fromMaybe "bash" <$> lookupEnv "SHELL"
 
 nixArgs :: [String]
-nixArgs =
-  [ "--print-build-logs",
-    "--extra-experimental-features",
-    "nix-command flakes"
-  ]
+nixArgs = ["--print-build-logs"]
