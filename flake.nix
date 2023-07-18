@@ -42,7 +42,7 @@
             (ourHaskell.callCabal2nix "garn" src { }).overrideAttrs
               (
                 original: {
-                  nativeBuildInputs = original.nativeBuildInputs ++ [
+                  buildInputs = original.buildInputs ++ [
                     pkgs.deno
                     pkgs.nix
                     pkgs.zsh
@@ -53,18 +53,12 @@
         };
         devShells = {
           default = pkgs.mkShell {
-            inputsFrom = [ self.packages.${system}.default ];
-            nativeBuildInputs = with pkgs; [
+            buildInputs = with pkgs; [
               ghcid
               ormolu
               cabal-install
-              (ourHaskell.ghc.withPackages (p:
-                [
-                  p.shake
-                  p.wai
-                  p.wai-app-static
-                  p.warp
-                ]))
+              (ourHaskell.ghc.withPackages (p: self.packages.${system}.default.buildInputs))
+              self.packages.${system}.default.buildInputs
               (haskell-language-server.override {
                 dynamic = true;
                 supportedGhcVersions = [ "945" ];
