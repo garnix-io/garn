@@ -57,8 +57,8 @@ hpack-check:
     when (oldCabal /= newCabal) $
       error "package.yaml has changed, please run hpack"
 
-test: hpack
-  cabal test --test-show-details=streaming
+test *args="": hpack
+  cabal run --test-show-details=streaming garner:spec -- {{ args }}
 
 # Run the tests continuously as the code changes
 watch *args="": hpack
@@ -98,19 +98,23 @@ fileserver:
   port :: Int
   port = 8777
 
-run-example *args="run haskellExecutable": hpack
+run-garner example *args="": hpack
   #!/usr/bin/env bash
 
   set -eux
 
-  cd examples
+  cd examples/{{ example }}
   cabal run garner:garner -- {{ args }}
 
 check-examples:
-  just run-example run haskellExecutable
-  just run-example run hello
+  just run-garner haskell run haskellExecutable
+  just run-garner haskell run hello
+  echo "node --version" | just run-garner npm-frontend enter frontend
 
 codegen: hpack
   cabal run codegen
   deno check ts/*.ts
   echo done
+
+typescript-check *args="":
+  deno check ts/*.ts {{ args }}

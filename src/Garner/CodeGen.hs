@@ -104,7 +104,7 @@ formatPkg varName (name, pkgInfo) =
     <> unindent
       [i|
         export const #{name} = mkPackage({
-          attribute: `#{varName}.#{attribute pkgInfo}`,
+          expression: `#{varName}.#{attribute pkgInfo}`,
         });
       |]
 

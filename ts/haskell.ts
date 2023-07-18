@@ -8,8 +8,8 @@ type MkHaskellArgs = {
 };
 
 export const mkHaskell = (args: MkHaskellArgs): Package => {
-  const attribute = `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "${args.name}" ${args.src} { } ) // { meta.mainProgram = "${args.executable}"; }`;
+  const expression = `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "${args.name}" ${args.src} { } ) // { meta.mainProgram = "${args.executable}"; }`;
   return mkPackage({
-    attribute,
+    expression,
   });
 };
