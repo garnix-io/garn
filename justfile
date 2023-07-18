@@ -5,24 +5,52 @@ ci: hpack fmt test codegen check-examples
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
+check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
+
 fmt-nix:
   nixpkgs-fmt *.nix
 
+fmt-nix-check:
+  nixpkgs-fmt --check .
+
 fmt-haskell:
+  just ormolu inplace
+
+fmt-haskell-check:
+  just ormolu check
+
+ormolu mode: hpack
   #!/usr/bin/env bash
 
   set -eux
 
   ormolu \
-    --mode inplace \
+    --mode {{ mode }} \
     $(find . -name '*.hs' | grep -v '^./dist-newstyle/')
-  fhi $(find . -name '*.hs' | grep -v '^./dist-newstyle/')
+  if [[ "{{ mode }}" == inplace ]]; then
+    fhi $(find . -name '*.hs' | grep -v '^./dist-newstyle/')
+  fi
 
 fmt-typescript:
   prettier --write $(fd .ts ts | grep -v nixpkgs.ts)
 
+fmt-typescript-check:
+  prettier --check $(fd .ts ts | grep -v nixpkgs.ts)
+
 hpack:
   hpack
+
+hpack-check:
+  #!/usr/bin/env runhaskell
+
+  import Control.Monad
+  import System.Process
+
+  main = do
+    oldCabal <- readFile "garner.cabal"
+    newCabal <- readProcess "hpack" (words "-") ""
+    when (oldCabal /= newCabal) $
+      error "package.yaml has changed, please run hpack"
 
 test: hpack
   cabal test --test-show-details=streaming
