@@ -51,8 +51,7 @@ spec = do
         writeFile "unformatted.nix" unformattedNix
         writeHaskellProject repoDir
         _ <- runGarner ["run", "foo"] "" repoDir
-        postFormatting <- readFile "./unformatted.nix"
-        postFormatting `shouldBe` unformattedNix
+        readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
     describe "enter" $ do
       it "has the right GHC version" $ do
