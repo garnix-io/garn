@@ -40,14 +40,15 @@ spec = do
         filesAfter <- sort <$> listDirectory "."
         filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
       it "doesn’t format other Nix files" $ do
-        let unformattedNix = [i|
-                { ...
-                  }
-            :       {
-              some              =     poorly
-            formatted nix;
-                  }
-          |]
+        let unformattedNix =
+              [i|
+                    { ...
+                      }
+                :       {
+                  some              =     poorly
+                formatted nix;
+                      }
+              |]
         writeFile "unformatted.nix" unformattedNix
         writeHaskellProject repoDir
         _ <- runGarner ["run", "foo"] "" repoDir

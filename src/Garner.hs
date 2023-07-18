@@ -9,7 +9,7 @@ where
 
 import Data.Maybe (fromMaybe)
 import Data.String.Interpolate (i)
-import Development.Shake (CmdOption(..), cmd_)
+import Development.Shake (CmdOption (..), cmd_)
 import Paths_garner
 import System.Directory
 import System.Environment (lookupEnv)
