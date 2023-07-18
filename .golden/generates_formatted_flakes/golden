@@ -14,8 +14,7 @@
           };
         in
         {
-          haskellExecutable = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { }) // { meta.mainProgram = "garnerTest"; };
-          hello = pkgs.hello;
+          foo = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { }) // { meta.mainProgram = "garner-test"; };
         });
       devShells = forAllSystems (system:
         let
@@ -25,21 +24,13 @@
           };
         in
         {
-          haskellExecutable =
-            let expr = self.packages.${system}.haskellExecutable;
-            in if self.packages.${system}.haskellExecutable ? env
-            then self.packages.${system}.haskellExecutable.env
+          foo =
+            let expr = self.packages.${system}.foo;
+            in if self.packages.${system}.foo ? env
+            then self.packages.${system}.foo.env
             else
               pkgs.mkShell ({
-                inputsFrom = [ self.packages.${system}.haskellExecutable ];
-              });
-          hello =
-            let expr = self.packages.${system}.hello;
-            in if self.packages.${system}.hello ? env
-            then self.packages.${system}.hello.env
-            else
-              pkgs.mkShell ({
-                inputsFrom = [ self.packages.${system}.hello ];
+                inputsFrom = [ self.packages.${system}.foo ];
               });
         });
       formatter = forAllSystems (system:

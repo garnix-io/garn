@@ -9,7 +9,7 @@ where
 
 import Data.Maybe (fromMaybe)
 import Data.String.Interpolate (i)
-import Development.Shake (cmd_)
+import Development.Shake (CmdOption(..), cmd_)
 import Paths_garner
 import System.Directory
 import System.Environment (lookupEnv)
@@ -69,6 +69,7 @@ makeFlake opts = do
       |]
     hClose mainHandle
     cmd_ "deno run --quiet --check --allow-write" mainPath
+    cmd_ [EchoStderr False, EchoStdout False] "nix fmt ./flake.nix"
 
 findUserShell :: IO String
 findUserShell = fromMaybe "bash" <$> lookupEnv "SHELL"

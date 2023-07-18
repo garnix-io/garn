@@ -19,6 +19,7 @@ import System.IO (Handle, withFile)
 import System.IO.Silently (capture_)
 import System.IO.Temp
 import Test.Hspec
+import Test.Hspec.Golden (defaultGolden)
 import Test.Mockery.Directory (inTempDirectory)
 import Test.Mockery.Environment (withModifiedEnvironment)
 
@@ -38,6 +39,20 @@ spec = do
         _ <- runGarner ["run", "foo"] "" repoDir
         filesAfter <- sort <$> listDirectory "."
         filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
+      it "doesn’t format other Nix files" $ do
+        let unformattedNix = [i|
+                { ...
+                  }
+            :       {
+              some              =     poorly
+            formatted nix;
+                  }
+          |]
+        writeFile "unformatted.nix" unformattedNix
+        writeHaskellProject repoDir
+        _ <- runGarner ["run", "foo"] "" repoDir
+        readFile "./unformatted.nix" `shouldReturn` unformattedNix
+
     describe "enter" $ do
       it "has the right GHC version" $ do
         writeHaskellProject repoDir
@@ -88,6 +103,17 @@ spec = do
           withModifiedEnvironment [("SHELL", "")] $
             runGarner ["enter", "foo"] shellTestCommand repoDir
         output `shouldBe` "using bash"
+  -- TODO: Golden tests currently can’t be integrated with the other test cases
+  --       because stackbuilders/hspec-golden#40. The case below shows the
+  --       effect that @`around_` `inTempDirectory`@ _should_ have.
+  describe "garner-golden" $ do
+    describe "run" $ do
+      it "generates formatted flakes" $ do
+        inTempDirectory $ do
+          writeHaskellProject repoDir
+          _ <- runGarner ["run", "foo"] "" repoDir
+          flake <- readFile "./flake.nix"
+          pure $ defaultGolden "generates_formatted_flakes" flake
 
 modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
 modifyPackageYaml modifier = do
