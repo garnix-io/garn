@@ -60,11 +60,11 @@
               cabal-install
               (ourHaskell.ghc.withPackages (p:
                 [
+                  ## Needed for `just fileserver`.
                   p.shake
-                  p.wai
                   p.wai-app-static
                   p.warp
-                ]))
+                ] ++ self.packages.${system}.default.buildInputs))
               (haskell-language-server.override {
                 dynamic = true;
                 supportedGhcVersions = [ "945" ];
