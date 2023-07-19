@@ -111,10 +111,8 @@ check-examples:
   just run-garner haskell run hello
   echo "node --version" | just run-garner npm-frontend enter frontend
 
-codegen: hpack
+codegen: hpack && typescript-check
   cabal run codegen
-  deno check ts/*.ts
-  echo done
 
 typescript-check *args="":
   deno check ts/*.ts {{ args }}
