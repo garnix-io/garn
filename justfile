@@ -36,6 +36,7 @@ fileserver:
   #!/usr/bin/env runhaskell
 
   import Control.Monad
+  import Data.Function
   import Development.Shake
   import Network.Wai.Application.Static
   import Network.Wai.Handler.Warp
@@ -45,8 +46,11 @@ fileserver:
   main = do
     isRunning >>= \yes -> when yes $ do
       error "Fileserver already running"
-    putStrLn "Starting server"
-    run port $ staticApp $ defaultFileServerSettings "ts"
+    let settings =
+          defaultSettings
+            & setPort port
+            & setBeforeMainLoop (putStrLn $ "listening on port " <> show port)
+    runSettings settings $ staticApp $ defaultFileServerSettings "ts"
 
   isRunning :: IO Bool
   isRunning = do
