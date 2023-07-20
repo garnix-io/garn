@@ -17,7 +17,7 @@
       {
         lib = pkgs.lib;
         apps.default = {
-          type = "program";
+          type = "app";
           program = "${self.packages.${system}.default}/bin/garner";
         };
         packages = {
