@@ -69,14 +69,14 @@ makeFlake opts = do
       |]
     hClose mainHandle
     cmd_ "deno run --quiet --check --allow-write" mainPath
-    cmd_ [EchoStderr False, EchoStdout False] "nix fmt ./flake.nix"
+    cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
 
 findUserShell :: IO String
 findUserShell = fromMaybe "bash" <$> lookupEnv "SHELL"
 
 nixArgs :: [String]
 nixArgs =
-  [ "--print-build-logs",
-    "--extra-experimental-features",
-    "nix-command flakes"
+  [ "--extra-experimental-features",
+    "flakes nix-command",
+    "--print-build-logs"
   ]
