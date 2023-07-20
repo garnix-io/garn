@@ -1,14 +1,19 @@
+# Show the available commands
 list:
   just --list
 
-ci: hpack fmt test codegen check-examples
+# Check what we can before pushing changes
+pre-push: fmt github-ci check-examples
+
+# Run checks that we can’t yet run via the flake
+github-ci: test codegen
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
 fmt-nix:
-  nixpkgs-fmt *.nix
+  nixpkgs-fmt .
 
 fmt-nix-check:
   nixpkgs-fmt --check .
@@ -55,6 +60,7 @@ hpack-check:
 test: hpack
   cabal test --test-show-details=streaming
 
+# Run the tests continuously as the code changes
 watch *args="": hpack
   #!/usr/bin/env bash
 
