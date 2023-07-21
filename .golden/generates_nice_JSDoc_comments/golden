@@ -4,12 +4,12 @@ import { mkPackage } from "../../ts/base.ts";
  * This one - eh, not so good!
  */
 export const bar = mkPackage({
-  attribute: `pkgs.bar`,
+  expression: `pkgs.bar`,
 });
 
 /**
  * This is the bestest derivation.
  */
 export const foo = mkPackage({
-  attribute: `pkgs.foo`,
+  expression: `pkgs.foo`,
 });

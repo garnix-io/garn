@@ -4,9 +4,9 @@ export type Package = {
   envExpression: (nixExpression: string) => string;
 };
 
-export const mkPackage = (args: { attribute: string }): Package => ({
+export const mkPackage = (args: { expression: string }): Package => ({
   tag: "package",
-  nixExpression: args.attribute,
+  nixExpression: args.expression,
   envExpression: (nixExpression) =>
     ` let expr = ${nixExpression};
       in if ${nixExpression} ? env

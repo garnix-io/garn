@@ -1,5 +1,5 @@
 import { mkPackage } from "../../ts/base.ts";
 
 export const foo = mkPackage({
-  attribute: `pkgs.foo`,
+  expression: `pkgs.foo`,
 });

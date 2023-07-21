@@ -1,21 +1,21 @@
 import { mkPackage } from "../../ts/base.ts";
 
 export const catch_ = mkPackage({
-  attribute: `pkgs.catch`,
+  expression: `pkgs.catch`,
 });
 
 export const foo_a = mkPackage({
-  attribute: `pkgs.foo-a`,
+  expression: `pkgs.foo-a`,
 });
 
 export const instanceOf_ = mkPackage({
-  attribute: `pkgs.instanceOf`,
+  expression: `pkgs.instanceOf`,
 });
 
 export const super_ = mkPackage({
-  attribute: `pkgs.super`,
+  expression: `pkgs.super`,
 });
 
 export const void_ = mkPackage({
-  attribute: `pkgs.void`,
+  expression: `pkgs.void`,
 });

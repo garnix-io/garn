@@ -11,11 +11,10 @@ import Data.List (sort)
 import Data.String.Interpolate (i)
 import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
-import GHC.IO.IOMode (IOMode (ReadMode))
 import Garner
 import System.Directory
 import System.Environment (withArgs)
-import System.IO (Handle, withFile)
+import System.IO (Handle, IOMode (..), withFile)
 import System.IO.Silently (capture_)
 import System.IO.Temp
 import Test.Hspec
@@ -78,7 +77,7 @@ spec = do
               import { mkPackage } from "#{repoDir}/ts/base.ts"
 
               export const foo = mkPackage({
-                attribute: `
+                expression: `
                   pkgs.stdenv.mkDerivation({
                     name = "blah";
                     src = ./.;
@@ -105,6 +104,22 @@ spec = do
             withModifiedEnvironment [("SHELL", "")] $
               runGarner ["enter", "foo"] shellTestCommand repoDir
           output `shouldBe` "using bash"
+        describe "npm project" $ do
+          it "puts node into the $PATH" $ do
+            writeFile
+              "garner.ts"
+              [i|
+                import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
+
+                export const frontend = mkNpmFrontend({
+                  name: "frontend",
+                  src: "./.",
+                });
+              |]
+            stdout <- runGarner ["enter", "frontend"] "node --version" repoDir
+            stdout `shouldStartWith` "v18."
+            stdout <- runGarner ["enter", "frontend"] "npm --version" repoDir
+            stdout `shouldStartWith` "9."
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the
     --       effect that @`around_` `inTempDirectory`@ _should_ have.
