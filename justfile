@@ -1,14 +1,19 @@
+# Show the available commands
 list:
   just --list
 
-ci: hpack fmt test codegen check-examples
+# Check what we can before pushing changes
+pre-push: fmt github-ci check-examples
+
+# Run checks that we can’t yet run via the flake
+github-ci: test codegen
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
 fmt-nix:
-  nixpkgs-fmt *.nix
+  nixpkgs-fmt .
 
 fmt-nix-check:
   nixpkgs-fmt --check .
@@ -55,6 +60,7 @@ hpack-check:
 test: hpack
   cabal test --test-show-details=streaming
 
+# Run the tests continuously as the code changes
 watch *args="": hpack
   #!/usr/bin/env bash
 
@@ -64,6 +70,7 @@ fileserver:
   #!/usr/bin/env runhaskell
 
   import Control.Monad
+  import Data.Function
   import Development.Shake
   import Network.Wai.Application.Static
   import Network.Wai.Handler.Warp
@@ -73,8 +80,11 @@ fileserver:
   main = do
     isRunning >>= \yes -> when yes $ do
       error "Fileserver already running"
-    putStrLn "Starting server"
-    run port $ staticApp $ defaultFileServerSettings "ts"
+    let settings =
+          defaultSettings
+            & setPort port
+            & setBeforeMainLoop (putStrLn $ "listening on port " <> show port)
+    runSettings settings $ staticApp $ defaultFileServerSettings "ts"
 
   isRunning :: IO Bool
   isRunning = do
