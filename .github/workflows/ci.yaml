@@ -1,0 +1,17 @@
+name: CI
+
+on: push
+
+jobs:
+  catchall:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v20
+        with:
+          extra_nix_config: |
+            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+            extra-substituters = https://cache.garnix.io
+      - uses: lriesebos/nix-develop-command@v1
+        with:
+          command: "just github-ci"

@@ -27,93 +27,95 @@ spec :: Spec
 spec = do
   repoDir <- runIO getCurrentDirectory
 
-  describe "garner" $ around_ inTempDirectory $ do
-    describe "run" $ do
-      it "runs a simple Haskell program" $ do
-        writeHaskellProject repoDir
-        output <- runGarner ["run", "foo"] "" repoDir
-        output `shouldBe` "haskell test output\n"
-      it "writes flake.{lock,nix}, but no other files" $ do
-        writeHaskellProject repoDir
-        filesBefore <- listDirectory "."
-        _ <- runGarner ["run", "foo"] "" repoDir
-        filesAfter <- sort <$> listDirectory "."
-        filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
-      it "doesn’t format other Nix files" $ do
-        let unformattedNix = [i|
-                { ...
-                  }
-            :       {
-              some              =     poorly
-            formatted nix;
-                  }
-          |]
-        writeFile "unformatted.nix" unformattedNix
-        writeHaskellProject repoDir
-        _ <- runGarner ["run", "foo"] "" repoDir
-        readFile "./unformatted.nix" `shouldReturn` unformattedNix
-
-    describe "enter" $ do
-      it "has the right GHC version" $ do
-        writeHaskellProject repoDir
-        output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir
-        output `shouldStartWith` "9.4"
-      it "registers Haskell dependencies with ghc-pkg" $ do
-        writeHaskellProject repoDir
-        modifyPackageYaml $
-          key "executables"
-            . key "garner-test"
-            . key "dependencies"
-            . _Array
-            . from vector
-            <>~ ["string-conversions"]
-        output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir
-        dropWhile (== ' ') output `shouldStartWith` "string-conversions"
-      it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
-        writeFile
-          "garner.ts"
-          [i|
-            import { mkPackage } from "#{repoDir}/ts/base.ts"
-
-            export const foo = mkPackage({
-              attribute: `
-                pkgs.stdenv.mkDerivation({
-                  name = "blah";
-                  src = ./.;
-                  buildInputs = [ pkgs.hello ];
-                })
-              `,
-            })
-          |]
-        output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir
-        output `shouldBe` "Hello, world!\n"
-      it "starts the shell defined in $SHELL" $ do
-        writeHaskellProject repoDir
-        output <-
-          withModifiedEnvironment [("SHELL", "bash")] $
-            runGarner ["enter", "foo"] shellTestCommand repoDir
-        output `shouldBe` "using bash"
-        output <-
-          withModifiedEnvironment [("SHELL", "zsh")] $
-            runGarner ["enter", "foo"] shellTestCommand repoDir
-        output `shouldBe` "using zsh"
-      it "defaults to bash" $ do
-        writeHaskellProject repoDir
-        output <-
-          withModifiedEnvironment [("SHELL", "")] $
-            runGarner ["enter", "foo"] shellTestCommand repoDir
-        output `shouldBe` "using bash"
-  -- TODO: Golden tests currently can’t be integrated with the other test cases
-  --       because stackbuilders/hspec-golden#40. The case below shows the
-  --       effect that @`around_` `inTempDirectory`@ _should_ have.
-  describe "garner-golden" $ do
-    describe "run" $ do
-      it "generates formatted flakes" $ do
-        inTempDirectory $ do
+  around_ (withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]) $ do
+    describe "garner" $ around_ inTempDirectory $ do
+      describe "run" $ do
+        it "runs a simple Haskell program" $ do
+          writeHaskellProject repoDir
+          output <- runGarner ["run", "foo"] "" repoDir
+          output `shouldBe` "haskell test output\n"
+        it "writes flake.{lock,nix}, but no other files" $ do
+          writeHaskellProject repoDir
+          filesBefore <- listDirectory "."
+          _ <- runGarner ["run", "foo"] "" repoDir
+          filesAfter <- sort <$> listDirectory "."
+          filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
+        it "doesn’t format other Nix files" $ do
+          let unformattedNix =
+                [i|
+                      { ...
+                        }
+                  :       {
+                    some              =     poorly
+                  formatted nix;
+                        }
+                |]
+          writeFile "unformatted.nix" unformattedNix
           writeHaskellProject repoDir
           _ <- runGarner ["run", "foo"] "" repoDir
-          flake <- readFile "./flake.nix"
-          pure $ defaultGolden "generates_formatted_flakes" flake
+          readFile "./unformatted.nix" `shouldReturn` unformattedNix
+
+      describe "enter" $ do
+        it "has the right GHC version" $ do
+          writeHaskellProject repoDir
+          output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir
+          output `shouldStartWith` "9.4"
+        it "registers Haskell dependencies with ghc-pkg" $ do
+          writeHaskellProject repoDir
+          modifyPackageYaml $
+            key "executables"
+              . key "garner-test"
+              . key "dependencies"
+              . _Array
+              . from vector
+              <>~ ["string-conversions"]
+          output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir
+          dropWhile (== ' ') output `shouldStartWith` "string-conversions"
+        it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
+          writeFile
+            "garner.ts"
+            [i|
+              import { mkPackage } from "#{repoDir}/ts/base.ts"
+
+              export const foo = mkPackage({
+                attribute: `
+                  pkgs.stdenv.mkDerivation({
+                    name = "blah";
+                    src = ./.;
+                    buildInputs = [ pkgs.hello ];
+                  })
+                `,
+              })
+            |]
+          output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir
+          output `shouldBe` "Hello, world!\n"
+        it "starts the shell defined in $SHELL" $ do
+          writeHaskellProject repoDir
+          output <-
+            withModifiedEnvironment [("SHELL", "bash")] $
+              runGarner ["enter", "foo"] shellTestCommand repoDir
+          output `shouldBe` "using bash"
+          output <-
+            withModifiedEnvironment [("SHELL", "zsh")] $
+              runGarner ["enter", "foo"] shellTestCommand repoDir
+          output `shouldBe` "using zsh"
+        it "defaults to bash" $ do
+          writeHaskellProject repoDir
+          output <-
+            withModifiedEnvironment [("SHELL", "")] $
+              runGarner ["enter", "foo"] shellTestCommand repoDir
+          output `shouldBe` "using bash"
+    -- TODO: Golden tests currently can’t be integrated with the other test cases
+    --       because stackbuilders/hspec-golden#40. The case below shows the
+    --       effect that @`around_` `inTempDirectory`@ _should_ have.
+    describe "garner-golden" $ do
+      describe "run" $ do
+        it "generates formatted flakes" $ do
+          inTempDirectory $ do
+            writeHaskellProject repoDir
+            _ <- runGarner ["run", "foo"] "" repoDir
+            flake <- readFile "./flake.nix"
+            pure $ defaultGolden "generates_formatted_flakes" flake
 
 modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
 modifyPackageYaml modifier = do

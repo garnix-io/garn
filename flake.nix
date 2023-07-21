@@ -16,7 +16,7 @@
       in
       {
         lib = pkgs.lib;
-        app.default = {
+        apps.default = {
           type = "program";
           program = "${self.packages.${system}.default}/bin/garner";
         };
@@ -53,31 +53,52 @@
         };
         devShells = {
           default = pkgs.mkShell {
-            inputsFrom = [ self.packages.${system}.default ];
+            inputsFrom =
+              builtins.attrValues self.checks.${system}
+              ++ builtins.attrValues self.packages.${system};
             nativeBuildInputs = with pkgs; [
               ghcid
-              ormolu
               cabal-install
               (ourHaskell.ghc.withPackages (p:
                 [
+                  ## Needed for `just fileserver`.
                   p.shake
-                  p.wai
                   p.wai-app-static
                   p.warp
-                ]))
+                ] ++ self.packages.${system}.default.buildInputs))
               (haskell-language-server.override {
                 dynamic = true;
                 supportedGhcVersions = [ "945" ];
               })
               ourHaskell.cabal2nix
-              nodePackages.prettier
-              nixpkgs-fmt
-              fd
               fhi.packages.${system}.default
-              just
             ];
           };
         };
+        checks =
+          let
+            justRecipe = recipe: inputs: pkgs.runCommand recipe
+              { nativeBuildInputs = [ pkgs.just ] ++ inputs; }
+              ''
+                touch $out
+                cp -r ${self}/* .
+                substituteInPlace justfile \
+                  --replace !/usr/bin/env !${pkgs.coreutils}/bin/env
+                just ${recipe}
+              '';
+          in
+          {
+            nix-fmt = justRecipe "fmt-nix-check" [ self.formatter.${system} ];
+            typescript-fmt =
+              justRecipe "fmt-typescript-check" [
+                pkgs.fd
+                pkgs.nodePackages.prettier
+              ];
+            haskell-fmt = justRecipe "fmt-haskell-check" [
+              pkgs.hpack
+              pkgs.ormolu
+            ];
+          };
         formatter = pkgs.nixpkgs-fmt;
       }
     );
