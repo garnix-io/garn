@@ -26,12 +26,9 @@
         {
           foo =
             let expr = self.packages.${system}.foo;
-            in if self.packages.${system}.foo ? env
-            then self.packages.${system}.foo.env
-            else
-              pkgs.mkShell ({
-                inputsFrom = [ self.packages.${system}.foo ];
-              });
+            in if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; };
         });
       formatter = forAllSystems (system:
         let
