@@ -7,15 +7,14 @@ module Garner
   )
 where
 
-import Data.Maybe (fromMaybe)
 import Data.String.Interpolate (i)
 import Development.Shake (CmdOption (..), cmd_)
 import Paths_garner
 import System.Directory
-import System.Environment (lookupEnv)
 import System.IO (Handle, hClose, hPutStr)
 import qualified System.IO
 import System.IO.Temp
+import qualified System.Posix.User as POSIX
 import System.Process
 import WithCli
 
@@ -72,7 +71,8 @@ makeFlake opts = do
     cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
 
 findUserShell :: IO String
-findUserShell = fromMaybe "bash" <$> lookupEnv "SHELL"
+findUserShell =
+  fmap POSIX.userShell . POSIX.getUserEntryForID =<< POSIX.getRealUserID
 
 nixArgs :: [String]
 nixArgs =

@@ -88,22 +88,6 @@ spec = do
             |]
           output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir
           output `shouldBe` "Hello, world!\n"
-        it "starts the shell defined in $SHELL" $ do
-          writeHaskellProject repoDir
-          output <-
-            withModifiedEnvironment [("SHELL", "bash")] $
-              runGarner ["enter", "foo"] shellTestCommand repoDir
-          output `shouldBe` "using bash"
-          output <-
-            withModifiedEnvironment [("SHELL", "zsh")] $
-              runGarner ["enter", "foo"] shellTestCommand repoDir
-          output `shouldBe` "using zsh"
-        it "defaults to bash" $ do
-          writeHaskellProject repoDir
-          output <-
-            withModifiedEnvironment [("SHELL", "")] $
-              runGarner ["enter", "foo"] shellTestCommand repoDir
-          output `shouldBe` "using bash"
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
             writeFile
@@ -180,17 +164,3 @@ runGarner args stdin repoDir = do
         (writeSystemTempFile "garner-test-stdin" stdin)
         removeFile
         (\file -> withFile file ReadMode action)
-
-shellTestCommand :: String
-shellTestCommand =
-  [i|
-    if [[ -v BASH_VERSION ]]; then
-        echo -n "using bash"
-    else
-        if [[ -v ZSH_VERSION ]]; then
-            echo -n "using zsh"
-        else
-            echo -n "using unknown shell"
-        fi
-    fi
-  |]
