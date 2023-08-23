@@ -21,7 +21,8 @@
           program = "${self.packages.${system}.default}/bin/garner";
         };
         packages = {
-          default =
+          default = self.packages.${system}.garner;
+          garner =
             let
               # directories shouldn't have leading or trailing slashes
               ignored = [ "examples" "justfile" ];
@@ -73,6 +74,12 @@
               ourHaskell.cabal2nix
               fhi.packages.${system}.default
             ];
+          };
+          ## An empty devShell for running garner in isolation
+          ## NB: If you use this shell within another shell or `direnv`, the
+          ##     environment will leak, and isolation will be lost.
+          barren = pkgs.mkShell {
+            nativeBuildInputs = [ self.packages.${system}.garner ];
           };
         };
         checks =

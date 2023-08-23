@@ -16,3 +16,29 @@ jobs:
       - uses: lriesebos/nix-develop-command@v1
         with:
           command: "just github-ci"
+  run-garner:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: cachix/install-nix-action@v20
+        with:
+          extra_nix_config: |
+            extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+            extra-substituters = https://cache.garnix.io
+            fallback = true
+      - uses: lriesebos/nix-develop-command@v1
+        with:
+          command: |
+            set -euo pipefail
+            shopt -s inherit_errexit
+
+            cd examples/haskell
+            expected=42
+            res="$(garner run haskellExecutable)"
+            if [[ $res != $expected ]]; then
+              echo "Garner ran, but gave a different result than expected."
+              echo "  Expected: $expected"
+              echo "  Received: $res"
+              exit 1
+            fi
+          devshell: "barren"
