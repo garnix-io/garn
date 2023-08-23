@@ -43,11 +43,20 @@
               (
                 original: {
                   nativeBuildInputs = original.nativeBuildInputs ++ [
+                    pkgs.cacert
                     pkgs.deno
                     pkgs.nix
                     pkgs.zsh
                   ];
-                  doCheck = false;
+
+                  preCheck = ''
+                    ## Can’t disable the Deno cache, it seems (denoland/deno#13754),
+                    ## so just make it local.
+                    export DENO_DIR="$PWD/.cache/deno"
+                    mkdir -p "$DENO_DIR"
+                    export HOME="$PWD/fake-home"
+                    mkdir -p "$HOME"
+                  '';
                 }
               );
         };
