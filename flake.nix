@@ -1,7 +1,15 @@
 {
-  inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs";
-  inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
+  inputs = {
+    flake-utils.url = "github:numtide/flake-utils";
+    nixpkgs.url = "github:NixOS/nixpkgs/release-23.05";
+    fhi = {
+      inputs = {
+        flake-utils.follows = "flake-utils";
+        nixpkgs.follows = "nixpkgs";
+      };
+      url = "github:soenkehahn/format-haskell-interpolate";
+    };
+  };
 
   outputs = { self, nixpkgs, flake-utils, fhi }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -12,7 +20,15 @@
         };
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
-        ourHaskell = pkgs.haskell.packages.ghc945;
+        ourHaskell = pkgs.haskell.packages.ghc945.override {
+          overrides = self: super: {
+            ## nixpkgs 23.05 defaults to 0.1, which would require code changes
+            hspec-golden = pkgs.haskell.lib.overrideCabal super.hspec-golden {
+              version = "0.2.1.0";
+              sha256 = "fgz+DAQnraLxlHKJZBxZ5fZuUPyedD71L7QcC4Lkbh0=";
+            };
+          };
+        };
       in
       {
         lib = pkgs.lib;
