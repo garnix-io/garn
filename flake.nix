@@ -45,9 +45,19 @@
                 original: {
                   nativeBuildInputs = original.nativeBuildInputs ++ [
                     pkgs.deno
+                    pkgs.makeWrapper
                     pkgs.nix
                     pkgs.zsh
                   ];
+
+                  postInstall = ''
+                    wrapProgram "$out/bin/garner" \
+                        --prefix PATH : ${pkgs.lib.makeBinPath [
+                      pkgs.deno
+                      pkgs.nix
+                    ]}
+                  '';
+
                   doCheck = false;
                 }
               );
