@@ -90,15 +90,23 @@ spec = do
             |]
           output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir id
           output `shouldBe` "Hello, world!\n"
-        fit "starts the shell given by Options.findUserShell" $ do
+        fit "starts the shell given by Options.userShell" $ do
           writeHaskellProject repoDir
           StdoutTrim shell <- cmd ("which bash" :: String)
           output <-
-            runGarner ["enter", "foo"] shellTestCommand repoDir (\opt -> opt {findUserShell = return shell})
+            runGarner
+              ["enter", "foo"]
+              shellTestCommand
+              repoDir
+              (\opt -> opt {userShell = return shell})
           output `shouldBe` "using bash"
           StdoutTrim shell <- cmd ("which zsh" :: String)
           output <-
-            runGarner ["enter", "foo"] shellTestCommand repoDir (\opt -> opt {findUserShell = return shell})
+            runGarner
+              ["enter", "foo"]
+              shellTestCommand
+              repoDir
+              (\opt -> opt {userShell = return shell})
           output `shouldBe` "using zsh"
 
         describe "npm project" $ do
@@ -174,7 +182,7 @@ runGarner args stdin repoDir modifyOptions = do
             ( Options
                 { stdin,
                   tsRunnerFilename = repoDir <> "/ts/runner.ts",
-                  findUserShell = fmap POSIX.userShell . POSIX.getUserEntryForID =<< POSIX.getRealUserID
+                  userShell = findUserShell
                 }
             )
   where

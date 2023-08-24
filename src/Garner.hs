@@ -4,6 +4,7 @@ module Garner
   ( Options (..),
     run,
     runWith,
+    findUserShell,
   )
 where
 
@@ -21,7 +22,7 @@ import WithCli
 data Options = Options
   { stdin :: Handle,
     tsRunnerFilename :: String,
-    findUserShell :: IO String
+    userShell :: IO String
   }
 
 run :: IO ()
@@ -31,7 +32,7 @@ run = do
     Options
       { stdin = System.IO.stdin,
         tsRunnerFilename,
-        findUserShell = fmap POSIX.userShell . POSIX.getUserEntryForID =<< POSIX.getRealUserID
+        userShell = findUserShell
       }
 
 runWith :: Options -> IO ()
@@ -41,7 +42,7 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
     cmd_ "nix run" nixArgs (".#" <> target)
   "enter" -> do
     makeFlake opts
-    shell <- findUserShell opts
+    shell <- userShell opts
     let devProc =
           ( proc
               "nix"
@@ -71,6 +72,11 @@ makeFlake opts = do
     hClose mainHandle
     cmd_ "deno run --quiet --check --allow-write" mainPath
     cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
+
+findUserShell :: IO String
+findUserShell = do
+  userId <- POSIX.getRealUserID
+  POSIX.userShell <$> POSIX.getUserEntryForID userId
 
 nixArgs :: [String]
 nixArgs =
