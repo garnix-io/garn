@@ -11,12 +11,14 @@ import Data.List (sort)
 import Data.String.Interpolate (i)
 import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
+import Development.Shake
 import Garner
 import System.Directory
 import System.Environment (withArgs)
 import System.IO (Handle, IOMode (..), withFile)
 import System.IO.Silently (capture_)
 import System.IO.Temp
+import qualified System.Posix.User as POSIX
 import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)
 import Test.Mockery.Directory (inTempDirectory)
@@ -31,12 +33,12 @@ spec = do
       describe "run" $ do
         it "runs a simple Haskell program" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["run", "foo"] "" repoDir
+          output <- runGarner ["run", "foo"] "" repoDir id
           output `shouldBe` "haskell test output\n"
         it "writes flake.{lock,nix}, but no other files" $ do
           writeHaskellProject repoDir
           filesBefore <- listDirectory "."
-          _ <- runGarner ["run", "foo"] "" repoDir
+          _ <- runGarner ["run", "foo"] "" repoDir id
           filesAfter <- sort <$> listDirectory "."
           filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
         it "doesn’t format other Nix files" $ do
@@ -51,13 +53,13 @@ spec = do
                 |]
           writeFile "unformatted.nix" unformattedNix
           writeHaskellProject repoDir
-          _ <- runGarner ["run", "foo"] "" repoDir
+          _ <- runGarner ["run", "foo"] "" repoDir id
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
       describe "enter" $ do
         it "has the right GHC version" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir
+          output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir id
           output `shouldStartWith` "9.4"
         it "registers Haskell dependencies with ghc-pkg" $ do
           writeHaskellProject repoDir
@@ -68,7 +70,7 @@ spec = do
               . _Array
               . from vector
               <>~ ["string-conversions"]
-          output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir
+          output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir id
           dropWhile (== ' ') output `shouldStartWith` "string-conversions"
         it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
           writeFile
@@ -86,8 +88,19 @@ spec = do
                 `,
               })
             |]
-          output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir
+          output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir id
           output `shouldBe` "Hello, world!\n"
+        fit "starts the shell given by Options.findUserShell" $ do
+          writeHaskellProject repoDir
+          StdoutTrim shell <- cmd ("which bash" :: String)
+          output <-
+            runGarner ["enter", "foo"] shellTestCommand repoDir (\opt -> opt {findUserShell = return shell})
+          output `shouldBe` "using bash"
+          StdoutTrim shell <- cmd ("which zsh" :: String)
+          output <-
+            runGarner ["enter", "foo"] shellTestCommand repoDir (\opt -> opt {findUserShell = return shell})
+          output `shouldBe` "using zsh"
+
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
             writeFile
@@ -100,9 +113,9 @@ spec = do
                   src: "./.",
                 });
               |]
-            stdout <- runGarner ["enter", "frontend"] "node --version" repoDir
+            stdout <- runGarner ["enter", "frontend"] "node --version" repoDir id
             stdout `shouldStartWith` "v18."
-            stdout <- runGarner ["enter", "frontend"] "npm --version" repoDir
+            stdout <- runGarner ["enter", "frontend"] "npm --version" repoDir id
             stdout `shouldStartWith` "9."
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the
@@ -112,7 +125,7 @@ spec = do
         it "generates formatted flakes" $ do
           inTempDirectory $ do
             writeHaskellProject repoDir
-            _ <- runGarner ["run", "foo"] "" repoDir
+            _ <- runGarner ["run", "foo"] "" repoDir id
             flake <- readFile "./flake.nix"
             pure $ defaultGolden "generates_formatted_flakes" flake
 
@@ -151,12 +164,19 @@ writeHaskellProject repoDir = do
            - base
     |]
 
-runGarner :: [String] -> String -> FilePath -> IO String
-runGarner args stdin repoDir = do
+runGarner :: [String] -> String -> FilePath -> (Options -> Options) -> IO String
+runGarner args stdin repoDir modifyOptions = do
   capture_ $
     withTempFile $ \stdin ->
       withArgs args $
-        runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+        runWith $
+          modifyOptions
+            ( Options
+                { stdin,
+                  tsRunnerFilename = repoDir <> "/ts/runner.ts",
+                  findUserShell = fmap POSIX.userShell . POSIX.getUserEntryForID =<< POSIX.getRealUserID
+                }
+            )
   where
     withTempFile :: (Handle -> IO a) -> IO a
     withTempFile action =
@@ -164,3 +184,17 @@ runGarner args stdin repoDir = do
         (writeSystemTempFile "garner-test-stdin" stdin)
         removeFile
         (\file -> withFile file ReadMode action)
+
+shellTestCommand :: String
+shellTestCommand =
+  [i|
+    if [[ -v BASH_VERSION ]]; then
+        echo -n "using bash"
+    else
+        if [[ -v ZSH_VERSION ]]; then
+            echo -n "using zsh"
+        else
+            echo -n "using unknown shell"
+        fi
+    fi
+  |]

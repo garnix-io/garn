@@ -20,7 +20,8 @@ import WithCli
 
 data Options = Options
   { stdin :: Handle,
-    tsRunnerFilename :: String
+    tsRunnerFilename :: String,
+    findUserShell :: IO String
   }
 
 run :: IO ()
@@ -29,7 +30,8 @@ run = do
   runWith
     Options
       { stdin = System.IO.stdin,
-        tsRunnerFilename
+        tsRunnerFilename,
+        findUserShell = fmap POSIX.userShell . POSIX.getUserEntryForID =<< POSIX.getRealUserID
       }
 
 runWith :: Options -> IO ()
@@ -39,7 +41,7 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
     cmd_ "nix run" nixArgs (".#" <> target)
   "enter" -> do
     makeFlake opts
-    shell <- findUserShell
+    shell <- findUserShell opts
     let devProc =
           ( proc
               "nix"
@@ -69,10 +71,6 @@ makeFlake opts = do
     hClose mainHandle
     cmd_ "deno run --quiet --check --allow-write" mainPath
     cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
-
-findUserShell :: IO String
-findUserShell =
-  fmap POSIX.userShell . POSIX.getUserEntryForID =<< POSIX.getRealUserID
 
 nixArgs :: [String]
 nixArgs =
