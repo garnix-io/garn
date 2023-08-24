@@ -22,17 +22,18 @@ import WithCli
 data Options = Options
   { stdin :: Handle,
     tsRunnerFilename :: String,
-    userShell :: IO String
+    userShell :: String
   }
 
 run :: IO ()
 run = do
   tsRunnerFilename <- getDataFileName "ts/runner.ts"
+  userShell <- findUserShell
   runWith
     Options
       { stdin = System.IO.stdin,
         tsRunnerFilename,
-        userShell = findUserShell
+        userShell
       }
 
 runWith :: Options -> IO ()
@@ -42,11 +43,10 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
     cmd_ "nix run" nixArgs (".#" <> target)
   "enter" -> do
     makeFlake opts
-    shell <- userShell opts
     let devProc =
           ( proc
               "nix"
-              ("develop" : nixArgs <> [".#" <> target, "--command", shell])
+              ("develop" : nixArgs <> [".#" <> target, "--command", userShell opts])
           )
             { std_in = UseHandle $ stdin opts,
               std_out = Inherit,

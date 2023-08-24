@@ -18,7 +18,6 @@ import System.Environment (withArgs)
 import System.IO (Handle, IOMode (..), withFile)
 import System.IO.Silently (capture_)
 import System.IO.Temp
-import qualified System.Posix.User as POSIX
 import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)
 import Test.Mockery.Directory (inTempDirectory)
@@ -90,23 +89,23 @@ spec = do
             |]
           output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir id
           output `shouldBe` "Hello, world!\n"
-        fit "starts the shell given by Options.userShell" $ do
+        it "starts the shell given by Options.userShell" $ do
           writeHaskellProject repoDir
-          StdoutTrim shell <- cmd ("which bash" :: String)
+          StdoutTrim userShell <- cmd ("which bash" :: String)
           output <-
             runGarner
               ["enter", "foo"]
               shellTestCommand
               repoDir
-              (\opt -> opt {userShell = return shell})
+              (\opt -> opt {userShell})
           output `shouldBe` "using bash"
-          StdoutTrim shell <- cmd ("which zsh" :: String)
+          StdoutTrim userShell <- cmd ("which zsh" :: String)
           output <-
             runGarner
               ["enter", "foo"]
               shellTestCommand
               repoDir
-              (\opt -> opt {userShell = return shell})
+              (\opt -> opt {userShell})
           output `shouldBe` "using zsh"
 
         describe "npm project" $ do
@@ -174,6 +173,7 @@ writeHaskellProject repoDir = do
 
 runGarner :: [String] -> String -> FilePath -> (Options -> Options) -> IO String
 runGarner args stdin repoDir modifyOptions = do
+  userShell <- findUserShell
   capture_ $
     withTempFile $ \stdin ->
       withArgs args $
@@ -182,7 +182,7 @@ runGarner args stdin repoDir modifyOptions = do
             ( Options
                 { stdin,
                   tsRunnerFilename = repoDir <> "/ts/runner.ts",
-                  userShell = findUserShell
+                  userShell
                 }
             )
   where
