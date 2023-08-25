@@ -21,8 +21,8 @@ import WithCli
 
 data Options = Options
   { stdin :: Handle,
-    tsRunnerFilename :: String,
-    userShell :: String
+    tsRunnerFilename :: FilePath,
+    userShell :: FilePath
   }
 
 run :: IO ()
@@ -73,7 +73,7 @@ makeFlake opts = do
     cmd_ "deno run --quiet --check --allow-write" mainPath
     cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
 
-findUserShell :: IO String
+findUserShell :: IO FilePath
 findUserShell = do
   userId <- POSIX.getRealUserID
   POSIX.userShell <$> POSIX.getUserEntryForID userId
