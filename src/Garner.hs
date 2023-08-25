@@ -4,7 +4,6 @@ module Garner
   ( Options (..),
     run,
     runWith,
-    findUserShell,
   )
 where
 
@@ -26,15 +25,7 @@ data Options = Options
   }
 
 run :: IO ()
-run = do
-  tsRunnerFilename <- getDataFileName "ts/runner.ts"
-  userShell <- findUserShell
-  runWith
-    Options
-      { stdin = System.IO.stdin,
-        tsRunnerFilename,
-        userShell
-      }
+run = runWith =<< productionOptions
 
 runWith :: Options -> IO ()
 runWith opts = withCli $ \(command :: String) (target :: String) -> case command of
@@ -72,6 +63,17 @@ makeFlake opts = do
     hClose mainHandle
     cmd_ "deno run --quiet --check --allow-write" mainPath
     cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
+
+productionOptions :: IO Options
+productionOptions = do
+  tsRunnerFilename <- getDataFileName "ts/runner.ts"
+  userShell <- findUserShell
+  pure $
+    Options
+      { stdin = System.IO.stdin,
+        tsRunnerFilename,
+        userShell
+      }
 
 findUserShell :: IO FilePath
 findUserShell = do
