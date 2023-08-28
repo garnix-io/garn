@@ -23,7 +23,10 @@ export const mkPackage = (args: { expression: string }): Package => ({
           })`;
   },
   addDevTools(this: Package, extraDevTools) {
-    return {...this, extraDevTools: [...this.extraDevTools, ...extraDevTools]};
+    return {
+      ...this,
+      extraDevTools: [...this.extraDevTools, ...extraDevTools],
+    };
   },
   extraDevTools: [],
 });
