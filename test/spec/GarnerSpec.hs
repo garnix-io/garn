@@ -73,6 +73,19 @@ spec = do
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir
             TIO.putStrLn =<< TIO.readFile "flake.nix"
             output `shouldBe` "tool\n"
+          fit "allows multiple dev tools to be added to the dev shell" $ do
+            writeHaskellProject repoDir
+            modifyGarnerTs $
+              \garnerTs ->
+                cs
+                  [i|
+                    import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
+                    #{garnerTs}
+                    export const bar = foo.addDevTools([nixpkgs.hello, nixpkgs.cowsay]);
+                  |]
+            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir
+            TIO.putStrLn =<< TIO.readFile "flake.nix"
+            output `shouldBe` "tool"
           it "allows dev tools to be added when `env` exists" $ do
             pending -- self.packages.${system}.hello ? env
           it "does not interfere with other packages" $ do
