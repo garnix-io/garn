@@ -72,7 +72,7 @@ spec = do
                   |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir
             TIO.putStrLn =<< TIO.readFile "flake.nix"
-            output `shouldBe` "tool"
+            output `shouldBe` "tool\n"
           it "allows dev tools to be added when `env` exists" $ do
             pending -- self.packages.${system}.hello ? env
           it "does not interfere with other packages" $ do

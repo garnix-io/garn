@@ -10,8 +10,7 @@ export const mkPackage = (args: { expression: string }): Package => ({
   tag: "package",
   nixExpression: args.expression,
   envExpression(nixRef): string {
-    return (
-      ` let expr = ${nixRef};
+    return ` let expr = ${nixRef};
         in
           (if expr ? env
             then expr.env
@@ -20,12 +19,12 @@ export const mkPackage = (args: { expression: string }): Package => ({
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
                 ++
-                ${this.devTools.map((p) => p.nixExpression).join()};
-          })`
-    );
+                [ ${this.devTools.map((p) => p.nixExpression).join()} ];
+          })`;
   },
   addDevTools(this: Package, devTools) {
-    this.devTools = this.devTools.concat(devTools); return this;
+    this.devTools = this.devTools.concat(devTools);
+    return this;
   },
   devTools: [],
 });
