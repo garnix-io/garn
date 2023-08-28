@@ -57,6 +57,7 @@
               builtins.attrValues self.checks.${system}
               ++ builtins.attrValues self.packages.${system};
             nativeBuildInputs = with pkgs; [
+              bashInteractive
               ghcid
               cabal-install
               (ourHaskell.ghc.withPackages (p:
