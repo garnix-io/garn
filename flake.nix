@@ -61,54 +61,6 @@
                   doCheck = false;
                 }
               );
-          nixpkgs-ts = pkgs.stdenv.mkDerivation {
-            name = "nixpkgs.ts";
-            src = ./.;
-
-            nativeBuildInputs = [
-              pkgs.cacert
-              pkgs.nix
-              self.packages.${system}.garner
-            ];
-
-            LC_ALL = "C.UTF-8";
-
-            buildPhase = ''
-              export HOME="$PWD/fake-home"
-              mkdir -p "$HOME"
-              codegen
-            '';
-
-            installPhase = ''
-              mkdir -p "$out/share/garner"
-              cp ts/nixpkgs.ts "$out/share/garner"
-            '';
-
-            outputHash = "TgnOyeVN2wpsM2vIYwk3jd0Gx14G6lY2XTfJ8+M4PGA=";
-            outputHashAlgo = "sha256";
-            outputHashMode = "recursive";
-          };
-          typescript = pkgs.stdenv.mkDerivation {
-            name = "garner-typescript";
-            src = ./ts;
-
-            nativeBuildInputs = [
-              self.packages.${system}.nixpkgs-ts
-            ];
-
-            buildPhase = ''
-              cp --no-preserve=mode --recursive "$src" ./
-              ## This is for garner itself, not users
-              rm runner.ts
-            '';
-
-            installPhase = ''
-              mkdir -p "$out/share"
-              cp --recursive ./ "$out/share/garner"
-              cp ${self.packages.${system}.nixpkgs-ts}/share/garner/* \
-                 "$out/share/garner"
-            '';
-          };
         };
         devShells = {
           default = pkgs.mkShell {
@@ -137,16 +89,16 @@
           ## NB: If you use this shell within another shell or `direnv`, the
           ##     environment will leak, and isolation will be lost.
           barren = pkgs.mkShell {
-            nativeBuildInputs = [ self.packages.${system}.garner ];
-            shellHook = ''
-              find . -name 'garner.ts' -exec \
-                bash -c \
-                  'source "${pkgs.stdenv}/setup" && \
-                   substituteInPlace "$0" \
-                     --replace \
-                     "http://localhost:8777/" \
-                     "${self.packages.${system}.typescript}/share/garner/"' {} \;
-            '';
+            nativeBuildInputs = [
+              self.packages.${system}.garner
+              ## Extra dependencies needed to run the fileserver
+              (ourHaskell.ghc.withPackages (p: [
+                p.shake
+                p.wai-app-static
+                p.warp
+              ]))
+              pkgs.just
+            ];
           };
         };
         checks =
