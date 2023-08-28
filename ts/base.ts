@@ -2,8 +2,8 @@ export type Package = {
   tag: "package";
   nixExpression: string;
   envExpression: (nixExpression: string) => string;
-  addDevTools: (devTools: Array<Package>) => Package;
-  devTools: Array<Package>;
+  addDevTools: (extraDevTools: Array<Package>) => Package;
+  extraDevTools: Array<Package>;
 };
 
 export const mkPackage = (args: { expression: string }): Package => ({
@@ -19,12 +19,11 @@ export const mkPackage = (args: { expression: string }): Package => ({
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
                 ++
-                [ ${this.devTools.map((p) => p.nixExpression).join()} ];
+                [ ${this.extraDevTools.map((p) => p.nixExpression).join(" ")} ];
           })`;
   },
-  addDevTools(this: Package, devTools) {
-    this.devTools = this.devTools.concat(devTools);
-    return this;
+  addDevTools(this: Package, extraDevTools) {
+    return {...this, extraDevTools: [...this.extraDevTools, ...extraDevTools]};
   },
-  devTools: [],
+  extraDevTools: [],
 });

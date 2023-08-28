@@ -19,7 +19,8 @@ import Garner
 import System.Directory
 import System.Environment (withArgs)
 import System.IO (Handle, IOMode (..), withFile)
-import System.IO.Silently (capture_)
+import qualified System.IO as Sys
+import System.IO.Silently (hCapture, hCapture_)
 import System.IO.Temp
 import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)
@@ -36,7 +37,7 @@ spec = do
         it "runs a simple Haskell program" $ do
           writeHaskellProject repoDir
           output <- runGarner ["run", "foo"] "" repoDir Nothing
-          output `shouldBe` "haskell test output\n"
+          stdout output `shouldBe` "haskell test output\n"
         it "writes flake.{lock,nix}, but no other files" $ do
           writeHaskellProject repoDir
           filesBefore <- listDirectory "."
@@ -60,40 +61,68 @@ spec = do
 
       describe "enter" $ do
         describe "addDevTools" $ do
-          fit "allows dev tools to be added to the dev shell" $ do
+          it "allows dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
             modifyGarnerTs $
               \garnerTs ->
                 cs
                   [i|
-                    import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
+                    import { mkPackage } from "#{repoDir}/ts/base.ts"
+
                     #{garnerTs}
-                    export const bar = foo.addDevTools([nixpkgs.hello]);
+
+                    const hello = mkPackage({
+                      expression: `pkgs.hello`,
+                    });
+
+                    export const bar = foo.addDevTools([hello]);
                   |]
-            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir
-            TIO.putStrLn =<< TIO.readFile "flake.nix"
-            output `shouldBe` "tool\n"
-          fit "allows multiple dev tools to be added to the dev shell" $ do
+            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
+            stdout output `shouldBe` "tool\n"
+          it "allows multiple dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
             modifyGarnerTs $
               \garnerTs ->
                 cs
                   [i|
-                    import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
+                    import { mkPackage } from "#{repoDir}/ts/base.ts"
+
                     #{garnerTs}
-                    export const bar = foo.addDevTools([nixpkgs.hello, nixpkgs.cowsay]);
+
+                    const hello = mkPackage({
+                      expression: `pkgs.hello`,
+                    });
+
+                    const cowsay = mkPackage({
+                      expression: `pkgs.cowsay`,
+                    });
+
+                    export const bar = foo.addDevTools([hello, cowsay]);
                   |]
-            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir
-            TIO.putStrLn =<< TIO.readFile "flake.nix"
-            output `shouldBe` "tool"
-          it "allows dev tools to be added when `env` exists" $ do
-            pending -- self.packages.${system}.hello ? env
+            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
+            stdout output `shouldBe` "tool\n"
           it "does not interfere with other packages" $ do
-            pending
+            writeHaskellProject repoDir
+            modifyGarnerTs $
+              \garnerTs ->
+                cs
+                  [i|
+                    import { mkPackage } from "#{repoDir}/ts/base.ts"
+
+                    #{garnerTs}
+
+                    const hello = mkPackage({
+                      expression: `pkgs.hello`,
+                    });
+
+                    export const bar = foo.addDevTools([hello]);
+                  |]
+            output <- runGarner ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
+            stderr output `shouldContain` "hello: command not found"
         it "has the right GHC version" $ do
           writeHaskellProject repoDir
           output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
-          output `shouldStartWith` "9.4"
+          stdout output `shouldStartWith` "9.4"
         it "registers Haskell dependencies with ghc-pkg" $ do
           writeHaskellProject repoDir
           modifyPackageYaml $
@@ -104,7 +133,7 @@ spec = do
               . from vector
               <>~ ["string-conversions"]
           output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir Nothing
-          dropWhile (== ' ') output `shouldStartWith` "string-conversions"
+          dropWhile (== ' ') (stdout output) `shouldStartWith` "string-conversions"
         it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
           writeFile
             "garner.ts"
@@ -122,17 +151,17 @@ spec = do
               })
             |]
           output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir Nothing
-          output `shouldBe` "Hello, world!\n"
-        it "starts the shell given by Options.userShell" $ do
+          stdout output `shouldBe` "Hello, world!\n"
+        it "starts the shell defined in $SHELL" $ do
           writeHaskellProject repoDir
           StdoutTrim userShell <- cmd ("which bash" :: String)
           output <-
             runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
-          output `shouldBe` "using bash"
+          stdout output `shouldBe` "using bash"
           StdoutTrim userShell <- cmd ("which zsh" :: String)
           output <-
             runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
-          output `shouldBe` "using zsh"
+          stdout output `shouldBe` "using zsh"
 
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
@@ -146,10 +175,10 @@ spec = do
                   src: "./.",
                 });
               |]
-            stdout <- runGarner ["enter", "frontend"] "node --version" repoDir Nothing
-            stdout `shouldStartWith` "v18."
-            stdout <- runGarner ["enter", "frontend"] "npm --version" repoDir Nothing
-            stdout `shouldStartWith` "9."
+            output <- runGarner ["enter", "frontend"] "node --version" repoDir Nothing
+            stdout output `shouldStartWith` "v18."
+            output <- runGarner ["enter", "frontend"] "npm --version" repoDir Nothing
+            stdout output `shouldStartWith` "9."
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the
     --       effect that @`around_` `inTempDirectory`@ _should_ have.
@@ -202,17 +231,15 @@ writeHaskellProject repoDir = do
            - base
     |]
 
-runGarner :: [String] -> String -> FilePath -> Maybe FilePath -> IO String
+runGarner :: [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
 runGarner args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
-  capture_ $ withTempFile $ \stdin ->
-    withArgs args $
-      runWith $
-        Options
-          { stdin,
-            tsRunnerFilename = repoDir <> "/ts/runner.ts",
-            userShell
-          }
+  (stderr, stdout) <- hCapture [Sys.stderr] $
+    hCapture_ [Sys.stdout] $
+      withTempFile $ \stdin ->
+        withArgs args $
+          runWith (Options {stdin, userShell, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+  return $ ProcResult {..}
   where
     withTempFile :: (Handle -> IO a) -> IO a
     withTempFile action =
@@ -220,6 +247,11 @@ runGarner args stdin repoDir shell = do
         (writeSystemTempFile "garner-test-stdin" stdin)
         removeFile
         (\file -> withFile file ReadMode action)
+
+data ProcResult = ProcResult
+  { stdout :: String,
+    stderr :: String
+  }
 
 shellTestCommand :: String
 shellTestCommand =
