@@ -8,7 +8,10 @@ import Control.Lens (from, (<>~))
 import qualified Data.Aeson as Aeson
 import Data.Aeson.Lens
 import Data.List (sort)
+import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
+import Data.Text (Text)
+import qualified Data.Text.IO as TIO
 import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
 import Development.Shake
@@ -56,6 +59,24 @@ spec = do
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
       describe "enter" $ do
+        describe "addDevTools" $ do
+          fit "allows dev tools to be added to the dev shell" $ do
+            writeHaskellProject repoDir
+            modifyGarnerTs $
+              \garnerTs ->
+                cs
+                  [i|
+                    import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
+                    #{garnerTs}
+                    export const bar = foo.addDevTools([nixpkgs.hello]);
+                  |]
+            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir
+            TIO.putStrLn =<< TIO.readFile "flake.nix"
+            output `shouldBe` "tool"
+          it "allows dev tools to be added when `env` exists" $ do
+            pending -- self.packages.${system}.hello ? env
+          it "does not interfere with other packages" $ do
+            pending
         it "has the right GHC version" $ do
           writeHaskellProject repoDir
           output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
@@ -132,6 +153,11 @@ modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
 modifyPackageYaml modifier = do
   decoded <- Yaml.decodeFileThrow "package.yaml"
   Yaml.encodeFile "package.yaml" $ modifier decoded
+
+modifyGarnerTs :: (Text -> Text) -> IO ()
+modifyGarnerTs modifier = do
+  garnerTs <- TIO.readFile "garner.ts"
+  TIO.writeFile "garner.ts" $ modifier garnerTs
 
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
