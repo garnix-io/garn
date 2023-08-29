@@ -11,6 +11,7 @@ import Data.List (sort)
 import Data.String.Interpolate (i)
 import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
+import Development.Shake
 import Garner
 import System.Directory
 import System.Environment (withArgs)
@@ -31,12 +32,12 @@ spec = do
       describe "run" $ do
         it "runs a simple Haskell program" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["run", "foo"] "" repoDir
+          output <- runGarner ["run", "foo"] "" repoDir Nothing
           output `shouldBe` "haskell test output\n"
         it "writes flake.{lock,nix}, but no other files" $ do
           writeHaskellProject repoDir
           filesBefore <- listDirectory "."
-          _ <- runGarner ["run", "foo"] "" repoDir
+          _ <- runGarner ["run", "foo"] "" repoDir Nothing
           filesAfter <- sort <$> listDirectory "."
           filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
         it "doesn’t format other Nix files" $ do
@@ -51,13 +52,13 @@ spec = do
                 |]
           writeFile "unformatted.nix" unformattedNix
           writeHaskellProject repoDir
-          _ <- runGarner ["run", "foo"] "" repoDir
+          _ <- runGarner ["run", "foo"] "" repoDir Nothing
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
       describe "enter" $ do
         it "has the right GHC version" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir
+          output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
           output `shouldStartWith` "9.4"
         it "registers Haskell dependencies with ghc-pkg" $ do
           writeHaskellProject repoDir
@@ -68,7 +69,7 @@ spec = do
               . _Array
               . from vector
               <>~ ["string-conversions"]
-          output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir
+          output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir Nothing
           dropWhile (== ' ') output `shouldStartWith` "string-conversions"
         it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
           writeFile
@@ -86,24 +87,19 @@ spec = do
                 `,
               })
             |]
-          output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir
+          output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir Nothing
           output `shouldBe` "Hello, world!\n"
-        it "starts the shell defined in $SHELL" $ do
+        it "starts the shell given by Options.userShell" $ do
           writeHaskellProject repoDir
+          StdoutTrim userShell <- cmd ("which bash" :: String)
           output <-
-            withModifiedEnvironment [("SHELL", "bash")] $
-              runGarner ["enter", "foo"] shellTestCommand repoDir
+            runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
           output `shouldBe` "using bash"
+          StdoutTrim userShell <- cmd ("which zsh" :: String)
           output <-
-            withModifiedEnvironment [("SHELL", "zsh")] $
-              runGarner ["enter", "foo"] shellTestCommand repoDir
+            runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
           output `shouldBe` "using zsh"
-        it "defaults to bash" $ do
-          writeHaskellProject repoDir
-          output <-
-            withModifiedEnvironment [("SHELL", "")] $
-              runGarner ["enter", "foo"] shellTestCommand repoDir
-          output `shouldBe` "using bash"
+
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
             writeFile
@@ -116,9 +112,9 @@ spec = do
                   src: "./.",
                 });
               |]
-            stdout <- runGarner ["enter", "frontend"] "node --version" repoDir
+            stdout <- runGarner ["enter", "frontend"] "node --version" repoDir Nothing
             stdout `shouldStartWith` "v18."
-            stdout <- runGarner ["enter", "frontend"] "npm --version" repoDir
+            stdout <- runGarner ["enter", "frontend"] "npm --version" repoDir Nothing
             stdout `shouldStartWith` "9."
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the
@@ -128,7 +124,7 @@ spec = do
         it "generates formatted flakes" $ do
           inTempDirectory $ do
             writeHaskellProject repoDir
-            _ <- runGarner ["run", "foo"] "" repoDir
+            _ <- runGarner ["run", "foo"] "" repoDir Nothing
             flake <- readFile "./flake.nix"
             pure $ defaultGolden "generates_formatted_flakes" flake
 
@@ -167,12 +163,17 @@ writeHaskellProject repoDir = do
            - base
     |]
 
-runGarner :: [String] -> String -> FilePath -> IO String
-runGarner args stdin repoDir = do
-  capture_ $
-    withTempFile $ \stdin ->
-      withArgs args $
-        runWith (Options {stdin, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+runGarner :: [String] -> String -> FilePath -> Maybe FilePath -> IO String
+runGarner args stdin repoDir shell = do
+  userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
+  capture_ $ withTempFile $ \stdin ->
+    withArgs args $
+      runWith $
+        Options
+          { stdin,
+            tsRunnerFilename = repoDir <> "/ts/runner.ts",
+            userShell
+          }
   where
     withTempFile :: (Handle -> IO a) -> IO a
     withTempFile action =
