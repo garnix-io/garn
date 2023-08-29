@@ -25,7 +25,7 @@
           garner =
             let
               # directories shouldn't have leading or trailing slashes
-              ignored = [ "examples" "justfile" ];
+              ignored = [ ".github" "examples" "justfile" "scripts" ];
               src = builtins.path
                 {
                   path = ./.;
