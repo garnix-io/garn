@@ -118,4 +118,4 @@ typescript-check *args="":
   deno check ts/*.ts {{ args }}
 
 check-isolated-garner:
-  nix develop --print-build-logs --ignore-environment .#barren -c bash
+  nix develop --print-build-logs --ignore-environment .#barren -c bash test/smoke-test.sh

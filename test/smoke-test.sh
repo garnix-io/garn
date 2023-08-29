@@ -10,7 +10,9 @@ sleep 5
 cd examples/haskell
 expected=42
 res="$(garner run haskellExecutable)"
-if [[ $res != $expected ]]; then
+if [[ $res == $expected ]]; then
+  echo "Smoke test successful"
+else
   echo "Garner ran, but gave a different result than expected."
   echo "  Expected: $expected"
   echo "  Received: $res"

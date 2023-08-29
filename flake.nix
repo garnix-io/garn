@@ -49,11 +49,17 @@
                     pkgs.nix
                     pkgs.zsh
                   ];
-
                   postInstall = ''
+                    wrapProgram "$out/bin/codegen" \
+                        --set LANG C.UTF-8 \
+                        --prefix PATH : ${pkgs.lib.makeBinPath [
+                      pkgs.git
+                      pkgs.nix
+                    ]}
                     wrapProgram "$out/bin/garner" \
                         --prefix PATH : ${pkgs.lib.makeBinPath [
                       pkgs.deno
+                      pkgs.git
                       pkgs.nix
                     ]}
                   '';
@@ -86,8 +92,7 @@
             ];
           };
           ## An empty devShell for running garner in isolation
-          ## NB: If you use this shell within another shell or `direnv`, the
-          ##     environment will leak, and isolation will be lost.
+          ## NB: This should always be entered with `--ignore-environment`.
           barren = pkgs.mkShell {
             nativeBuildInputs = [
               self.packages.${system}.garner
@@ -97,6 +102,7 @@
                 p.wai-app-static
                 p.warp
               ]))
+              pkgs.curl
               pkgs.just
             ];
           };
