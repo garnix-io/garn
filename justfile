@@ -6,7 +6,7 @@ list:
 pre-push: fmt github-ci check-examples
 
 # Run checks that we can’t yet run via the flake
-github-ci: test codegen
+github-ci: test codegen check-isolated-garner
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
@@ -89,4 +89,4 @@ typescript-check *args="":
   deno check ts/*.ts {{ args }}
 
 check-isolated-garner:
-  nix develop --print-build-logs --ignore-environment .#barren -c bash test/smoke-test.sh
+  test/smoke-test.sh

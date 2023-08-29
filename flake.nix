@@ -91,21 +91,6 @@
               fhi.packages.${system}.default
             ];
           };
-          ## An empty devShell for running garner in isolation
-          ## NB: This should always be entered with `--ignore-environment`.
-          barren = pkgs.mkShell {
-            nativeBuildInputs = [
-              self.packages.${system}.garner
-              ## Extra dependencies needed to run the fileserver
-              (ourHaskell.ghc.withPackages (p: [
-                p.shake
-                p.wai-app-static
-                p.warp
-              ]))
-              pkgs.curl
-              pkgs.git
-            ];
-          };
         };
         checks =
           let
