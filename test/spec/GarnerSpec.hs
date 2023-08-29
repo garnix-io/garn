@@ -169,12 +169,11 @@ runGarner args stdin repoDir shell = do
   capture_ $ withTempFile $ \stdin ->
     withArgs args $
       runWith $
-        ( Options
-            { stdin,
-              tsRunnerFilename = repoDir <> "/ts/runner.ts",
-              userShell
-            }
-        )
+        Options
+          { stdin,
+            tsRunnerFilename = repoDir <> "/ts/runner.ts",
+            userShell
+          }
   where
     withTempFile :: (Handle -> IO a) -> IO a
     withTempFile action =
