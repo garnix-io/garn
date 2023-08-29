@@ -67,36 +67,7 @@ watch *args="": hpack
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
 
 fileserver:
-  #!/usr/bin/env runhaskell
-
-  import Control.Monad
-  import Data.Function
-  import Development.Shake
-  import Network.Wai.Application.Static
-  import Network.Wai.Handler.Warp
-  import System.Exit
-
-  main :: IO ()
-  main = do
-    isRunning >>= \yes -> when yes $ do
-      error "Fileserver already running"
-    let settings =
-          defaultSettings
-            & setPort port
-            & setBeforeMainLoop (putStrLn $ "listening on port " <> show port)
-    runSettings settings $ staticApp $ defaultFileServerSettings "ts"
-
-  isRunning :: IO Bool
-  isRunning = do
-    Exit code <-
-      cmd
-        "curl" ("http://localhost:" <> show port)
-        (EchoStdout False)
-        (EchoStderr False)
-    pure (code == ExitSuccess)
-
-  port :: Int
-  port = 8777
+  scripts/fileserver
 
 run-garner example *args="": hpack
   #!/usr/bin/env bash

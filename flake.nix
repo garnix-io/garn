@@ -103,7 +103,7 @@
                 p.warp
               ]))
               pkgs.curl
-              pkgs.just
+              pkgs.git
             ];
           };
         };

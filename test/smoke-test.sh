@@ -3,9 +3,12 @@
 set -euo pipefail
 shopt -s inherit_errexit
 
+PROJECT_ROOT="$(git rev-parse --show-toplevel)"
+
 codegen
-just fileserver &
-sleep 5
+fs_proc="$("$PROJECT_ROOT/scripts/fileserver" >/dev/null & jobs -p)"
+sleep 2
+trap "kill -s SIGTERM $fs_proc" EXIT
 
 cd examples/haskell
 expected=42
