@@ -15,6 +15,7 @@ if run-in-isolation git rev-parse --show-toplevel 2>/dev/null; then
   exit 1
 fi
 
+echo running codegen...
 run-in-isolation codegen
 fs_proc="$("$PROJECT_ROOT/scripts/fileserver" >/dev/null & jobs -p)"
 sleep 2
