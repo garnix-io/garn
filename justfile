@@ -89,4 +89,4 @@ typescript-check *args="":
   deno check ts/*.ts {{ args }}
 
 check-isolated-garner:
-  test/smoke-test.sh
+  test/check-isolated-garner.sh
