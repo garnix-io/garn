@@ -10,7 +10,7 @@ function run-in-isolation () {
 }
 
 ## verify isolation is working
-if run-in-isolation git rev-parse --show-toplevel 2>/dev/null; then
+if run-in-isolation git --version 2>/dev/null; then
   echo "Error: Isolation is broken"
   exit 1
 fi
