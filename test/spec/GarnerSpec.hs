@@ -10,8 +10,6 @@ import Data.Aeson.Lens
 import Data.List (sort)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
-import Data.Text (Text)
-import qualified Data.Text.IO as TIO
 import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
 import Development.Shake
@@ -110,7 +108,7 @@ spec = do
                   |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
-            output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir
+            output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "/nix/store"
           it "does not interfere with other packages" $ do
             writeHaskellProject repoDir
