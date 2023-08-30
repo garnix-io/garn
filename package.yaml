@@ -55,6 +55,7 @@ dependencies:
   - string-conversions
   - temporary
   - text
+  - unix
 
 ghc-options:
   - -Wall

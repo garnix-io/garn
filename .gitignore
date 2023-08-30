@@ -2,3 +2,4 @@
 /dist-newstyle/
 /result
 /ts/nixpkgs.ts
+/.golden/*/actual
