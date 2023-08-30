@@ -64,21 +64,21 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                    import { mkPackage } from "#{repoDir}/ts/base.ts"
-                    import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkPackage } from "#{repoDir}/ts/base.ts"
+                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
-                    export const foo = mkHaskell({
-                      name: "mkHaskell-test",
-                      executable: "garner-test",
-                      compiler: "ghc94",
-                      src: "./."
-                    })
-                    const hello = mkPackage({
-                      expression: `pkgs.hello`,
-                    });
+                  export const foo = mkHaskell({
+                    name: "mkHaskell-test",
+                    executable: "garner-test",
+                    compiler: "ghc94",
+                    src: "./."
+                  })
+                  const hello = mkPackage({
+                    expression: `pkgs.hello`,
+                  });
 
-                    export const bar = foo.addDevTools([hello]);
-                  |]
+                  export const bar = foo.addDevTools([hello]);
+                |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
           it "allows multiple dev tools to be added to the dev shell" $ do
@@ -86,26 +86,26 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                    import { mkPackage } from "#{repoDir}/ts/base.ts"
-                    import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkPackage } from "#{repoDir}/ts/base.ts"
+                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
-                    export const foo = mkHaskell({
-                      name: "mkHaskell-test",
-                      executable: "garner-test",
-                      compiler: "ghc94",
-                      src: "./."
-                    })
+                  export const foo = mkHaskell({
+                    name: "mkHaskell-test",
+                    executable: "garner-test",
+                    compiler: "ghc94",
+                    src: "./."
+                  })
 
-                    const hello = mkPackage({
-                      expression: `pkgs.hello`,
-                    });
+                  const hello = mkPackage({
+                    expression: `pkgs.hello`,
+                  });
 
-                    const cowsay = mkPackage({
-                      expression: `pkgs.cowsay`,
-                    });
+                  const cowsay = mkPackage({
+                    expression: `pkgs.cowsay`,
+                  });
 
-                    export const bar = foo.addDevTools([hello, cowsay]);
-                  |]
+                  export const bar = foo.addDevTools([hello, cowsay]);
+                |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
             output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
@@ -115,22 +115,22 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                    import { mkPackage } from "#{repoDir}/ts/base.ts"
-                    import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkPackage } from "#{repoDir}/ts/base.ts"
+                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
-                    export const foo = mkHaskell({
-                      name: "mkHaskell-test",
-                      executable: "garner-test",
-                      compiler: "ghc94",
-                      src: "./."
-                    })
+                  export const foo = mkHaskell({
+                    name: "mkHaskell-test",
+                    executable: "garner-test",
+                    compiler: "ghc94",
+                    src: "./."
+                  })
 
-                    const hello = mkPackage({
-                      expression: `pkgs.hello`,
-                    });
+                  const hello = mkPackage({
+                    expression: `pkgs.hello`,
+                  });
 
-                    export const bar = foo.addDevTools([hello]);
-                  |]
+                  export const bar = foo.addDevTools([hello]);
+                |]
             output <- runGarner ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
             stderr output `shouldContain` "hello: command not found"
         it "has the right GHC version" $ do

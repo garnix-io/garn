@@ -11,14 +11,14 @@ export const mkPackage = (args: { expression: string }): Package => ({
   nixExpression: args.expression,
   envExpression(nixRef): string {
     const devToolsOverride =
-        this.extraDevTools.length == 0
-            ? ""
-            : `.overrideAttrs (finalAttrs: previousAttrs: {
+      this.extraDevTools.length == 0
+        ? ""
+        : `.overrideAttrs (finalAttrs: previousAttrs: {
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
                 ++
                 [ ${this.extraDevTools.map((p) => p.nixExpression).join(" ")} ];
-          })`
+          })`;
     return ` let expr = ${nixRef};
         in
           (if expr ? env
