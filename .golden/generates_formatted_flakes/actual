@@ -30,12 +30,7 @@
             (if expr ? env
             then expr.env
             else pkgs.mkShell { inputsFrom = [ expr ]; }
-            ).overrideAttrs (finalAttrs: previousAttrs: {
-              nativeBuildInputs =
-                previousAttrs.nativeBuildInputs
-                ++
-                [ ];
-            });
+            );
         });
       formatter = forAllSystems (system:
         let

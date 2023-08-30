@@ -10,17 +10,21 @@ export const mkPackage = (args: { expression: string }): Package => ({
   tag: "package",
   nixExpression: args.expression,
   envExpression(nixRef): string {
+    const devToolsOverride =
+        this.extraDevTools.length == 0
+            ? ""
+            : `.overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ ${this.extraDevTools.map((p) => p.nixExpression).join(" ")} ];
+          })`
     return ` let expr = ${nixRef};
         in
           (if expr ? env
             then expr.env
             else pkgs.mkShell {inputsFrom = [ expr ];}
-          ).overrideAttrs (finalAttrs: previousAttrs: {
-              nativeBuildInputs =
-                previousAttrs.nativeBuildInputs
-                ++
-                [ ${this.extraDevTools.map((p) => p.nixExpression).join(" ")} ];
-          })`;
+          )${devToolsOverride}`;
   },
   addDevTools(this: Package, extraDevTools) {
     return {

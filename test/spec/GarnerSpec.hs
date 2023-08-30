@@ -8,8 +8,8 @@ import Control.Lens (from, (<>~))
 import qualified Data.Aeson as Aeson
 import Data.Aeson.Lens
 import Data.List (sort)
-import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
+import Data.String.Interpolate.Util (unindent)
 import Data.Text (Text)
 import qualified Data.Text.IO as TIO
 import Data.Vector.Generic.Lens (vector)
@@ -63,14 +63,18 @@ spec = do
         describe "addDevTools" $ do
           it "allows dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
-            modifyGarnerTs $
-              \garnerTs ->
-                cs
-                  [i|
+            writeFile "garner.ts" $
+              unindent
+                [i|
                     import { mkPackage } from "#{repoDir}/ts/base.ts"
+                    import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
-                    #{garnerTs}
-
+                    export const foo = mkHaskell({
+                      name: "mkHaskell-test",
+                      executable: "garner-test",
+                      compiler: "ghc94",
+                      src: "./."
+                    })
                     const hello = mkPackage({
                       expression: `pkgs.hello`,
                     });
@@ -81,13 +85,18 @@ spec = do
             stdout output `shouldBe` "tool\n"
           it "allows multiple dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
-            modifyGarnerTs $
-              \garnerTs ->
-                cs
-                  [i|
+            writeFile "garner.ts" $
+              unindent
+                [i|
                     import { mkPackage } from "#{repoDir}/ts/base.ts"
+                    import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
-                    #{garnerTs}
+                    export const foo = mkHaskell({
+                      name: "mkHaskell-test",
+                      executable: "garner-test",
+                      compiler: "ghc94",
+                      src: "./."
+                    })
 
                     const hello = mkPackage({
                       expression: `pkgs.hello`,
@@ -101,15 +110,22 @@ spec = do
                   |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
+            output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir
+            stdout output `shouldStartWith` "/nix/store"
           it "does not interfere with other packages" $ do
             writeHaskellProject repoDir
-            modifyGarnerTs $
-              \garnerTs ->
-                cs
-                  [i|
+            writeFile "garner.ts" $
+              unindent
+                [i|
                     import { mkPackage } from "#{repoDir}/ts/base.ts"
+                    import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
-                    #{garnerTs}
+                    export const foo = mkHaskell({
+                      name: "mkHaskell-test",
+                      executable: "garner-test",
+                      compiler: "ghc94",
+                      src: "./."
+                    })
 
                     const hello = mkPackage({
                       expression: `pkgs.hello`,
@@ -195,11 +211,6 @@ modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
 modifyPackageYaml modifier = do
   decoded <- Yaml.decodeFileThrow "package.yaml"
   Yaml.encodeFile "package.yaml" $ modifier decoded
-
-modifyGarnerTs :: (Text -> Text) -> IO ()
-modifyGarnerTs modifier = do
-  garnerTs <- TIO.readFile "garner.ts"
-  TIO.writeFile "garner.ts" $ modifier garnerTs
 
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
