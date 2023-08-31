@@ -21,10 +21,11 @@
           program = "${self.packages.${system}.default}/bin/garner";
         };
         packages = {
-          default =
+          default = self.packages.${system}.garner;
+          garner =
             let
               # directories shouldn't have leading or trailing slashes
-              ignored = [ "examples" "justfile" ];
+              ignored = [ ".github" "examples" "justfile" "scripts" "test/smoke-test.sh" ];
               src = builtins.path
                 {
                   path = ./.;
@@ -44,9 +45,25 @@
                 original: {
                   nativeBuildInputs = original.nativeBuildInputs ++ [
                     pkgs.deno
+                    pkgs.makeWrapper
                     pkgs.nix
                     pkgs.zsh
                   ];
+                  postInstall = ''
+                    wrapProgram "$out/bin/codegen" \
+                        --set LANG C.UTF-8 \
+                        --prefix PATH : ${pkgs.lib.makeBinPath [
+                      pkgs.git
+                      pkgs.nix
+                    ]}
+                    wrapProgram "$out/bin/garner" \
+                        --prefix PATH : ${pkgs.lib.makeBinPath [
+                      pkgs.deno
+                      pkgs.git
+                      pkgs.nix
+                    ]}
+                  '';
+
                   doCheck = false;
                 }
               );
