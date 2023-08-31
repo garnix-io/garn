@@ -110,7 +110,7 @@ spec = do
             stdout output `shouldBe` "tool\n"
             output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "/nix/store"
-          it "does not interfere with other packages" $ do
+          it "does not destructively update the given package" $ do
             writeHaskellProject repoDir
             writeFile "garner.ts" $
               unindent
