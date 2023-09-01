@@ -51,12 +51,13 @@
                   ];
                   postInstall = ''
                     wrapProgram "$out/bin/codegen" \
-                        --set LANG C.UTF-8 \
+                        --set LC_ALL C.UTF-8 \
                         --prefix PATH : ${pkgs.lib.makeBinPath [
                       pkgs.git
                       pkgs.nix
                     ]}
                     wrapProgram "$out/bin/garner" \
+                        --set LC_ALL C.UTF-8 \
                         --prefix PATH : ${pkgs.lib.makeBinPath [
                       pkgs.deno
                       pkgs.git
