@@ -16,6 +16,7 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import Development.Shake
 import GHC.Generics (Generic)
+import Garner.Common (nixpkgsInput)
 import WithCli (withCli)
 
 run :: IO ()
@@ -24,13 +25,7 @@ run = withCli $ do
   let varName = "pkgs"
       nixpkgsExpression =
         [i|
-          let commit = "23.05";
-              sha256 = "10wn0l08j9lgqcw8177nh2ljrnxdrpri7bp0g7nvrsn9rkawvlbf";
-              pkgsSrc = builtins.fetchTarball {
-                url = "https://github.com/NixOS/nixpkgs/archive/${commit}.tar.gz";
-                inherit sha256;
-              };
-          in import pkgsSrc {
+          import (builtins.getFlake "#{nixpkgsInput}") {
             system = "#{system}";
             config.allowAliases = false;
           }

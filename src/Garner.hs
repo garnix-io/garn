@@ -9,6 +9,7 @@ where
 
 import Data.String.Interpolate (i)
 import Development.Shake (CmdOption (..), cmd_)
+import Garner.Common (nixpkgsInput)
 import Paths_garner
 import System.Directory
 import System.IO (Handle, hClose, hPutStr)
@@ -58,7 +59,7 @@ makeFlake opts = do
         import * as config from "#{dir}/garner.ts"
         import { writeFlake } from "#{tsRunnerFilename opts}"
 
-        writeFlake(config)
+        writeFlake("#{nixpkgsInput}", config)
       |]
     hClose mainHandle
     cmd_ "deno run --quiet --check --allow-write" mainPath
