@@ -8,7 +8,6 @@ copyright: "AllRightsReserved"
 
 data-files:
   - ts/base.ts
-  - ts/haskell.ts
   - ts/runner.ts
 
 default-extensions:
