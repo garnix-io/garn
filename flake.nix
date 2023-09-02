@@ -72,6 +72,7 @@
             let
               ghc = ourHaskell.ghc.withPackages (p:
                 [
+                  p.fsnotify
                   p.getopt-generics
                   p.shake
                   p.wai-app-static
@@ -80,6 +81,7 @@
             in
             (pkgs.writeScriptBin "fileserver" ''
               export PATH=${pkgs.curl}/bin:$PATH
+              export PATH=${pkgs.deno}/bin:$PATH
               ${ghc}/bin/runhaskell ${self}/scripts/fileserver "$@"
             '');
         };
