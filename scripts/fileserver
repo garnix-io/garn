@@ -4,9 +4,10 @@ import Development.Shake
 import Network.Wai.Application.Static
 import Network.Wai.Handler.Warp
 import System.Exit
+import WithCli
 
 main :: IO ()
-main = do
+main = withCli $ do
   isRunning >>= \yes -> when yes $ do
     error "Fileserver already running"
   let settings =

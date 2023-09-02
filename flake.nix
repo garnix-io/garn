@@ -72,6 +72,7 @@
             let
               ghc = ourHaskell.ghc.withPackages (p:
                 [
+                  p.getopt-generics
                   p.shake
                   p.wai-app-static
                   p.warp
@@ -125,6 +126,13 @@
               pkgs.hpack
               pkgs.ormolu
             ];
+            fileserver = pkgs.runCommand "fileserver-check"
+              {
+                buildInputs = [ self.packages.${system}.fileserver ];
+              } ''
+              fileserver --help
+              touch $out
+            '';
           };
         formatter = pkgs.nixpkgs-fmt;
         apps = {
