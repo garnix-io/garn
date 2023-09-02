@@ -66,8 +66,8 @@ watch *args="": hpack
 
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
 
-fileserver:
-  scripts/fileserver
+fileserver *args="":
+  nix run .#fileserver -- {{ args }}
 
 run-garner example *args="": hpack
   #!/usr/bin/env bash
