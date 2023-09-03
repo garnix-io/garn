@@ -2,7 +2,10 @@ import { Package } from "./base.ts";
 
 const encoder = new TextEncoder();
 
-const formatFlake = (config: Record<string, Package>): string => {
+const formatFlake = (
+  nixpkgsInput: string,
+  config: Record<string, Package>
+): string => {
   const packages = Object.entries(config).reduce(
     (acc, [name, pkg]) => acc + `${name} = ${pkg.nixExpression};`,
     ""
@@ -13,7 +16,7 @@ const formatFlake = (config: Record<string, Package>): string => {
     return acc + `${name} = ${env};`;
   }, "");
   return `{
-    inputs.nixpkgs.url = "github:NixOS/nixpkgs";
+    inputs.nixpkgs.url = "${nixpkgsInput}";
     outputs = { self, nixpkgs }:
       let
         systems = [ "x86_64-linux" ];
@@ -52,7 +55,10 @@ const formatFlake = (config: Record<string, Package>): string => {
   }`;
 };
 
-export const writeFlake = (config: Record<string, Package>) => {
-  const data = encoder.encode(formatFlake(config));
+export const writeFlake = (
+  nixpkgsInput: string,
+  config: Record<string, Package>
+) => {
+  const data = encoder.encode(formatFlake(nixpkgsInput, config));
   Deno.writeFileSync("flake.nix", data);
 };
