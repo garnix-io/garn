@@ -6,7 +6,8 @@ shopt -s inherit_errexit
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
 function run-in-isolation () {
-  nix shell --ignore-environment "$PROJECT_ROOT#garner" -c "$@"
+  nix shell --ignore-environment --print-build-logs \
+    "$PROJECT_ROOT#garner" -c "$@"
 }
 
 ## verify isolation is working
