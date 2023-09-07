@@ -1,5 +1,5 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/841889913dfd06a70ffb39f603e29e46f45f0c1a";
   outputs = { self, nixpkgs }:
     let
       systems = [ "x86_64-linux" ];
@@ -31,12 +31,11 @@
         {
           frontend =
             let expr = self.packages.${system}.frontend;
-            in if self.packages.${system}.frontend ? env
-            then self.packages.${system}.frontend.env
-            else
-              pkgs.mkShell ({
-                inputsFrom = [ self.packages.${system}.frontend ];
-              });
+            in
+            (if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; }
+            );
         });
       formatter = forAllSystems (system:
         let
