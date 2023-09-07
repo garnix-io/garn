@@ -209,7 +209,6 @@ spec = do
 
                   running
                 |]
-          it "displays an error if there is no start script configured in package.json" pending
           it "displays an error if the script exists but exits with non-zero status code" $ do
             writeNpmFrontendProject repoDir
             writeFile

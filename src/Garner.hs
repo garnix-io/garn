@@ -8,7 +8,7 @@ module Garner
 where
 
 import Control.Monad (void)
-import Data.Aeson (FromJSON, decode)
+import Data.Aeson (FromJSON, eitherDecode)
 import Data.Map (Map)
 import qualified Data.Map as Map
 import Data.String.Interpolate (i)
@@ -87,9 +87,9 @@ makeFlake opts = do
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
     cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
-    case decode out of
-      Nothing -> error "Failed to parse target config map from garner.ts stdout"
-      Just targetConfigMap -> return targetConfigMap
+    case eitherDecode out of
+      Left err -> error $ "Unexpected package export from garner.ts: " <> err
+      Right targetConfigMap -> return targetConfigMap
 
 productionOptions :: IO Options
 productionOptions = do
