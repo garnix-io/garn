@@ -193,6 +193,94 @@ spec = do
             stdout output `shouldStartWith` "v18."
             output <- runGarner ["enter", "frontend"] "npm --version" repoDir Nothing
             stdout output `shouldStartWith` "9."
+
+      describe "start" $ do
+        describe "no start command configured" $ do
+          it "runs npm start" $ do
+            writeNpmFrontendProject repoDir
+            output <- runGarner ["start", "frontend"] "" repoDir Nothing
+            stderr output `shouldBe` "[garner] Running \"npm run start\"\n"
+            stdout output
+              `shouldBe` unindent
+                [i|
+
+                  > frontend@0.0.1 start
+                  > echo running
+
+                  running
+                |]
+          it "displays an error if there is no start script configured in package.json" pending
+          it "displays an error if the script exists but exits with non-zero status code" $ do
+            writeNpmFrontendProject repoDir
+            writeFile
+              "package.json"
+              [i|
+                {
+                  "name": "frontend",
+                  "version": "0.0.1",
+                  "scripts": {
+                    "start": "exit 42"
+                  }
+                }
+              |]
+            output <- runGarner ["start", "frontend"] "" repoDir Nothing
+            stderr output
+              `shouldBe` unindent
+                [i|
+                  [garner] Running "npm run start"
+                  [garner] "npm run start" exited with status code 42
+                |]
+
+        describe "with a specific start command configured" $ do
+          it "runs the configured command" $ do
+            writeNpmFrontendProject repoDir
+            writeFile
+              "garner.ts"
+              [i|
+                import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
+
+                export const frontend = mkNpmFrontend({
+                  name: "mkNpmFrontend-custom-command-test",
+                  src: "./.",
+                }).setStartCommand(["echo", "foobar"]);
+              |]
+            output <- runGarner ["start", "frontend"] "" repoDir Nothing
+            stderr output `shouldBe` "[garner] Running \"echo foobar\"\n"
+            stdout output `shouldBe` "foobar\n"
+          it "correctly handles argv arrays" $ do
+            writeFile
+              "garner.ts"
+              [i|
+                import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
+
+                export const frontend = mkNpmFrontend({
+                  name: "mkNpmFrontend-custom-command-test",
+                  src: "./.",
+                }).setStartCommand(["printf", "%s..%s..%s", "foo bar", "baz"]);
+              |]
+            output <- runGarner ["start", "frontend"] "" repoDir Nothing
+            stdout output `shouldBe` "foo bar..baz.."
+          it "displays an error if the command exits with non-zero status code" $ do
+            writeNpmFrontendProject repoDir
+            writeFile
+              "garner.ts"
+              [i|
+                import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
+
+                export const frontend = mkNpmFrontend({
+                  name: "mkNpmFrontend-custom-command-test",
+                  src: "./.",
+                }).setStartCommand(["sh", "-c", ">&2 echo error! && exit 42"]);
+              |]
+            output <- runGarner ["start", "frontend"] "" repoDir Nothing
+            stderr output
+              `shouldBe` unindent
+                [i|
+                  [garner] Running "sh -c >&2 echo error! && exit 42"
+                  error!
+                  [garner] "sh -c >&2 echo error! && exit 42" exited with status code 42
+                |]
+
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the
     --       effect that @`around_` `inTempDirectory`@ _should_ have.
@@ -238,6 +326,30 @@ writeHaskellProject repoDir = do
           main: Main.hs
           dependencies:
            - base
+    |]
+
+writeNpmFrontendProject :: FilePath -> IO ()
+writeNpmFrontendProject repoDir = do
+  writeFile
+    "garner.ts"
+    [i|
+      import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts"
+
+      export const frontend = mkNpmFrontend({
+        name: "mkNpmFrontend-test",
+        src: "./."
+      })
+    |]
+  writeFile
+    "package.json"
+    [i|
+      {
+        "name": "frontend",
+        "version": "0.0.1",
+        "scripts": {
+          "start": "echo running"
+        }
+      }
     |]
 
 runGarner :: [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult

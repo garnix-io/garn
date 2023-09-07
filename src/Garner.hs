@@ -7,12 +7,17 @@ module Garner
   )
 where
 
+import Control.Monad (void)
+import Data.Aeson (FromJSON, decode)
+import Data.Map (Map)
+import qualified Data.Map as Map
 import Data.String.Interpolate (i)
-import Development.Shake (CmdOption (..), cmd_)
+import Development.Shake (CmdOption (..), Exit (Exit), Stdout (Stdout), cmd, cmd_)
 import Garner.Common (nixpkgsInput)
 import Paths_garner
 import System.Directory
-import System.IO (Handle, hClose, hPutStr)
+import System.Exit (ExitCode (ExitFailure, ExitSuccess))
+import System.IO (Handle, hClose, hPutStr, hPutStrLn, stderr)
 import qualified System.IO
 import System.IO.Temp
 import qualified System.Posix.User as POSIX
@@ -31,10 +36,10 @@ run = runWith =<< productionOptions
 runWith :: Options -> IO ()
 runWith opts = withCli $ \(command :: String) (target :: String) -> case command of
   "run" -> do
-    makeFlake opts
+    void $ makeFlake opts
     cmd_ "nix run" nixArgs (".#" <> target)
   "enter" -> do
-    makeFlake opts
+    void $ makeFlake opts
     let devProc =
           ( proc
               "nix"
@@ -47,9 +52,24 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
     _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
       waitForProcess procHandle
     pure ()
+  "start" -> do
+    config <- makeFlake opts
+    let command = case Map.lookup target config of
+          Nothing -> error $ "Could not find target " <> target
+          Just targetConfig -> startCommand targetConfig
+    hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
+    Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" command
+    case c of
+      ExitSuccess -> pure ()
+      ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
   _ -> error $ "Command " <> command <> " not supported."
 
-makeFlake :: Options -> IO ()
+data TargetConfig = TargetConfig
+  { startCommand :: [String]
+  }
+  deriving (Generic, FromJSON)
+
+makeFlake :: Options -> IO (Map String TargetConfig)
 makeFlake opts = do
   dir <- getCurrentDirectory
   withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
@@ -62,8 +82,11 @@ makeFlake opts = do
         writeFlake("#{nixpkgsInput}", config)
       |]
     hClose mainHandle
-    cmd_ "deno run --quiet --check --allow-write" mainPath
+    Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
     cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
+    case decode out of
+      Nothing -> error "Failed to parse target config map from garner.ts stdout"
+      Just targetConfigMap -> return targetConfigMap
 
 productionOptions :: IO Options
 productionOptions = do

@@ -4,6 +4,8 @@ export type Package = {
   envExpression: (nixExpression: string) => string;
   addDevTools: (extraDevTools: Array<Package>) => Package;
   extraDevTools: Array<Package>;
+  setStartCommand: (startCommand: Array<string>) => Package;
+  startCommand: Array<string> | null;
 };
 
 export const mkPackage = (args: { expression: string }): Package => ({
@@ -33,4 +35,11 @@ export const mkPackage = (args: { expression: string }): Package => ({
     };
   },
   extraDevTools: [],
+  setStartCommand(this: Package, startCommand) {
+    return {
+      ...this,
+      startCommand,
+    };
+  },
+  startCommand: null,
 });
