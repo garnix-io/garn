@@ -8,4 +8,4 @@ export const mkNpmFrontend = (args: { name: string; src: string }): Package =>
       buildInputs = [ pkgs.nodejs-18_x ];
     }
   `,
-  });
+  }).setStartCommand(["npm", "run", "start"]);
