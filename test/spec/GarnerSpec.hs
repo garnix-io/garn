@@ -195,7 +195,7 @@ spec = do
             stdout output `shouldStartWith` "9."
 
       describe "start" $ do
-        describe "no start command configured" $ do
+        context "when no start command is configured" $ do
           it "runs npm start" $ do
             writeNpmFrontendProject repoDir
             output <- runGarner ["start", "frontend"] "" repoDir Nothing
@@ -230,7 +230,7 @@ spec = do
                   [garner] "npm run start" exited with status code 42
                 |]
 
-        describe "with a specific start command configured" $ do
+        context "with a specific start command configured" $ do
           it "runs the configured command" $ do
             writeNpmFrontendProject repoDir
             writeFile
