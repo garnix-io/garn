@@ -4,7 +4,7 @@
 module GarnerSpec where
 
 import Control.Exception (bracket)
-import Control.Lens (from, (<>~))
+import Control.Lens (from, (.~), (<>~))
 import qualified Data.Aeson as Aeson
 import Data.Aeson.Lens
 import Data.List (sort)
@@ -211,17 +211,10 @@ spec = do
                 |]
           it "displays an error if the script exists but exits with non-zero status code" $ do
             writeNpmFrontendProject repoDir
-            writeFile
-              "package.json"
-              [i|
-                {
-                  "name": "frontend",
-                  "version": "0.0.1",
-                  "scripts": {
-                    "start": "exit 42"
-                  }
-                }
-              |]
+            modifyPackageJson $
+              key "scripts"
+                . key "start"
+                .~ "exit 42"
             output <- runGarner ["start", "frontend"] "" repoDir Nothing
             stderr output
               `shouldBe` unindent
@@ -296,6 +289,13 @@ modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
 modifyPackageYaml modifier = do
   decoded <- Yaml.decodeFileThrow "package.yaml"
   Yaml.encodeFile "package.yaml" $ modifier decoded
+
+modifyPackageJson :: (Aeson.Value -> Aeson.Value) -> IO ()
+modifyPackageJson modifier = do
+  maybeDecoded <- Aeson.decodeFileStrict "package.json"
+  case maybeDecoded of
+    Nothing -> error "could not decode package.json"
+    Just decoded -> Aeson.encodeFile "package.json" $ modifier decoded
 
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
