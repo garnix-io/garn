@@ -54,9 +54,12 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
     pure ()
   "start" -> do
     config <- makeFlake opts
-    let command = case Map.lookup target config of
+    let maybeCommand = case Map.lookup target config of
           Nothing -> error $ "Could not find target " <> target
           Just targetConfig -> startCommand targetConfig
+    let command = case maybeCommand of
+          Nothing -> error "No start command configured"
+          Just command -> command
     hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
     Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" command
     case c of
@@ -65,7 +68,7 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
   _ -> error $ "Command " <> command <> " not supported."
 
 data TargetConfig = TargetConfig
-  { startCommand :: [String]
+  { startCommand :: Maybe [String]
   }
   deriving (Generic, FromJSON)
 
