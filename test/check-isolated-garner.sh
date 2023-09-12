@@ -24,7 +24,9 @@ nix build --print-build-logs "$PROJECT_ROOT#fileserver"
 nix run "$PROJECT_ROOT#fileserver" &
 fileserver_pid="$!"
 trap "kill -s SIGTERM $fileserver_pid" EXIT
-sleep 2
+while ! nc localhost 8777 -z; do
+  sleep 1
+done
 
 cd examples/haskell
 expected=42
