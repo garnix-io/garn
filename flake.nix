@@ -25,7 +25,14 @@
           garner =
             let
               # directories shouldn't have leading or trailing slashes
-              ignored = [ ".github" "examples" "justfile" "scripts" "test/smoke-test.sh" ];
+              ignored = [
+                "examples"
+                "flake.nix"
+                ".github"
+                "justfile"
+                "scripts"
+                "test/check-isolated-garner.sh"
+              ];
               src = builtins.path
                 {
                   path = ./.;
@@ -68,6 +75,22 @@
                   doCheck = false;
                 }
               );
+          fileserver =
+            let
+              ghc = ourHaskell.ghc.withPackages (p:
+                [
+                  p.fsnotify
+                  p.getopt-generics
+                  p.shake
+                  p.wai-app-static
+                  p.warp
+                ]);
+            in
+            (pkgs.writeScriptBin "fileserver" ''
+              export PATH=${pkgs.curl}/bin:$PATH
+              export PATH=${pkgs.deno}/bin:$PATH
+              exec ${ghc}/bin/runhaskell ${./scripts/fileserver.hs} "$@"
+            '');
         };
         devShells = {
           default = pkgs.mkShell {
@@ -79,12 +102,7 @@
               ghcid
               cabal-install
               (ourHaskell.ghc.withPackages (p:
-                [
-                  ## Needed for `just fileserver`.
-                  p.shake
-                  p.wai-app-static
-                  p.warp
-                ] ++ self.packages.${system}.default.buildInputs))
+                self.packages.${system}.default.buildInputs))
               (haskell-language-server.override {
                 dynamic = true;
                 supportedGhcVersions = [ "945" ];
@@ -117,8 +135,18 @@
               pkgs.hpack
               pkgs.ormolu
             ];
+            fileserver = pkgs.runCommand "fileserver-check"
+              {
+                buildInputs = [ self.packages.${system}.fileserver ];
+              } ''
+              fileserver --help
+              touch $out
+            '';
           };
         formatter = pkgs.nixpkgs-fmt;
-      }
-    );
+        apps = {
+          fileserver = flake-utils.lib.mkApp
+            { drv = self.packages.${system}.fileserver; };
+        };
+      });
 }
