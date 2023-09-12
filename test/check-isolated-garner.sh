@@ -5,6 +5,8 @@ shopt -s inherit_errexit
 
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
+nix build --print-build-logs \
+  "$PROJECT_ROOT#garner"
 function run-in-isolation () {
   nix shell --ignore-environment --print-build-logs \
     "$PROJECT_ROOT#garner" -c "$@"
@@ -18,9 +20,11 @@ fi
 
 echo running codegen...
 run-in-isolation codegen
-fs_proc="$(nix run "$PROJECT_ROOT"#fileserver >/dev/null & jobs -p)"
+nix build --print-build-logs "$PROJECT_ROOT#fileserver"
+nix run "$PROJECT_ROOT#fileserver" &
+fileserver_pid="$!"
+trap "kill -s SIGTERM $fileserver_pid" EXIT
 sleep 2
-trap "kill -s SIGTERM $fs_proc" EXIT
 
 cd examples/haskell
 expected=42

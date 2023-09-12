@@ -25,7 +25,14 @@
           garner =
             let
               # directories shouldn't have leading or trailing slashes
-              ignored = [ ".github" "examples" "justfile" "scripts" "test/smoke-test.sh" ];
+              ignored = [
+                "examples"
+                "flake.nix"
+                ".github"
+                "justfile"
+                "scripts"
+                "test/check-isolated-garner.sh"
+              ];
               src = builtins.path
                 {
                   path = ./.;
@@ -82,7 +89,7 @@
             (pkgs.writeScriptBin "fileserver" ''
               export PATH=${pkgs.curl}/bin:$PATH
               export PATH=${pkgs.deno}/bin:$PATH
-              ${ghc}/bin/runhaskell ${./scripts/fileserver.hs} "$@"
+              exec ${ghc}/bin/runhaskell ${./scripts/fileserver.hs} "$@"
             '');
         };
         devShells = {
