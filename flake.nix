@@ -82,7 +82,7 @@
             (pkgs.writeScriptBin "fileserver" ''
               export PATH=${pkgs.curl}/bin:$PATH
               export PATH=${pkgs.deno}/bin:$PATH
-              ${ghc}/bin/runhaskell ${self}/scripts/fileserver "$@"
+              ${ghc}/bin/runhaskell ${./scripts/fileserver.hs} "$@"
             '');
         };
         devShells = {

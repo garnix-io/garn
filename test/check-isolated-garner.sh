@@ -18,7 +18,7 @@ fi
 
 echo running codegen...
 run-in-isolation codegen
-fs_proc="$("$PROJECT_ROOT/scripts/fileserver" >/dev/null & jobs -p)"
+fs_proc="$(nix run "$PROJECT_ROOT"#fileserver >/dev/null & jobs -p)"
 sleep 2
 trap "kill -s SIGTERM $fs_proc" EXIT
 
