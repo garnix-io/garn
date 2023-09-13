@@ -5,6 +5,7 @@ import { mkPackage } from "../../ts/base.ts";
  */
 export const bar = mkPackage({
   expression: `pkgs.bar`,
+  description: "This one - eh, not so good!"
 });
 
 /**
@@ -12,4 +13,5 @@ export const bar = mkPackage({
  */
 export const foo = mkPackage({
   expression: `pkgs.foo`,
+  description: "This is the bestest derivation."
 });

@@ -2,20 +2,25 @@ import { mkPackage } from "../../ts/base.ts";
 
 export const catch_ = mkPackage({
   expression: `pkgs.catch`,
+  description: ""
 });
 
 export const foo_a = mkPackage({
   expression: `pkgs.foo-a`,
+  description: ""
 });
 
 export const instanceOf_ = mkPackage({
   expression: `pkgs.instanceOf`,
+  description: ""
 });
 
 export const super_ = mkPackage({
   expression: `pkgs.super`,
+  description: ""
 });
 
 export const void_ = mkPackage({
   expression: `pkgs.void`,
+  description: ""
 });

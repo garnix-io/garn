@@ -36,13 +36,14 @@ const fromNodeVersion = (version: NodeVersion) => {
 };
 
 export const mkNpmFrontend = (args: {
-  name: string;
+  description: string;
   src: string;
   nodeVersion: NodeVersion;
   testCommand: string;
 }): Package => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   return mkPackage({
+    description: args.description,
     expression: `
       let
         npmlock2nix = import npmlock2nix-repo {
@@ -64,13 +65,14 @@ export const mkNpmFrontend = (args: {
 };
 
 export const mkYarnFrontend = (args: {
-  name: string;
+  description: string;
   src: string;
   nodeVersion: keyof typeof nodeVersions;
   testCommand: string;
 }): Package => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   return mkPackage({
+    description: args.description,
     expression: `
       let pkgs = ${pkgs}; in
       pkgs.yarn2nix-moretea.mkYarnPackage {

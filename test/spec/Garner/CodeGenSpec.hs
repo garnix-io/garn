@@ -129,6 +129,17 @@ spec = do
             };
           }
         |]
+      checkTs "adds a description attribute from the nix package" $
+        [i|
+          {
+            foo-a = derivation {
+              system = "x86_64-linux";
+              name = "fooderivation1";
+              meta.description = "some description";
+              builder = "foo";
+            };
+          }
+        |]
 
 checkTs :: String -> String -> SpecWith ()
 checkTs description nixExpression = do

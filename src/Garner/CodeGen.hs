@@ -6,11 +6,13 @@ module Garner.CodeGen
   )
 where
 
-import Data.Aeson (FromJSON, eitherDecode)
+import Data.Aeson (FromJSON, eitherDecode, toJSON)
+import Data.Aeson.Text (encodeToLazyText)
 import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Map (Map, toAscList)
 import qualified Data.Map as Map
+import Data.Maybe (fromMaybe)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
@@ -95,13 +97,15 @@ pkgDoc pkgInfo = case description pkgInfo of
 
 formatPkg :: String -> (String, PkgInfo) -> String
 formatPkg varName (name, pkgInfo) =
-  pkgDoc pkgInfo
-    <> unindent
-      [i|
-        export const #{name} = mkPackage({
-          expression: `#{varName}.#{attribute pkgInfo}`,
-        });
-      |]
+  let escapedDoc = encodeToLazyText . toJSON $ fromMaybe "" $ description pkgInfo
+   in pkgDoc pkgInfo
+        <> unindent
+          [i|
+            export const #{name} = mkPackage({
+              expression: `#{varName}.#{attribute pkgInfo}`,
+              description: #{escapedDoc}
+            });
+          |]
 
 pkgsString :: String -> Map String PkgInfo -> String
 pkgsString varName pkgs =

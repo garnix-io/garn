@@ -2,4 +2,5 @@ import { mkPackage } from "../../ts/base.ts";
 
 export const foo = mkPackage({
   expression: `pkgs.foo`,
+  description: ""
 });
