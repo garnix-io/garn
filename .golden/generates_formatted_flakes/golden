@@ -14,7 +14,7 @@
           };
         in
         {
-          foo = (pkgs.haskell.packages.ghc94.callCabal2nix "mkHaskell-test" ./. { }) // { meta.mainProgram = "garner-test"; };
+          foo = (pkgs.haskell.packages.ghc94.callCabal2nix "garner-pkg" ./. { }) // { meta.mainProgram = "garner-test"; };
         });
       devShells = forAllSystems (system:
         let
