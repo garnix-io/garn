@@ -16,7 +16,6 @@
         let
           pkgs = import "${nixpkgs}" {
             config.allowUnfree = true;
-            config.permittedInsecurePackages = [ "nodejs-16.20.2" ];
             inherit system;
           };
         in
@@ -25,6 +24,10 @@
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
+              };
+              pkgs = import "${nixpkgs}" {
+                config.permittedInsecurePackages = [ ];
+                inherit system;
               };
             in
             npmlock2nix.v2.build

@@ -33,7 +33,6 @@ const formatFlake = (
           let
             pkgs = import "\${nixpkgs}" {
               config.allowUnfree = true;
-              config.permittedInsecurePackages = [ "nodejs-16.20.2" ];
               inherit system;
             };
           in
