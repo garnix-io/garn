@@ -54,21 +54,30 @@ runWith opts = withCli $ \(command :: String) (target :: String) -> case command
     pure ()
   "start" -> do
     config <- makeFlake opts
-    let maybeCommand = case Map.lookup target config of
+    let maybeConfig = case Map.lookup target config of
           Nothing -> error $ "Could not find target " <> target
-          Just targetConfig -> startCommand targetConfig
-    let command = case maybeCommand of
+          Just targetConfig -> targetConfig
+    case setupCommand maybeConfig of
+          Nothing -> pure ()
+          Just setupCommand -> do
+            Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" setupCommand
+            case c of
+              ExitSuccess -> pure ()
+              ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords setupCommand <> "\" exited with status code " <> show exitCode
+    let command = case startCommand maybeConfig of
           Nothing -> error "No start command configured"
           Just command -> command
     hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
     Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" command
     case c of
       ExitSuccess -> pure ()
-      ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
+      ExitFailure exitCode -> do
+        error $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
   _ -> error $ "Command " <> command <> " not supported."
 
 data TargetConfig = TargetConfig
-  { startCommand :: Maybe [String]
+  { startCommand :: Maybe [String],
+    setupCommand :: Maybe [String]
   }
   deriving (Generic, FromJSON)
 

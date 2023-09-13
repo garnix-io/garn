@@ -81,6 +81,7 @@ tests:
       - lens-aeson
       - mockery
       - silently
+      - wreq
       - yaml
 
 library:

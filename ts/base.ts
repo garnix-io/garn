@@ -6,6 +6,8 @@ export type Package = {
   extraDevTools: Array<Package>;
   setStartCommand: (startCommand: Array<string>) => Package;
   startCommand: Array<string> | null;
+  setSetupCommand: (setupCommand: Array<string>) => Package;
+  setupCommand: Array<string> | null;
 };
 
 export const mkPackage = (args: { expression: string }): Package => ({
@@ -42,4 +44,11 @@ export const mkPackage = (args: { expression: string }): Package => ({
     };
   },
   startCommand: null,
+  setSetupCommand(this: Package, setupCommand) {
+    return {
+      ...this,
+      setupCommand,
+    };
+  },
+  setupCommand: null,
 });
