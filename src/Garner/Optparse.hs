@@ -5,9 +5,7 @@ module Garner.Optparse
     optionsParser,
     Options (..),
     Command (..),
-    StartOptions (..),
-    RunOptions (..),
-    EnterOptions (..),
+    CommandOptions (..),
   )
 where
 
@@ -31,25 +29,15 @@ data Options = Options
   {command :: Command}
   deriving stock (Eq, Show)
 
-data RunOptions = RunOptions
-  { target :: String
-  }
-  deriving stock (Eq, Show)
-
-data EnterOptions = EnterOptions
-  { target :: String
-  }
-  deriving stock (Eq, Show)
-
-data StartOptions = StartOptions
+data CommandOptions = CommandOptions
   { target :: String
   }
   deriving stock (Eq, Show)
 
 data Command
-  = Run RunOptions
-  | Enter EnterOptions
-  | Start StartOptions
+  = Run CommandOptions
+  | Enter CommandOptions
+  | Start CommandOptions
   deriving stock (Eq, Show)
 
 optionsParser :: Targets -> Parser Options
@@ -65,9 +53,9 @@ commandParser targets =
         <> OA.command "start" (info startCmd (progDesc "Start the startCommand process of a target"))
     )
   where
-    runCmd = Run . RunOptions <$> targetParser <**> helper
-    enterCmd = Enter . EnterOptions <$> targetParser <**> helper
-    startCmd = Start . StartOptions <$> targetParser <**> helper
+    runCmd = Run . CommandOptions <$> targetParser <**> helper
+    enterCmd = Enter . CommandOptions <$> targetParser <**> helper
+    startCmd = Start . CommandOptions <$> targetParser <**> helper
     targetParser :: Parser String
     targetParser =
       subparser

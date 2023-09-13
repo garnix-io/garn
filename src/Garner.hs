@@ -39,9 +39,9 @@ runWith :: Env -> Options -> IO ()
 runWith env opts = do
   targets <- writeFlakeFile $ tsRunnerFilename env
   case command opts of
-    Run (RunOptions {..}) -> do
+    Run (CommandOptions {..}) -> do
       cmd_ "nix run" nixArgs (".#" <> target)
-    Enter (EnterOptions {..}) -> do
+    Enter (CommandOptions {..}) -> do
       let devProc =
             ( proc
                 "nix"
@@ -54,7 +54,7 @@ runWith env opts = do
       _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
         waitForProcess procHandle
       pure ()
-    Start (StartOptions {..}) -> do
+    Start (CommandOptions {..}) -> do
       let maybeCommand = case Map.lookup target targets of
             Nothing -> error $ "Could not find target " <> target
             Just targetConfig -> startCommand targetConfig
