@@ -47,11 +47,11 @@ startDenoCacheInvalidator = void $ forkIO $ do
     -- invalidate individual files on changes
     tsDirectory <- makeAbsolute "ts"
     _ <- watchDir manager "ts" (const True) $ \event -> do
-      reload $ makeRelative tsDirectory $ eventPath event
+      when (takeExtension (eventPath event) == ".ts") $ do
+        reload $ makeRelative tsDirectory $ eventPath event
     forever $ threadDelay 1000000
 
 reload :: FilePath -> IO ()
 reload file = do
   let url = "http://localhost:8777/" <> file
   cmd_ "deno cache --reload" url
-  hPutStrLn stderr $ "reloaded " <> url
