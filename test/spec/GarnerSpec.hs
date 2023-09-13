@@ -339,7 +339,7 @@ writeNpmFrontendProject repoDir = do
 
       export const frontend = mkNpmFrontend({
         description: "mkNpmFrontend-test",
-        src: "./."
+        src: "./.",
         nodeVersion: "18",
         testCommand: "",
       })
