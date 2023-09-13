@@ -73,6 +73,8 @@ tests:
       - -with-rtsopts=-N
       - -fdefer-typed-holes
     dependencies:
+      - async
+      - filepath
       - http-client
       - hspec
       - hspec-discover
