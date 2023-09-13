@@ -1,0 +1,12 @@
+{
+  "name": "frontend-yarn-webpack",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "webpack serve --port 3000"
+  },
+  "devDependencies": {
+    "webpack": "^5.88.2",
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^4.15.1"
+  }
+}
