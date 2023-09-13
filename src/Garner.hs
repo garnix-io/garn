@@ -9,7 +9,6 @@ module Garner
   )
 where
 
-import Control.Monad (void)
 import qualified Data.Map as Map
 import Development.Shake (Exit (Exit), cmd, cmd_)
 import Garner.Common (nixArgs)

@@ -29,21 +29,32 @@ data Options = Options
   {command :: Command}
   deriving stock (Eq, Show)
 
+optionsParser :: Targets -> Parser Options
+optionsParser targets =
+  Options <$> commandParser targets
+
 data CommandOptions = CommandOptions
   { target :: String
   }
   deriving stock (Eq, Show)
+
+commandOptionsParser :: Targets -> Parser CommandOptions
+commandOptionsParser targets =
+  CommandOptions
+    <$> ( subparser
+            $ foldMap
+              ( \(target, targetOpts) ->
+                  OA.command target (info (pure target) (progDesc $ description targetOpts))
+              )
+            $ Map.assocs targets
+        )
+    <**> helper
 
 data Command
   = Run CommandOptions
   | Enter CommandOptions
   | Start CommandOptions
   deriving stock (Eq, Show)
-
-optionsParser :: Targets -> Parser Options
-optionsParser targets =
-  Options
-    <$> commandParser targets
 
 commandParser :: Targets -> Parser Command
 commandParser targets =
@@ -53,14 +64,6 @@ commandParser targets =
         <> OA.command "start" (info startCmd (progDesc "Start the startCommand process of a target"))
     )
   where
-    runCmd = Run . CommandOptions <$> targetParser <**> helper
-    enterCmd = Enter . CommandOptions <$> targetParser <**> helper
-    startCmd = Start . CommandOptions <$> targetParser <**> helper
-    targetParser :: Parser String
-    targetParser =
-      subparser
-        $ foldMap
-          ( \(target, targetOpts) ->
-              OA.command target (info (pure target) (progDesc $ description targetOpts))
-          )
-        $ Map.assocs targets
+    runCmd = Run <$> commandOptionsParser targets
+    enterCmd = Enter <$> commandOptionsParser targets
+    startCmd = Start <$> commandOptionsParser targets
