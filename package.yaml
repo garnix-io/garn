@@ -73,6 +73,7 @@ tests:
       - -with-rtsopts=-N
       - -fdefer-typed-holes
     dependencies:
+      - http-client
       - hspec
       - hspec-discover
       - hspec-discover
