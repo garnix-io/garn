@@ -1,20 +1,22 @@
 import { Package, mkPackage } from "./base.ts";
 
 const nodeVersions = {
-  '14': {
-    pkg: 'nodejs-14_x',
-    permittedInsecurePackages: ['nodejs-14.21.3', 'openssl-1.1.1v'],
+  "14": {
+    pkg: "nodejs-14_x",
+    permittedInsecurePackages: ["nodejs-14.21.3", "openssl-1.1.1v"],
   },
-  '16': {
-    pkg: 'nodejs-16_x',
-    permittedInsecurePackages: ['nodejs-16.20.2'],
+  "16": {
+    pkg: "nodejs-16_x",
+    permittedInsecurePackages: ["nodejs-16.20.2"],
   },
-  '18': {
-    pkg: 'nodejs-18_x',
+  "18": {
+    pkg: "nodejs-18_x",
     permittedInsecurePackages: [],
   },
-} satisfies Record<string, { pkg: string; permittedInsecurePackages: Array<string> }>;
-
+} satisfies Record<
+  string,
+  { pkg: string; permittedInsecurePackages: Array<string> }
+>;
 
 export const mkNpmFrontend = (args: {
   name: string;
@@ -30,7 +32,9 @@ export const mkNpmFrontend = (args: {
           inherit pkgs;
         };
         pkgs = import "\${nixpkgs}" {
-          config.permittedInsecurePackages = [${permittedInsecurePackages.map(JSON.stringify).join(' ')}];
+          config.permittedInsecurePackages = [${permittedInsecurePackages
+            .map(JSON.stringify)
+            .join(" ")}];
           inherit system;
         };
       in
