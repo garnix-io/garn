@@ -18,25 +18,37 @@ const nodeVersions = {
   { pkg: string; permittedInsecurePackages: Array<string> }
 >;
 
+type NodeVersion = keyof typeof nodeVersions;
+
+const fromNodeVersion = (version: NodeVersion) => {
+  const { pkg, permittedInsecurePackages } = nodeVersions[version];
+  return {
+    pkgs: `
+      import "\${nixpkgs}" {
+        config.permittedInsecurePackages = [${permittedInsecurePackages
+          .map((x) => JSON.stringify(x))
+          .join(" ")}];
+        inherit system;
+      }
+    `.trim(),
+    nodejs: `pkgs.${pkg}`,
+  };
+};
+
 export const mkNpmFrontend = (args: {
   name: string;
   src: string;
-  nodeVersion: keyof typeof nodeVersions;
+  nodeVersion: NodeVersion;
   testCommand: string;
 }): Package => {
-  const { pkg, permittedInsecurePackages } = nodeVersions[args.nodeVersion];
+  const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   return mkPackage({
     expression: `
       let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
         };
-        pkgs = import "\${nixpkgs}" {
-          config.permittedInsecurePackages = [${permittedInsecurePackages
-            .map(JSON.stringify)
-            .join(" ")}];
-          inherit system;
-        };
+        pkgs = ${pkgs};
       in
       npmlock2nix.v2.build
         {
@@ -44,9 +56,28 @@ export const mkNpmFrontend = (args: {
           buildCommands = [ ${JSON.stringify(args.testCommand)} "mkdir $out" ];
           installPhase = "true";
           node_modules_attrs = {
-            nodejs = pkgs.${pkg};
+            nodejs = ${nodejs};
           };
         }
   `,
   }).setStartCommand(["npm", "run", "start"]);
+};
+
+export const mkYarnFrontend = (args: {
+  name: string;
+  src: string;
+  nodeVersion: keyof typeof nodeVersions;
+  testCommand: string;
+}): Package => {
+  const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
+  return mkPackage({
+    expression: `
+      let pkgs = ${pkgs}; in
+      pkgs.yarn2nix-moretea.mkYarnPackage {
+        nodejs = ${nodejs};
+        src = ${args.src};
+        buildPhase = ${JSON.stringify(args.testCommand)};
+      }
+    `,
+  });
 };
