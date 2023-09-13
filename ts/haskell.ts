@@ -11,6 +11,6 @@ export const mkHaskell = (args: MkHaskellArgs): Package => {
   const expression = `(pkgs.haskell.packages.${args.compiler}.callCabal2nix "garner-pkg" ${args.src} { } ) // { meta.mainProgram = "${args.executable}"; }`;
   return mkPackage({
     expression,
-    description: args.description
+    description: args.description,
   });
 };

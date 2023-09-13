@@ -34,12 +34,12 @@ getFlake :: String -> IO Targets
         hPutStr
           mainHandle
           [i|
-        import * as config from "#{dir}/garner.ts"
-        import { writeFlake } from "#{tsRunner}"
+            import * as config from "#{dir}/garner.ts"
+            import { writeFlake } from "#{tsRunner}"
 
-        #{makeString}
-        console.log(JSON.stringify(config));
-      |]
+            #{makeString}
+            console.log(JSON.stringify(config));
+          |]
         hClose mainHandle
         Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
         when alsoMake $

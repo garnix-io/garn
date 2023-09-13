@@ -1,6 +1,9 @@
 import { Package, mkPackage } from "./base.ts";
 
-export const mkNpmFrontend = (args: { description: string; src: string }): Package =>
+export const mkNpmFrontend = (args: {
+  description: string;
+  src: string;
+}): Package =>
   mkPackage({
     description: args.description,
     expression: `

@@ -101,11 +101,11 @@ formatPkg varName (name, pkgInfo) =
    in pkgDoc pkgInfo
         <> unindent
           [i|
-        export const #{name} = mkPackage({
-          expression: `#{varName}.#{attribute pkgInfo}`,
-          description: #{escapedDoc}
-        });
-      |]
+            export const #{name} = mkPackage({
+              expression: `#{varName}.#{attribute pkgInfo}`,
+              description: #{escapedDoc}
+            });
+          |]
 
 pkgsString :: String -> Map String PkgInfo -> String
 pkgsString varName pkgs =

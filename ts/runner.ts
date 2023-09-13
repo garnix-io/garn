@@ -62,4 +62,3 @@ export const writeFlake = (
   const data = encoder.encode(formatFlake(nixpkgsInput, config));
   Deno.writeFileSync("flake.nix", data);
 };
-
