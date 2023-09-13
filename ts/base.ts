@@ -1,5 +1,6 @@
 export type Package = {
   tag: "package";
+  description: string;
   nixExpression: string;
   envExpression: (nixExpression: string) => string;
   addDevTools: (extraDevTools: Array<Package>) => Package;
@@ -8,8 +9,12 @@ export type Package = {
   startCommand: Array<string> | null;
 };
 
-export const mkPackage = (args: { expression: string }): Package => ({
+export const mkPackage = (args: {
+  expression: string;
+  description: string;
+}): Package => ({
   tag: "package",
+  description: args.description,
   nixExpression: args.expression,
   envExpression(nixRef): string {
     const devToolsOverride =

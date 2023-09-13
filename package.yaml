@@ -49,6 +49,7 @@ dependencies:
   - directory
   - getopt-generics
   - interpolate
+  - optparse-applicative
   - process
   - shake
   - string-conversions

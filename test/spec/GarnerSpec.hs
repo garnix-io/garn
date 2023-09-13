@@ -12,7 +12,7 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
-import Development.Shake
+import Development.Shake (StdoutTrim (..), cmd)
 import Garner
 import System.Directory
 import System.Environment (withArgs)
@@ -68,12 +68,13 @@ spec = do
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
-                    name: "mkHaskell-test",
+                    description: "mkHaskell-test",
                     executable: "garner-test",
                     compiler: "ghc94",
                     src: "./."
                   })
                   const hello = mkPackage({
+                    description: "hi",
                     expression: `pkgs.hello`,
                   });
 
@@ -90,17 +91,19 @@ spec = do
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
-                    name: "mkHaskell-test",
+                    description: "mkHaskell-test",
                     executable: "garner-test",
                     compiler: "ghc94",
                     src: "./."
                   })
 
                   const hello = mkPackage({
+                    description: "hi",
                     expression: `pkgs.hello`,
                   });
 
                   const cowsay = mkPackage({
+                    description: "moocow coming down along the road",
                     expression: `pkgs.cowsay`,
                   });
 
@@ -119,13 +122,14 @@ spec = do
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
-                    name: "mkHaskell-test",
+                    description: "mkHaskell-test",
                     executable: "garner-test",
                     compiler: "ghc94",
                     src: "./."
                   })
 
                   const hello = mkPackage({
+                    description: "hi",
                     expression: `pkgs.hello`,
                   });
 
@@ -155,6 +159,7 @@ spec = do
               import { mkPackage } from "#{repoDir}/ts/base.ts"
 
               export const foo = mkPackage({
+                description: "this is foo",
                 expression: `
                   pkgs.stdenv.mkDerivation({
                     name = "blah";
@@ -185,7 +190,7 @@ spec = do
                 import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
 
                 export const frontend = mkNpmFrontend({
-                  name: "frontend",
+                  description: "frontend",
                   src: "./.",
                 });
               |]
@@ -232,7 +237,7 @@ spec = do
                 import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
 
                 export const frontend = mkNpmFrontend({
-                  name: "mkNpmFrontend-custom-command-test",
+                  description: "mkNpmFrontend-custom-command-test",
                   src: "./.",
                 }).setStartCommand(["echo", "foobar"]);
               |]
@@ -246,7 +251,7 @@ spec = do
                 import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
 
                 export const frontend = mkNpmFrontend({
-                  name: "mkNpmFrontend-custom-command-test",
+                  description: "mkNpmFrontend-custom-command-test",
                   src: "./.",
                 }).setStartCommand(["printf", "%s..%s..%s", "foo bar", "baz"]);
               |]
@@ -260,7 +265,7 @@ spec = do
                 import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
 
                 export const frontend = mkNpmFrontend({
-                  name: "mkNpmFrontend-custom-command-test",
+                  description: "mkNpmFrontend-custom-command-test",
                   src: "./.",
                 }).setStartCommand(["sh", "-c", ">&2 echo error! && exit 42"]);
               |]
@@ -305,7 +310,7 @@ writeHaskellProject repoDir = do
       import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
       export const foo = mkHaskell({
-        name: "mkHaskell-test",
+        description: "mkHaskell-test",
         executable: "garner-test",
         compiler: "ghc94",
         src: "./."
@@ -335,7 +340,7 @@ writeNpmFrontendProject repoDir = do
       import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts"
 
       export const frontend = mkNpmFrontend({
-        name: "mkNpmFrontend-test",
+        description: "mkNpmFrontend-test",
         src: "./."
       })
     |]
@@ -351,14 +356,16 @@ writeNpmFrontendProject repoDir = do
       }
     |]
 
-runGarner :: [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
+runGarner :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
 runGarner args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
   (stderr, stdout) <- hCapture [Sys.stderr] $
     hCapture_ [Sys.stdout] $
       withTempFile $ \stdin ->
-        withArgs args $
-          runWith (Options {stdin, userShell, tsRunnerFilename = repoDir <> "/ts/runner.ts"})
+        withArgs args $ do
+          let env = Env {stdin, userShell, tsRunnerFilename = repoDir <> "/ts/runner.ts"}
+          opts <- readOptions env
+          runWith env opts
   return $ ProcResult {..}
   where
     withTempFile :: (Handle -> IO a) -> IO a

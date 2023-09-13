@@ -1,102 +1,82 @@
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module Garner
   ( Options (..),
+    Env (..),
     run,
+    readOptions,
     runWith,
   )
 where
 
-import Control.Monad (void)
-import Data.Aeson (FromJSON, eitherDecode)
-import Data.Map (Map)
 import qualified Data.Map as Map
-import Data.String.Interpolate (i)
-import Development.Shake (CmdOption (..), Exit (Exit), Stdout (Stdout), cmd, cmd_)
-import Garner.Common (nixpkgsInput)
+import Development.Shake (Exit (Exit), cmd, cmd_)
+import Garner.Common (nixArgs)
+import Garner.Optparse
+import Garner.Target
 import Paths_garner
-import System.Directory
 import System.Exit (ExitCode (ExitFailure, ExitSuccess))
-import System.IO (Handle, hClose, hPutStr, hPutStrLn, stderr)
+import System.IO (Handle, hPutStrLn, stderr)
 import qualified System.IO
-import System.IO.Temp
 import qualified System.Posix.User as POSIX
 import System.Process
-import WithCli
 
-data Options = Options
+data Env = Env
   { stdin :: Handle,
     tsRunnerFilename :: FilePath,
     userShell :: FilePath
   }
 
 run :: IO ()
-run = runWith =<< productionOptions
+run = do
+  env <- productionEnv
+  options <- readOptions env
+  runWith env options
 
-runWith :: Options -> IO ()
-runWith opts = withCli $ \(command :: String) (target :: String) -> case command of
-  "run" -> do
-    void $ makeFlake opts
-    cmd_ "nix run" nixArgs (".#" <> target)
-  "enter" -> do
-    void $ makeFlake opts
-    let devProc =
-          ( proc
-              "nix"
-              ("develop" : nixArgs <> [".#" <> target, "--command", userShell opts])
-          )
-            { std_in = UseHandle $ stdin opts,
-              std_out = Inherit,
-              std_err = Inherit
-            }
-    _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
-      waitForProcess procHandle
-    pure ()
-  "start" -> do
-    config <- makeFlake opts
-    let maybeCommand = case Map.lookup target config of
-          Nothing -> error $ "Could not find target " <> target
-          Just targetConfig -> startCommand targetConfig
-    let command = case maybeCommand of
-          Nothing -> error "No start command configured"
-          Just command -> command
-    hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
-    Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" command
-    case c of
-      ExitSuccess -> pure ()
-      ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
-  _ -> error $ "Command " <> command <> " not supported."
+readOptions :: Env -> IO Options
+readOptions env = do
+  targets <- readTargets (tsRunnerFilename env)
+  getOptions targets
 
-data TargetConfig = TargetConfig
-  { startCommand :: Maybe [String]
-  }
-  deriving (Generic, FromJSON)
+runWith :: Env -> Options -> IO ()
+runWith env opts = do
+  targets <- writeFlakeFile $ tsRunnerFilename env
+  case command opts of
+    Run (CommandOptions {..}) -> do
+      cmd_ "nix run" nixArgs (".#" <> target)
+    Enter (CommandOptions {..}) -> do
+      let devProc =
+            ( proc
+                "nix"
+                ("develop" : nixArgs <> [".#" <> target, "--command", userShell env])
+            )
+              { std_in = UseHandle $ stdin env,
+                std_out = Inherit,
+                std_err = Inherit
+              }
+      _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
+        waitForProcess procHandle
+      pure ()
+    Start (CommandOptions {..}) -> do
+      let maybeCommand = case Map.lookup target targets of
+            Nothing -> error $ "Could not find target " <> target
+            Just targetConfig -> startCommand targetConfig
+      let command = case maybeCommand of
+            Nothing -> error "No start command configured"
+            Just command -> command
+      hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
+      Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" command
+      case c of
+        ExitSuccess -> pure ()
+        ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
 
-makeFlake :: Options -> IO (Map String TargetConfig)
-makeFlake opts = do
-  dir <- getCurrentDirectory
-  withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
-    hPutStr
-      mainHandle
-      [i|
-        import * as config from "#{dir}/garner.ts"
-        import { writeFlake } from "#{tsRunnerFilename opts}"
-
-        writeFlake("#{nixpkgsInput}", config)
-      |]
-    hClose mainHandle
-    Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
-    cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
-    case eitherDecode out of
-      Left err -> error $ "Unexpected package export from garner.ts: " <> err
-      Right targetConfigMap -> return targetConfigMap
-
-productionOptions :: IO Options
-productionOptions = do
+productionEnv :: IO Env
+productionEnv = do
   tsRunnerFilename <- getDataFileName "ts/runner.ts"
   userShell <- findUserShell
   pure $
-    Options
+    Env
       { stdin = System.IO.stdin,
         tsRunnerFilename,
         userShell
@@ -106,10 +86,3 @@ findUserShell :: IO FilePath
 findUserShell = do
   userId <- POSIX.getRealUserID
   POSIX.userShell <$> POSIX.getUserEntryForID userId
-
-nixArgs :: [String]
-nixArgs =
-  [ "--extra-experimental-features",
-    "flakes nix-command",
-    "--print-build-logs"
-  ]
