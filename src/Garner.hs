@@ -31,17 +31,17 @@ data Env = Env
 run :: IO ()
 run = do
   env <- productionEnv
-  targets <- getFlake (tsRunnerFilename env)
+  targets <- readTargets (tsRunnerFilename env)
   opts' <- getOptions targets
   runWith env opts'
 
 runWith :: Env -> Options -> IO ()
 runWith env opts = case command opts of
   Run (RunOptions {..}) -> do
-    void $ makeFlake $ tsRunnerFilename env
+    void $ writeFlakeFile $ tsRunnerFilename env
     cmd_ "nix run" nixArgs (".#" <> target)
   Enter (EnterOptions {..}) -> do
-    void $ makeFlake $ tsRunnerFilename env
+    void $ writeFlakeFile $ tsRunnerFilename env
     let devProc =
           ( proc
               "nix"
@@ -55,7 +55,7 @@ runWith env opts = case command opts of
       waitForProcess procHandle
     pure ()
   Start (StartOptions {..}) -> do
-    config <- makeFlake $ tsRunnerFilename env
+    config <- writeFlakeFile $ tsRunnerFilename env
     let maybeCommand = case Map.lookup target config of
           Nothing -> error $ "Could not find target " <> target
           Just targetConfig -> startCommand targetConfig

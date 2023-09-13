@@ -19,15 +19,15 @@ data TargetConfig = TargetConfig
   }
   deriving (Generic, FromJSON)
 
-makeFlake :: String -> IO Targets
-getFlake :: String -> IO Targets
-(makeFlake, getFlake) = (flakeRunner True, flakeRunner False)
+writeFlakeFile :: String -> IO Targets
+readTargets :: String -> IO Targets
+(writeFlakeFile, readTargets) = (flakeRunner True, flakeRunner False)
   where
     flakeRunner :: Bool -> String -> IO Targets
-    flakeRunner alsoMake tsRunner = do
+    flakeRunner writeFlakeFile tsRunner = do
       dir <- getCurrentDirectory
       let makeString =
-            if alsoMake
+            if writeFlakeFile
               then "writeFlake(\"" <> nixpkgsInput <> "\", config)"
               else ""
       withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
@@ -42,7 +42,7 @@ getFlake :: String -> IO Targets
           |]
         hClose mainHandle
         Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
-        when alsoMake $
+        when writeFlakeFile $
           cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
         case eitherDecode out of
           Left err -> error $ "Unexpected package export from garner.ts: " <> err

@@ -358,7 +358,7 @@ writeNpmFrontendProject repoDir = do
       }
     |]
 
-runGarner :: HasCallStack => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
+runGarner :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
 runGarner args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
   (stderr, stdout) <- hCapture [Sys.stderr] $
@@ -366,7 +366,7 @@ runGarner args stdin repoDir shell = do
       withTempFile $ \stdin ->
         withArgs args $ do
           let env = Env {stdin, userShell, tsRunnerFilename = repoDir <> "/ts/runner.ts"}
-          targets <- getFlake (tsRunnerFilename env)
+          targets <- readTargets (tsRunnerFilename env)
           opts' <- getOptions targets
           runWith env opts'
   return $ ProcResult {..}
