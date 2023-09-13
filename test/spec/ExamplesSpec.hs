@@ -1,12 +1,15 @@
+{-# LANGUAGE ExtendedDefaultRules #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-type-defaults #-}
+
 module ExamplesSpec where
 
 import Control.Concurrent (threadDelay)
 import Control.Exception (bracket, catch)
-import Control.Monad (void)
 import Data.String.Conversions (cs)
 import Data.Text (Text)
 import Development.Shake
-import Network.HTTP.Client (HttpException)
+import Network.HTTP.Client (HttpException, responseBody)
 import Network.Wreq (Response, get)
 import System.Process
 import Test.Hspec
@@ -25,6 +28,9 @@ retryGet url = fmap cs <$> go 100
 
 spec :: Spec
 spec = do
-  it "???" $ do
-    withCmd (cmd (Cwd "test-examples/frontend-create-react-app") ("cabal run garner:garner start main" :: String)) $ do
-      void $ retryGet $ "http://localhost:3000"
+  describe "frontend-create-react-app" $ do
+    describe "garner start" $ do
+      it "serves a page" $ do
+        withCmd (cmd (Cwd "test-examples/frontend-create-react-app") "cabal run garner:garner start main") $ do
+          body <- responseBody <$> retryGet "http://localhost:3000"
+          body `shouldBe` "<!DOCTYPE html>\n<html lang=\"en\"><head><script defer src=\"/static/js/bundle.js\"></script></head>\n  <body>\n    Hello from create-react-app\n  </body>\n</html>\n"
