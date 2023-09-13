@@ -101,7 +101,7 @@
               bashInteractive
               ghcid
               cabal-install
-              (ourHaskell.ghc.withPackages (p:
+              (ourHaskell.ghc.withHoogle (p:
                 self.packages.${system}.default.buildInputs))
               (haskell-language-server.override {
                 dynamic = true;
