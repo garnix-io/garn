@@ -14,8 +14,6 @@ import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
 import Development.Shake (StdoutTrim (..), cmd)
 import Garner
-import Garner.Optparse
-import Garner.Target
 import System.Directory
 import System.Environment (withArgs)
 import System.IO (Handle, IOMode (..), withFile)
@@ -366,9 +364,8 @@ runGarner args stdin repoDir shell = do
       withTempFile $ \stdin ->
         withArgs args $ do
           let env = Env {stdin, userShell, tsRunnerFilename = repoDir <> "/ts/runner.ts"}
-          targets <- readTargets (tsRunnerFilename env)
-          opts' <- getOptions targets
-          runWith env opts'
+          opts <- readOptions env
+          runWith env opts
   return $ ProcResult {..}
   where
     withTempFile :: (Handle -> IO a) -> IO a

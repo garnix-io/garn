@@ -15,7 +15,8 @@ import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 
 getOptions :: Targets -> IO Options
-getOptions targets = customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
+getOptions targets = do
+  customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
   where
     opts =
       info

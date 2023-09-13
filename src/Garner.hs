@@ -5,6 +5,7 @@ module Garner
   ( Options (..),
     Env (..),
     run,
+    readOptions,
     runWith,
   )
 where
@@ -30,9 +31,13 @@ data Env = Env
 run :: IO ()
 run = do
   env <- productionEnv
+  options <- readOptions env
+  runWith env options
+
+readOptions :: Env -> IO Options
+readOptions env = do
   targets <- readTargets (tsRunnerFilename env)
-  opts' <- getOptions targets
-  runWith env opts'
+  getOptions targets
 
 runWith :: Env -> Options -> IO ()
 runWith env opts = do
