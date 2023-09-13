@@ -77,6 +77,10 @@ run-garner example *args="": hpack
   cd examples/{{ example }}
   cabal run garner:garner -- {{ args }}
 
+run-garner-and-ci example target:
+  just run-garner {{ example }} gen huhu
+  nix build --print-build-logs ./examples/{{ example }}#{{ target }}
+
 check-examples:
   just run-garner haskell run haskellExecutable
   just run-garner haskell run hello

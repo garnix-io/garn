@@ -17,7 +17,13 @@ const formatFlake = (
   }, "");
   return `{
     inputs.nixpkgs.url = "${nixpkgsInput}";
-    outputs = { self, nixpkgs }:
+
+    inputs.npmlock2nix-repo = {
+      url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81";
+      flake = false;
+    };
+
+    outputs = { self, nixpkgs, npmlock2nix-repo }:
       let
         systems = [ "x86_64-linux" ];
         forAllSystems = nixpkgs.lib.genAttrs systems;
@@ -27,6 +33,7 @@ const formatFlake = (
           let
             pkgs = import "\${nixpkgs}" {
               config.allowUnfree = true;
+              config.permittedInsecurePackages = [ "nodejs-16.20.2" ];
               inherit system;
             };
           in

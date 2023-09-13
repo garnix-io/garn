@@ -35,6 +35,8 @@ run = runWith =<< productionOptions
 
 runWith :: Options -> IO ()
 runWith opts = withCli $ \(command :: String) (target :: String) -> case command of
+  "gen" -> do
+    void $ makeFlake opts
   "run" -> do
     void $ makeFlake opts
     cmd_ "nix run" nixArgs (".#" <> target)
