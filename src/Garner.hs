@@ -36,37 +36,36 @@ run = do
   runWith env opts'
 
 runWith :: Env -> Options -> IO ()
-runWith env opts = case command opts of
-  Run (RunOptions {..}) -> do
-    void $ writeFlakeFile $ tsRunnerFilename env
-    cmd_ "nix run" nixArgs (".#" <> target)
-  Enter (EnterOptions {..}) -> do
-    void $ writeFlakeFile $ tsRunnerFilename env
-    let devProc =
-          ( proc
-              "nix"
-              ("develop" : nixArgs <> [".#" <> target, "--command", userShell env])
-          )
-            { std_in = UseHandle $ stdin env,
-              std_out = Inherit,
-              std_err = Inherit
-            }
-    _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
-      waitForProcess procHandle
-    pure ()
-  Start (StartOptions {..}) -> do
-    config <- writeFlakeFile $ tsRunnerFilename env
-    let maybeCommand = case Map.lookup target config of
-          Nothing -> error $ "Could not find target " <> target
-          Just targetConfig -> startCommand targetConfig
-    let command = case maybeCommand of
-          Nothing -> error "No start command configured"
-          Just command -> command
-    hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
-    Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" command
-    case c of
-      ExitSuccess -> pure ()
-      ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
+runWith env opts = do
+  targets <- writeFlakeFile $ tsRunnerFilename env
+  case command opts of
+    Run (RunOptions {..}) -> do
+      cmd_ "nix run" nixArgs (".#" <> target)
+    Enter (EnterOptions {..}) -> do
+      let devProc =
+            ( proc
+                "nix"
+                ("develop" : nixArgs <> [".#" <> target, "--command", userShell env])
+            )
+              { std_in = UseHandle $ stdin env,
+                std_out = Inherit,
+                std_err = Inherit
+              }
+      _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
+        waitForProcess procHandle
+      pure ()
+    Start (StartOptions {..}) -> do
+      let maybeCommand = case Map.lookup target targets of
+            Nothing -> error $ "Could not find target " <> target
+            Just targetConfig -> startCommand targetConfig
+      let command = case maybeCommand of
+            Nothing -> error "No start command configured"
+            Just command -> command
+      hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
+      Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" command
+      case c of
+        ExitSuccess -> pure ()
+        ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
 
 productionEnv :: IO Env
 productionEnv = do

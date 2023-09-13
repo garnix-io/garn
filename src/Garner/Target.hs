@@ -13,6 +13,8 @@ import System.Directory (getCurrentDirectory)
 import System.IO (hClose, hPutStr)
 import System.IO.Temp (withSystemTempFile)
 
+type Targets = Map String TargetConfig
+
 data TargetConfig = TargetConfig
   { startCommand :: Maybe [String],
     description :: String
@@ -47,5 +49,3 @@ readTargets :: String -> IO Targets
         case eitherDecode out of
           Left err -> error $ "Unexpected package export from garner.ts: " <> err
           Right targetConfigMap -> return targetConfigMap
-
-type Targets = Map String TargetConfig
