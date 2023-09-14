@@ -22,23 +22,16 @@
         {
           frontend =
             let
-              npmlock2nix = import npmlock2nix-repo {
-                inherit pkgs;
-              };
               pkgs = import "${nixpkgs}" {
                 config.permittedInsecurePackages = [ ];
                 inherit system;
               };
             in
-            npmlock2nix.v2.build
-              {
-                src = ./.;
-                buildCommands = [ "" "mkdir $out" ];
-                installPhase = "true";
-                node_modules_attrs = {
-                  nodejs = pkgs.nodejs-18_x;
-                };
-              }
+            pkgs.yarn2nix-moretea.mkYarnPackage {
+              nodejs = pkgs.nodejs-18_x;
+              src = ./.;
+              buildPhase = "yarn mocha";
+            }
           ;
         });
       devShells = forAllSystems (system:

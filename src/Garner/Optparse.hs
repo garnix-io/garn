@@ -52,18 +52,21 @@ commandOptionsParser targets =
     <**> helper
 
 data Command
-  = Run CommandOptions
+  = Gen
+  | Run CommandOptions
   | Enter CommandOptions
   | Start CommandOptions
   deriving stock (Eq, Show)
 
 commandParser :: Targets -> Parser Command
 commandParser targets =
-  subparser
-    ( OA.command "run" (info runCmd (progDesc "Build and run the default executable of a target"))
-        <> OA.command "enter" (info enterCmd (progDesc "Enter a devshell for a target"))
-        <> OA.command "start" (info startCmd (progDesc "Start the startCommand process of a target"))
-    )
+  subparser $
+    mconcat
+      [ OA.command "gen" (info (pure Gen) (progDesc "Generate the flake.nix file and exit")),
+        OA.command "run" (info runCmd (progDesc "Build and run the default executable of a target")),
+        OA.command "enter" (info enterCmd (progDesc "Enter a devshell for a target")),
+        OA.command "start" (info startCmd (progDesc "Start the startCommand process of a target"))
+      ]
   where
     runCmd = Run <$> commandOptionsParser targets
     enterCmd = Enter <$> commandOptionsParser targets

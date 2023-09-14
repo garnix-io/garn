@@ -20,7 +20,7 @@
           };
         in
         {
-          frontend =
+          main =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -33,7 +33,7 @@
             npmlock2nix.v2.build
               {
                 src = ./.;
-                buildCommands = [ "" "mkdir $out" ];
+                buildCommands = [ "npm run test -- --watchAll=false" "mkdir $out" ];
                 installPhase = "true";
                 node_modules_attrs = {
                   nodejs = pkgs.nodejs-18_x;
@@ -49,8 +49,8 @@
           };
         in
         {
-          frontend =
-            let expr = self.packages.${system}.frontend;
+          main =
+            let expr = self.packages.${system}.main;
             in
             (if expr ? env
             then expr.env

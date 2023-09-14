@@ -184,16 +184,7 @@ spec = do
 
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
-            writeFile
-              "garner.ts"
-              [i|
-                import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts";
-
-                export const frontend = mkNpmFrontend({
-                  description: "frontend",
-                  src: "./.",
-                });
-              |]
+            writeNpmFrontendProject repoDir
             output <- runGarner ["enter", "frontend"] "node --version" repoDir Nothing
             stdout output `shouldStartWith` "v18."
             output <- runGarner ["enter", "frontend"] "npm --version" repoDir Nothing
@@ -204,7 +195,7 @@ spec = do
           it "runs npm start" $ do
             writeNpmFrontendProject repoDir
             output <- runGarner ["start", "frontend"] "" repoDir Nothing
-            stderr output `shouldBe` "[garner] Running \"npm run start\"\n"
+            stderr output `shouldStartWith` "[garner] Running \"npm run start\"\n"
             stdout output
               `shouldBe` unindent
                 [i|
@@ -221,12 +212,8 @@ spec = do
                 . key "start"
                 .~ "exit 42"
             output <- runGarner ["start", "frontend"] "" repoDir Nothing
-            stderr output
-              `shouldBe` unindent
-                [i|
-                  [garner] Running "npm run start"
-                  [garner] "npm run start" exited with status code 42
-                |]
+            stderr output `shouldStartWith` "[garner] Running \"npm run start\""
+            stderr output `shouldEndWith` "[garner] \"npm run start\" exited with status code 42\n"
 
         context "with a specific start command configured" $ do
           it "runs the configured command" $ do
@@ -239,12 +226,15 @@ spec = do
                 export const frontend = mkNpmFrontend({
                   description: "mkNpmFrontend-custom-command-test",
                   src: "./.",
+                  nodeVersion: "18",
+                  testCommand: "",
                 }).setStartCommand(["echo", "foobar"]);
               |]
             output <- runGarner ["start", "frontend"] "" repoDir Nothing
-            stderr output `shouldBe` "[garner] Running \"echo foobar\"\n"
+            stderr output `shouldStartWith` "[garner] Running \"echo foobar\"\n"
             stdout output `shouldBe` "foobar\n"
           it "correctly handles argv arrays" $ do
+            writeNpmFrontendProject repoDir
             writeFile
               "garner.ts"
               [i|
@@ -253,6 +243,8 @@ spec = do
                 export const frontend = mkNpmFrontend({
                   description: "mkNpmFrontend-custom-command-test",
                   src: "./.",
+                  nodeVersion: "18",
+                  testCommand: "",
                 }).setStartCommand(["printf", "%s..%s..%s", "foo bar", "baz"]);
               |]
             output <- runGarner ["start", "frontend"] "" repoDir Nothing
@@ -267,13 +259,19 @@ spec = do
                 export const frontend = mkNpmFrontend({
                   description: "mkNpmFrontend-custom-command-test",
                   src: "./.",
+                  nodeVersion: "18",
+                  testCommand: "",
                 }).setStartCommand(["sh", "-c", ">&2 echo error! && exit 42"]);
               |]
             output <- runGarner ["start", "frontend"] "" repoDir Nothing
             stderr output
-              `shouldBe` unindent
+              `shouldStartWith` unindent
                 [i|
                   [garner] Running "sh -c >&2 echo error! && exit 42"
+                |]
+            stderr output
+              `shouldEndWith` unindent
+                [i|
                   error!
                   [garner] "sh -c >&2 echo error! && exit 42" exited with status code 42
                 |]
@@ -341,7 +339,9 @@ writeNpmFrontendProject repoDir = do
 
       export const frontend = mkNpmFrontend({
         description: "mkNpmFrontend-test",
-        src: "./."
+        src: "./.",
+        nodeVersion: "18",
+        testCommand: "",
       })
     |]
   writeFile
@@ -352,6 +352,23 @@ writeNpmFrontendProject repoDir = do
         "version": "0.0.1",
         "scripts": {
           "start": "echo running"
+        }
+      }
+    |]
+  writeFile
+    "package-lock.json"
+    [i|
+      {
+        "name": "foo",
+        "version": "1.0.0",
+        "lockfileVersion": 2,
+        "requires": true,
+        "packages": {
+          "": {
+            "name": "foo",
+            "version": "1.0.0",
+            "license": "ISC"
+          }
         }
       }
     |]
@@ -379,6 +396,7 @@ data ProcResult = ProcResult
   { stdout :: String,
     stderr :: String
   }
+  deriving (Show)
 
 shellTestCommand :: String
 shellTestCommand =

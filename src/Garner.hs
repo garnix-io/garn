@@ -43,6 +43,7 @@ runWith :: Env -> Options -> IO ()
 runWith env opts = do
   targets <- writeFlakeFile $ tsRunnerFilename env
   case command opts of
+    Gen -> pure ()
     Run (CommandOptions {..}) -> do
       cmd_ "nix run" nixArgs (".#" <> target)
     Enter (CommandOptions {..}) -> do

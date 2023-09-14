@@ -12,7 +12,7 @@ import GHC.Generics (Generic)
 import Garner.Common (nixArgs, nixpkgsInput)
 import System.Directory (doesFileExist, getCurrentDirectory)
 import System.Exit (ExitCode (..), exitWith)
-import System.IO (hClose, hPutStr, hPutStrLn, stderr)
+import System.IO (hClose, hPutStr, stderr)
 import System.IO.Temp (withSystemTempFile)
 
 type Targets = Map String TargetConfig
