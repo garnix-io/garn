@@ -16,7 +16,7 @@ import Garner.Common (nixArgs)
 import Garner.Optparse
 import Garner.Target
 import Paths_garner
-import System.Exit (ExitCode (ExitFailure, ExitSuccess))
+import System.Exit (ExitCode (ExitFailure, ExitSuccess), exitWith)
 import System.IO (Handle, hPutStrLn, stderr)
 import qualified System.IO
 import qualified System.Posix.User as POSIX
@@ -71,6 +71,9 @@ runWith env opts = do
       case c of
         ExitSuccess -> pure ()
         ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
+    Ci (CommandOptions {target}) -> do
+      Exit c <- cmd "nix build" nixArgs (".#" <> target)
+      exitWith c
 
 productionEnv :: IO Env
 productionEnv = do
