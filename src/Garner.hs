@@ -12,8 +12,8 @@ where
 
 import Development.Shake (Exit (Exit), cmd, cmd_)
 import Garner.Common (nixArgs)
+import Garner.GarnerConfig
 import Garner.Optparse
-import Garner.Target
 import Paths_garner
 import System.Exit (ExitCode (ExitFailure, ExitSuccess), exitWith)
 import System.IO (Handle, hPutStrLn, stderr)

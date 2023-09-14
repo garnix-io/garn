@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Garner.Target where
+module Garner.GarnerConfig where
 
 import Control.Monad
 import Data.Aeson (FromJSON, eitherDecode)
