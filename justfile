@@ -78,8 +78,7 @@ run-garner example *args="": hpack
   cabal run garner:garner -- {{ args }}
 
 run-garner-and-ci example target:
-  just run-garner {{ example }} gen
-  nix build --print-build-logs ./examples/{{ example }}#{{ target }}
+  just run-garner {{ example }} ci {{ target }}
 
 run-example-ci:
   just run-garner-and-ci frontend-create-react-app main

@@ -34,40 +34,46 @@ optionsParser :: Targets -> Parser Options
 optionsParser targets =
   Options <$> commandParser targets
 
-data CommandOptions = CommandOptions
-  { target :: String
-  }
-  deriving stock (Eq, Show)
-
-commandOptionsParser :: Targets -> Parser CommandOptions
-commandOptionsParser targets =
-  CommandOptions
-    <$> ( subparser
-            $ foldMap
-              ( \(target, targetOpts) ->
-                  OA.command target (info (pure target) (progDesc $ description targetOpts))
-              )
-            $ Map.assocs targets
-        )
-    <**> helper
-
 data Command
   = Gen
   | Run CommandOptions
   | Enter CommandOptions
   | Start CommandOptions
+  | Ci CommandOptions
   deriving stock (Eq, Show)
 
 commandParser :: Targets -> Parser Command
 commandParser targets =
   subparser $
     mconcat
-      [ OA.command "gen" (info (pure Gen) (progDesc "Generate the flake.nix file and exit")),
-        OA.command "run" (info runCmd (progDesc "Build and run the default executable of a target")),
-        OA.command "enter" (info enterCmd (progDesc "Enter a devshell for a target")),
-        OA.command "start" (info startCmd (progDesc "Start the startCommand process of a target"))
+      [ OA.command "ci" (info (withCommandOptions Ci) (progDesc "Run the garnix ci tests locally")),
+        OA.command "gen" (info (pure Gen) (progDesc "Generate the flake.nix file and exit")),
+        OA.command "run" (info (withCommandOptions Run) (progDesc "Build and run the default executable of a target")),
+        OA.command "enter" (info (withCommandOptions Enter) (progDesc "Enter a devshell for a target")),
+        OA.command "start" (info (withCommandOptions Start) (progDesc "Start the startCommand process of a target"))
       ]
   where
-    runCmd = Run <$> commandOptionsParser targets
-    enterCmd = Enter <$> commandOptionsParser targets
-    startCmd = Start <$> commandOptionsParser targets
+    withCommandOptions constructor =
+      constructor <$> commandOptionsParser targets
+
+data CommandOptions = CommandOptions
+  { target :: String,
+    targetConfig :: TargetConfig
+  }
+  deriving stock (Eq, Show)
+
+commandOptionsParser :: Targets -> Parser CommandOptions
+commandOptionsParser targets =
+  ( subparser
+      $ foldMap
+        ( \(target, targetConfig) ->
+            OA.command
+              target
+              ( info
+                  (pure (CommandOptions target targetConfig))
+                  (progDesc $ description targetConfig)
+              )
+        )
+      $ Map.assocs targets
+  )
+    <**> helper

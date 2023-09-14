@@ -10,13 +10,12 @@ module Garner
   )
 where
 
-import qualified Data.Map as Map
 import Development.Shake (Exit (Exit), cmd, cmd_)
 import Garner.Common (nixArgs)
 import Garner.Optparse
 import Garner.Target
 import Paths_garner
-import System.Exit (ExitCode (ExitFailure, ExitSuccess))
+import System.Exit (ExitCode (ExitFailure, ExitSuccess), exitWith)
 import System.IO (Handle, hPutStrLn, stderr)
 import qualified System.IO
 import qualified System.Posix.User as POSIX
@@ -41,7 +40,7 @@ readOptions env = do
 
 runWith :: Env -> Options -> IO ()
 runWith env opts = do
-  targets <- writeFlakeFile $ tsRunnerFilename env
+  _ <- writeFlakeFile $ tsRunnerFilename env
   case command opts of
     Gen -> pure ()
     Run (CommandOptions {..}) -> do
@@ -60,10 +59,7 @@ runWith env opts = do
         waitForProcess procHandle
       pure ()
     Start (CommandOptions {..}) -> do
-      let maybeCommand = case Map.lookup target targets of
-            Nothing -> error $ "Could not find target " <> target
-            Just targetConfig -> startCommand targetConfig
-      let command = case maybeCommand of
+      let command = case startCommand targetConfig of
             Nothing -> error "No start command configured"
             Just command -> command
       hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
@@ -71,6 +67,9 @@ runWith env opts = do
       case c of
         ExitSuccess -> pure ()
         ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
+    Ci (CommandOptions {target}) -> do
+      Exit c <- cmd "nix build" nixArgs (".#" <> target)
+      exitWith c
 
 productionEnv :: IO Env
 productionEnv = do
