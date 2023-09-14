@@ -10,7 +10,6 @@ module Garner
   )
 where
 
-import qualified Data.Map as Map
 import Development.Shake (Exit (Exit), cmd, cmd_)
 import Garner.Common (nixArgs)
 import Garner.Optparse
@@ -41,7 +40,7 @@ readOptions env = do
 
 runWith :: Env -> Options -> IO ()
 runWith env opts = do
-  targets <- writeFlakeFile $ tsRunnerFilename env
+  _ <- writeFlakeFile $ tsRunnerFilename env
   case command opts of
     Gen -> pure ()
     Run (CommandOptions {..}) -> do
