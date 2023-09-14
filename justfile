@@ -83,6 +83,7 @@ run-garner-and-ci example target:
 run-example-ci:
   just run-garner-and-ci frontend-create-react-app main
   just run-garner-and-ci frontend-yarn-webpack frontend
+  just run-garner-and-ci go-http-backend server
 
 check-examples:
   just run-garner haskell run haskellExecutable
