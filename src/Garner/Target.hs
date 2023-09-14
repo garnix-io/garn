@@ -6,11 +6,13 @@ import Control.Monad
 import Data.Aeson (FromJSON, eitherDecode)
 import Data.Map (Map)
 import Data.String.Interpolate (i)
+import Data.String.Interpolate.Util
 import Development.Shake (CmdOption (EchoStderr, EchoStdout), Stdout (Stdout), cmd, cmd_)
 import GHC.Generics (Generic)
 import Garner.Common (nixArgs, nixpkgsInput)
-import System.Directory (getCurrentDirectory)
-import System.IO (hClose, hPutStr)
+import System.Directory (doesFileExist, getCurrentDirectory)
+import System.Exit (ExitCode (..), exitWith)
+import System.IO (hClose, hPutStr, hPutStrLn, stderr)
 import System.IO.Temp (withSystemTempFile)
 
 type Targets = Map String TargetConfig
@@ -27,6 +29,7 @@ readTargets :: String -> IO Targets
   where
     flakeRunner :: Bool -> String -> IO Targets
     flakeRunner writeFlakeFile tsRunner = do
+      checkGarnerFileExists
       dir <- getCurrentDirectory
       let makeString =
             if writeFlakeFile
@@ -49,3 +52,24 @@ readTargets :: String -> IO Targets
         case eitherDecode out of
           Left err -> error $ "Unexpected package export from garner.ts: " <> err
           Right targetConfigMap -> return targetConfigMap
+
+checkGarnerFileExists :: IO ()
+checkGarnerFileExists = do
+  exists <- doesFileExist "garner.ts"
+  when (not exists) $ do
+    hPutStr stderr $
+      unindent
+        [i|
+          No `garner.ts` file found in the current directory.
+
+          Here's an example `garner.ts` file for npm frontends:
+
+            import { mkNpmFrontend } from "http://localhost:8777/typescript.ts";
+
+            export const frontend = mkNpmFrontend({
+              src: "./.",
+              description: "An NPM frontend",
+            });
+
+        |]
+    exitWith $ ExitFailure 1
