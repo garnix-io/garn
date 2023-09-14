@@ -60,10 +60,7 @@ runWith env opts = do
         waitForProcess procHandle
       pure ()
     Start (CommandOptions {..}) -> do
-      let maybeCommand = case Map.lookup target targets of
-            Nothing -> error $ "Could not find target " <> target
-            Just targetConfig -> startCommand targetConfig
-      let command = case maybeCommand of
+      let command = case startCommand targetConfig of
             Nothing -> error "No start command configured"
             Just command -> command
       hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""

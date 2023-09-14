@@ -57,18 +57,23 @@ commandParser targets =
       constructor <$> commandOptionsParser targets
 
 data CommandOptions = CommandOptions
-  { target :: String
+  { target :: String,
+    targetConfig :: TargetConfig
   }
   deriving stock (Eq, Show)
 
 commandOptionsParser :: Targets -> Parser CommandOptions
 commandOptionsParser targets =
-  CommandOptions
-    <$> ( subparser
-            $ foldMap
-              ( \(target, targetOpts) ->
-                  OA.command target (info (pure target) (progDesc $ description targetOpts))
+  ( subparser
+      $ foldMap
+        ( \(target, targetConfig) ->
+            OA.command
+              target
+              ( info
+                  (pure (CommandOptions target targetConfig))
+                  (progDesc $ description targetConfig)
               )
-            $ Map.assocs targets
         )
+      $ Map.assocs targets
+  )
     <**> helper

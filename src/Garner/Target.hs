@@ -21,7 +21,7 @@ data TargetConfig = TargetConfig
   { startCommand :: Maybe [String],
     description :: String
   }
-  deriving (Generic, FromJSON)
+  deriving (Generic, FromJSON, Eq, Show)
 
 writeFlakeFile :: String -> IO Targets
 readTargets :: String -> IO Targets
