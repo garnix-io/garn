@@ -34,23 +34,6 @@ optionsParser :: Targets -> Parser Options
 optionsParser targets =
   Options <$> commandParser targets
 
-data CommandOptions = CommandOptions
-  { target :: String
-  }
-  deriving stock (Eq, Show)
-
-commandOptionsParser :: Targets -> Parser CommandOptions
-commandOptionsParser targets =
-  CommandOptions
-    <$> ( subparser
-            $ foldMap
-              ( \(target, targetOpts) ->
-                  OA.command target (info (pure target) (progDesc $ description targetOpts))
-              )
-            $ Map.assocs targets
-        )
-    <**> helper
-
 data Command
   = Gen
   | Run CommandOptions
@@ -72,3 +55,20 @@ commandParser targets =
   where
     withCommandOptions constructor =
       constructor <$> commandOptionsParser targets
+
+data CommandOptions = CommandOptions
+  { target :: String
+  }
+  deriving stock (Eq, Show)
+
+commandOptionsParser :: Targets -> Parser CommandOptions
+commandOptionsParser targets =
+  CommandOptions
+    <$> ( subparser
+            $ foldMap
+              ( \(target, targetOpts) ->
+                  OA.command target (info (pure target) (progDesc $ description targetOpts))
+              )
+            $ Map.assocs targets
+        )
+    <**> helper
