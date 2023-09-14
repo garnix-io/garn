@@ -15,6 +15,12 @@ import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)
 import System.IO.Temp (withSystemTempFile)
 
+data GarnerConfig = GarnerConfig
+  { targets :: Targets,
+    flakeFile :: String
+  }
+  deriving (Generic, FromJSON)
+
 type Targets = Map String TargetConfig
 
 data TargetConfig = TargetConfig
@@ -23,35 +29,32 @@ data TargetConfig = TargetConfig
   }
   deriving (Generic, FromJSON, Eq, Show)
 
-writeFlakeFile :: String -> IO Targets
-readTargets :: String -> IO Targets
-(writeFlakeFile, readTargets) = (flakeRunner True, flakeRunner False)
-  where
-    flakeRunner :: Bool -> String -> IO Targets
-    flakeRunner writeFlakeFile tsRunner = do
-      checkGarnerFileExists
-      dir <- getCurrentDirectory
-      let makeString =
-            if writeFlakeFile
-              then "writeFlake(\"" <> nixpkgsInput <> "\", config)"
-              else ""
-      withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
-        hPutStr
-          mainHandle
-          [i|
-            import * as config from "#{dir}/garner.ts"
-            import { writeFlake } from "#{tsRunner}"
+readGarnerConfig :: String -> IO GarnerConfig
+readGarnerConfig tsRunner = do
+  checkGarnerFileExists
+  dir <- getCurrentDirectory
+  withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
+    hPutStr
+      mainHandle
+      [i|
+        import * as targets from "#{dir}/garner.ts"
+        import { formatFlake } from "#{tsRunner}"
 
-            #{makeString}
-            console.log(JSON.stringify(config));
-          |]
-        hClose mainHandle
-        Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
-        when writeFlakeFile $
-          cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
-        case eitherDecode out of
-          Left err -> error $ "Unexpected package export from garner.ts: " <> err
-          Right targetConfigMap -> return targetConfigMap
+        console.log(JSON.stringify({
+          targets,
+          flakeFile: formatFlake("#{nixpkgsInput}", targets),
+        }));
+      |]
+    hClose mainHandle
+    Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
+    case eitherDecode out :: Either String GarnerConfig of
+      Left err -> error $ "Unexpected package export from garner.ts:\n" <> err
+      Right writtenConfig -> return writtenConfig
+
+writeGarnerConfig :: GarnerConfig -> IO ()
+writeGarnerConfig garnerConfig = do
+  writeFile "flake.nix" $ flakeFile garnerConfig
+  cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
 
 checkGarnerFileExists :: IO ()
 checkGarnerFileExists = do
