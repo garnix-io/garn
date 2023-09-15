@@ -71,7 +71,7 @@ spec = do
                     description: "mkHaskell-test",
                     executable: "garner-test",
                     compiler: "ghc94",
-                    src: "./."
+                    src: "."
                   })
                   const hello = mkPackage({
                     description: "hi",
@@ -94,7 +94,7 @@ spec = do
                     description: "mkHaskell-test",
                     executable: "garner-test",
                     compiler: "ghc94",
-                    src: "./."
+                    src: "."
                   })
 
                   const hello = mkPackage({
@@ -125,7 +125,7 @@ spec = do
                     description: "mkHaskell-test",
                     executable: "garner-test",
                     compiler: "ghc94",
-                    src: "./."
+                    src: "."
                   })
 
                   const hello = mkPackage({
@@ -311,7 +311,7 @@ writeHaskellProject repoDir = do
         description: "mkHaskell-test",
         executable: "garner-test",
         compiler: "ghc94",
-        src: "./."
+        src: "."
       })
     |]
   writeFile
@@ -339,7 +339,7 @@ writeNpmFrontendProject repoDir = do
 
       export const frontend = mkNpmFrontend({
         description: "mkNpmFrontend-test",
-        src: "./.",
+        src: ".",
         nodeVersion: "18",
         testCommand: "",
       })
