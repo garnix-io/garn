@@ -14,20 +14,24 @@ import Garner.GarnerConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 
-getOptions :: Targets -> IO Options
-getOptions targets = do
-  customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
+getOptions :: Maybe Targets -> IO Options
+getOptions mtargets = do
+  let o = case mtargets of
+        Just targets -> opts (optionsParser targets)
+        Nothing -> Init <$> opts initParser
+  customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) o
   where
-    opts =
+    opts parser =
       info
-        (optionsParser targets <**> helper)
+        (parser <**> helper)
         ( fullDesc
             <> progDesc "Develop, build, and test your projects reliably and easily"
             <> header "garner - the project manager"
         )
 
-data Options = Options
-  {command :: Command}
+data Options
+  = Options {command :: Command}
+  | Init InitOptions
   deriving stock (Eq, Show)
 
 optionsParser :: Targets -> Parser Options
@@ -56,6 +60,13 @@ commandParser targets =
     withCommandOptions constructor =
       constructor <$> commandOptionsParser targets
 
+initParser :: Parser InitOptions
+initParser =
+  subparser $
+    OA.command "init" $
+      info (pure InitOptions) $
+        progDesc "Infer a garner.ts file from the project layout"
+
 data CommandOptions = CommandOptions
   { target :: String,
     targetConfig :: TargetConfig
@@ -77,3 +88,6 @@ commandOptionsParser targets =
       $ Map.assocs targets
   )
     <**> helper
+
+data InitOptions = InitOptions
+  deriving stock (Eq, Show)

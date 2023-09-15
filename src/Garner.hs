@@ -15,6 +15,7 @@ import Garner.Common (nixArgs)
 import Garner.GarnerConfig
 import Garner.Optparse
 import Paths_garner
+import System.Directory (doesFileExist)
 import System.Exit (ExitCode (ExitFailure, ExitSuccess), exitWith)
 import System.IO (Handle, hPutStrLn, stderr)
 import qualified System.IO
@@ -33,17 +34,23 @@ run = do
   (options, garnerConfig) <- readOptionsAndConfig env
   runWith env options garnerConfig
 
-readOptionsAndConfig :: Env -> IO (Options, GarnerConfig)
+readOptionsAndConfig :: Env -> IO (Options, Maybe GarnerConfig)
 readOptionsAndConfig env = do
-  garnerConfig <- readGarnerConfig (tsRunnerFilename env)
-  options <- getOptions $ targets garnerConfig
+  hasGarner <- doesFileExist "garner.hs"
+  garnerConfig <-
+    if hasGarner
+      then Just <$> readGarnerConfig (tsRunnerFilename env)
+      else pure Nothing
+  options <- getOptions $ targets <$> garnerConfig
   pure (options, garnerConfig)
 
-runWith :: Env -> Options -> GarnerConfig -> IO ()
+runWith :: Env -> Options -> Maybe GarnerConfig -> IO ()
 runWith env opts garnerConfig = do
   writeGarnerConfig garnerConfig
   case command opts of
     Gen -> pure ()
+    Run (CommandOptions {..}) -> do
+      cmd_ "nix run" nixArgs (".#" <> target)
     Run (CommandOptions {..}) -> do
       cmd_ "nix run" nixArgs (".#" <> target)
     Enter (CommandOptions {..}) -> do
