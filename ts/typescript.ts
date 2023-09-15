@@ -1,4 +1,5 @@
 import { Package, mkPackage } from "./base.ts";
+import { nixSource } from "./utils.ts";
 
 const nodeVersions = {
   "14": {
@@ -53,7 +54,7 @@ export const mkNpmFrontend = (args: {
       in
       npmlock2nix.v2.build
         {
-          src = ./${args.src};
+          src = ${nixSource(args.src)};
           buildCommands = [ ${JSON.stringify(args.testCommand)} "mkdir $out" ];
           installPhase = "true";
           node_modules_attrs = {
@@ -77,7 +78,7 @@ export const mkYarnFrontend = (args: {
       let pkgs = ${pkgs}; in
       pkgs.yarn2nix-moretea.mkYarnPackage {
         nodejs = ${nodejs};
-        src = ./${args.src};
+        src = ${nixSource(args.src)};
         buildPhase = ${JSON.stringify(args.testCommand)};
       }
     `,

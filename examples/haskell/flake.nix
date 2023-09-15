@@ -20,7 +20,34 @@
           };
         in
         {
-          haskellExecutable = (pkgs.haskell.packages.ghc94.callCabal2nix "garner-pkg" ./. { }) // { meta.mainProgram = "garnerTest"; };
+          haskellExecutable =
+            (pkgs.haskell.packages.ghc94.callCabal2nix
+              "garner-pkg"
+
+              (
+                let
+                  lib = pkgs.lib;
+                  lastSafe = list:
+                    if lib.lists.length list == 0
+                    then null
+                    else lib.lists.last list;
+                in
+                builtins.path
+                  {
+                    path = ./.;
+                    filter = path: type:
+                      let
+                        fileName = lastSafe (lib.strings.splitString "/" path);
+                      in
+                      fileName != "flake.nix";
+                  }
+              )
+
+              { })
+            // {
+              meta.mainProgram = "garnerTest";
+            }
+          ;
           hello = pkgs.hello;
         });
       devShells = forAllSystems (system:
