@@ -51,8 +51,6 @@ runWith env opts garnerConfig = do
     Gen -> pure ()
     Run (CommandOptions {..}) -> do
       cmd_ "nix run" nixArgs (".#" <> target)
-    Run (CommandOptions {..}) -> do
-      cmd_ "nix run" nixArgs (".#" <> target)
     Enter (CommandOptions {..}) -> do
       let devProc =
             ( proc

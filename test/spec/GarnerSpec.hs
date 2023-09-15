@@ -276,6 +276,17 @@ spec = do
                   [garner] "sh -c >&2 echo error! && exit 42" exited with status code 42
                 |]
 
+      fdescribe "start" $ do
+        it "uses the provided init function if there is one" pending
+        it "logs unexpected errors" $ do
+          output <- runGarner ["init"] "" repoDir Nothing
+          stderr output
+            `shouldBe` unindent
+              [i|
+                  [garner] Creating a garner.ts file
+                  [garner] Error
+                |]
+
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the
     --       effect that @`around_` `inTempDirectory`@ _should_ have.
