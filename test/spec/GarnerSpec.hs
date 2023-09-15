@@ -281,35 +281,35 @@ spec = do
           writeFile
             "garner.cabal"
             [i|
-            name: garner
-            version: 0.0.1
-          |]
+              name: garner
+              version: 0.0.1
+            |]
           output <- runGarner ["init"] "" repoDir Nothing
           stderr output `shouldBe` "[garner] Creating a garner.ts file\n"
           readFile "garner.ts"
             `shouldReturn` unindent
               [i|
-             import { mkHaskell } from "http://localhost:8777/haskell.ts"
+                     import { mkHaskell } from "http://localhost:8777/haskell.ts"
 
-             export const garner = mkHaskell({
-               description: "",
-               executable: "",
-               compiler: "ghc94",
-               src: "."
-             })|]
-        it "logs unexpected errors" $ do
-          writeFile
-            "garner.cabal"
-            [i|
-            badCabalfile
-          |]
+                     export const garner = mkHaskell({
+                       description: "",
+                       executable: "",
+                       compiler: "ghc94",
+                       src: "."
+                     })|]
+                it "logs unexpected errors" $ do
+                  writeFile
+                    "garner.cabal"
+                    [i|
+                    badCabalfile
+              |]
           output <- runGarner ["init"] "" repoDir Nothing
           stderr output
             `shouldBe` unindent
               [i|
-                  [garner] Creating a garner.ts file
-                  [garner] Found but could not parse cabal file
-                |]
+                [garner] Creating a garner.ts file
+                [garner] Found but could not parse cabal file
+              |]
 
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the

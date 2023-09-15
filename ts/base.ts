@@ -50,23 +50,16 @@ export const mkPackage = (args: {
 });
 
 export type ShouldNotRun =
-    { tag: "ShouldNotRun" } |
-    { tag: "UnexpectedError"
-      reason: string
-    }
+  | { tag: "ShouldNotRun" }
+  | { tag: "UnexpectedError"; reason: string };
 
 export type Initializer = () =>
-  { tag: "ShouldRun"
-    imports: string,
-    makeTarget: () => string
-  } |
-  { tag: "ShouldNotRun" } |
-  { tag: "UnexpectedError"
-    reason: string
-  }
+  | { tag: "ShouldRun"; imports: string; makeTarget: () => string }
+  | { tag: "ShouldNotRun" }
+  | { tag: "UnexpectedError"; reason: string };
 
-export const initializers : Initializer[] = [];
+export const initializers: Initializer[] = [];
 
-export const addInitializer = (args : Initializer): void => {
-  initializers.push(args)
-}
+export const addInitializer = (args: Initializer): void => {
+  initializers.push(args);
+};
