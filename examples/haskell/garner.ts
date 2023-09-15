@@ -5,7 +5,7 @@ export const haskellExecutable = mkHaskell({
   description: "My haskell executable",
   executable: "garnerTest",
   compiler: "ghc94",
-  src: "./.",
+  src: ".",
 });
 
 export const hello = nixpkgs.hello;

@@ -53,7 +53,7 @@ export const mkNpmFrontend = (args: {
       in
       npmlock2nix.v2.build
         {
-          src = ./.;
+          src = ./${args.src};
           buildCommands = [ ${JSON.stringify(args.testCommand)} "mkdir $out" ];
           installPhase = "true";
           node_modules_attrs = {
@@ -77,7 +77,7 @@ export const mkYarnFrontend = (args: {
       let pkgs = ${pkgs}; in
       pkgs.yarn2nix-moretea.mkYarnPackage {
         nodejs = ${nodejs};
-        src = ${args.src};
+        src = ./${args.src};
         buildPhase = ${JSON.stringify(args.testCommand)};
       }
     `,
