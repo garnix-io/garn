@@ -381,8 +381,8 @@ runGarner args stdin repoDir shell = do
       withTempFile $ \stdin ->
         withArgs args $ do
           let env = Env {stdin, userShell, tsRunnerFilename = repoDir <> "/ts/runner.ts"}
-          opts <- readOptions env
-          runWith env opts
+          (options, garnerConfig) <- readOptionsAndConfig env
+          runWith env options garnerConfig
   return $ ProcResult {..}
   where
     withTempFile :: (Handle -> IO a) -> IO a

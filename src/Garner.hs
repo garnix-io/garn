@@ -5,15 +5,15 @@ module Garner
   ( Options (..),
     Env (..),
     run,
-    readOptions,
+    readOptionsAndConfig,
     runWith,
   )
 where
 
 import Development.Shake (Exit (Exit), cmd, cmd_)
 import Garner.Common (nixArgs)
+import Garner.GarnerConfig
 import Garner.Optparse
-import Garner.Target
 import Paths_garner
 import System.Exit (ExitCode (ExitFailure, ExitSuccess), exitWith)
 import System.IO (Handle, hPutStrLn, stderr)
@@ -30,17 +30,18 @@ data Env = Env
 run :: IO ()
 run = do
   env <- productionEnv
-  options <- readOptions env
-  runWith env options
+  (options, garnerConfig) <- readOptionsAndConfig env
+  runWith env options garnerConfig
 
-readOptions :: Env -> IO Options
-readOptions env = do
-  targets <- readTargets (tsRunnerFilename env)
-  getOptions targets
+readOptionsAndConfig :: Env -> IO (Options, GarnerConfig)
+readOptionsAndConfig env = do
+  garnerConfig <- readGarnerConfig (tsRunnerFilename env)
+  options <- getOptions $ targets garnerConfig
+  pure (options, garnerConfig)
 
-runWith :: Env -> Options -> IO ()
-runWith env opts = do
-  _ <- writeFlakeFile $ tsRunnerFilename env
+runWith :: Env -> Options -> GarnerConfig -> IO ()
+runWith env opts garnerConfig = do
+  writeGarnerConfig garnerConfig
   case command opts of
     Gen -> pure ()
     Run (CommandOptions {..}) -> do

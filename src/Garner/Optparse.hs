@@ -10,7 +10,7 @@ module Garner.Optparse
 where
 
 import qualified Data.Map as Map
-import Garner.Target
+import Garner.GarnerConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 

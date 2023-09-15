@@ -2,7 +2,7 @@ import { Package } from "./base.ts";
 
 const encoder = new TextEncoder();
 
-const formatFlake = (
+export const formatFlake = (
   nixpkgsInput: string,
   config: Record<string, Package>
 ): string => {
@@ -59,12 +59,4 @@ const formatFlake = (
           pkgs.nixpkgs-fmt);
       };
   }`;
-};
-
-export const writeFlake = (
-  nixpkgsInput: string,
-  config: Record<string, Package>
-) => {
-  const data = encoder.encode(formatFlake(nixpkgsInput, config));
-  Deno.writeFileSync("flake.nix", data);
 };
