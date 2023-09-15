@@ -26,31 +26,43 @@
                 config.permittedInsecurePackages = [ ];
                 inherit system;
               };
+              packageJson = pkgs.lib.importJSON ./package.json;
+              yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+                nodejs = pkgs.nodejs-18_x;
+                yarn = pkgs.yarn;
+                src =
+                  (
+                    let
+                      lib = pkgs.lib;
+                      lastSafe = list:
+                        if lib.lists.length list == 0
+                        then null
+                        else lib.lists.last list;
+                    in
+                    builtins.path
+                      {
+                        path = ./.;
+                        filter = path: type:
+                          let
+                            fileName = lastSafe (lib.strings.splitString "/" path);
+                          in
+                          fileName != "flake.nix";
+                      }
+                  )
+                ;
+                buildPhase = "yarn mocha";
+              };
             in
-            pkgs.yarn2nix-moretea.mkYarnPackage {
-              nodejs = pkgs.nodejs-18_x;
-              src =
-                (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./.;
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix";
-                    }
-                )
-              ;
-              buildPhase = "yarn mocha";
-            }
+            (pkgs.writeScriptBin "start-server" ''
+              #!/usr/bin/env bash
+
+              set -eu
+
+              export PATH=${pkgs.yarn}/bin:$PATH
+              export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
+              yarn --version
+              yarn start
+            '')
           ;
         });
       devShells = forAllSystems (system:

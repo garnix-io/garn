@@ -78,14 +78,17 @@ tests:
       - -with-rtsopts=-N
       - -fdefer-typed-holes
     dependencies:
+      - async
       - hspec
       - hspec-discover
       - hspec-discover
       - hspec-golden
+      - http-client
       - lens
       - lens-aeson
       - mockery
       - silently
+      - wreq
       - yaml
 
 library:
