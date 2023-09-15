@@ -57,6 +57,7 @@ export type ShouldNotRun =
 
 export type Initializer = () =>
   { tag: "ShouldRun"
+    imports: string,
     makeTarget: () => string
   } |
   { tag: "ShouldNotRun" } |
@@ -64,7 +65,7 @@ export type Initializer = () =>
     reason: string
   }
 
-const initializers : Initializer[] = [];
+export const initializers : Initializer[] = [];
 
 export const addInitializer = (args : Initializer): void => {
   initializers.push(args)

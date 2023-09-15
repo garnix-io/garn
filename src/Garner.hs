@@ -13,6 +13,7 @@ where
 import Development.Shake (Exit (Exit), cmd, cmd_)
 import Garner.Common (nixArgs)
 import Garner.GarnerConfig
+import Garner.Init
 import Garner.Optparse
 import Paths_garner
 import System.Directory (doesFileExist)
@@ -25,29 +26,31 @@ import System.Process
 data Env = Env
   { stdin :: Handle,
     tsRunnerFilename :: FilePath,
+    initFileName :: FilePath,
     userShell :: FilePath
   }
 
 run :: IO ()
 run = do
   env <- productionEnv
-  (options, garnerConfig) <- readOptionsAndConfig env
-  runWith env options garnerConfig
+  options <- readOptionsAndConfig env
+  runWith env options
 
-readOptionsAndConfig :: Env -> IO (Options, Maybe GarnerConfig)
+readOptionsAndConfig :: Env -> IO Options
 readOptionsAndConfig env = do
   hasGarner <- doesFileExist "garner.hs"
-  garnerConfig <-
-    if hasGarner
-      then Just <$> readGarnerConfig (tsRunnerFilename env)
-      else pure Nothing
-  options <- getOptions $ targets <$> garnerConfig
-  pure (options, garnerConfig)
+  if hasGarner
+    then do
+      garnerConfig <- readGarnerConfig (tsRunnerFilename env)
+      options <- getWithGarnerTsOptions $ targets garnerConfig
+      pure $ WithGarnerTsOpts options garnerConfig
+    else WithoutGarnerTsOpts <$> getWithoutGarnerTsOptions
 
-runWith :: Env -> Options -> Maybe GarnerConfig -> IO ()
-runWith env opts garnerConfig = do
+runWith :: Env -> Options -> IO ()
+runWith env (WithoutGarnerTsOpts Init) = initGarnerTs $ initFileName env
+runWith env (WithGarnerTsOpts opts garnerConfig) = do
   writeGarnerConfig garnerConfig
-  case command opts of
+  case opts of
     Gen -> pure ()
     Run (CommandOptions {..}) -> do
       cmd_ "nix run" nixArgs (".#" <> target)
@@ -80,11 +83,13 @@ runWith env opts garnerConfig = do
 productionEnv :: IO Env
 productionEnv = do
   tsRunnerFilename <- getDataFileName "ts/runner.ts"
+  initFileName <- getDataFileName "ts/init.ts"
   userShell <- findUserShell
   pure $
     Env
       { stdin = System.IO.stdin,
         tsRunnerFilename,
+        initFileName,
         userShell
       }
 

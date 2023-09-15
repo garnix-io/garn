@@ -391,9 +391,15 @@ runGarner args stdin repoDir shell = do
     hCapture_ [Sys.stdout] $
       withTempFile $ \stdin ->
         withArgs args $ do
-          let env = Env {stdin, userShell, tsRunnerFilename = repoDir <> "/ts/runner.ts"}
-          (options, garnerConfig) <- readOptionsAndConfig env
-          runWith env options garnerConfig
+          let env =
+                Env
+                  { stdin,
+                    userShell,
+                    tsRunnerFilename = repoDir <> "/ts/runner.ts",
+                    initFileName = repoDir <> "/ts/init.ts"
+                  }
+          options <- readOptionsAndConfig env
+          runWith env options
   return $ ProcResult {..}
   where
     withTempFile :: (Handle -> IO a) -> IO a

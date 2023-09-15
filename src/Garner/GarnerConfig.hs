@@ -19,7 +19,7 @@ data GarnerConfig = GarnerConfig
   { targets :: Targets,
     flakeFile :: String
   }
-  deriving (Generic, FromJSON)
+  deriving (Eq, Show, Generic, FromJSON)
 
 type Targets = Map String TargetConfig
 

@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-import { mkPackage, Package } from "./base.ts";
 import { nixSource } from "./utils.ts";
-||||||| parent of b004c86 (Haskell initializer)
-import { mkPackage, Package } from "./base.ts";
-=======
 import { mkPackage, Package, addInitializer, Initializer } from "./base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from 'http://deno.land/x/outdent/mod.ts';
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
->>>>>>> b004c86 (Haskell initializer)
 
 type MkHaskellArgs = {
   description: string;
@@ -62,6 +56,7 @@ const mkHaskellInitializer: Initializer = () => {
 
   return {
     tag: "ShouldRun",
+    imports: "import { mkHaskell } from \"http://localhost:8777/haskell.ts\"",
     makeTarget: () => outdent`
       export const ${parsedCabal.description.package.name} = mkHaskell({
         description: "${parsedCabal.description.synopsis
