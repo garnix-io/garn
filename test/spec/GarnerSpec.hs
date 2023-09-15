@@ -276,15 +276,39 @@ spec = do
                   [garner] "sh -c >&2 echo error! && exit 42" exited with status code 42
                 |]
 
-      fdescribe "start" $ do
-        it "uses the provided init function if there is one" pending
+      describe "init" $ do
+        it "uses the provided init function if there is one" $ do
+          writeFile
+            "garner.cabal"
+            [i|
+            name: garner
+            version: 0.0.1
+          |]
+          output <- runGarner ["init"] "" repoDir Nothing
+          stderr output `shouldBe` "[garner] Creating a garner.ts file\n"
+          readFile "garner.ts"
+            `shouldReturn` unindent
+              [i|
+             import { mkHaskell } from "http://localhost:8777/haskell.ts"
+
+             export const garner = mkHaskell({
+               description: "",
+               executable: "",
+               compiler: "ghc94",
+               src: "."
+             })|]
         it "logs unexpected errors" $ do
+          writeFile
+            "garner.cabal"
+            [i|
+            badCabalfile
+          |]
           output <- runGarner ["init"] "" repoDir Nothing
           stderr output
             `shouldBe` unindent
               [i|
                   [garner] Creating a garner.ts file
-                  [garner] Error
+                  [garner] Found but could not parse cabal file
                 |]
 
     -- TODO: Golden tests currently can’t be integrated with the other test cases

@@ -4,11 +4,13 @@ import { } from "./haskell.ts";
 let imports = ""
 let body = ""
 
+console.error("[garner] Creating a garner.ts file")
+
 for (const init of initializers) {
     const result = init()
     switch (result.tag)  {
       case "UnexpectedError":
-        console.log(result.reason)
+        console.error("[garner] " + result.reason)
         break
       case "ShouldNotRun":
         break
