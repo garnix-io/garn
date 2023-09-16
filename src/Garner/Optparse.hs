@@ -6,7 +6,6 @@ module Garner.Optparse
     Options (..),
     WithGarnerTsCommand (..),
     WithoutGarnerTsCommand (..),
-    -- Command (..),
     CommandOptions (..),
   )
 where
@@ -24,7 +23,7 @@ getWithoutGarnerTsOptions = mkOpts withoutGarnerTsParser
 
 mkOpts :: Parser a -> IO a
 mkOpts parser =
-  customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) $ opts
+  customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
   where
     opts =
       info
@@ -37,12 +36,6 @@ mkOpts parser =
 data Options
   = WithGarnerTsOpts WithGarnerTsCommand GarnerConfig
   | WithoutGarnerTsOpts WithoutGarnerTsCommand
-
-{-
-optionsParser :: Targets -> Parser Options
-optionsParser targets =
-  Options <$> commandParser targets
-  -}
 
 data WithoutGarnerTsCommand
   = Init

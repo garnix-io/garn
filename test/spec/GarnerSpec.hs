@@ -297,12 +297,8 @@ spec = do
                        compiler: "ghc94",
                        src: "."
                      })|]
-                it "logs unexpected errors" $ do
-                  writeFile
-                    "garner.cabal"
-                    [i|
-                    badCabalfile
-              |]
+        it "logs unexpected errors" $ do
+          writeFile "garner.cabal" [i| badCabalfile |]
           output <- runGarner ["init"] "" repoDir Nothing
           stderr output
             `shouldBe` unindent

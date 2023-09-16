@@ -8,7 +8,11 @@ copyright: "AllRightsReserved"
 
 data-files:
   - ts/base.ts
+  - ts/haskell.ts
+  - ts/init.ts
   - ts/runner.ts
+  - ts/typescript.ts
+  - ts/utils.ts
 
 default-extensions:
   - BangPatterns
