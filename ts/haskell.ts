@@ -1,5 +1,5 @@
 import { nixSource } from "./utils.ts";
-import { mkPackage, Package, addInitializer, Initializer } from "./base.ts";
+import { mkPackage, Package, Initializer } from "./base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "http://deno.land/x/outdent/mod.ts";
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
@@ -71,7 +71,7 @@ const mkHaskellInitializer: Initializer = () => {
   };
 };
 
-addInitializer(mkHaskellInitializer);
+export const initializers = [mkHaskellInitializer];
 
 // Tests
 

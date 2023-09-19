@@ -1,8 +1,9 @@
-import { initializers } from "./base.ts";
-import {} from "./haskell.ts";
+import { initializers as haskellInitializers } from "./haskell.ts";
 
 let imports = "";
 let body = "";
+
+const initializers = haskellInitializers;
 
 console.error("[garner] Creating a garner.ts file");
 
