@@ -9,3 +9,4 @@ export const haskellExecutable = mkHaskell({
 });
 
 export const hello = nixpkgs.hello;
+

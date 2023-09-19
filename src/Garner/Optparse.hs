@@ -1,10 +1,11 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Garner.Optparse
-  ( getOptions,
-    optionsParser,
+  ( getWithGarnerTsOptions,
+    getWithoutGarnerTsOptions,
     Options (..),
-    Command (..),
+    WithGarnerTsCommand (..),
+    WithoutGarnerTsCommand (..),
     CommandOptions (..),
   )
 where
@@ -14,27 +15,32 @@ import Garner.GarnerConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 
-getOptions :: Targets -> IO Options
-getOptions targets = do
+getWithGarnerTsOptions :: Targets -> IO WithGarnerTsCommand
+getWithGarnerTsOptions = mkOpts . withGarnerTsParser
+
+getWithoutGarnerTsOptions :: IO WithoutGarnerTsCommand
+getWithoutGarnerTsOptions = mkOpts withoutGarnerTsParser
+
+mkOpts :: Parser a -> IO a
+mkOpts parser =
   customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
   where
     opts =
       info
-        (optionsParser targets <**> helper)
+        (parser <**> helper)
         ( fullDesc
             <> progDesc "Develop, build, and test your projects reliably and easily"
             <> header "garner - the project manager"
         )
 
-data Options = Options
-  {command :: Command}
-  deriving stock (Eq, Show)
+data Options
+  = WithGarnerTsOpts WithGarnerTsCommand GarnerConfig
+  | WithoutGarnerTsOpts WithoutGarnerTsCommand
 
-optionsParser :: Targets -> Parser Options
-optionsParser targets =
-  Options <$> commandParser targets
+data WithoutGarnerTsCommand
+  = Init
 
-data Command
+data WithGarnerTsCommand
   = Gen
   | Run CommandOptions
   | Enter CommandOptions
@@ -42,8 +48,8 @@ data Command
   | Ci CommandOptions
   deriving stock (Eq, Show)
 
-commandParser :: Targets -> Parser Command
-commandParser targets =
+withGarnerTsParser :: Targets -> Parser WithGarnerTsCommand
+withGarnerTsParser targets =
   subparser $
     mconcat
       [ OA.command "ci" (info (withCommandOptions Ci) (progDesc "Run the garnix ci tests locally")),
@@ -56,6 +62,13 @@ commandParser targets =
     withCommandOptions constructor =
       constructor <$> commandOptionsParser targets
 
+withoutGarnerTsParser :: Parser WithoutGarnerTsCommand
+withoutGarnerTsParser =
+  subparser $
+    OA.command "init" $
+      info (pure Init) $
+        progDesc "Infer a garner.ts file from the project layout"
+
 data CommandOptions = CommandOptions
   { target :: String,
     targetConfig :: TargetConfig
@@ -64,8 +77,8 @@ data CommandOptions = CommandOptions
 
 commandOptionsParser :: Targets -> Parser CommandOptions
 commandOptionsParser targets =
-  ( subparser
-      $ foldMap
+  subparser
+    ( foldMap
         ( \(target, targetConfig) ->
             OA.command
               target
@@ -74,6 +87,6 @@ commandOptionsParser targets =
                   (progDesc $ description targetConfig)
               )
         )
-      $ Map.assocs targets
-  )
+        $ Map.assocs targets
+    )
     <**> helper

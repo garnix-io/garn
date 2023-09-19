@@ -6,7 +6,7 @@ list:
 pre-push: fmt github-ci check-examples
 
 # Run checks that we can’t yet run via the flake
-github-ci: test codegen check-isolated-garner run-example-ci
+github-ci: test codegen check-isolated-garner run-example-ci test-ts
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
@@ -56,6 +56,9 @@ hpack-check:
     newCabal <- readProcess "hpack" (words "-") ""
     when (oldCabal /= newCabal) $
       error "package.yaml has changed, please run hpack"
+
+test-ts:
+  deno test --allow-write --allow-read --allow-run ts/*.ts
 
 test *args="": hpack
   cabal run --test-show-details=streaming garner:spec -- {{ args }}

@@ -276,6 +276,37 @@ spec = do
                   [garner] "sh -c >&2 echo error! && exit 42" exited with status code 42
                 |]
 
+      describe "init" $ do
+        it "uses the provided init function if there is one" $ do
+          writeFile
+            "garner.cabal"
+            [i|
+              name: garner
+              version: 0.0.1
+            |]
+          output <- runGarner ["init"] "" repoDir Nothing
+          stderr output `shouldBe` "[garner] Creating a garner.ts file\n"
+          readFile "garner.ts"
+            `shouldReturn` unindent
+              [i|
+                     import { mkHaskell } from "http://localhost:8777/haskell.ts"
+
+                     export const garner = mkHaskell({
+                       description: "",
+                       executable: "",
+                       compiler: "ghc94",
+                       src: "."
+                     })|]
+        it "logs unexpected errors" $ do
+          writeFile "garner.cabal" [i| badCabalfile |]
+          output <- runGarner ["init"] "" repoDir Nothing
+          stderr output
+            `shouldBe` unindent
+              [i|
+                [garner] Creating a garner.ts file
+                [garner] Found but could not parse cabal file
+              |]
+
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the
     --       effect that @`around_` `inTempDirectory`@ _should_ have.
@@ -380,9 +411,15 @@ runGarner args stdin repoDir shell = do
     hCapture_ [Sys.stdout] $
       withTempFile $ \stdin ->
         withArgs args $ do
-          let env = Env {stdin, userShell, tsRunnerFilename = repoDir <> "/ts/runner.ts"}
-          (options, garnerConfig) <- readOptionsAndConfig env
-          runWith env options garnerConfig
+          let env =
+                Env
+                  { stdin,
+                    userShell,
+                    tsRunnerFilename = repoDir <> "/ts/runner.ts",
+                    initFileName = repoDir <> "/ts/init.ts"
+                  }
+          options <- readOptionsAndConfig env
+          runWith env options
   return $ ProcResult {..}
   where
     withTempFile :: (Handle -> IO a) -> IO a
