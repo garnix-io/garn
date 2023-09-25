@@ -21,10 +21,12 @@ export default function ParameterListAutoIndent(
   const indentLvl = React.useContext(IndentCtx);
 
   React.useEffect(() => {
-    setShouldIndent(
-      props.list.length > 0 &&
-        (ref.current?.getBoundingClientRect().width ?? 0) > 500,
-    );
+    if (!shouldIndent) {
+      setShouldIndent(
+        props.list.length > 0 &&
+          (ref.current?.getBoundingClientRect().width ?? 0) > 500,
+      );
+    }
   }, [props.list]);
 
   return (
