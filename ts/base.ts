@@ -1,3 +1,7 @@
+/**
+ * A Package represents a Nix package to be included in the final `flake.nix`
+ * generated for this project
+ */
 export type Package = {
   tag: "package";
   description: string;
