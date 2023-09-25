@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": true,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "dom.extras",
+      "deno.ns"
+    ],
+    "types": [
+      "https://deno.land/x/aleph@1.0.0-beta.44/types.d.ts"
+    ],
+    "jsx": "react"
+  },
+  "tasks": {
+    "dev": "deno run -A --watch main.ts"
+  }
+}

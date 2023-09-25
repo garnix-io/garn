@@ -1,0 +1,87 @@
+@import url('./reset.css');
+
+body {
+  font-family: "Space Mono", monospace;
+}
+
+/* Layout */
+:root {
+  --header-height: 50px;
+}
+.layout > header {
+  height: var(--header-height);
+  border-bottom: 1px solid #000;
+  display: flex;
+}
+.layout > main {
+  position: absolute;
+  top: var(--header-height);
+  width: 100%;
+  min-height: calc(100% - 51px);
+}
+.layout > header nav {
+  margin-left: 50px;
+  line-height: 43px;
+  color: grey;
+}
+.layout > header .active {
+  color: #000;
+}
+.layout > header .logo {
+  line-height: 41px;
+  font-size: 32px;
+  font-weight: 700;
+  margin-left: 20px;
+}
+
+/* Sidebar */
+:root {
+  --sidebar-width: 275px;
+}
+.sidebar > aside {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100%;
+  padding-top: 15px;
+  overflow: auto;
+  border-right: 1px solid #000;
+}
+.sidebar > section {
+  padding: 15px 15px 15px calc(var(--sidebar-width) + 15px);
+}
+.sidebar > aside ul {
+  padding-left: 15px;
+}
+.sidebar > aside a {
+  display: block;
+  color: #00f;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* TsType */
+.ts-keyword { color: blue }
+.ts-literal { color: green }
+.ts-typeref { color: brown }
+
+/* pages/typescript */
+.page-typescript code {
+  display: block;
+  width: 650px;
+  padding: 5px;
+  margin: 20px 0;
+  background: #f9f9f9;
+  border: 1px solid #000;
+  border-radius: 5px;
+  overflow: auto;
+}
+.page-typescript h1 {
+  font-weight: 700;
+  font-size: 25px;
+}
+.page-typescript h2 {
+  font-weight: 700;
+}
