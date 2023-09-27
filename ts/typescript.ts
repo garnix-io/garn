@@ -70,17 +70,32 @@ export const mkYarnFrontend = (args: {
   src: string;
   nodeVersion: keyof typeof nodeVersions;
   testCommand: string;
+  serverStartCommand: string;
 }): Package => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   return mkPackage({
     description: args.description,
     expression: `
-      let pkgs = ${pkgs}; in
-      pkgs.yarn2nix-moretea.mkYarnPackage {
-        nodejs = ${nodejs};
-        src = ${nixSource(args.src)};
-        buildPhase = ${JSON.stringify(args.testCommand)};
-      }
+      let
+          pkgs = ${pkgs};
+          packageJson = pkgs.lib.importJSON ./package.json;
+          yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+            nodejs = ${nodejs};
+            yarn = pkgs.yarn;
+            src = ${nixSource(args.src)};
+            buildPhase = ${JSON.stringify(args.testCommand)};
+          };
+      in
+        (pkgs.writeScriptBin "start-server" ''
+          #!/usr/bin/env bash
+
+          set -eu
+
+          export PATH=\${pkgs.yarn}/bin:$PATH
+          export PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules/.bin:$PATH
+          yarn --version
+          ${args.serverStartCommand}
+        '')
     `,
   });
 };

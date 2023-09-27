@@ -1,7 +1,5 @@
 import { Package } from "./base.ts";
 
-const encoder = new TextEncoder();
-
 export const formatFlake = (
   nixpkgsInput: string,
   config: Record<string, Package>

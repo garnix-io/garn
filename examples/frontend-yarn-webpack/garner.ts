@@ -6,4 +6,5 @@ export const frontend: Package = mkYarnFrontend({
   src: ".",
   nodeVersion: "18",
   testCommand: "yarn mocha",
+  serverStartCommand: "yarn start",
 });
