@@ -23,15 +23,20 @@
         in
         rec {
           backend = 1;
-backend__develop = pkgs.writeScriptBin "develop" ''
+backend__server = pkgs.writeScriptBin "server" ''
       
-      while true; do
-echo -e 'HTTP/1.1 200 OK\n\nHello' | nc -w 1 -l 8000
+      echo listening on port 8000
+while true; do
+echo -e 'HTTP/1.1 200 OK\n\nHello from backend' | nc -w 0 -l 8000
 done
     '';
 backend__format = pkgs.writeScriptBin "format" ''
       
       echo formatting...
+    '';
+backend__runMigrations = pkgs.writeScriptBin "runMigrations" ''
+      
+      echo running migrations...
     '';
 deploy = pkgs.writeScriptBin "deploy" ''
       
@@ -139,8 +144,9 @@ devFrontend = pkgs.writeScriptBin "devFrontend" ''
           
 
             backend = {
-              command = "while true; do
-echo -e 'HTTP/1.1 200 OK\n\nHello' | nc -w 1 -l 8000
+              command = "echo listening on port 8000
+while true; do
+echo -e 'HTTP/1.1 200 OK\n\nHello from backend' | nc -w 0 -l 8000
 done";
               
               availability = { restart = "always"; };

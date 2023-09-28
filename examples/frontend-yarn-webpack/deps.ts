@@ -44,24 +44,22 @@ export function shell(
   };
 }
 
-type TaskList = Record<string, Runnable>;
-
-type PackageData<Tasks extends TaskList> = {
+type PackageData<Tasks extends string> = {
   nixExpr: NixInterpolated;
-  tasks: Tasks;
+  tasks: Record<Tasks, Runnable>;
 };
 
-type PackageHelpers<Tasks extends TaskList> = {
+type PackageHelpers<Tasks extends string> = {
   type: "package";
   shell(parts: TemplateStringsArray, ...args: Array<Arg>): Runnable;
-  extend<T extends TaskList>(extend: T): Package<Tasks & T>;
+  addTasks<T extends string>(extend: Record<T, Runnable>): Package<Tasks | T>;
 };
 
-export type Package<Tasks extends TaskList> =
+export type Package<Tasks extends string> =
   & PackageData<Tasks>
   & PackageHelpers<Tasks>;
 
-function mkPackage<T extends TaskList>(
+function mkPackage<T extends string>(
   pkg: PackageData<T>,
   devShellPath?: NixInterpolated,
 ): Package<T> {
@@ -75,7 +73,7 @@ function mkPackage<T extends TaskList>(
         cmd: { parts: [...parts], interpolations },
       };
     },
-    extend(extend) {
+    addTasks(extend) {
       return { ...self, tasks: { ...self.tasks, ...extend } };
     },
   };
@@ -98,7 +96,7 @@ export function nixPkg(nixPkgName: string) {
 export function mkYarnPackage(opts: {
   buildCmd: string;
   artifacts: Array<string>;
-}): Package<{ develop: Runnable }> {
+}): Package<"develop"> {
   const projectName = {
     nixExpr: `(pkgs.lib.importJSON ./package.json).name`,
   };
@@ -162,7 +160,7 @@ export function mkYarnPackage(opts: {
       nixPkg("yarn")
     }/bin:${yarnDependencies}/libexec/${projectName}/node_modules/.bin`,
   );
-  return pkg.extend({ develop: pkg.shell`yarn start` });
+  return pkg.addTasks({ develop: pkg.shell`yarn start` });
 }
 
 export function processCompose(runnables: Record<string, Runnable>): Runnable {
@@ -201,11 +199,12 @@ export function processCompose(runnables: Record<string, Runnable>): Runnable {
   // return shell`cat ${processComposeConfigPkg}`;
 }
 
-export function mkFooBackend(): Package<{ develop: Runnable }> {
+export function mkFooBackend(): Package<"server" | "format"> {
   return mkPackage({
-    nixExpr: '1',
+    nixExpr: "1",
     tasks: {
-      develop: shell`while true; do\necho -e 'HTTP/1.1 200 OK\\n\\nHello' | nc -w 1 -l 8000\ndone`,
+      server:
+        shell`echo listening on port 8000\nwhile true; do\necho -e 'HTTP/1.1 200 OK\\n\\nHello from backend' | nc -w 0 -l 8000\ndone`,
       format: shell`echo formatting...`,
     },
   });

@@ -6,7 +6,8 @@ export const frontend = garn.mkYarnPackage({
   artifacts: ["dist"],
 });
 
-export const backend = garn.mkFooBackend();
+export const backend = garn.mkFooBackend()
+  .addTasks({ runMigrations: garn.shell`echo running migrations...` });
 
 export const deploy = garn
   .shell`cat ${frontend}/dist/main.js`;
@@ -19,5 +20,5 @@ export const serveFrontend = garn.shell`${
 
 export const devFrontend = garn.processCompose({
   frontend: frontend.tasks.develop,
-  backend: backend.tasks.develop,
+  backend: backend.tasks.server,
 });
