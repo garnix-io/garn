@@ -6,6 +6,8 @@ export const frontend = garn.mkYarnPackage({
   artifacts: ["dist"],
 });
 
+export const backend = garn.mkFooBackend();
+
 export const deploy = garn
   .shell`cat ${frontend}/dist/main.js`;
 
@@ -16,7 +18,6 @@ export const serveFrontend = garn.shell`${
 }/bin/python3 -m http.server --directory ${frontend}/dist 8000`;
 
 export const devFrontend = garn.processCompose({
-  frontend: frontend.shell`yarn start`,
-  backend: garn
-    .shell`while true; do\necho -e 'HTTP/1.1 200 OK\\n\\nHello' | nc -w 1 -l 8000\ndone`,
+  frontend: frontend.tasks.develop,
+  backend: backend.tasks.develop,
 });

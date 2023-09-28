@@ -3,34 +3,37 @@ import * as config from "./garner.ts";
 
 const configs = Object.entries(config);
 
-let c = 0;
-function mkName() {
-  return `unknown${c}`;
+function runnableToNix(name: string, r: g.Runnable) {
+  return `
+    pkgs.writeScriptBin ${JSON.stringify(name)} ''
+      ${r.path ? `export PATH=${g.nixInterpolatedToNixExpr(r.path)}:$PATH` : ""}
+      ${g.nixInterpolatedToNixExpr(r.cmd)}
+    ''
+  `;
 }
 
 const pub = configs.reduce(
   (acc: Record<string, string>, [name, packageOrRunnable]) => ({
     ...acc,
-    [name]: packageOrRunnable.type === "package"
-      ? g.nixInterpolatedToNixExpr(packageOrRunnable.nixExpr)
-      : `
-      pkgs.writeScriptBin ${JSON.stringify(name)} ''
-        ${
-        packageOrRunnable.path
-          ? `export PATH=${
-            g.nixInterpolatedToNixExpr(packageOrRunnable.path)
-          }:$PATH`
-          : ""
+    ...(packageOrRunnable.type === "package"
+      ? {
+        [name]: g.nixInterpolatedToNixExpr(packageOrRunnable.nixExpr),
+        ...Object.entries(packageOrRunnable.tasks).reduce(
+          (acc: Record<string, string>, [taskName, task]) => ({
+            ...acc,
+            [`${name}__${taskName}`]: runnableToNix(taskName, task),
+          }),
+          {},
+        ),
       }
-        ${g.nixInterpolatedToNixExpr(packageOrRunnable.cmd)}
-      ''
-    `,
+      : {
+        [name]: runnableToNix(name, packageOrRunnable),
+      }),
   }),
   {},
 );
 
-const priv: Record<string, string> = {
-};
+const priv: Record<string, string> = {};
 
 Deno.writeTextFileSync(
   "flake.nix",
@@ -69,9 +72,23 @@ Deno.writeTextFileSync(
 `,
 );
 
-const cmd = new Deno.Command("nix", {
-  args: [Deno.args[0], `.#${Deno.args[1]}`],
-  stdout: "piped",
-}).spawn();
-cmd.stdout.pipeTo(Deno.stdout.writable);
-await cmd.status;
+// @ts-ignore -
+const selectedCfg = config[Deno.args[1]] as
+  | undefined
+  | (typeof config)[keyof typeof config];
+if (Deno.args[0] === "run" && selectedCfg?.type === "package") {
+  const tasks = Object.keys(selectedCfg.tasks);
+  if (tasks.length === 0) {
+    console.log(`${Deno.args[1]} has no tasks to run`);
+  } else {
+    console.log("Which task?");
+    tasks.forEach((t) => console.log(`${Deno.args[1]}.${t}`));
+  }
+} else {
+  const cmd = new Deno.Command("nix", {
+    args: [Deno.args[0], `.#${Deno.args[1].replace(".", "__")}`],
+    stdout: "piped",
+  }).spawn();
+  cmd.stdout.pipeTo(Deno.stdout.writable);
+  await cmd.status;
+}
