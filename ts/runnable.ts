@@ -1,17 +1,18 @@
-// deno-lint-ignore-file no-unused-vars
 export type Runnable = { tag: "runnable" };
 
-export const processCompose = (...runnables: Array<Runnable>): Runnable =>
+export const mkRunnable = (): Runnable => ({ tag: "runnable" });
+
+export const processCompose = (..._runnables: Array<Runnable>): Runnable =>
   (() => {
     throw new Error(`bottom`);
   })();
 
-export const runParallel = (...runnables: Array<Runnable>): Runnable =>
+export const runParallel = (..._runnables: Array<Runnable>): Runnable =>
   (() => {
     throw new Error(`bottom`);
   })();
 
-export const runSequential = (...runnables: Array<Runnable>): Runnable =>
+export const runSequential = (..._runnables: Array<Runnable>): Runnable =>
   (() => {
     throw new Error(`bottom`);
   })();

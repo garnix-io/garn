@@ -1,4 +1,10 @@
-import { Formattable, Project, composeChecks } from "../../ts/base.ts";
+import {
+  Check,
+  Formattable,
+  Project,
+  collectAllChecks,
+  composeChecks,
+} from "../../ts/base.ts";
 import * as garner from "../../ts/mod.ts";
 import {
   processCompose,
@@ -22,6 +28,8 @@ export const backend = garner.go
       !(grep TODO -r backend)
     `
   );
+
+const _todosCheck: Check = backend.checks.what;
 
 export const frontend = garner.typescript.mkYarnFrontend({
   description: "react frontend",
@@ -67,6 +75,8 @@ export const format = runSequential(
 export const allChecks = composeChecks(
   ...allProjects.flatMap((p: Project) => Object.values(p.checks))
 );
+// or
+export const allChecks2 = collectAllChecks(...allProjects);
 
 // todo:
 //   - default exports?
