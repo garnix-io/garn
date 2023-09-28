@@ -1,10 +1,11 @@
-import { Package } from "http://localhost:8777/base.ts";
-import { mkYarnFrontend } from "http://localhost:8777/typescript.ts";
+// import * as garn from "https://garn.io/garn.ts";
+import * as garn from "./deps.ts";
 
-export const frontend: Package = mkYarnFrontend({
-  description: "my nice yarn project",
-  src: ".",
-  nodeVersion: "18",
-  testCommand: "yarn mocha",
-  serverStartCommand: "yarn start",
+export const frontend = garn.mkYarnPackage();
+
+export const printWebpackHelp = garn.shell`ls ${frontend}/libexec/frontend-yarn-webpack/node_modules/.bin/webpack --help`;
+
+export const devFrontend = garn.processCompose({
+  frontend: frontend.shell`yarn start`,
+  help: frontend.shell`yarn --help`,
 });
