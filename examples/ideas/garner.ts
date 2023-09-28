@@ -1,15 +1,8 @@
 import { z } from "https://deno.land/x/zod@v3.16.1/mod.ts";
-import {
-  Check,
-  Formattable,
-  Project,
-  collectAllChecks,
-  composeChecks,
-} from "../../ts/base.ts";
+import { Check, Formattable, collectAllChecks } from "../../ts/base.ts";
 import * as garner from "../../ts/mod.ts";
 import {
   Runnable,
-  mkRunnable,
   processCompose,
   runParallel,
   runSequential,
