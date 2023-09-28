@@ -14,6 +14,9 @@ export type Project = {
   ) => T;
 };
 
+export const isProject = (x: unknown): x is Project =>
+  typeof x === "object" && x != null && "tag" in x && x.tag === "project";
+
 export const mkProject = (): Project &
   DevServer &
   ProdServer &
@@ -47,16 +50,15 @@ export type ProdServer = { runnables: { prod: Runnable } };
 
 export type Formattable = { runnables: { format: Runnable } };
 
+export const isFormattable = (x: unknown): x is Formattable => {
+  return isProject(x) && "format" in x.runnables;
+};
+
 export type Check = { tag: "check" };
 
 export const mkCheck = (): Check => ({ tag: "check" });
 
-export const composeChecks = (..._checks: Array<Check>): Check =>
-  (() => {
-    throw new Error(`bottom`);
-  })();
+export const composeChecks = (..._checks: Array<Check>): Check => mkCheck();
 
 export const collectAllChecks = (..._projects: Array<Project>): Check =>
-  (() => {
-    throw new Error(`bottom`);
-  })();
+  mkCheck();

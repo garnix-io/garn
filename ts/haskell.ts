@@ -1,4 +1,10 @@
-import { DevServer, Formattable, ProdServer, Project } from "./base.ts";
+import {
+  Formattable,
+  ProdServer,
+  Project,
+  mkCheck,
+  mkProject,
+} from "./base.ts";
 
 type MkHaskellArgs = {
   description: string;
@@ -7,8 +13,15 @@ type MkHaskellArgs = {
 
 export const mkHaskell = (
   _args: MkHaskellArgs
-): Project & DevServer & ProdServer & Formattable => {
-  return (() => {
-    throw new Error(`bottom`);
-  })();
+): Project & ProdServer & Formattable => {
+  const project = mkProject();
+  // deno-lint-ignore no-unused-vars
+  const { dev, ...withoutDev } = project.runnables;
+  return {
+    ...project,
+    runnables: withoutDev,
+    checks: {
+      "cabal-tests": mkCheck(),
+    },
+  };
 };
