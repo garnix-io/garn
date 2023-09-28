@@ -56,9 +56,17 @@ export const isFormattable = (x: unknown): x is Formattable => {
 
 export type Check = { tag: "check" };
 
+export const isCheck = (x: unknown): x is Check =>
+  typeof x === "object" && x != null && "tag" in x && x.tag === "check";
+
 export const mkCheck = (): Check => ({ tag: "check" });
 
 export const composeChecks = (..._checks: Array<Check>): Check => mkCheck();
 
 export const collectAllChecks = (..._projects: Array<Project>): Check =>
   mkCheck();
+
+export const collectAllProjects = (): Array<Project> =>
+  (() => {
+    throw new Error(`bottom`);
+  })();
