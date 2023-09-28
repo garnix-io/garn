@@ -1,16 +1,9 @@
-import { Package, mkPackage } from "./base.ts";
+import { DevServer, Formattable, ProdServer, Project } from "./base.ts";
 
-export const mkGoProject = (args: {
+export const mkGoProject = (_args: {
   description: string;
   src: string;
-}): Package =>
-  mkPackage({
-    expression: `
-      pkgs.buildGoModule {
-        name = "go-project";
-        src = ${args.src};
-        vendorHash = null;
-      }
-    `,
-    description: args.description,
-  });
+}): Project & DevServer & ProdServer & Formattable =>
+  (() => {
+    throw new Error(`bottom`);
+  })();

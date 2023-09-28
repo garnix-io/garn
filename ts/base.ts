@@ -1,59 +1,21 @@
-export type Package = {
-  tag: "package";
-  description: string;
-  nixExpression: string;
-  envExpression: (nixExpression: string) => string;
-  addDevTools: (extraDevTools: Array<Package>) => Package;
-  extraDevTools: Array<Package>;
-  setStartCommand: (startCommand: Array<string>) => Package;
-  startCommand: Array<string> | null;
+export type Project = {
+  tag: "project";
+  runnables: { [name: string]: Runnable };
+  checks: { [name: string]: Check };
+  addCheck: <T extends Project>(this: T, name: string, script: string) => T;
 };
 
-export const mkPackage = (args: {
-  expression: string;
-  description: string;
-}): Package => ({
-  tag: "package",
-  description: args.description,
-  nixExpression: args.expression,
-  envExpression(nixRef): string {
-    const devToolsOverride =
-      this.extraDevTools.length == 0
-        ? ""
-        : `.overrideAttrs (finalAttrs: previousAttrs: {
-              nativeBuildInputs =
-                previousAttrs.nativeBuildInputs
-                ++
-                [ ${this.extraDevTools.map((p) => p.nixExpression).join(" ")} ];
-          })`;
-    return ` let expr = ${nixRef};
-        in
-          (if expr ? env
-            then expr.env
-            else pkgs.mkShell {inputsFrom = [ expr ];}
-          )${devToolsOverride}`;
-  },
-  addDevTools(this: Package, extraDevTools) {
-    return {
-      ...this,
-      extraDevTools: [...this.extraDevTools, ...extraDevTools],
-    };
-  },
-  extraDevTools: [],
-  setStartCommand(this: Package, startCommand) {
-    return {
-      ...this,
-      startCommand,
-    };
-  },
-  startCommand: null,
-});
+import { Runnable } from "./runnable.ts";
 
-export type ShouldNotRun =
-  | { tag: "ShouldNotRun" }
-  | { tag: "UnexpectedError"; reason: string };
+export type DevServer = { runnables: { dev: Runnable } };
 
-export type Initializer = () =>
-  | { tag: "ShouldRun"; imports: string; makeTarget: () => string }
-  | { tag: "ShouldNotRun" }
-  | { tag: "UnexpectedError"; reason: string };
+export type ProdServer = { runnables: { prod: Runnable } };
+
+export type Formattable = { runnables: { format: Runnable } };
+
+export type Check = { tag: "check" };
+
+export const composeChecks = (..._checks: Array<Check>): Check =>
+  (() => {
+    throw new Error(`bottom`);
+  })();
