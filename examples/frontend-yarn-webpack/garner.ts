@@ -11,7 +11,12 @@ export const deploy = garn
 
 export const fmtFrontend = frontend.shell`yarn fmt -w src`;
 
+export const serveFrontend = garn.shell`${
+  garn.nixPkg("python3")
+}/bin/python3 -m http.server --directory ${frontend}/dist 8000`;
+
 export const devFrontend = garn.processCompose({
   frontend: frontend.shell`yarn start`,
-  help: frontend.shell`yarn --help`,
+  backend: garn
+    .shell`while true; do\necho -e 'HTTP/1.1 200 OK\\n\\nHello' | nc -w 1 -l 8000\ndone`,
 });
