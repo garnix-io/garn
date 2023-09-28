@@ -1,22 +1,22 @@
-type Arg = { nixExpr: string };
+type Arg = string | { nixExpr: NixInterpolated };
 
-export function argToNix(a: Arg): string {
-  return a.nixExpr;
+function argToNix(a: Arg): string {
+  if (typeof a === "string") return a;
+  return `\${${nixInterpolatedToNixExpr(a.nixExpr)}}`;
 }
 
-export type NixInterpolated = {
+export type NixInterpolated = string | {
   parts: Array<string>;
   interpolations: Array<Arg>;
 };
 
 export function nixInterpolatedToNixExpr(nixInterpolated: NixInterpolated) {
+  if (typeof nixInterpolated === "string") return nixInterpolated;
   return nixInterpolated.parts.reduce(
     (acc, part, idx) =>
       idx === 0
         ? part
-        : `${acc}\${${
-          argToNix(nixInterpolated.interpolations[idx - 1])
-        }}${part}`,
+        : acc + argToNix(nixInterpolated.interpolations[idx - 1]) + part,
     "",
   );
 }
@@ -45,7 +45,7 @@ export function shell(
 }
 
 type PackageData = {
-  nixExpr: string;
+  nixExpr: NixInterpolated;
 };
 
 type PackageHelpers = {
@@ -65,31 +65,6 @@ function mkPackage(pkg: PackageData, devShellPath?: NixInterpolated): Package {
         path: devShellPath,
         cmd: { parts: [...parts], interpolations },
       };
-      // if (!devShellPath) {
-      //   return {
-      //     type: "runnable",
-      //     cmd: { parts: [...parts], interpolations },
-      //   };
-      // }
-      // return {
-      //   type: "runnable",
-      //   cmd: {
-      //     parts: [
-      //       `export PATH=${devShellPath.parts[0]}`,
-      //       ...devShellPath.parts.slice(1, -1),
-      //       `${
-      //         devShellPath.parts.length > 1
-      //           ? devShellPath.parts[devShellPath.parts.length - 1]
-      //           : ""
-      //       }:$PATH\n\n${parts[0]}`,
-      //       ...parts.slice(1),
-      //     ],
-      //     interpolations: [
-      //       ...devShellPath.interpolations,
-      //       ...interpolations,
-      //     ],
-      //   },
-      // };
     },
   };
 }
@@ -107,42 +82,69 @@ export function nixPkg(nixPkgName: string) {
 //   `;
 // }
 
-export function mkYarnPackage(): Package {
-  const nixExpr = {
-    nixExpr: `
-    pkgs.yarn2nix-moretea.mkYarnPackage {
-      nodejs = pkgs.nodejs-18_x;
-      yarn = pkgs.yarn;
-      src = (
-        let
-        lib = pkgs.lib;
-        lastSafe = list:
-          if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-        in
-        builtins.path
-        {
-          path = ./.;
-          filter = path: type:
-            let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-          in
-          fileName == "package.json" || fileName == "yarn.lock";
-        }
-      );
-     # buildPhase = "yarn mocha";
-    }
-  `,
-  };
+export function mkYarnPackage(opts: {
+  buildCmd: string;
+  artifacts: Array<string>;
+}): Package {
   const projectName = {
     nixExpr: `(pkgs.lib.importJSON ./package.json).name`,
   };
+  const yarnDependencies = {
+    nixExpr: `
+      pkgs.yarn2nix-moretea.mkYarnPackage {
+        nodejs = pkgs.nodejs-18_x;
+        yarn = pkgs.yarn;
+        src = (
+          let
+          lib = pkgs.lib;
+          lastSafe = list:
+            if lib.lists.length list == 0
+          then null
+          else lib.lists.last list;
+          in
+          builtins.path
+          {
+            path = ./.;
+            filter = path: type:
+              let
+            fileName = lastSafe (lib.strings.splitString "/" path);
+            in
+            fileName == "package.json" || fileName == "yarn.lock";
+          }
+        );
+      }
+    `,
+  };
+  const nodeModuleBins = {
+    nixExpr: nix`
+      pkgs.runCommand "node-bins" {} ''
+        mkdir $out
+        ln -s ${yarnDependencies}/libexec/${projectName}/node_modules/.bin $out/bin
+      ''
+    `,
+  };
+  const buildPackage = {
+    nixExpr: nix`
+      pkgs.stdenv.mkDerivation {
+        name = "${projectName}";
+        src = ./.;
+        nativeBuildInputs = [ pkgs.yarn (${nixInterpolatedToNixExpr(nodeModuleBins.nixExpr)}) ];
+        buildPhase = ''
+          ln -s ${yarnDependencies}/libexec/${projectName}/node_modules node_modules
+          ${opts.buildCmd}
+        '';
+        installPhase = ''
+          mkdir $out
+          mv ${opts.artifacts.join(' ')} $out
+        '';
+      }
+    `,
+  };
   return mkPackage(
-    nixExpr,
+    buildPackage,
     nix`${
       nixPkg("yarn")
-    }/bin:${nixExpr}/libexec/${projectName}/node_modules/.bin`,
+    }/bin:${yarnDependencies}/libexec/${projectName}/node_modules/.bin`,
   );
 }
 

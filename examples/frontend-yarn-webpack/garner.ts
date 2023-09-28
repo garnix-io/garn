@@ -1,9 +1,15 @@
 // import * as garn from "https://garn.io/garn.ts";
 import * as garn from "./deps.ts";
 
-export const frontend = garn.mkYarnPackage();
+export const frontend = garn.mkYarnPackage({
+  buildCmd: "webpack build",
+  artifacts: ["dist"],
+});
 
-export const printWebpackHelp = garn.shell`ls ${frontend}/libexec/frontend-yarn-webpack/node_modules/.bin/webpack --help`;
+export const deploy = garn
+  .shell`cat ${frontend}/dist/main.js`;
+
+export const fmtFrontend = frontend.shell`yarn fmt -w src`;
 
 export const devFrontend = garn.processCompose({
   frontend: frontend.shell`yarn start`,

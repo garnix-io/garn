@@ -11,8 +11,17 @@ function mkName() {
 const pub = configs.reduce(
   (acc: Record<string, string>, [name, packageOrRunnable]) => ({
     ...acc,
-    [name]: packageOrRunnable.type === "package" ? packageOrRunnable.nixExpr : `
+    [name]: packageOrRunnable.type === "package"
+      ? g.nixInterpolatedToNixExpr(packageOrRunnable.nixExpr)
+      : `
       pkgs.writeScriptBin ${JSON.stringify(name)} ''
+        ${
+        packageOrRunnable.path
+          ? `export PATH=${
+            g.nixInterpolatedToNixExpr(packageOrRunnable.path)
+          }:$PATH`
+          : ""
+      }
         ${g.nixInterpolatedToNixExpr(packageOrRunnable.cmd)}
       ''
     `,
@@ -21,24 +30,7 @@ const pub = configs.reduce(
 );
 
 const priv: Record<string, string> = {
-  // devDependencies: `123`,
 };
-
-console.log(pub);
-
-// const pub = {
-//   foo: `
-//     pkgs.runCommand "foo" {} ''
-//       mkdir -p $out/bin
-//       echo ${
-//     JSON.stringify(JSON.stringify({
-//     }))
-//   } > $out/pc.yml
-//       echo '\${pkgs."process-compose"}/bin/process-compose -f "$(dirname $0)/../pc.yml"' > $out/bin/foo
-//       chmod +x $out/bin/foo
-//     ''
-//   `,
-// };
 
 Deno.writeTextFileSync(
   "flake.nix",
@@ -78,7 +70,7 @@ Deno.writeTextFileSync(
 );
 
 const cmd = new Deno.Command("nix", {
-  args: ["run", `.#${Deno.args[0]}`],
+  args: [Deno.args[0], `.#${Deno.args[1]}`],
   stdout: "piped",
 }).spawn();
 cmd.stdout.pipeTo(Deno.stdout.writable);
