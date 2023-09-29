@@ -99,7 +99,7 @@ formatPkg :: String -> (String, PkgInfo) -> String
 formatPkg varName (name, pkgInfo) =
   let escapedDoc = encodeToLazyText . toJSON $ fromMaybe "" $ description pkgInfo
    in pkgDoc pkgInfo
-        <> unindent
+        <> uninden
           [i|
             export const #{name} = mkPackage({
               expression: `#{varName}.#{attribute pkgInfo}`,
