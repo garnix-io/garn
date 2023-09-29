@@ -1,14 +1,47 @@
 import * as garner from "./deps.ts";
 
-export const goBackend = garner.mkGoProject({
-  src: "goBackend",
-  bins: {
-    server: "src/server.go",
-    migrate: "utils/migrator.go",
-  },
-}).withTasks({
-  codeGen: garner.bash`${garner.pkgs.protoc} generate protobufs/*.proto`,
-}).withGeneratorCheck("codeGen");
+const goBackendBase = garner
+  .mkGoProject({
+    src: "goBackend",
+    bins: {
+      server: "src/server.go",
+      migrate: "utils/migrator.go",
+    },
+  })
+  .withTasks({
+    codeGen: garner.bash`${garner.pkgs.protoc} generate protobufs/*.proto`,
+  })
+  .withGeneratorCheck("codeGen")
+  .withCheck("todos", garner.bash`! grep -r TODO src`)
+  .withTasks({
+    dev: garner.bash`go run src/server.go`,
+  });
+
+export const goBackend = goBackendBase.withTasks({
+  prod: garner.bash`${goBackendBase}/bin/server`,
+});
+
+const frontendBase = garner
+  .mkYarn({
+    src: "typescriptFrontend",
+  })
+  .withPackageJsonScripts("start", "dev", "lint")
+  .withTasks({
+    bundle: garner.bash`webpack --whatever`,
+    // deploy: garner.bash`rsync ${typescriptFrontend.bundle}`,
+  })
+  .withArtifacts({
+    bundled: {
+      cmd: garner.bash`webpack --whatever ${"huhu"}`,
+      artifacts: ["dist"],
+    },
+  })
+  .withCheck(
+    "typecheck",
+    garner.bash`
+    tsc scripts/*.ts
+  `
+  );
 
 // garner enter
 //   - yarn
@@ -20,21 +53,8 @@ export const goBackend = garner.mkGoProject({
 // garner run typescriptFrontend.serveStatically
 // garner build typescriptFrontend.bundled ; rsync result/* ssh://somewhere
 // garner build typescriptFrontend.serveStatically; ./result
-export const typescriptFrontend = garner.mkYarn({
-  src: "typescriptFrontend",
-})
-  .withPackageJsonScripts("start", "dev", "lint")
-  .withTasks({
-    bundle: garner.bash`webpack --whatever`,
-    // deploy: garner.bash`rsync ${typescriptFrontend.bundle}`,
-  }).withArtifacts({
-    bundled: {
-      cmd: garner.bash`webpack --whatever`,
-      artifacts: ["dist"],
-    },
-  }).withTasks((self) => ({
-    serveStatically: garner
-      .bash`${garner.pkgs.python3.bin("python3")} -m http ${self.bundled}/dist`,
-  }));
-
-export const startFrontend = typescriptFrontend.bundled;
+export const typescriptFrontend = frontendBase.withTasks({
+  serveStatically: garner.bash`${garner.pkgs.python3.bin("python3")} -m http ${
+    frontendBase.bundled
+  }/dist`,
+});

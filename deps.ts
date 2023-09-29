@@ -1,37 +1,75 @@
-export type Artifact = {
-  cmd: Runnable;
-  artifacts: Array<string>;
-  artifact(s: string): string;
+export type NixPackage = {
+  subPath(s: string): string;
   bin(s: string): string;
 };
 
-export type Runnable = "runnable";
+type Artifact = {
+  cmd: Script;
+  artifacts: Array<string>;
+};
 
-export type Package = {
-  withTasks<T extends Package, E extends Record<string, Runnable>>(
+export const mkArtifact = (_args: Artifact): NixPackage =>
+  (() => {
+    throw new Error(`bottom`);
+  })();
+
+export type Script = "script";
+
+export type Runnable = ["runnable", Script];
+
+export type Check = ["check", Script];
+
+export const packageTag = Symbol();
+
+export type Project = {
+  [packageTag]: {
+    environmentPackage: NixPackage;
+    mainPackage: NixPackage;
+  };
+  withTasks<T extends Project, E extends Record<string, Script>>(
     this: T,
-    extend: E | ((s: T) => E),
+    extend: E | ((s: T) => E)
   ): T & E;
-  withPackageJsonScripts<T extends Package, ScriptUnion extends string>(
+  withPackageJsonScripts<T extends Project, ScriptUnion extends string>(
     this: T,
     ...scripts: Array<ScriptUnion>
   ): T & Record<ScriptUnion, Runnable>;
-  withArtifacts<T extends Package, NameUnion extends string>(
+  withArtifacts<T extends Project, NameUnion extends string>(
     this: T,
-    extend: Record<NameUnion, Pick<Artifact, "cmd"| "artifacts">>,
-  ): T & Record<NameUnion, Artifact>;
+    extend: Record<NameUnion, Artifact>
+  ): T & Record<NameUnion, NixPackage>;
+  withCheck<T extends Project, Name extends string>(
+    this: T,
+    name: Name,
+    check: Script
+  ): T & Record<Name, Check>;
+  withGeneratorCheck<T extends Project, Name extends keyof T & string>(
+    this: T,
+    name: Name
+  ): T & Record<`check-${Name}`, Check>;
 };
 
-export const pkgs: Record<string, any> = {} as any;
+export const pkgs = {
+  protoc: (() => {
+    throw new Error(`bottom`);
+  })() as NixPackage,
+  python3: (() => {
+    throw new Error(`bottom`);
+  })() as NixPackage,
+};
 
-export const bash = (s: TemplateStringsArray, ...args: Array<any>) => "runnable" as const;
+export const bash = (
+  _s: TemplateStringsArray,
+  ..._args: Array<NixPackage | Project | string>
+) => "script" as const;
 
-// { [name: string]: Runnable | Check }
-
-// Package & { bundle: Runnable }
-
-export function mkYarn(args: {
-  src: string;
-}): Package {
+export function mkYarn(_args: { src: string }): Project {
   throw "huh";
 }
+
+export const mkGoProject = (_args: {
+  src: string;
+  bins: Record<string, string>;
+}): Project => {
+  throw new Error(`not yet implemented`);
+};
