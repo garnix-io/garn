@@ -1,9 +1,12 @@
 // import garn from "https://garn.io/mod.ts";
 import * as garn from "./deps.ts";
 
-export const frontend = garn.mkYarnPackage({
-  buildCmd: "webpack build",
-  artifacts: ["dist"],
+export const frontend: Package = mkYarnFrontend({
+  description: "my nice yarn project",
+  src: ".",
+  nodeVersion: "18",
+  testCommand: "yarn mocha",
+  serverStartCommand: "yarn start",
 });
 
 export const backend = garn.mkFooBackend()

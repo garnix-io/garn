@@ -21,77 +21,62 @@
           };
           
         in
-        rec {
-          backend = 1;
-backend__server = pkgs.writeScriptBin "server" ''
-      
-      echo listening on port 8000
-while true; do
-echo -e 'HTTP/1.1 200 OK\n\nHello from backend' | nc -w 0 -l 8000
-done
-    '';
-backend__format = pkgs.writeScriptBin "format" ''
-      
-      echo formatting...
-    '';
-backend__runMigrations = pkgs.writeScriptBin "runMigrations" ''
-      
-      echo running migrations...
-    '';
-deploy = pkgs.writeScriptBin "deploy" ''
-      
-      cat ${
-      pkgs.stdenv.mkDerivation {
-        name = "${(pkgs.lib.importJSON ./package.json).name}";
-        src = ./.;
-        nativeBuildInputs = [ pkgs.yarn (
-      pkgs.runCommand "node-bins" {} ''
-        mkdir $out
-        ln -s ${
-      pkgs.yarn2nix-moretea.mkYarnPackage {
-        nodejs = pkgs.nodejs-18_x;
-        yarn = pkgs.yarn;
-        src = (
-          let
-          lib = pkgs.lib;
-          lastSafe = list:
-            if lib.lists.length list == 0
-          then null
-          else lib.lists.last list;
-          in
-          builtins.path
-          {
-            path = ./.;
-            filter = path: type:
-              let
-            fileName = lastSafe (lib.strings.splitString "/" path);
+        {
+          frontend =
+            let
+              pkgs = import "${nixpkgs}" {
+                config.permittedInsecurePackages = [ ];
+                inherit system;
+              };
+              packageJson = pkgs.lib.importJSON ./package.json;
+              yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+                nodejs = pkgs.nodejs-18_x;
+                yarn = pkgs.yarn;
+                src =
+                  (
+                    let
+                      lib = pkgs.lib;
+                      lastSafe = list:
+                        if lib.lists.length list == 0
+                        then null
+                        else lib.lists.last list;
+                    in
+                    builtins.path
+                      {
+                        path = ./.;
+                        filter = path: type:
+                          let
+                            fileName = lastSafe (lib.strings.splitString "/" path);
+                          in
+                          fileName != "flake.nix";
+                      }
+                  )
+                ;
+                buildPhase = "yarn mocha";
+              };
             in
-            fileName == "package.json" || fileName == "yarn.lock";
-          }
-        );
-      }
-    }/libexec/${(pkgs.lib.importJSON ./package.json).name}/node_modules/.bin $out/bin
-      ''
-    ) ];
-        buildPhase = ''
-          ln -s ${
-      pkgs.yarn2nix-moretea.mkYarnPackage {
-        nodejs = pkgs.nodejs-18_x;
-        yarn = pkgs.yarn;
-        src = (
-          let
-          lib = pkgs.lib;
-          lastSafe = list:
-            if lib.lists.length list == 0
-          then null
-          else lib.lists.last list;
-          in
-          builtins.path
-          {
-            path = ./.;
-            filter = path: type:
-              let
-            fileName = lastSafe (lib.strings.splitString "/" path);
+            (pkgs.writeScriptBin "start-server" ''
+              #!/usr/bin/env bash
+
+              set -eu
+
+              export PATH=${pkgs.yarn}/bin:$PATH
+              export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
+              yarn --version
+              yarn start
+            '')
+          ;
+        });
+      devShells = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+        {
+          frontend =
+            let expr = self.packages.${system}.frontend;
             in
             fileName == "package.json" || fileName == "yarn.lock";
           }
