@@ -2,16 +2,12 @@
   "name": "frontend-yarn-webpack",
   "version": "1.0.0",
   "scripts": {
-    "start": "webpack serve --port 3000",
-    "fmt": "prettier"
+    "start": "webpack serve --port 3000"
   },
   "devDependencies": {
     "mocha": "^10.2.0",
     "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4",
     "webpack-dev-server": "^4.15.1"
-  },
-  "dependencies": {
-    "prettier": "^3.0.3"
   }
 }
