@@ -1,5 +1,8 @@
-import { Package, mkPackage } from "./base.ts";
+import { Package, mkPackage, Initializer } from "./base.ts";
+import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import { nixSource } from "./utils.ts";
+import outdent from "http://deno.land/x/outdent/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 
 const nodeVersions = {
   "14": {
@@ -99,3 +102,139 @@ export const mkYarnFrontend = (args: {
     `,
   });
 };
+
+// Initializers
+
+const mkNpmFrontendInitializer: Initializer = () => {
+  const existsPkgJson = fs.existsSync("package.json");
+  const existsPkgLock = fs.existsSync("package-lock.json");
+  if (!existsPkgJson || !existsPkgLock) {
+    return { tag: "ShouldNotRun" };
+  }
+  const contents = Deno.readTextFileSync("package.json");
+  try {
+    const packageJson = JSON.parse(contents);
+    return {
+      tag: "ShouldRun",
+      imports:
+        'import { mkHaskell } from "http://localhost:8777/typescript.ts"',
+      makeTarget: () =>
+        outdent`
+          export const ${packageJson.name || "frontend"} = mkNpmFrontend({
+              description: "${packageJson.description || "An NPM frontend"}",
+              src: ".",
+              nodeVersion: "18",
+              testCommand: ""
+          })
+        `,
+    };
+  } catch (_e) {
+    return {
+      tag: "UnexpectedError",
+      reason: "Could not parse package.json",
+    };
+  }
+};
+
+export const initializers = [mkNpmFrontendInitializer];
+
+// Tests
+
+Deno.test(
+  "NPM initializer does not run when no package.json is present",
+  () => {
+    const tempDir = Deno.makeTempDirSync();
+    Deno.chdir(tempDir);
+    const result = mkNpmFrontendInitializer();
+    assertEquals(result.tag, "ShouldNotRun");
+  }
+);
+
+Deno.test(
+  "NPM initializer does not run when no package-lock.json is present",
+  () => {
+    const tempDir = Deno.makeTempDirSync();
+    Deno.chdir(tempDir);
+    Deno.writeTextFileSync("./package.json", "{}");
+    const result = mkNpmFrontendInitializer();
+    assertEquals(result.tag, "ShouldNotRun");
+  }
+);
+
+Deno.test("NPM initializer errors if package.json is unparseable", () => {
+  const tempDir = Deno.makeTempDirSync();
+  Deno.chdir(tempDir);
+  Deno.writeTextFileSync("./package-lock.json", "{}");
+  Deno.writeTextFileSync(
+    "./package.json",
+    `
+    name: foo
+  `
+  );
+  const result = mkNpmFrontendInitializer();
+  assertEquals(result.tag, "UnexpectedError");
+  if (result.tag === "UnexpectedError") {
+    assertEquals(result.reason, "Could not parse package.json");
+  }
+});
+
+Deno.test("NPM initializer returns the code to be generated", () => {
+  const tempDir = Deno.makeTempDirSync();
+  Deno.chdir(tempDir);
+  Deno.writeTextFileSync("./package-lock.json", "{}");
+  Deno.writeTextFileSync(
+    "./package.json",
+    `
+    {
+        "name": "somepackage",
+        "description": "just some package"
+    }
+  `
+  );
+  const result = mkNpmFrontendInitializer();
+  assertEquals(result.tag, "ShouldRun");
+  if (result.tag === "ShouldRun") {
+    assertEquals(
+      result.makeTarget(),
+      outdent`
+          export const somepackage = mkNpmFrontend({
+              description: "just some package",
+              src: ".",
+              nodeVersion: "18",
+              testCommand: ""
+          })
+        `
+    );
+  }
+});
+
+Deno.test(
+  "NPM initializer has sensible defaults if name and description are missing",
+  () => {
+    const tempDir = Deno.makeTempDirSync();
+    Deno.chdir(tempDir);
+    Deno.writeTextFileSync("./package-lock.json", "{}");
+    Deno.writeTextFileSync(
+      "./package.json",
+      `
+    {
+    }
+  `
+    );
+    const result = mkNpmFrontendInitializer();
+    assertEquals(result.tag, "ShouldRun");
+    if (result.tag === "ShouldRun") {
+      assertEquals(
+        result.makeTarget(),
+        outdent`
+          export const frontend = mkNpmFrontend({
+              description: "An NPM frontend",
+              src: ".",
+              nodeVersion: "18",
+              testCommand: ""
+          })
+        `
+      );
+    }
+  }
+);

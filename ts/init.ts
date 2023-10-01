@@ -1,9 +1,13 @@
 import * as haskell from "./haskell.ts";
+import * as typescript from "./haskell.ts";
 
 let imports = "";
 let body = "";
 
-const initializers = haskell.initializers;
+const initializers = Array.prototype.concat(
+  haskell.initializers,
+  typescript.initializers
+);
 
 console.error("[garner] Creating a garner.ts file");
 
