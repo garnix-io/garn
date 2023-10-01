@@ -1,5 +1,6 @@
 import { nixSource } from "./utils.ts";
-import { mkPackage, Package, Initializer } from "./base.ts";
+import { mkPackage, Package } from "./base.ts";
+import { Initializer } from "./initializer.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "http://deno.land/x/outdent/mod.ts";
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
@@ -30,7 +31,7 @@ export const mkHaskell = (args: MkHaskellArgs): Package => {
 // Initializer
 
 // Currently only works if there's a single cabal file, in the current directory
-const mkHaskellInitializer: Initializer = () => {
+const mkHaskellInitializer: Initializer = (path: string) => {
   const cabalFiles: fs.WalkEntry[] = [...fs.expandGlobSync("*.cabal")];
   if (cabalFiles.length === 0) {
     return { tag: "ShouldNotRun" };
@@ -66,7 +67,7 @@ const mkHaskellInitializer: Initializer = () => {
         }",
         executable: "",
         compiler: "ghc94",
-        src: "."
+        src: "${path}"
       })`,
   };
 };
@@ -78,7 +79,7 @@ export const initializers = [mkHaskellInitializer];
 Deno.test("Initializer does not run when no cabal file is present", () => {
   const tempDir = Deno.makeTempDirSync();
   Deno.chdir(tempDir);
-  const result = mkHaskellInitializer();
+  const result = mkHaskellInitializer(".");
   assertEquals(result.tag, "ShouldNotRun");
 });
 
@@ -91,7 +92,7 @@ Deno.test("Initializer errors if the cabal file is unparseable", () => {
     name: foo
   `
   );
-  const result = mkHaskellInitializer();
+  const result = mkHaskellInitializer(".");
   assertEquals(result.tag, "UnexpectedError");
   if (result.tag === "UnexpectedError") {
     assertEquals(result.reason, "Found but could not parse cabal file");
@@ -108,7 +109,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     version: 0.0.1
   `
   );
-  const result = mkHaskellInitializer();
+  const result = mkHaskellInitializer("./somedir");
   assertEquals(result.tag, "ShouldRun");
   if (result.tag === "ShouldRun") {
     assertEquals(
@@ -118,7 +119,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
             description: "",
             executable: "",
             compiler: "ghc94",
-            src: "."
+            src: "./somedir"
           })`
     );
   }

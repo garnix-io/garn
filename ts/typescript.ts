@@ -1,4 +1,5 @@
-import { Package, mkPackage, Initializer } from "./base.ts";
+import { Package, mkPackage } from "./base.ts";
+import { Initializer } from "./initializer.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import { nixSource } from "./utils.ts";
 import outdent from "http://deno.land/x/outdent/mod.ts";
@@ -105,7 +106,7 @@ export const mkYarnFrontend = (args: {
 
 // Initializers
 
-const mkNpmFrontendInitializer: Initializer = () => {
+const mkNpmFrontendInitializer: Initializer = (path : string) => {
   const existsPkgJson = fs.existsSync("package.json");
   const existsPkgLock = fs.existsSync("package-lock.json");
   if (!existsPkgJson || !existsPkgLock) {
@@ -122,7 +123,7 @@ const mkNpmFrontendInitializer: Initializer = () => {
         outdent`
           export const ${packageJson.name || "frontend"} = mkNpmFrontend({
               description: "${packageJson.description || "An NPM frontend"}",
-              src: ".",
+              src: "${path}",
               nodeVersion: "18",
               testCommand: ""
           })
@@ -145,7 +146,7 @@ Deno.test(
   () => {
     const tempDir = Deno.makeTempDirSync();
     Deno.chdir(tempDir);
-    const result = mkNpmFrontendInitializer();
+    const result = mkNpmFrontendInitializer(".");
     assertEquals(result.tag, "ShouldNotRun");
   }
 );
@@ -156,7 +157,7 @@ Deno.test(
     const tempDir = Deno.makeTempDirSync();
     Deno.chdir(tempDir);
     Deno.writeTextFileSync("./package.json", "{}");
-    const result = mkNpmFrontendInitializer();
+    const result = mkNpmFrontendInitializer(".");
     assertEquals(result.tag, "ShouldNotRun");
   }
 );
@@ -171,7 +172,7 @@ Deno.test("NPM initializer errors if package.json is unparseable", () => {
     name: foo
   `
   );
-  const result = mkNpmFrontendInitializer();
+  const result = mkNpmFrontendInitializer(".");
   assertEquals(result.tag, "UnexpectedError");
   if (result.tag === "UnexpectedError") {
     assertEquals(result.reason, "Could not parse package.json");
@@ -191,7 +192,7 @@ Deno.test("NPM initializer returns the code to be generated", () => {
     }
   `
   );
-  const result = mkNpmFrontendInitializer();
+  const result = mkNpmFrontendInitializer("./somewhere");
   assertEquals(result.tag, "ShouldRun");
   if (result.tag === "ShouldRun") {
     assertEquals(
@@ -199,7 +200,7 @@ Deno.test("NPM initializer returns the code to be generated", () => {
       outdent`
           export const somepackage = mkNpmFrontend({
               description: "just some package",
-              src: ".",
+              src: "./somewhere",
               nodeVersion: "18",
               testCommand: ""
           })
@@ -221,7 +222,7 @@ Deno.test(
     }
   `
     );
-    const result = mkNpmFrontendInitializer();
+    const result = mkNpmFrontendInitializer(".");
     assertEquals(result.tag, "ShouldRun");
     if (result.tag === "ShouldRun") {
       assertEquals(
