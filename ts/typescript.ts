@@ -136,10 +136,43 @@ const mkNpmFrontendInitializer: Initializer = () => {
   }
 };
 
-export const initializers = [mkNpmFrontendInitializer];
+const mkYarnFrontendInitializer: Initializer = () => {
+  const existsPkgJson = fs.existsSync("package.json");
+  const existsPkgLock = fs.existsSync("yarn.lock");
+  if (!existsPkgJson || !existsPkgLock) {
+    return { tag: "ShouldNotRun" };
+  }
+  const contents = Deno.readTextFileSync("package.json");
+  try {
+    const packageJson = JSON.parse(contents);
+    return {
+      tag: "ShouldRun",
+      imports:
+        'import { mkHaskell } from "http://localhost:8777/typescript.ts"',
+      makeTarget: () =>
+        outdent`
+          export const ${packageJson.name || "frontend"} = mkYarnFrontend({
+              description: "${packageJson.description || "A Yarn frontend"}",
+              src: ".",
+              nodeVersion: "18",
+              testCommand: "",
+              serverStartCommand: ""
+          })
+        `,
+    };
+  } catch (_e) {
+    return {
+      tag: "UnexpectedError",
+      reason: "Could not parse package.json",
+    };
+  }
+};
+
+export const initializers = [mkNpmFrontendInitializer, mkYarnFrontendInitializer];
 
 // Tests
 
+// NPM initializer
 Deno.test(
   "NPM initializer does not run when no package.json is present",
   () => {
@@ -238,3 +271,104 @@ Deno.test(
     }
   }
 );
+
+// Yarn initializer
+
+Deno.test(
+  "Yarn initializer does not run when no package.json is present",
+  () => {
+    const tempDir = Deno.makeTempDirSync();
+    Deno.chdir(tempDir);
+    const result = mkYarnFrontendInitializer();
+    assertEquals(result.tag, "ShouldNotRun");
+  }
+);
+
+Deno.test(
+  "Yarn initializer does not run when no package-lock.json is present",
+  () => {
+    const tempDir = Deno.makeTempDirSync();
+    Deno.chdir(tempDir);
+    Deno.writeTextFileSync("./package.json", "{}");
+    const result = mkYarnFrontendInitializer();
+    assertEquals(result.tag, "ShouldNotRun");
+  }
+);
+
+Deno.test("Yarn initializer errors if package.json is unparseable", () => {
+  const tempDir = Deno.makeTempDirSync();
+  Deno.chdir(tempDir);
+  Deno.writeTextFileSync("./yarn.lock", "");
+  Deno.writeTextFileSync(
+    "./package.json",
+    `
+    name: foo
+  `
+  );
+  const result = mkYarnFrontendInitializer();
+  assertEquals(result.tag, "UnexpectedError");
+  if (result.tag === "UnexpectedError") {
+    assertEquals(result.reason, "Could not parse package.json");
+  }
+});
+
+Deno.test("Yarn initializer returns the code to be generated", () => {
+  const tempDir = Deno.makeTempDirSync();
+  Deno.chdir(tempDir);
+  Deno.writeTextFileSync("./yarn.lock", "");
+  Deno.writeTextFileSync(
+    "./package.json",
+    `
+    {
+        "name": "somepackage",
+        "description": "just some package"
+    }
+  `
+  );
+  const result = mkYarnFrontendInitializer();
+  assertEquals(result.tag, "ShouldRun");
+  if (result.tag === "ShouldRun") {
+    assertEquals(
+      result.makeTarget(),
+      outdent`
+          export const somepackage = mkYarnFrontend({
+              description: "just some package",
+              src: ".",
+              nodeVersion: "18",
+              testCommand: "",
+              serverStartCommand: ""
+          })
+        `
+    );
+  }
+});
+
+Deno.test(
+  "Yarn initializer has sensible defaults if name and description are missing",
+  () => {
+    const tempDir = Deno.makeTempDirSync();
+    Deno.chdir(tempDir);
+    Deno.writeTextFileSync("./yarn.lock", "{}");
+    Deno.writeTextFileSync(
+      "./package.json",
+      "{}"
+    );
+    const result = mkYarnFrontendInitializer();
+    assertEquals(result.tag, "ShouldRun");
+    if (result.tag === "ShouldRun") {
+      assertEquals(
+        result.makeTarget(),
+        outdent`
+          export const frontend = mkYarnFrontend({
+              description: "A Yarn frontend",
+              src: ".",
+              nodeVersion: "18",
+              testCommand: "",
+              serverStartCommand: ""
+          })
+        `
+      );
+    }
+  }
+);
+
