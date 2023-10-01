@@ -11,6 +11,9 @@ const goBackendBase = garner
   .withTasks({
     codeGen: garner.bash`${garner.pkgs.protoc} generate protobufs/*.proto`,
   })
+  // withGeneratorCheck will add a check for a given task  by running the task
+  // in a check and ensuring that no changes exist after running this task.
+  // This is useful for things like formatting, codegen, etc..
   .withGeneratorCheck("codeGen")
   .withCheck("todos", garner.bash`! grep -r TODO src`)
   .withTasks({

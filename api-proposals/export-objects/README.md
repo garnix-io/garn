@@ -3,6 +3,10 @@
 The gist of this design is to give users flexibility to define their own
 taxonomy for `Project`, `Runnable` `Check`, and `NixPackage`.
 
+We do this by allowing users to export plain javascript objects in any
+configuration they feel like, and expose the ability to build, check, run and
+enter by specifying javascript-style paths to the objects to act on.
+
 ## Types
 
 ### `Project`
