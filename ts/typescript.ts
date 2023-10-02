@@ -117,7 +117,7 @@ const mkNpmFrontendInitializer: Initializer = () => {
     return {
       tag: "ShouldRun",
       imports:
-        'import { mkHaskell } from "http://localhost:8777/typescript.ts"',
+        'import { mkNpmFrontend } from "http://localhost:8777/typescript.ts"',
       makeTarget: () =>
         outdent`
           export const ${packageJson.name || "frontend"} = mkNpmFrontend({
