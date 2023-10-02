@@ -7,4 +7,4 @@ const initializers = Array.prototype.concat(
   typescript.initializers
 );
 
-initialize(initializers)
+initialize(initializers);

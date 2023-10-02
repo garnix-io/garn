@@ -106,7 +106,7 @@ export const mkYarnFrontend = (args: {
 
 // Initializers
 
-const mkNpmFrontendInitializer: Initializer = (path : string) => {
+const mkNpmFrontendInitializer: Initializer = (path: string) => {
   const existsPkgJson = fs.existsSync("package.json");
   const existsPkgLock = fs.existsSync("package-lock.json");
   if (!existsPkgJson || !existsPkgLock) {
