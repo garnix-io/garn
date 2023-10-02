@@ -1,5 +1,5 @@
 import * as haskell from "./haskell.ts";
-import * as typescript from "./haskell.ts";
+import * as typescript from "./typescript.ts";
 
 let imports = "";
 let body = "";
