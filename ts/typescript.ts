@@ -148,7 +148,7 @@ const mkYarnFrontendInitializer: Initializer = () => {
     return {
       tag: "ShouldRun",
       imports:
-        'import { mkHaskell } from "http://localhost:8777/typescript.ts"',
+        'import { mkYarnFrontend } from "http://localhost:8777/typescript.ts"',
       makeTarget: () =>
         outdent`
           export const ${packageJson.name || "frontend"} = mkYarnFrontend({
