@@ -1,5 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE QuasiQuotes #-}
 
 module Garner
   ( Options (..),
@@ -17,8 +16,8 @@ import Garner.Init
 import Garner.Optparse
 import Paths_garner
 import System.Directory (doesFileExist)
-import System.Exit (ExitCode (ExitFailure, ExitSuccess), exitWith)
-import System.IO (Handle, hPutStrLn, stderr)
+import System.Exit (exitWith)
+import System.IO (Handle)
 import qualified System.IO
 import qualified System.Posix.User as POSIX
 import System.Process
@@ -69,15 +68,6 @@ runWith env (WithGarnerTsOpts opts garnerConfig) = do
         waitForProcess procHandle
       hPutStrLn stderr $ "[garner] Exiting " <> target <> " shell."
       pure ()
-    Start (CommandOptions {..}) -> do
-      let command = case startCommand targetConfig of
-            Nothing -> error "No start command configured"
-            Just command -> command
-      hPutStrLn stderr $ "[garner] Running \"" <> unwords command <> "\""
-      Exit c <- cmd "nix develop" nixArgs (".#" <> target) "-c" command
-      case c of
-        ExitSuccess -> pure ()
-        ExitFailure exitCode -> hPutStrLn stderr $ "[garner] \"" <> unwords command <> "\" exited with status code " <> show exitCode
     Ci (CommandOptions {target}) -> do
       Exit c <- cmd "nix build" nixArgs (".#" <> target)
       exitWith c
