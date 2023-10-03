@@ -1,14 +1,10 @@
 import { nixSource } from "./utils.ts";
-import { mkProject, Project } from "./project.ts";
+import { mkProject } from "./project.ts";
 import { Initializer, mkPackage, Package } from "./base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
-import {
-  Environment,
-  environmentTag,
-  packageToEnvironment,
-} from "./environment.ts";
+import { Environment, packageToEnvironment } from "./environment.ts";
 import { NewPackage } from "./package.ts";
 
 type MkHaskellArgs = {
@@ -18,11 +14,9 @@ type MkHaskellArgs = {
   src: string;
 };
 
-export const mkHaskell = (
-  args: MkHaskellArgs,
-) => {
+export const mkHaskell = (args: MkHaskellArgs) => {
   const pkg: NewPackage = {
-    nixExpr: `
+    nixExpression: `
     (pkgs.haskell.packages.${args.compiler}.callCabal2nix
       "garner-pkg"
       ${nixSource(args.src)}
@@ -33,13 +27,16 @@ export const mkHaskell = (
   `,
   };
   const devShell: Environment = packageToEnvironment(pkg);
-  return mkProject({
-    devShell
-  }, {
-    defaults: {
-      environment: "devShell",
+  return mkProject(
+    {
+      devShell,
     },
-  });
+    {
+      defaults: {
+        environment: "devShell",
+      },
+    }
+  );
 };
 
 export const mkHaskellOld = (args: MkHaskellArgs): Package => {
@@ -57,7 +54,6 @@ export const mkHaskellOld = (args: MkHaskellArgs): Package => {
     description: args.description,
   });
 };
-
 
 // Initializer
 
@@ -91,12 +87,14 @@ const mkHaskellInitializer: Initializer = () => {
     imports: 'import * as garner from "http://localhost:8777/mod.ts"',
     makeTarget: () =>
       outdent`
-      export const ${parsedCabal.description.package.name} = garner.haskell.mkHaskell({
+      export const ${
+        parsedCabal.description.package.name
+      } = garner.haskell.mkHaskell({
         description: "${
-        parsedCabal.description.synopsis ||
-        parsedCabal.description.description ||
-        ""
-      }",
+          parsedCabal.description.synopsis ||
+          parsedCabal.description.description ||
+          ""
+        }",
         executable: "",
         compiler: "ghc94",
         src: "."
@@ -122,7 +120,7 @@ Deno.test("Initializer errors if the cabal file is unparseable", () => {
     "./foo.cabal",
     `
     name: foo
-  `,
+  `
   );
   const result = mkHaskellInitializer();
   assertEquals(result.tag, "UnexpectedError");
@@ -139,7 +137,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     `
     name: foo
     version: 0.0.1
-  `,
+  `
   );
   const result = mkHaskellInitializer();
   assertEquals(result.tag, "ShouldRun");
@@ -152,7 +150,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
             executable: "",
             compiler: "ghc94",
             src: "."
-          })`,
+          })`
     );
   }
 });

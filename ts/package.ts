@@ -1,5 +1,9 @@
 export type NewPackage = {
-  nixExpr: string;
+  nixExpression: string;
 
   // disableCheck(this: Package): Package;
 };
+
+export const mkNewPackage = (nixExpression: string): NewPackage => ({
+  nixExpression,
+});

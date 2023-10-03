@@ -5,7 +5,6 @@ module Garner.GarnerConfig where
 import Control.Monad
 import Data.Aeson (FromJSON, eitherDecode)
 import Data.Map (Map)
-import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util
 import Development.Shake (CmdOption (EchoStderr, EchoStdout), Stdout (Stdout), cmd, cmd_)

@@ -5,22 +5,13 @@ import { Executable } from "./executable.ts";
 
 export const environmentTag = Symbol();
 
-export type EnvironmentHelpers = {
-  withDevTools(this: Environment, devTools: Array<NewPackage>): Environment;
-  shell(
-    _s: TemplateStringsArray,
-    ..._args: Array<string>
-  ): Executable;
-  check(
-    _s: TemplateStringsArray,
-    ..._args: Array<string>
-  ): Check;
-};
-
 export type Environment = {
   tag: typeof environmentTag;
   nixExpr?: string;
-} & EnvironmentHelpers;
+  withDevTools(devTools: Array<NewPackage>): Environment;
+  shell(_s: TemplateStringsArray, ..._args: Array<string>): Executable;
+  check(_s: TemplateStringsArray, ..._args: Array<string>): Check;
+};
 
 export const emptyEnvironment: Environment = {
   tag: environmentTag,
@@ -42,7 +33,7 @@ export const isEnvironment = (e: unknown): e is Environment => {
 export const packageToEnvironment = (pkg: NewPackage): Environment => ({
   tag: environmentTag,
   nixExpr: `
-    let expr = ${pkg.nixExpr};
+    let expr = ${pkg.nixExpression};
     in
       (if expr ? env
         then expr.env
@@ -55,7 +46,21 @@ export const packageToEnvironment = (pkg: NewPackage): Environment => ({
   shell(this) {
     throw 1;
   },
-  withDevTools(this) {
-    throw 1;
+  withDevTools(this, extraDevTools) {
+    if (this.nixExpr == null) {
+      throw new Error(`not yet implemented`);
+    } else {
+      return {
+        ...this,
+        nixExpr: `
+          (${this.nixExpr}).overrideAttrs (finalAttrs: previousAttrs: {
+            nativeBuildInputs =
+              previousAttrs.nativeBuildInputs
+              ++
+              [ ${extraDevTools.map((p) => p.nixExpression).join(" ")} ];
+          })
+        `,
+      };
+    }
   },
 });

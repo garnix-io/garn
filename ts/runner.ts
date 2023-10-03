@@ -1,10 +1,9 @@
-import { isProject, Project } from "./project.ts";
+import { projectDefaultEnvironment, isProject, Project } from "./project.ts";
 import { Package } from "./base.ts";
-import { isEnvironment } from "./environment.ts";
 
 export const formatFlake = (
   nixpkgsInput: string,
-  config: Record<string, Package | unknown>,
+  config: Record<string, Package | unknown>
 ): string => {
   if (isPackageRecord(config)) {
     return oldFormatFlake(nixpkgsInput, config);
@@ -14,7 +13,7 @@ export const formatFlake = (
 };
 
 function isPackageRecord(
-  config: Record<string, unknown>,
+  config: Record<string, unknown>
 ): config is Record<string, Package> {
   return (
     Object.values(config).find(
@@ -24,18 +23,18 @@ function isPackageRecord(
           c != null &&
           "tag" in c &&
           c.tag == "package"
-        ),
+        )
     ) == null
   );
 }
 
 const oldFormatFlake = (
   nixpkgsInput: string,
-  config: Record<string, Package>,
+  config: Record<string, Package>
 ): string => {
   const packages = Object.entries(config).reduce(
     (acc, [name, pkg]) => acc + `${name} = ${pkg.nixExpression};`,
-    "",
+    ""
   );
   const shells = Object.entries(config).reduce((acc, [name, pkg]) => {
     const pkgAttr = `self.packages.\${system}.${name}`;
@@ -90,18 +89,22 @@ const oldFormatFlake = (
 
 export const newFormatFlake = (
   nixpkgsInput: string,
-  config: Record<string, unknown>,
+  config: Record<string, unknown>
 ): string => {
-  const shells = findEnterable(config);
-  const shellsString = Object.entries(shells)
+  const projects = findEnterable(config);
+  const shellsString = Object.entries(projects)
     .map(
-      ([name, enterable]) =>
+      ([name, project]) => [name, projectDefaultEnvironment(project)] as const
+    )
+    .filter((x) => x[1] != null)
+    .map(
+      ([name, defaultEnvironment]) =>
         `${name} = ${
-          getEnterExpression(enterable) ||
+          defaultEnvironment!.nixExpr ||
           (() => {
             throw new Error(`bottom`);
           })()
-        };`,
+        };`
     )
     .join("\n");
   return `{
@@ -126,34 +129,17 @@ export const newFormatFlake = (
   }`;
 };
 
-type Enterable = Project & { settings: { defaults: { environment: string } } };
-
-const getEnterExpression = (e: Enterable): string => {
-  if (!(e.settings.defaults.environment in e)) {
-    throw new Error(
-      `defaults.environment points to a non-existing field: ${e.settings.defaults.environment}`,
-    );
-  }
-  const environment: unknown =
-    e[e.settings.defaults.environment as keyof typeof e];
-  if (!isEnvironment(environment)) {
-    throw new Error(
-      `defaults.environment points to a non-environment: ${e.settings.defaults.environment}`,
-    );
-  }
-  if (!environment.nixExpr) {
-    throw new Error(`TODO: Handle empty environment`);
-  }
-  return environment.nixExpr;
+type Enterable = Project & {
+  settings: { defaults: { environment: string } };
 };
 
 const findEnterable = (
-  config: Record<string, unknown>,
-): Record<string, Enterable> => {
-  const result: Record<string, Enterable> = {};
+  config: Record<string, unknown>
+): Record<string, Project> => {
+  const result: Record<string, Project> = {};
   for (const [name, value] of Object.entries(config)) {
-    if (isProject(value) && value.settings.defaults?.environment) {
-      result[name] = value as Enterable;
+    if (isProject(value)) {
+      result[name] = value;
     }
   }
   return result;

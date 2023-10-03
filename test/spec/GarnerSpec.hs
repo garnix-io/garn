@@ -110,6 +110,7 @@ spec = do
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/base.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkNewPackage } from "#{repoDir}/ts/package.ts"
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
@@ -122,7 +123,7 @@ spec = do
                     expression: `pkgs.hello`,
                   });
 
-                  export const bar = foo.addDevTools([hello]);
+                  export const bar = foo.withDevTools([mkNewPackage(hello.nixExpression)]);
                 |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
