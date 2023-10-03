@@ -17,19 +17,6 @@ type ProjectSettings = {
 // In the future we plan on adding Project, Check, etc..
 type Nestable = Environment;
 
-type ProjectWithEnvironmentHelpers<Settings> = Settings extends {
-  defaults: { environment: string };
-}
-  ? {
-      withDevTools<
-        T extends Project & { settings: { defaults: { environment: string } } }
-      >(
-        this: T,
-        devTools: Array<NewPackage>
-      ): T;
-    }
-  : Record<string, unknown>;
-
 function proxyEnvironmentHelpers(environment: Environment) {
   return {
     shell() {
@@ -50,25 +37,41 @@ function proxyEnvironmentHelpers(environment: Environment) {
   };
 }
 
-export const mkProject = <
-  Deps extends Record<string, Nestable>,
-  Settings extends ProjectSettings
->(
-  deps: Deps,
-  settings: Settings
-): Deps & Project & ProjectWithEnvironmentHelpers<Settings> => {
-  const environment = getDefaultEnvironment(deps, settings);
-  const helpers = (
-    environment != null ? proxyEnvironmentHelpers(environment) : {}
-  ) as ProjectWithEnvironmentHelpers<Settings>;
+export type ProjectWithDefaultEnvironment = Project & {
+  withDevTools<T extends ProjectWithDefaultEnvironment>(
+    this: T,
+    devTools: Array<NewPackage>
+  ): T;
+};
 
+export function mkProject<Deps extends Record<string, Nestable>>(
+  deps: Deps,
+  settings: { defaults: { environment: string } }
+): Deps & ProjectWithDefaultEnvironment;
+
+export function mkProject<Deps extends Record<string, Nestable>>(
+  deps: Deps,
+  settings: ProjectSettings
+): Deps & Project;
+
+export function mkProject<Deps extends Record<string, Nestable>>(
+  deps: Deps
+): Deps & Project;
+
+export function mkProject<Deps extends Record<string, Nestable>>(
+  deps: Deps,
+  settings: { defaults: { environment: string } } | ProjectSettings = {}
+): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
+  const environment = getDefaultEnvironment(deps, settings);
+  const helpers =
+    environment != null ? proxyEnvironmentHelpers(environment) : {};
   return {
     ...deps,
     ...helpers,
     tag: "project",
     settings,
   };
-};
+}
 
 export function isProject(p: unknown): p is Project {
   return hasTag(p, "project");

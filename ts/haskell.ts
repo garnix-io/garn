@@ -1,11 +1,11 @@
-import { nixSource } from "./utils.ts";
-import { mkProject } from "./project.ts";
-import { Initializer, mkPackage, Package } from "./base.ts";
+import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
+import { Initializer, Package, mkPackage } from "./base.ts";
 import { Environment, packageToEnvironment } from "./environment.ts";
 import { NewPackage } from "./package.ts";
+import { ProjectWithDefaultEnvironment, mkProject } from "./project.ts";
+import { nixSource } from "./utils.ts";
 
 type MkHaskellArgs = {
   description: string;
@@ -14,7 +14,9 @@ type MkHaskellArgs = {
   src: string;
 };
 
-export const mkHaskell = (args: MkHaskellArgs) => {
+export const mkHaskell = (
+  args: MkHaskellArgs
+): ProjectWithDefaultEnvironment & { devShell: Environment } => {
   const pkg: NewPackage = {
     nixExpression: `
     (pkgs.haskell.packages.${args.compiler}.callCabal2nix
