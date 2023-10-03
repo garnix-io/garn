@@ -1,4 +1,6 @@
+import { Check } from "./check.ts";
 import { Environment, isEnvironment } from "./environment.ts";
+import { Executable } from "./executable.ts";
 import { NewPackage } from "./package.ts";
 import { hasTag } from "./utils.ts";
 
@@ -42,6 +44,16 @@ export type ProjectWithDefaultEnvironment = Project & {
     this: T,
     devTools: Array<NewPackage>
   ): T;
+  shell(
+    this: ProjectWithDefaultEnvironment,
+    _s: TemplateStringsArray,
+    ..._args: Array<string>
+  ): Executable;
+  check(
+    this: ProjectWithDefaultEnvironment,
+    _s: TemplateStringsArray,
+    ..._args: Array<string>
+  ): Check;
 };
 
 export function mkProject<Deps extends Record<string, Nestable>>(

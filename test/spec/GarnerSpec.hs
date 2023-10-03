@@ -102,7 +102,7 @@ spec = do
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
       describe "enter" $ do
-        describe "addDevTools" $ do
+        describe "withDevTools" $ do
           it "allows dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
             writeFile "garner.ts" $
@@ -152,7 +152,7 @@ spec = do
                     expression: `pkgs.cowsay`,
                   });
 
-                  export const bar = foo.addDevTools([hello, cowsay]);
+                  export const bar = foo.withDevTools([hello, cowsay]);
                 |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -178,7 +178,7 @@ spec = do
                     expression: `pkgs.hello`,
                   });
 
-                  export const bar = foo.addDevTools([hello]);
+                  export const bar = foo.withDevTools([hello]);
                 |]
             output <- runGarner ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
             stderr output `shouldContain` "hello: command not found"
