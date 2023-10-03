@@ -289,9 +289,9 @@ spec = do
           readFile "garner.ts"
             `shouldReturn` unindent
               [i|
-                     import { mkHaskell } from "http://localhost:8777/haskell.ts"
+                     import * as garner from "http://localhost:8777/mod.ts"
 
-                     export const garner = mkHaskell({
+                     export const garner = garner.haskell.mkHaskell({
                        description: "",
                        executable: "",
                        compiler: "ghc94",

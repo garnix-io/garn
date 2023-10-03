@@ -1,7 +1,6 @@
-import { Package } from "http://localhost:8777/base.ts";
-import { mkYarnFrontend } from "http://localhost:8777/typescript.ts";
+import * as garner from "http://localhost:8777/mod.ts";
 
-export const frontend: Package = mkYarnFrontend({
+export const frontend: garner.Package = garner.typescript.mkYarnFrontend({
   description: "my nice yarn project",
   src: ".",
   nodeVersion: "18",

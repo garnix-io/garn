@@ -1,6 +1,6 @@
-import { mkNpmFrontend } from "http://localhost:8777/typescript.ts";
+import * as garner from "http://localhost:8777/mod.ts";
 
-export const frontend = mkNpmFrontend({
+export const frontend = garner.typescript.mkNpmFrontend({
   src: ".",
   description: "An NPM frontend",
   nodeVersion: "18",
