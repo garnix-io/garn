@@ -1,8 +1,14 @@
 import { nixSource } from "./utils.ts";
-import { mkPackage, Package, Initializer } from "./base.ts";
+import { mkPackage, Package, Initializer, Project, mkProject } from "./base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
+import {
+  Environment,
+  environmentTag,
+  packageToEnvironment,
+} from "./environment.ts";
+import { NewPackage } from "./package.ts";
 
 type MkHaskellArgs = {
   description: string;
@@ -11,8 +17,11 @@ type MkHaskellArgs = {
   src: string;
 };
 
-export const mkHaskell = (args: MkHaskellArgs): Package => {
-  const expression = `
+export const mkHaskell = (
+  args: MkHaskellArgs
+): Project & { devShell: Environment } => {
+  const pkg: NewPackage = {
+    nixExpr: `
     (pkgs.haskell.packages.${args.compiler}.callCabal2nix
       "garner-pkg"
       ${nixSource(args.src)}
@@ -20,10 +29,14 @@ export const mkHaskell = (args: MkHaskellArgs): Package => {
       // {
         meta.mainProgram = "${args.executable}";
       }
-  `;
-  return mkPackage({
-    expression,
-    description: args.description,
+  `,
+  };
+  const devShell: Environment = packageToEnvironment(pkg);
+  return mkProject({
+    defaults: {
+      environment: "devShell",
+    },
+    devShell,
   });
 };
 

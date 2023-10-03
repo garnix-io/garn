@@ -16,3 +16,8 @@ export const nixSource = (src: string) => `
          fileName != "flake.nix";
     })
 `;
+
+export const dbg = <A>(a: A): A => {
+  console.error("here: ", a);
+  return a;
+};
