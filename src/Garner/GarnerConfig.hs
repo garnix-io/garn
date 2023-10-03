@@ -39,10 +39,17 @@ readGarnerConfig tsRunner = do
         import * as targets from "#{dir}/garner.ts"
         import { formatFlake } from "#{tsRunner}"
 
-        console.log(JSON.stringify({
+        type GarnerConfig = {
+          targets: Record<string, { description: string }>,
+          flakeFile: string,
+        }
+
+        const config: GarnerConfig = {
           targets,
           flakeFile: formatFlake("#{nixpkgsInput}", targets),
-        }));
+        };
+
+        console.log(JSON.stringify(config));
       |]
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
