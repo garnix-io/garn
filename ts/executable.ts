@@ -1,2 +1,1 @@
-export type Executable = {
-};
+export type Executable = {};

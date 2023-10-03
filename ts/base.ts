@@ -17,9 +17,10 @@ export const mkPackage = (args: {
   description: args.description,
   nixExpression: args.expression,
   envExpression(nixRef): string {
-    const devToolsOverride = this.extraDevTools.length == 0
-      ? ""
-      : `.overrideAttrs (finalAttrs: previousAttrs: {
+    const devToolsOverride =
+      this.extraDevTools.length == 0
+        ? ""
+        : `.overrideAttrs (finalAttrs: previousAttrs: {
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
                 ++

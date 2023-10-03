@@ -1,2 +1,1 @@
-export type Check = {
-};
+export type Check = {};
