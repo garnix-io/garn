@@ -1,7 +1,7 @@
 import { nixSource } from "./utils.ts";
 import { mkPackage, Package, Initializer } from "./base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
-import outdent from "http://deno.land/x/outdent/mod.ts";
+import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 
 type MkHaskellArgs = {
