@@ -90,7 +90,6 @@ run-example-ci:
 
 check-examples:
   just run-garner haskell run haskellExecutable
-  just run-garner haskell run hello
   echo "node --version" | just run-garner npm-frontend enter frontend
 
 codegen: hpack && typescript-check
