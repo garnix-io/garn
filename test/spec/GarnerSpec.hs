@@ -256,14 +256,14 @@ spec = do
           readFile "garner.ts"
             `shouldReturn` unindent
               [i|
-                     import * as garner from "http://localhost:8777/mod.ts"
+                import * as garner from "http://localhost:8777/mod.ts"
 
-                     export const garner = garner.haskell.mkHaskell({
-                       description: "",
-                       executable: "",
-                       compiler: "ghc94",
-                       src: "."
-                     })|]
+                export const garner = garner.haskell.mkHaskell({
+                  description: "",
+                  executable: "",
+                  compiler: "ghc94",
+                  src: "."
+                })|]
         it "logs unexpected errors" $ do
           writeFile "garner.cabal" [i| badCabalfile |]
           output <- runGarner ["init"] "" repoDir Nothing
