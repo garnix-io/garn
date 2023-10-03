@@ -53,7 +53,7 @@ readGarnerConfig tsRunner = do
 writeGarnerConfig :: GarnerConfig -> IO ()
 writeGarnerConfig garnerConfig = do
   writeFile "flake.nix" $ flakeFile garnerConfig
-  cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
+  cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
 
 checkGarnerFileExists :: IO ()
 checkGarnerFileExists = do
