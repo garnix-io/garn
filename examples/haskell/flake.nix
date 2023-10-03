@@ -6,18 +6,18 @@
       forAllSystems = nixpkgs.lib.genAttrs systems;
     in
     {
-      devShells = forAllSystems
-        (system:
-          let
-            pkgs = import "${nixpkgs}" {
-              config.allowUnfree = true;
-              inherit system;
-            };
-          in
-          {
-            haskellExecutable =
-              let
-                pkg = (pkgs.haskell.packages.ghc94.callCabal2nix
+      devShells = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+        {
+          haskellExecutable =
+            let
+              expr =
+                (pkgs.haskell.packages.ghc94.callCabal2nix
                   "garner-pkg"
 
                   (
@@ -43,10 +43,13 @@
                 // {
                   meta.mainProgram = "garnerTest";
                 }
-                ;
-              in
-              # pkgs.mkShell { inputsFrom = [ pkg ]; };
-              pkg.env;
-          });
+              ;
+            in
+            (if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; }
+            )
+          ;
+        });
     };
 }
