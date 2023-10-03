@@ -56,9 +56,11 @@ const mkHaskellInitializer: Initializer = () => {
 
   return {
     tag: "ShouldRun",
-    imports: 'import { mkHaskell } from "http://localhost:8777/haskell.ts"',
+    imports: 'import * as garner from "http://localhost:8777/mod.ts"',
     makeTarget: () => outdent`
-      export const ${parsedCabal.description.package.name} = mkHaskell({
+      export const ${
+        parsedCabal.description.package.name
+      } = garner.haskell.mkHaskell({
         description: "${
           parsedCabal.description.synopsis ||
           parsedCabal.description.description ||
@@ -114,7 +116,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     assertEquals(
       result.makeTarget(),
       outdent`
-          export const foo = mkHaskell({
+          export const foo = garner.haskell.mkHaskell({
             description: "",
             executable: "",
             compiler: "ghc94",
