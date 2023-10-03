@@ -1,40 +1,3 @@
-import { Schema, z } from "https://deno.land/x/zod@v3.22.2/mod.ts";
-
-type ProjectSettings = {
-  defaults?: {
-    executable?: string;
-    environment?: string;
-  };
-};
-
-export type Project = ProjectSettings & {
-  // shell(
-  //   _s: TemplateStringsArray,
-  //   ..._args: Array<Package | string>
-  // ): Executable;
-  // check(
-  //   _s: TemplateStringsArray,
-  //   ..._args: Array<Package | string>
-  // ): Check;
-};
-
-export const projectSchema: Schema<Project> = z
-  .object({
-    defaults: z
-      .object({
-        executable: z.string().optional(),
-        environment: z.string().optional(),
-      })
-      .optional(),
-  })
-  .passthrough();
-
-export const mkProject = <T extends ProjectSettings>(
-  settings: T
-): T & Project => {
-  return settings;
-};
-
 export type Package = {
   tag: "package";
   description: string;
@@ -54,10 +17,9 @@ export const mkPackage = (args: {
   description: args.description,
   nixExpression: args.expression,
   envExpression(nixRef): string {
-    const devToolsOverride =
-      this.extraDevTools.length == 0
-        ? ""
-        : `.overrideAttrs (finalAttrs: previousAttrs: {
+    const devToolsOverride = this.extraDevTools.length == 0
+      ? ""
+      : `.overrideAttrs (finalAttrs: previousAttrs: {
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
                 ++
