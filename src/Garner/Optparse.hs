@@ -44,7 +44,6 @@ data WithGarnerTsCommand
   = Gen
   | Run CommandOptions
   | Enter CommandOptions
-  | Start CommandOptions
   | Ci CommandOptions
   deriving stock (Eq, Show)
 
@@ -55,8 +54,7 @@ withGarnerTsParser targets =
       [ OA.command "ci" (info (withCommandOptions Ci) (progDesc "Run the garnix ci tests locally")),
         OA.command "gen" (info (pure Gen) (progDesc "Generate the flake.nix file and exit")),
         OA.command "run" (info (withCommandOptions Run) (progDesc "Build and run the default executable of a target")),
-        OA.command "enter" (info (withCommandOptions Enter) (progDesc "Enter a devshell for a target")),
-        OA.command "start" (info (withCommandOptions Start) (progDesc "Start the startCommand process of a target"))
+        OA.command "enter" (info (withCommandOptions Enter) (progDesc "Enter a devshell for a target"))
       ]
   where
     withCommandOptions constructor =
