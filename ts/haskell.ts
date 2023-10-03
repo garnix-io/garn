@@ -116,7 +116,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     assertEquals(
       result.makeTarget(),
       outdent`
-          export const foo = mkHaskell({
+          export const foo = garner.haskell.mkHaskell({
             description: "",
             executable: "",
             compiler: "ghc94",
