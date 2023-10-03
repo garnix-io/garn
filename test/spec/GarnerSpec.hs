@@ -4,7 +4,7 @@
 module GarnerSpec where
 
 import Control.Exception (bracket)
-import Control.Lens (from, (.~), (<>~))
+import Control.Lens (from, (<>~))
 import qualified Data.Aeson as Aeson
 import Data.Aeson.Lens
 import Data.List (sort)
