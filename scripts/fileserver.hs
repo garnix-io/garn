@@ -44,6 +44,7 @@ startDenoCacheInvalidator = void $ forkIO $ do
     -- invalidate all files on startup
     tsFiles <- listDirectory "ts"
     forM_ tsFiles reload
+    hPutStrLn stderr "initial reloading done"
     -- invalidate individual files on changes
     tsDirectory <- makeAbsolute "ts"
     _ <- watchDir manager "ts" (const True) $ \event -> do
@@ -54,4 +55,5 @@ startDenoCacheInvalidator = void $ forkIO $ do
 reload :: FilePath -> IO ()
 reload file = do
   let url = "http://localhost:8777/" <> file
-  cmd_ "deno cache --reload" url
+  Exit _ <- cmd "deno cache --reload" url
+  pure ()
