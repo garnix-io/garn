@@ -40,7 +40,7 @@ readGarnerConfig tsRunner = do
         import { formatFlake } from "#{tsRunner}"
 
         type GarnerConfig = {
-          targets: Record<string, { description: string }>,
+          targets: Record<string, { description?: string }>,
           flakeFile: string,
         }
 

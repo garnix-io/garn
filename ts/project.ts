@@ -7,6 +7,7 @@ import { hasTag } from "./utils.ts";
 export type Project = {
   tag: "project";
   settings: ProjectSettings;
+  description: string;
 };
 
 type ProjectSettings = {
@@ -81,6 +82,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
     ...deps,
     ...helpers,
     tag: "project",
+    description: 'huhu',
     settings,
   };
 }
