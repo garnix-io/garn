@@ -28,7 +28,7 @@ function proxyEnvironmentHelpers(environment: Environment) {
       throw 1;
     },
     withDevTools<
-      T extends Project & { settings: { defaults: { environment: string } } },
+      T extends Project & { settings: { defaults: { environment: string } } }
     >(this: T, devTools: Array<NewPackage>): T {
       const newEnvironment = environment.withDevTools(devTools);
       return {
@@ -42,7 +42,7 @@ function proxyEnvironmentHelpers(environment: Environment) {
 export type ProjectWithDefaultEnvironment = Project & {
   withDevTools<T extends ProjectWithDefaultEnvironment>(
     this: T,
-    devTools: Array<NewPackage>,
+    devTools: Array<NewPackage>
   ): T;
   shell(
     this: ProjectWithDefaultEnvironment,
@@ -58,26 +58,25 @@ export type ProjectWithDefaultEnvironment = Project & {
 
 export function mkProject<Deps extends Record<string, Nestable>>(
   deps: Deps,
-  settings: ProjectSettings & { defaults: { environment: string } },
+  settings: ProjectSettings & { defaults: { environment: string } }
 ): Deps & ProjectWithDefaultEnvironment;
 
 export function mkProject<Deps extends Record<string, Nestable>>(
   deps: Deps,
-  settings: ProjectSettings,
+  settings: ProjectSettings
+): Deps & Project;
+
+export function mkProject<Deps extends Record<string, Nestable>>(
+  deps: Deps
 ): Deps & Project;
 
 export function mkProject<Deps extends Record<string, Nestable>>(
   deps: Deps,
-): Deps & Project;
-
-export function mkProject<Deps extends Record<string, Nestable>>(
-  deps: Deps,
-  settings: { defaults: { environment: string } } | ProjectSettings = {},
+  settings: { defaults: { environment: string } } | ProjectSettings = {}
 ): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
   const environment = getDefaultEnvironment(deps, settings);
-  const helpers = environment != null
-    ? proxyEnvironmentHelpers(environment)
-    : {};
+  const helpers =
+    environment != null ? proxyEnvironmentHelpers(environment) : {};
   return {
     ...deps,
     ...helpers,
@@ -92,44 +91,43 @@ export function isProject(p: unknown): p is Project {
 }
 
 export const projectDefaultEnvironment = (
-  project: Project,
+  project: Project
 ): Environment | undefined => {
   return getDefaultEnvironment(project, project.settings);
 };
 
 export const projectDefaultExecutable = (
-  project: Project,
+  project: Project
 ): Executable | undefined => {
   return getDefault("executable", isExecutable)(project, project.settings);
 };
 
-const getDefault = <T>(
-  key: keyof NonNullable<ProjectSettings["defaults"]>,
-  test: (x: unknown) => x is T,
-) =>
-(
-  project: Record<string, unknown>,
-  settings: ProjectSettings,
-): T | undefined => {
-  const defaultKey = settings.defaults?.[key];
-  if (defaultKey == null) {
-    return undefined;
-  }
-  if (!(defaultKey in project)) {
-    throw new Error(
-      `defaults.${key} points to a non-existing field: ${defaultKey}`,
-    );
-  }
-  const value: unknown = project[defaultKey as keyof typeof project];
-  if (!test(value)) {
-    throw new Error(
-      `defaults.${key} points to a non-${key}: ${defaultKey}`,
-    );
-  }
-  // if (!value.nixExpr) {
-  //   throw new Error(`TODO: Handle empty ${key}`);
-  // }
-  return value;
-};
+const getDefault =
+  <T>(
+    key: keyof NonNullable<ProjectSettings["defaults"]>,
+    test: (x: unknown) => x is T
+  ) =>
+  (
+    project: Record<string, unknown>,
+    settings: ProjectSettings
+  ): T | undefined => {
+    const defaultKey = settings.defaults?.[key];
+    if (defaultKey == null) {
+      return undefined;
+    }
+    if (!(defaultKey in project)) {
+      throw new Error(
+        `defaults.${key} points to a non-existing field: ${defaultKey}`
+      );
+    }
+    const value: unknown = project[defaultKey as keyof typeof project];
+    if (!test(value)) {
+      throw new Error(`defaults.${key} points to a non-${key}: ${defaultKey}`);
+    }
+    // if (!value.nixExpr) {
+    //   throw new Error(`TODO: Handle empty ${key}`);
+    // }
+    return value;
+  };
 
 const getDefaultEnvironment = getDefault("environment", isEnvironment);

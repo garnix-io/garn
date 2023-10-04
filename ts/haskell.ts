@@ -16,7 +16,7 @@ type MkHaskellArgs = {
 };
 
 export const mkHaskell = (
-  args: MkHaskellArgs,
+  args: MkHaskellArgs
 ): ProjectWithDefaultEnvironment & {
   pkg: NewPackage;
   devShell: Environment;
@@ -43,7 +43,7 @@ export const mkHaskell = (
         environment: "devShell",
         executable: "main",
       },
-    },
+    }
   );
 };
 
@@ -79,12 +79,14 @@ const mkHaskellInitializer: Initializer = () => {
     imports: 'import * as garner from "http://localhost:8777/mod.ts"',
     makeTarget: () =>
       outdent`
-      export const ${parsedCabal.description.package.name} = garner.haskell.mkHaskell({
+      export const ${
+        parsedCabal.description.package.name
+      } = garner.haskell.mkHaskell({
         description: "${
-        parsedCabal.description.synopsis ||
-        parsedCabal.description.description ||
-        ""
-      }",
+          parsedCabal.description.synopsis ||
+          parsedCabal.description.description ||
+          ""
+        }",
         executable: "",
         compiler: "ghc94",
         src: "."
@@ -110,7 +112,7 @@ Deno.test("Initializer errors if the cabal file is unparseable", () => {
     "./foo.cabal",
     `
     name: foo
-  `,
+  `
   );
   const result = mkHaskellInitializer();
   assertEquals(result.tag, "UnexpectedError");
@@ -127,7 +129,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     `
     name: foo
     version: 0.0.1
-  `,
+  `
   );
   const result = mkHaskellInitializer();
   assertEquals(result.tag, "ShouldRun");
@@ -140,7 +142,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
             executable: "",
             compiler: "ghc94",
             src: "."
-          })`,
+          })`
     );
   }
 });

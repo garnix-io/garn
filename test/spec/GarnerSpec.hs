@@ -8,7 +8,8 @@ import Control.Lens (from, (<>~))
 import Control.Monad (unless)
 import qualified Data.Aeson as Aeson
 import Data.Aeson.Lens
-import Data.List (sort)
+import Data.Char (isSpace)
+import Data.List (dropWhileEnd, sort)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
@@ -254,16 +255,20 @@ spec = do
           output <- runGarner ["init"] "" repoDir Nothing
           stderr output `shouldBe` "[garner] Creating a garner.ts file\n"
           readFile "garner.ts"
-            `shouldReturn` unindent
-              [i|
-                import * as garner from "http://localhost:8777/mod.ts"
+            `shouldReturn` dropWhileEnd
+              isSpace
+              ( unindent
+                  [i|
+                    import * as garner from "http://localhost:8777/mod.ts"
 
-                export const garner = garner.haskell.mkHaskell({
-                  description: "",
-                  executable: "",
-                  compiler: "ghc94",
-                  src: "."
-                })|]
+                    export const garner = garner.haskell.mkHaskell({
+                      description: "",
+                      executable: "",
+                      compiler: "ghc94",
+                      src: "."
+                    })
+                  |]
+              )
         it "logs unexpected errors" $ do
           writeFile "garner.cabal" [i| badCabalfile |]
           output <- runGarner ["init"] "" repoDir Nothing

@@ -1,4 +1,9 @@
-import { isProject, Project, projectDefaultEnvironment, projectDefaultExecutable } from "./project.ts";
+import {
+  isProject,
+  Project,
+  projectDefaultEnvironment,
+  projectDefaultExecutable,
+} from "./project.ts";
 import { Package } from "./base.ts";
 import { NewPackage, isNewPackage } from "./package.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
@@ -34,7 +39,7 @@ export const toTargets = <A>(
 
 export const formatFlake = (
   nixpkgsInput: string,
-  config: Record<string, Package | unknown>,
+  config: Record<string, Package | unknown>
 ): string => {
   if (isPackageRecord(config)) {
     return oldFormatFlake(nixpkgsInput, config);
@@ -44,7 +49,7 @@ export const formatFlake = (
 };
 
 function isPackageRecord(
-  config: Record<string, unknown>,
+  config: Record<string, unknown>
 ): config is Record<string, Package> {
   return (
     Object.values(config).find(
@@ -54,18 +59,18 @@ function isPackageRecord(
           c != null &&
           "tag" in c &&
           c.tag == "package"
-        ),
+        )
     ) == null
   );
 }
 
 const oldFormatFlake = (
   nixpkgsInput: string,
-  config: Record<string, Package>,
+  config: Record<string, Package>
 ): string => {
   const packages = Object.entries(config).reduce(
     (acc, [name, pkg]) => acc + `${name} = ${pkg.nixExpression};`,
-    "",
+    ""
   );
   const shells = Object.entries(config).reduce((acc, [name, pkg]) => {
     const pkgAttr = `self.packages.\${system}.${name}`;
@@ -120,7 +125,7 @@ const oldFormatFlake = (
 
 export const newFormatFlake = (
   nixpkgsInput: string,
-  config: Record<string, unknown>,
+  config: Record<string, unknown>
 ): string => {
   const projects = findProjects(config);
   const packages = collectPackages(projects);
@@ -129,7 +134,7 @@ export const newFormatFlake = (
     .join("\n");
   const shellsString = Object.entries(projects)
     .map(
-      ([name, project]) => [name, projectDefaultEnvironment(project)] as const,
+      ([name, project]) => [name, projectDefaultEnvironment(project)] as const
     )
     .filter((x): x is [string, Environment] => x[1] != null)
     .map(
@@ -139,16 +144,17 @@ export const newFormatFlake = (
           (() => {
             throw new Error(`bottom`);
           })()
-        };`,
+        };`
     )
     .join("\n");
   const executables = Object.entries(projects)
     .map(
-      ([name, project]) => [name, projectDefaultExecutable(project)] as const,
+      ([name, project]) => [name, projectDefaultExecutable(project)] as const
     )
     .filter((x): x is [string, Executable] => x[1] != null)
-    .map(([name, executable]) =>
-      outdent`
+    .map(
+      ([name, executable]) =>
+        outdent`
         ${name} = {
           type = "app";
           program = ${executable.nixExpression};
@@ -196,7 +202,7 @@ export const newFormatFlake = (
 };
 
 const findProjects = (
-  config: Record<string, unknown>,
+  config: Record<string, unknown>
 ): Record<string, Project> => {
   const result: Record<string, Project> = {};
   for (const [name, value] of Object.entries(config)) {

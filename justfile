@@ -5,6 +5,8 @@ list:
 # Check what we can before pushing changes
 pre-push: fmt github-ci
 
+fast-pre-push: fmt test check-examples typescript-check test-ts
+
 # Run checks that we can’t yet run via the flake
 github-ci: test codegen check-isolated-garner check-examples test-ts
 

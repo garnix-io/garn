@@ -11,7 +11,7 @@ export type Executable = {
 
 export const isExecutable = (e: unknown): e is Executable => {
   return hasTag(e, "executable");
-}
+};
 
 export const shell = (
   s: TemplateStringsArray,
@@ -43,11 +43,12 @@ const serializeNixStr = (s: NixString): NixExpression => {
   const escapedTemplate = s.template.map((part) =>
     ["\\", '"', "$"].reduce(
       (str, char) => str.replaceAll(char, `\\${char}`),
-      part,
+      part
     )
   );
-  const nixExpression = '"' + escapedTemplate.reduce(
-    (acc, part, i) => {
+  const nixExpression =
+    '"' +
+    escapedTemplate.reduce((acc, part, i) => {
       const interpolation = s.interpolations[i];
       switch (typeof interpolation) {
         case "string":
@@ -57,40 +58,39 @@ const serializeNixStr = (s: NixString): NixExpression => {
         case "undefined":
           return acc + part;
       }
-    },
-    "",
-  ) + '"';
+    }, "") +
+    '"';
   return { nixExpression };
 };
 
 Deno.test("serializeNixStr correctly serializees into a nix expression", () => {
   assertEquals(
     serializeNixStr(nixStringFromTemplate`foo`).nixExpression,
-    '"foo"',
+    '"foo"'
   );
   assertEquals(
     serializeNixStr(nixStringFromTemplate`with ${"string"} interpolation`)
       .nixExpression,
-    '"with string interpolation"',
+    '"with string interpolation"'
   );
   assertEquals(
     serializeNixStr(
       nixStringFromTemplate`with package ${{
         nixExpression: "pkgs.hello",
-      }} works`,
+      }} works`
     ).nixExpression,
-    '"with package ${pkgs.hello} works"',
+    '"with package ${pkgs.hello} works"'
   );
   assertEquals(
     serializeNixStr(
-      nixStringFromTemplate`escaped dollars in strings \${should not interpolate}`,
+      nixStringFromTemplate`escaped dollars in strings \${should not interpolate}`
     ).nixExpression,
-    '"escaped dollars in strings \\${should not interpolate}"',
+    '"escaped dollars in strings \\${should not interpolate}"'
   );
   assertEquals(
     serializeNixStr(
-      nixStringFromTemplate`"double quotes" are correctly escaped`,
+      nixStringFromTemplate`"double quotes" are correctly escaped`
     ).nixExpression,
-    '"\\"double quotes\\" are correctly escaped"',
+    '"\\"double quotes\\" are correctly escaped"'
   );
 });
