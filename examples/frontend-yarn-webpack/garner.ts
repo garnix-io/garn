@@ -1,6 +1,6 @@
-import * as garner from "http://localhost:8777/mod.ts";
+import * as garner from "../../ts/mod.ts";
 
-export const frontend: garner.OldPackage = garner.typescript.mkYarnFrontend({
+export const frontend = garner.typescript.mkYarnFrontend({
   description: "my nice yarn project",
   src: ".",
   nodeVersion: "18",

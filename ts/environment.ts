@@ -1,7 +1,11 @@
 import { Package } from "./package.ts";
 import { hasTag } from "./utils.ts";
 import { Check } from "./check.ts";
-import { Executable } from "./executable.ts";
+import {
+  Executable,
+  nixStringFromTemplate,
+  serializeNixStr,
+} from "./executable.ts";
 
 export type Environment = {
   tag: "environment";
@@ -41,8 +45,30 @@ export const packageToEnvironment = (pkg: Package): Environment => ({
   check(this) {
     throw 1;
   },
-  shell(this) {
-    throw 1;
+  shell(this, s, ...args) {
+    if (this.nixExpr == null) {
+      throw new Error(`not yet implemented`);
+    }
+    const shellEnv = {
+      nixExpression: `
+        pkgs.runCommand "shell-env" {
+          buildInputs = (${this.nixExpr}).buildInputs;
+          nativeBuildInputs = (${this.nixExpr}).nativeBuildInputs;
+        } ''
+          echo "export PATH=$PATH:\$PATH" > $out
+          echo \${pkgs.lib.strings.escapeShellArg ${
+        serializeNixStr(nixStringFromTemplate(s, ...args)).nixExpression
+      }} >> $out
+          chmod +x $out
+        ''
+      `,
+    };
+    return {
+      tag: "executable",
+      description: `Executes TODO`,
+      nixExpression:
+        serializeNixStr(nixStringFromTemplate`${shellEnv}`).nixExpression,
+    };
   },
   withDevTools(this, extraDevTools) {
     if (this.nixExpr == null) {

@@ -164,7 +164,11 @@ export const newFormatFlake = (
   return `{
     inputs.nixpkgs.url = "${nixpkgsInput}";
     inputs.flake-utils.url = "github:numtide/flake-utils";
-    outputs = { self, nixpkgs, flake-utils }:
+    inputs.npmlock2nix-repo = {
+      url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81";
+      flake = false;
+    };
+    outputs = { self, nixpkgs, flake-utils, npmlock2nix-repo }:
       let
         systems = [ "x86_64-linux" ];
         forAllSystems = nixpkgs.lib.genAttrs systems;
