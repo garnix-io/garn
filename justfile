@@ -3,10 +3,10 @@ list:
   just --list
 
 # Check what we can before pushing changes
-pre-push: fmt github-ci check-examples
+pre-push: fmt github-ci
 
 # Run checks that we can’t yet run via the flake
-github-ci: test codegen check-isolated-garner run-example-check test-ts
+github-ci: test codegen check-isolated-garner check-examples test-ts
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
@@ -80,18 +80,13 @@ run-garner example *args="": hpack
   cd examples/{{ example }}
   cabal run garner:garner -- {{ args }}
 
-run-garner-and-check example target:
-  just run-garner {{ example }} check {{ target }}
-
-run-example-check:
-  just run-garner-and-check haskell haskellExecutable
-  just run-garner-and-check frontend-create-react-app main
-  just run-garner-and-check frontend-yarn-webpack frontend
-  just run-garner-and-check go-http-backend server
-
 check-examples:
+  just run-garner haskell check haskellExecutable
   just run-garner haskell run haskellExecutable
   echo "node --version" | just run-garner npm-frontend enter frontend
+  just run-garner frontend-create-react-app check main
+  just run-garner frontend-yarn-webpack check frontend
+  just run-garner go-http-backend check server
 
 codegen: hpack && typescript-check
   cabal run codegen
