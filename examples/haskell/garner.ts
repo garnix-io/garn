@@ -1,5 +1,5 @@
-import { mkProject } from "http://localhost:8777/project.ts";
-import * as garner from "../../ts/mod.ts";
+import * as garner from "http://localhost:8777/mod.ts";
+import { mkProject } from "http://localhost:8777/mod.ts";
 import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
 
 export const haskellExecutable = garner.haskell.mkHaskell({
