@@ -28,14 +28,5 @@ while ! nc localhost 8777 -z; do
   sleep 1
 done
 
-cd examples/haskell
-expected=42
-res="$(run-in-isolation garner run haskellExecutable)"
-if [[ $res == $expected ]]; then
-  echo "Smoke test successful"
-else
-  echo "Garner ran, but gave a different result than expected."
-  echo "  Expected: $expected"
-  echo "  Received: $res"
-  exit 1
-fi
+cd examples/frontend-yarn-webpack
+run-in-isolation garner ci frontend

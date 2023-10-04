@@ -8,8 +8,15 @@ copyright: "AllRightsReserved"
 
 data-files:
   - ts/base.ts
+  - ts/check.ts
+  - ts/environment.ts
+  - ts/executable.ts
+  - ts/go.ts
   - ts/haskell.ts
   - ts/init.ts
+  - ts/mod.ts
+  - ts/package.ts
+  - ts/project.ts
   - ts/runner.ts
   - ts/typescript.ts
   - ts/utils.ts

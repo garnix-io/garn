@@ -3,10 +3,8 @@ import { hasTag } from "./utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
 
-export const environmentTag = Symbol();
-
 export type Environment = {
-  tag: typeof environmentTag;
+  tag: "environment";
   nixExpr?: string;
   withDevTools(devTools: Array<NewPackage>): Environment;
   shell(_s: TemplateStringsArray, ..._args: Array<string>): Executable;
@@ -14,7 +12,7 @@ export type Environment = {
 };
 
 export const emptyEnvironment: Environment = {
-  tag: environmentTag,
+  tag: "environment",
   check(this) {
     throw 1;
   },
@@ -27,11 +25,11 @@ export const emptyEnvironment: Environment = {
 };
 
 export const isEnvironment = (e: unknown): e is Environment => {
-  return hasTag(e, environmentTag);
+  return hasTag(e, "environment");
 };
 
 export const packageToEnvironment = (pkg: NewPackage): Environment => ({
-  tag: environmentTag,
+  tag: "environment",
   nixExpr: `
     let expr = ${pkg.nixExpression};
     in
