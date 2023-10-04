@@ -34,11 +34,9 @@ const fromNodeVersion = (version: NodeVersion) => {
   return {
     pkgs: `
       import "\${nixpkgs}" {
-        config.permittedInsecurePackages = [${
-      permittedInsecurePackages
-        .map((x) => JSON.stringify(x))
-        .join(" ")
-    }];
+        config.permittedInsecurePackages = [${permittedInsecurePackages
+          .map((x) => JSON.stringify(x))
+          .join(" ")}];
         inherit system;
       }
     `.trim(),
@@ -72,16 +70,19 @@ export const mkNpmFrontend = (args: {
   `);
   const devShell: Environment = packageToEnvironment(pkg);
   const startDev: Executable = devShell.shell`npm run start`;
-  return mkProject({
-    pkg,
-    devShell,
-    startDev,
-  }, {
-    defaults: {
-      environment: "devShell",
-      executable: "startDev",
+  return mkProject(
+    {
+      pkg,
+      devShell,
+      startDev,
     },
-  });
+    {
+      defaults: {
+        environment: "devShell",
+        executable: "startDev",
+      },
+    }
+  );
 };
 
 export const mkYarnFrontend = (args: {
@@ -145,6 +146,6 @@ export const mkYarnFrontend = (args: {
         environment: "devShell",
         executable: "startDev",
       },
-    },
+    }
   );
 };

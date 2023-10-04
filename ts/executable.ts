@@ -21,8 +21,7 @@ export const shell = (
   return {
     tag: "executable",
     description: `Executes ${shellScript}`,
-    nixExpression:
-      `"\${pkgs.writeScriptBin "executable" ${shellScript.nixExpression}}/bin/executable"`,
+    nixExpression: `"\${pkgs.writeScriptBin "executable" ${shellScript.nixExpression}}/bin/executable"`,
   };
 };
 
@@ -44,10 +43,11 @@ export const serializeNixStr = (s: NixString): NixExpression => {
   const escapedTemplate = s.template.map((part) =>
     ["\\", '"', "$"].reduce(
       (str, char) => str.replaceAll(char, `\\${char}`),
-      part,
+      part
     )
   );
-  const nixExpression = '"' +
+  const nixExpression =
+    '"' +
     escapedTemplate.reduce((acc, part, i) => {
       const interpolation = s.interpolations[i];
       switch (typeof interpolation) {
@@ -70,10 +70,7 @@ export const concat = (a: NixString, b: NixString): NixString => {
       a.template[a.template.length - 1] + b.template[0],
       ...b.template.slice(1),
     ],
-    interpolations: [
-      ...a.interpolations,
-      ...b.interpolations,
-    ],
+    interpolations: [...a.interpolations, ...b.interpolations],
   };
 };
 
@@ -84,43 +81,43 @@ Deno.test("concat correctly concatenates nix expressions", () => {
   assertEquals(
     concat(
       nixStringFromTemplate`foo${A}bar${B}baz`,
-      nixStringFromTemplate`fizz${C}buzz`,
+      nixStringFromTemplate`fizz${C}buzz`
     ),
     {
       template: ["foo", "bar", "bazfizz", "buzz"],
       interpolations: [A, B, C],
-    },
+    }
   );
 });
 
 Deno.test("serializeNixStr correctly serializees into a nix expression", () => {
   assertEquals(
     serializeNixStr(nixStringFromTemplate`foo`).nixExpression,
-    '"foo"',
+    '"foo"'
   );
   assertEquals(
     serializeNixStr(nixStringFromTemplate`with ${"string"} interpolation`)
       .nixExpression,
-    '"with string interpolation"',
+    '"with string interpolation"'
   );
   assertEquals(
     serializeNixStr(
       nixStringFromTemplate`with package ${{
         nixExpression: "pkgs.hello",
-      }} works`,
+      }} works`
     ).nixExpression,
-    '"with package ${pkgs.hello} works"',
+    '"with package ${pkgs.hello} works"'
   );
   assertEquals(
     serializeNixStr(
-      nixStringFromTemplate`escaped dollars in strings \${should not interpolate}`,
+      nixStringFromTemplate`escaped dollars in strings \${should not interpolate}`
     ).nixExpression,
-    '"escaped dollars in strings \\${should not interpolate}"',
+    '"escaped dollars in strings \\${should not interpolate}"'
   );
   assertEquals(
     serializeNixStr(
-      nixStringFromTemplate`"double quotes" are correctly escaped`,
+      nixStringFromTemplate`"double quotes" are correctly escaped`
     ).nixExpression,
-    '"\\"double quotes\\" are correctly escaped"',
+    '"\\"double quotes\\" are correctly escaped"'
   );
 });

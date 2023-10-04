@@ -48,8 +48,8 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
           echo "export PATH=$PATH:\$PATH" > $out
           echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
           echo \${pkgs.lib.strings.escapeShellArg ${
-        serializeNixStr(nixStringFromTemplate(s, ...args)).nixExpression
-      }} >> $out
+            serializeNixStr(nixStringFromTemplate(s, ...args)).nixExpression
+          }} >> $out
           chmod +x $out
         ''
       `,
@@ -57,8 +57,8 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
     return {
       tag: "executable",
       description: `Executes TODO`,
-      nixExpression:
-        serializeNixStr(nixStringFromTemplate`${shellEnv}`).nixExpression,
+      nixExpression: serializeNixStr(nixStringFromTemplate`${shellEnv}`)
+        .nixExpression,
     };
   },
   withDevTools(this, extraDevTools) {
@@ -93,5 +93,5 @@ export const packageToEnvironment = (pkg: Package): Environment =>
         then expr.env
         else pkgs.mkShell { inputsFrom = [ expr ]; }
       )
-    `,
+    `
   );
