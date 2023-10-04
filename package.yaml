@@ -49,6 +49,7 @@ default-extensions:
 dependencies:
   - base >= 4.7 && < 5
   - aeson
+  - ansi-wl-pprint
   - containers
   - directory
   - getopt-generics
@@ -86,7 +87,9 @@ tests:
       - http-client
       - lens
       - lens-aeson
+      - lens-regex-pcre
       - mockery
+      - pcre-heavy
       - silently
       - wreq
       - yaml

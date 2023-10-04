@@ -1,9 +1,9 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Garner.Optparse
-  ( getWithGarnerTsOptions,
-    getWithoutGarnerTsOptions,
+  ( getOpts,
     Options (..),
+    OptionType (..),
     WithGarnerTsCommand (..),
     WithoutGarnerTsCommand (..),
     CommandOptions (..),
@@ -14,27 +14,44 @@ import qualified Data.Map as Map
 import Garner.GarnerConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
+import qualified Options.Applicative.Help.Pretty as OA
+import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
-getWithGarnerTsOptions :: Targets -> IO WithGarnerTsCommand
-getWithGarnerTsOptions = mkOpts . withGarnerTsParser
-
-getWithoutGarnerTsOptions :: IO WithoutGarnerTsCommand
-getWithoutGarnerTsOptions = mkOpts withoutGarnerTsParser
-
-mkOpts :: Parser a -> IO a
-mkOpts parser =
+getOpts :: OptionType -> IO Options
+getOpts oType =
   customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
   where
+    unavailable :: OA.Doc
+    unavailable =
+      let formatCommands cmdInfo = [PP.string cmd | (cmd, _, _) <- cmdInfo]
+       in PP.nest
+            2
+            $ PP.vsep
+              ( PP.string "Unavailable commands:"
+                  : case oType of
+                    WithGarnerTs _ -> formatCommands withouGarnerTsCommandInfo
+                    WithoutGarnerTs -> formatCommands withGarnerTsCommandInfo
+              )
+    parser :: Parser Options
+    parser = case oType of
+      WithGarnerTs garnerConfig -> WithGarnerTsOpts garnerConfig <$> withGarnerTsParser (targets garnerConfig)
+      WithoutGarnerTs -> WithoutGarnerTsOpts <$> withoutGarnerTsParser
     opts =
       info
         (parser <**> helper)
         ( fullDesc
             <> progDesc "Develop, build, and test your projects reliably and easily"
             <> header "garner - the project manager"
+            <> footerDoc (Just unavailable)
         )
 
+data OptionType
+  = WithGarnerTs GarnerConfig
+  | WithoutGarnerTs
+  deriving stock (Eq, Show)
+
 data Options
-  = WithGarnerTsOpts WithGarnerTsCommand GarnerConfig
+  = WithGarnerTsOpts GarnerConfig WithGarnerTsCommand
   | WithoutGarnerTsOpts WithoutGarnerTsCommand
 
 data WithoutGarnerTsCommand
@@ -47,25 +64,36 @@ data WithGarnerTsCommand
   | Ci CommandOptions
   deriving stock (Eq, Show)
 
+withGarnerTsCommandInfo :: [(String, String, Targets -> Parser WithGarnerTsCommand)]
+withGarnerTsCommandInfo =
+  [ ("run", "Build and run the default executable of a target", withCommandOptions Run),
+    ("enter", "Enter a devshell for a target", withCommandOptions Enter),
+    ("gen", "Generate the flake.nix file and exit", const $ pure Gen),
+    ("ci", "Run the garnix ci tests locally", withCommandOptions Ci)
+  ]
+  where
+    withCommandOptions constructor target =
+      constructor <$> commandOptionsParser target
+
 withGarnerTsParser :: Targets -> Parser WithGarnerTsCommand
 withGarnerTsParser targets =
   subparser $
     mconcat
-      [ OA.command "ci" (info (withCommandOptions Ci) (progDesc "Run the garnix ci tests locally")),
-        OA.command "gen" (info (pure Gen) (progDesc "Generate the flake.nix file and exit")),
-        OA.command "run" (info (withCommandOptions Run) (progDesc "Build and run the default executable of a target")),
-        OA.command "enter" (info (withCommandOptions Enter) (progDesc "Enter a devshell for a target"))
+      [ OA.command cmd (info (runner targets) (progDesc desc))
+        | (cmd, desc, runner) <- withGarnerTsCommandInfo
       ]
-  where
-    withCommandOptions constructor =
-      constructor <$> commandOptionsParser targets
+
+withouGarnerTsCommandInfo :: [(String, String, Parser WithoutGarnerTsCommand)]
+withouGarnerTsCommandInfo =
+  [("init", "Infer a garner.ts file from the project layout", pure Init)]
 
 withoutGarnerTsParser :: Parser WithoutGarnerTsCommand
 withoutGarnerTsParser =
   subparser $
-    OA.command "init" $
-      info (pure Init) $
-        progDesc "Infer a garner.ts file from the project layout"
+    mconcat
+      [ OA.command cmd (info runner (progDesc desc))
+        | (cmd, desc, runner) <- withouGarnerTsCommandInfo
+      ]
 
 data CommandOptions = CommandOptions
   { target :: String,
