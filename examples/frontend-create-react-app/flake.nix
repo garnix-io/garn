@@ -123,97 +123,56 @@
           main = {
             type = "app";
             program = "${
+        let dev = 
+    let expr = 
+    let
+      npmlock2nix = import npmlock2nix-repo {
+        inherit pkgs;
+      };
+      pkgs = import "${nixpkgs}" {
+        config.permittedInsecurePackages = [];
+        inherit system;
+      };
+    in
+    npmlock2nix.v2.build
+      {
+        src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix";
+    })
+;
+        buildCommands = [ "npm run test -- --watchAll=false" "mkdir $out" ];
+        installPhase = "true";
+        node_modules_attrs = {
+          nodejs = pkgs.nodejs-18_x;
+        };
+      }
+  ;
+    in
+      (if expr ? env
+        then expr.env
+        else pkgs.mkShell { inputsFrom = [ expr ]; }
+      )
+    ; in
         pkgs.runCommand "shell-env" {
-          buildInputs = (
-    let expr = 
-    let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      };
-    in
-    npmlock2nix.v2.build
-      {
-        src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./.;
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix";
-    })
-;
-        buildCommands = [ "npm run test -- --watchAll=false" "mkdir $out" ];
-        installPhase = "true";
-        node_modules_attrs = {
-          nodejs = pkgs.nodejs-18_x;
-        };
-      }
-  ;
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    ).buildInputs;
-          nativeBuildInputs = (
-    let expr = 
-    let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      };
-    in
-    npmlock2nix.v2.build
-      {
-        src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./.;
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix";
-    })
-;
-        buildCommands = [ "npm run test -- --watchAll=false" "mkdir $out" ];
-        installPhase = "true";
-        node_modules_attrs = {
-          nodejs = pkgs.nodejs-18_x;
-        };
-      }
-  ;
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    ).nativeBuildInputs;
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
         } ''
           echo "export PATH=$PATH:$PATH" > $out
+          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
           echo ${pkgs.lib.strings.escapeShellArg "npm run start"} >> $out
           chmod +x $out
         ''
