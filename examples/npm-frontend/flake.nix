@@ -69,50 +69,35 @@
         {
           frontend =
             let
-              expr =
-                let
-                  npmlock2nix = import npmlock2nix-repo {
-                    inherit pkgs;
-                  };
-                  pkgs = import "${nixpkgs}" {
-                    config.permittedInsecurePackages = [ ];
-                    inherit system;
-                  };
-                in
-                npmlock2nix.v2.build
-                  {
-                    src =
-                      (
-                        let
-                          lib = pkgs.lib;
-                          lastSafe = list:
-                            if lib.lists.length list == 0
-                            then null
-                            else lib.lists.last list;
-                        in
-                        builtins.path
-                          {
-                            path = ./.;
-                            filter = path: type:
-                              let
-                                fileName = lastSafe (lib.strings.splitString "/" path);
-                              in
-                              fileName != "flake.nix";
-                          }
-                      )
-                    ;
-                    buildCommands = [ "" "mkdir $out" ];
-                    installPhase = "true";
-                    node_modules_attrs = {
-                      nodejs = pkgs.nodejs-18_x;
-                    };
-                  }
-              ;
+              npmlock2nix = import npmlock2nix-repo {
+                inherit pkgs;
+              };
             in
-            (if expr ? env
-            then expr.env
-            else pkgs.mkShell { inputsFrom = [ expr ]; }
-            )
+            npmlock2nix.v2.shell {
+              src =
+                (
+                  let
+                    lib = pkgs.lib;
+                    lastSafe = list:
+                      if lib.lists.length list == 0
+                      then null
+                      else lib.lists.last list;
+                  in
+                  builtins.path
+                    {
+                      path = ./.;
+                      filter = path: type:
+                        let
+                          fileName = lastSafe (lib.strings.splitString "/" path);
+                        in
+                        fileName != "flake.nix";
+                    }
+                )
+              ;
+              node_modules_attrs = {
+                nodejs = pkgs.nodejs-18_x;
+              };
+            }
           ;
         });
       apps = forAllSystems (system:
@@ -124,19 +109,13 @@
             type = "app";
             program = "${
         let dev = 
-    let expr = 
     let
       npmlock2nix = import npmlock2nix-repo {
         inherit pkgs;
       };
-      pkgs = import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      };
     in
-    npmlock2nix.v2.build
-      {
-        src = 
+    npmlock2nix.v2.shell {
+      src = 
   (let
     lib = pkgs.lib;
     lastSafe = list :
@@ -154,19 +133,11 @@
          fileName != "flake.nix";
     })
 ;
-        buildCommands = [ "" "mkdir $out" ];
-        installPhase = "true";
-        node_modules_attrs = {
-          nodejs = pkgs.nodejs-18_x;
-        };
-      }
-  ;
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    ; in
+      node_modules_attrs = {
+        nodejs = pkgs.nodejs-18_x;
+      };
+    }
+  ; in
         pkgs.runCommand "shell-env" {
           buildInputs = dev.buildInputs;
           nativeBuildInputs = dev.nativeBuildInputs;
