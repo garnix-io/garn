@@ -37,10 +37,7 @@ run = withCli $ do
 
 fromToplevelDerivation :: String -> String -> String -> IO String
 fromToplevelDerivation garnerLibRoot varName rootExpr = do
-  system :: String <- do
-    Stdout json <- cmd "nix" nixArgs "eval --impure --json --expr builtins.currentSystem"
-    pure $ either error id $ eitherDecode json
-  Stdout json <- cmd "nix" nixArgs "eval" (".#lib." <> system) "--json --apply" [nixExpr]
+  Stdout json <- cmd "nix" nixArgs "eval --expr" [nixExpr] "--json"
   pkgs :: Map String PkgInfo <- case eitherDecode json of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in " <> cs json)
@@ -55,25 +52,27 @@ fromToplevelDerivation garnerLibRoot varName rootExpr = do
   where
     nixExpr =
       [i|
-        lib :
-        let mk = name: value: {
+        let nameValuePair = name: value: { inherit name value; };
+            filterAttrs = pred: set: builtins.listToAttrs (builtins.concatMap (name: let v = set.${name}; in if pred name v then [(nameValuePair name v)] else []) (builtins.attrNames set));
+            mk = name: value: {
               attribute = name;
               description = if value ? meta.description
                 then value.meta.description
                 else null;
             };
+           isDerivation = value: value.type or null == "derivation";
             isNotBroken = value:
                 let broken = (builtins.tryEval (value.meta.broken or false));
                 in broken.success && !broken.value;
             doesNotThrow = value : (builtins.tryEval value).success;
-            filterAttrs = lib.attrsets.filterAttrs
+            filterAttrs' = filterAttrs
               (name: value:
                     doesNotThrow value
-                && lib.isDerivation value
+                && isDerivation value
                 && isNotBroken value);
         in
-          (lib.mapAttrs mk
-            (filterAttrs (#{rootExpr}))
+          (builtins.mapAttrs mk
+            (filterAttrs' (#{rootExpr}))
           )
       |]
 

@@ -28,9 +28,7 @@
               # directories shouldn't have leading or trailing slashes
               ignored = [
                 "examples"
-                "flake.nix"
                 ".github"
-                "justfile"
                 "scripts"
                 "test/check-isolated-garner.sh"
               ];
@@ -51,6 +49,7 @@
             (ourHaskell.callCabal2nix "garn" src { }).overrideAttrs
               (
                 original: {
+                  requiredSystemFeatures = [ "recursive-nix" ];
                   nativeBuildInputs = original.nativeBuildInputs ++ [
                     pkgs.deno
                     pkgs.makeWrapper
@@ -58,12 +57,18 @@
                     pkgs.zsh
                     cabal2json.packages.${system}.cabal2json
                   ];
+                  preCheck = ''
+                    export HOME=$(pwd)
+                    export PATH=${pkgs.curl}/bin:${pkgs.which}/bin:${pkgs.just}/bin:$PATH
+                  '';
                   postInstall = ''
                     wrapProgram "$out/bin/codegen" \
                         --set LC_ALL C.UTF-8 \
                         --prefix PATH : ${pkgs.lib.makeBinPath [
                       pkgs.git
                       pkgs.nix
+                      pkgs.curl
+                      pkgs.which
                     ]}
                     wrapProgram "$out/bin/garner" \
                         --set LC_ALL C.UTF-8 \
@@ -71,10 +76,10 @@
                       pkgs.deno
                       pkgs.git
                       pkgs.nix
+                      pkgs.curl
+                      pkgs.which
                     ]}
                   '';
-
-                  doCheck = false;
                 }
               );
           fileserver =
