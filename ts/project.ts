@@ -82,7 +82,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
     ...deps,
     ...helpers,
     tag: "project",
-    description: 'huhu',
+    description: "huhu",
     settings,
   };
 }

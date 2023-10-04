@@ -53,7 +53,7 @@ spec = do
                   run.*
                   enter.*
                   gen.*
-                  ci.*
+                  check.*
               |]
         it "lists unavailable commands" $ do
           output <- runGarner ["--help"] "" repoDir Nothing
@@ -64,7 +64,7 @@ spec = do
                   run
                   enter
                   gen
-                  ci
+                  check
               |]
           writeFile "garner.ts" ""
           output <- runGarner ["--help"] "" repoDir Nothing
@@ -418,7 +418,7 @@ shellTestCommand =
     fi
   |]
 
-shouldMatch :: HasCallStack => String -> String -> Expectation
+shouldMatch :: (HasCallStack) => String -> String -> Expectation
 shouldMatch actual expected = case compileM (cs expected) [] of
   Left err -> expectationFailure $ "invalid regex: " <> show err
   Right regex ->

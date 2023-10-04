@@ -129,10 +129,6 @@ export const newFormatFlake = (
   }`;
 };
 
-type Enterable = Project & {
-  settings: { defaults: { environment: string } };
-};
-
 const findEnterable = (
   config: Record<string, unknown>
 ): Record<string, Project> => {

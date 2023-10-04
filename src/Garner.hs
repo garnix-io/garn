@@ -67,7 +67,7 @@ runWith env (WithGarnerTsOpts garnerConfig opts) = do
         waitForProcess procHandle
       hPutStrLn stderr $ "[garner] Exiting " <> target <> " shell."
       pure ()
-    Ci (CommandOptions {target}) -> do
+    Check (CommandOptions {target}) -> do
       Exit c <- cmd "nix build" nixArgs (".#" <> target)
       exitWith c
 

@@ -6,7 +6,7 @@ list:
 pre-push: fmt github-ci check-examples
 
 # Run checks that we can’t yet run via the flake
-github-ci: test codegen check-isolated-garner run-example-ci test-ts
+github-ci: test codegen check-isolated-garner run-example-check test-ts
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
@@ -80,13 +80,13 @@ run-garner example *args="": hpack
   cd examples/{{ example }}
   cabal run garner:garner -- {{ args }}
 
-run-garner-and-ci example target:
-  just run-garner {{ example }} ci {{ target }}
+run-garner-and-check example target:
+  just run-garner {{ example }} check {{ target }}
 
-run-example-ci:
-  just run-garner-and-ci frontend-create-react-app main
-  just run-garner-and-ci frontend-yarn-webpack frontend
-  just run-garner-and-ci go-http-backend server
+run-example-check:
+  just run-garner-and-check frontend-create-react-app main
+  just run-garner-and-check frontend-yarn-webpack frontend
+  just run-garner-and-check go-http-backend server
 
 check-examples:
   just run-garner haskell run haskellExecutable
