@@ -68,7 +68,19 @@ export const mkNpmFrontend = (args: {
         };
       }
   `);
-  const devShell: Environment = packageToEnvironment(pkg);
+  const devShell: Environment = mkEnvironment(`
+    let
+      npmlock2nix = import npmlock2nix-repo {
+        inherit pkgs;
+      };
+    in
+    npmlock2nix.v2.shell {
+      src = ${nixSource(args.src)};
+      node_modules_attrs = {
+        nodejs = ${nodejs};
+      };
+    }
+  `);
   const startDev: Executable = devShell.shell`npm run start`;
   return mkProject(
     args.description,
