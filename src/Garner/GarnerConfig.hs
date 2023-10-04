@@ -42,7 +42,7 @@ readGarnerConfig tsRunner = do
 
         type GarnerConfig = {
           targets: Record<string, {
-            description?: string
+            description: string
             checks?: Array<string>
           }>,
           flakeFile: string,
