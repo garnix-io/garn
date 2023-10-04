@@ -1,4 +1,4 @@
-import { Package, mkPackage } from "./base.ts";
+import { OldPackage, mkOldPackage } from "./base.ts";
 import { nixSource } from "./utils.ts";
 
 const nodeVersions = {
@@ -41,9 +41,9 @@ export const mkNpmFrontend = (args: {
   src: string;
   nodeVersion: NodeVersion;
   testCommand: string;
-}): Package => {
+}): OldPackage => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
-  return mkPackage({
+  return mkOldPackage({
     description: args.description,
     expression: `
       let
@@ -71,9 +71,9 @@ export const mkYarnFrontend = (args: {
   nodeVersion: keyof typeof nodeVersions;
   testCommand: string;
   serverStartCommand: string;
-}): Package => {
+}): OldPackage => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
-  return mkPackage({
+  return mkOldPackage({
     description: args.description,
     expression: `
       let

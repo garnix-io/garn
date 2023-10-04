@@ -1,26 +1,26 @@
-import { mkPackage } from "../../ts/base.ts";
+import { mkOldPackage } from "../../ts/base.ts";
 
-export const catch_ = mkPackage({
+export const catch_ = mkOldPackage({
   expression: `pkgs.catch`,
   description: ""
 });
 
-export const foo_a = mkPackage({
+export const foo_a = mkOldPackage({
   expression: `pkgs.foo-a`,
   description: ""
 });
 
-export const instanceOf_ = mkPackage({
+export const instanceOf_ = mkOldPackage({
   expression: `pkgs.instanceOf`,
   description: ""
 });
 
-export const super_ = mkPackage({
+export const super_ = mkOldPackage({
   expression: `pkgs.super`,
   description: ""
 });
 
-export const void_ = mkPackage({
+export const void_ = mkOldPackage({
   expression: `pkgs.void`,
   description: ""
 });

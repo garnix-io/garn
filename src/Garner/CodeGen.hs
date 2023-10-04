@@ -48,7 +48,7 @@ fromToplevelDerivation garnerLibRoot varName rootExpr = do
   pure $
     unindent
       [i|
-        import { mkPackage } from "#{garnerLibRoot}/base.ts";
+        import { mkOldPackage } from "#{garnerLibRoot}/base.ts";
 
       |]
       <> pkgsString varName sanitizedPkgs
@@ -101,7 +101,7 @@ formatPkg varName (name, pkgInfo) =
    in pkgDoc pkgInfo
         <> unindent
           [i|
-            export const #{name} = mkPackage({
+            export const #{name} = mkOldPackage({
               expression: `#{varName}.#{attribute pkgInfo}`,
               description: #{escapedDoc}
             });

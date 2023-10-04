@@ -1,9 +1,9 @@
-import { mkPackage } from "../../ts/base.ts";
+import { mkOldPackage } from "../../ts/base.ts";
 
 /**
  * some description
  */
-export const foo_a = mkPackage({
+export const foo_a = mkOldPackage({
   expression: `pkgs.foo-a`,
   description: "some description"
 });

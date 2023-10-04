@@ -4,11 +4,10 @@ import {
   projectDefaultEnvironment,
   projectDefaultExecutable,
 } from "./project.ts";
-import { Package } from "./base.ts";
+import { OldPackage } from "./base.ts";
 import { NewPackage, isNewPackage } from "./package.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-import { dbg } from "./utils.ts";
-import { Executable, isExecutable } from "./executable.ts";
+import { Executable } from "./executable.ts";
 import { Environment } from "./environment.ts";
 
 type Targets = Record<
@@ -22,7 +21,7 @@ type Targets = Record<
 export const toTargets = <A>(
   garnerExports: Record<string, unknown>
 ): Targets => {
-  if (isPackageRecord(garnerExports)) {
+  if (isOldPackageRecord(garnerExports)) {
     return garnerExports;
   }
   const result: Targets = {};
@@ -39,18 +38,18 @@ export const toTargets = <A>(
 
 export const formatFlake = (
   nixpkgsInput: string,
-  config: Record<string, Package | unknown>
+  config: Record<string, OldPackage | unknown>
 ): string => {
-  if (isPackageRecord(config)) {
+  if (isOldPackageRecord(config)) {
     return oldFormatFlake(nixpkgsInput, config);
   } else {
     return newFormatFlake(nixpkgsInput, config);
   }
 };
 
-function isPackageRecord(
+function isOldPackageRecord(
   config: Record<string, unknown>
-): config is Record<string, Package> {
+): config is Record<string, OldPackage> {
   return (
     Object.values(config).find(
       (c) =>
@@ -58,7 +57,7 @@ function isPackageRecord(
           typeof c === "object" &&
           c != null &&
           "tag" in c &&
-          c.tag == "package"
+          c.tag == "oldPackage"
         )
     ) == null
   );
@@ -66,7 +65,7 @@ function isPackageRecord(
 
 const oldFormatFlake = (
   nixpkgsInput: string,
-  config: Record<string, Package>
+  config: Record<string, OldPackage>
 ): string => {
   const packages = Object.entries(config).reduce(
     (acc, [name, pkg]) => acc + `${name} = ${pkg.nixExpression};`,

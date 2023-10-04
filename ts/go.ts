@@ -1,10 +1,10 @@
-import { Package, mkPackage } from "./base.ts";
+import { OldPackage, mkOldPackage } from "./base.ts";
 
 export const mkGoProject = (args: {
   description: string;
   src: string;
-}): Package =>
-  mkPackage({
+}): OldPackage =>
+  mkOldPackage({
     expression: `
       pkgs.buildGoModule {
         name = "go-project";

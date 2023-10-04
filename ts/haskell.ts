@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-import { Initializer, mkPackage, Package } from "./base.ts";
+import { Initializer, mkOldPackage, OldPackage } from "./base.ts";
 import { Environment, packageToEnvironment } from "./environment.ts";
 import { mkNewPackage, NewPackage } from "./package.ts";
 import { mkProject, ProjectWithDefaultEnvironment } from "./project.ts";

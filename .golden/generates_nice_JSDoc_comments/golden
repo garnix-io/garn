@@ -1,9 +1,9 @@
-import { mkPackage } from "../../ts/base.ts";
+import { mkOldPackage } from "../../ts/base.ts";
 
 /**
  * This one - eh, not so good!
  */
-export const bar = mkPackage({
+export const bar = mkOldPackage({
   expression: `pkgs.bar`,
   description: "This one - eh, not so good!"
 });
@@ -11,7 +11,7 @@ export const bar = mkPackage({
 /**
  * This is the bestest derivation.
  */
-export const foo = mkPackage({
+export const foo = mkOldPackage({
   expression: `pkgs.foo`,
   description: "This is the bestest derivation."
 });

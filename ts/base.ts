@@ -1,19 +1,19 @@
-export type Package = {
-  tag: "package";
+export type OldPackage = {
+  tag: "oldPackage";
   description: string;
   nixExpression: string;
   envExpression: (nixExpression: string) => string;
-  addDevTools: (extraDevTools: Array<Package>) => Package;
-  extraDevTools: Array<Package>;
-  setStartCommand: (startCommand: Array<string>) => Package;
+  addDevTools: (extraDevTools: Array<OldPackage>) => OldPackage;
+  extraDevTools: Array<OldPackage>;
+  setStartCommand: (startCommand: Array<string>) => OldPackage;
   startCommand: Array<string> | null;
 };
 
-export const mkPackage = (args: {
+export const mkOldPackage = (args: {
   expression: string;
   description: string;
-}): Package => ({
-  tag: "package",
+}): OldPackage => ({
+  tag: "oldPackage",
   description: args.description,
   nixExpression: args.expression,
   envExpression(nixRef): string {
@@ -33,14 +33,14 @@ export const mkPackage = (args: {
             else pkgs.mkShell {inputsFrom = [ expr ];}
           )${devToolsOverride}`;
   },
-  addDevTools(this: Package, extraDevTools) {
+  addDevTools(this: OldPackage, extraDevTools) {
     return {
       ...this,
       extraDevTools: [...this.extraDevTools, ...extraDevTools],
     };
   },
   extraDevTools: [],
-  setStartCommand(this: Package, startCommand) {
+  setStartCommand(this: OldPackage, startCommand) {
     return {
       ...this,
       startCommand,

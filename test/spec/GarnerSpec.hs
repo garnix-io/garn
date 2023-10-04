@@ -109,7 +109,7 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkPackage } from "#{repoDir}/ts/base.ts"
+                  import { mkOldPackage } from "#{repoDir}/ts/base.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
                   import { mkNewPackage } from "#{repoDir}/ts/package.ts"
 
@@ -119,7 +119,7 @@ spec = do
                     compiler: "ghc94",
                     src: "."
                   })
-                  const hello = mkPackage({
+                  const hello = mkOldPackage({
                     description: "hi",
                     expression: `pkgs.hello`,
                   });
@@ -133,7 +133,7 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkPackage } from "#{repoDir}/ts/base.ts"
+                  import { mkNewPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
@@ -143,15 +143,9 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkPackage({
-                    description: "hi",
-                    expression: `pkgs.hello`,
-                  });
+                  const hello = mkNewPackage(`pkgs.hello`);
 
-                  const cowsay = mkPackage({
-                    description: "moocow coming down along the road",
-                    expression: `pkgs.cowsay`,
-                  });
+                  const cowsay = mkNewPackage(`pkgs.cowsay`);
 
                   export const bar = foo.withDevTools([hello, cowsay]);
                 |]
@@ -164,7 +158,7 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkPackage } from "#{repoDir}/ts/base.ts"
+                  import { mkNewPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
@@ -174,10 +168,7 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkPackage({
-                    description: "hi",
-                    expression: `pkgs.hello`,
-                  });
+                  const hello = mkNewPackage(`pkgs.hello`);
 
                   export const bar = foo.withDevTools([hello]);
                 |]
@@ -202,9 +193,9 @@ spec = do
           writeFile
             "garner.ts"
             [i|
-              import { mkPackage } from "#{repoDir}/ts/base.ts"
+              import { mkOldPackage } from "#{repoDir}/ts/base.ts"
 
-              export const foo = mkPackage({
+              export const foo = mkOldPackage({
                 description: "this is foo",
                 expression: `
                   pkgs.stdenv.mkDerivation({
