@@ -1,3 +1,4 @@
+import { mkProject } from "http://localhost:8777/project.ts";
 import * as garner from "../../ts/mod.ts";
 import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
 
@@ -8,4 +9,7 @@ export const haskellExecutable = garner.haskell.mkHaskell({
   src: ".",
 });
 
-export const hello = nixpkgs.hello;
+export const hello = mkProject(
+  { hello: garner.shell`${nixpkgs.hello}/bin/hello` },
+  { defaults: { executable: "hello" } }
+);

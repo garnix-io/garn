@@ -123,6 +123,10 @@
       }
   }/bin/garnerTest";
           };
+          hello = {
+            type = "app";
+            program = "${pkgs.hello}/bin/hello";
+          };
         });
     };
 }
