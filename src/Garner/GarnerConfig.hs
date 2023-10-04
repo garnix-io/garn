@@ -39,10 +39,17 @@ readGarnerConfig tsRunner = do
         import * as targets from "#{dir}/garner.ts"
         import { formatFlake } from "#{tsRunner}"
 
-        console.log(JSON.stringify({
+        type GarnerConfig = {
+          targets: Record<string, { description: string }>,
+          flakeFile: string,
+        }
+
+        const config: GarnerConfig = {
           targets,
           flakeFile: formatFlake("#{nixpkgsInput}", targets),
-        }));
+        };
+
+        console.log(JSON.stringify(config));
       |]
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
@@ -53,7 +60,7 @@ readGarnerConfig tsRunner = do
 writeGarnerConfig :: GarnerConfig -> IO ()
 writeGarnerConfig garnerConfig = do
   writeFile "flake.nix" $ flakeFile garnerConfig
-  cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "fmt ./flake.nix"
+  cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
 
 checkGarnerFileExists :: IO ()
 checkGarnerFileExists = do
@@ -66,9 +73,9 @@ checkGarnerFileExists = do
 
           Here's an example `garner.ts` file for npm frontends:
 
-            import { mkNpmFrontend } from "http://localhost:8777/typescript.ts";
+            import * as garner from "http://localhost:8777/mod.ts";
 
-            export const frontend = mkNpmFrontend({
+            export const frontend = garner.typescript.mkNpmFrontend({
               src: "./.",
               description: "An NPM frontend",
             });

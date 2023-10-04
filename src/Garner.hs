@@ -41,13 +41,12 @@ readOptionsAndConfig env = do
   if hasGarner
     then do
       garnerConfig <- readGarnerConfig (tsRunnerFilename env)
-      options <- getWithGarnerTsOptions $ targets garnerConfig
-      pure $ WithGarnerTsOpts options garnerConfig
-    else WithoutGarnerTsOpts <$> getWithoutGarnerTsOptions
+      getOpts (WithGarnerTs garnerConfig)
+    else getOpts WithoutGarnerTs
 
 runWith :: Env -> Options -> IO ()
 runWith env (WithoutGarnerTsOpts Init) = initGarnerTs $ initFileName env
-runWith env (WithGarnerTsOpts opts garnerConfig) = do
+runWith env (WithGarnerTsOpts garnerConfig opts) = do
   writeGarnerConfig garnerConfig
   case opts of
     Gen -> pure ()

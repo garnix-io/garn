@@ -3,11 +3,13 @@
 
 module GarnerSpec where
 
-import Control.Exception (bracket)
-import Control.Lens (from, (.~), (<>~))
+import Control.Exception (bracket, catch)
+import Control.Lens (from, (<>~))
+import Control.Monad (unless)
 import qualified Data.Aeson as Aeson
 import Data.Aeson.Lens
 import Data.List (sort)
+import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import Data.Vector.Generic.Lens (vector)
@@ -16,6 +18,7 @@ import Development.Shake (StdoutTrim (..), cmd)
 import Garner
 import System.Directory
 import System.Environment (withArgs)
+import System.Exit (ExitCode (..))
 import System.IO (Handle, IOMode (..), withFile)
 import qualified System.IO as Sys
 import System.IO.Silently (hCapture, hCapture_)
@@ -24,6 +27,7 @@ import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)
 import Test.Mockery.Directory (inTempDirectory)
 import Test.Mockery.Environment (withModifiedEnvironment)
+import Text.Regex.PCRE.Heavy (compileM, (=~))
 
 spec :: Spec
 spec = do
@@ -31,6 +35,46 @@ spec = do
 
   around_ (withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]) $ do
     describe "garner" $ around_ inTempDirectory $ do
+      describe "--help" $ do
+        it "lists available commands" $ do
+          output <- runGarner ["--help"] "" repoDir Nothing
+          stdout output
+            `shouldMatch` unindent
+              [i|
+                Available commands:
+                  init.*
+              |]
+          writeFile "garner.ts" ""
+          output <- runGarner ["--help"] "" repoDir Nothing
+          stdout output
+            `shouldMatch` unindent
+              [i|
+                Available commands:
+                  run.*
+                  enter.*
+                  gen.*
+                  ci.*
+              |]
+        it "lists unavailable commands" $ do
+          output <- runGarner ["--help"] "" repoDir Nothing
+          stdout output
+            `shouldMatch` unindent
+              [i|
+                Unavailable commands:
+                  run
+                  enter
+                  gen
+                  ci
+              |]
+          writeFile "garner.ts" ""
+          output <- runGarner ["--help"] "" repoDir Nothing
+          stdout output
+            `shouldMatch` unindent
+              [i|
+                Unavailable commands:
+                  init
+              |]
+
       describe "run" $ do
         it "runs a simple Haskell program" $ do
           writeHaskellProject repoDir
@@ -211,9 +255,9 @@ spec = do
           readFile "garner.ts"
             `shouldReturn` unindent
               [i|
-                     import { mkHaskell } from "http://localhost:8777/haskell.ts"
+                     import * as garner from "http://localhost:8777/mod.ts"
 
-                     export const garner = mkHaskell({
+                     export const garner = garner.haskell.mkHaskell({
                        description: "",
                        executable: "",
                        compiler: "ghc94",
@@ -340,8 +384,10 @@ runGarner args stdin repoDir shell = do
                     tsRunnerFilename = repoDir <> "/ts/runner.ts",
                     initFileName = repoDir <> "/ts/init.ts"
                   }
-          options <- readOptionsAndConfig env
-          runWith env options
+          let go = do
+                options <- readOptionsAndConfig env
+                runWith env options
+          go `catch` \(_ :: ExitCode) -> pure ()
   return $ ProcResult {..}
   where
     withTempFile :: (Handle -> IO a) -> IO a
@@ -370,3 +416,11 @@ shellTestCommand =
         fi
     fi
   |]
+
+shouldMatch :: HasCallStack => String -> String -> Expectation
+shouldMatch actual expected = case compileM (cs expected) [] of
+  Left err -> expectationFailure $ "invalid regex: " <> show err
+  Right regex ->
+    unless (actual =~ regex) $
+      expectationFailure $
+        "expected " <> actual <> " to match regex " <> show expected

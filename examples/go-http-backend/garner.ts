@@ -1,7 +1,6 @@
-import { Package } from "http://localhost:8777/base.ts";
-import { mkGoProject } from "http://localhost:8777/go.ts";
+import * as garner from "http://localhost:8777/mod.ts";
 
-export const server: Package = mkGoProject({
+export const server: garner.Package = garner.go.mkGoProject({
   description: "example backend server in go",
   src: "./.",
 });
