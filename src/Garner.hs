@@ -17,7 +17,7 @@ import Garner.Optparse
 import Paths_garner
 import System.Directory (doesFileExist)
 import System.Exit (exitWith)
-import System.IO (Handle)
+import System.IO (Handle, hPutStrLn, stderr)
 import qualified System.IO
 import qualified System.Posix.User as POSIX
 import System.Process
