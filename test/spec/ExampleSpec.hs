@@ -79,3 +79,16 @@ spec = aroundAll_ withFileServer $ do
           $ do
             body <- (^. responseBody) <$> retryGet "http://localhost:3000"
             pure $ defaultGolden "frontend-yarn-webpack" (cs body)
+
+  describe "go-http-backend" $ do
+    describe "run" $ do
+      it "starts the backend" $ do
+        withCmd
+          ( cmd
+              (Cwd "examples/go-http-backend")
+              "cabal run garner:garner --"
+              "run server"
+          )
+          $ do
+            body <- (^. responseBody) <$> retryGet "http://localhost:3000"
+            pure $ defaultGolden "go-http-backend" (cs body)
