@@ -11,6 +11,7 @@ import Development.Shake (CmdOption (EchoStderr, EchoStdout), Stdout (Stdout), c
 import GHC.Generics (Generic)
 import Garner.Common (nixArgs, nixpkgsInput)
 import System.Directory (doesFileExist, getCurrentDirectory)
+import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)
 import System.IO.Temp (withSystemTempFile)
@@ -52,7 +53,11 @@ readGarnerConfig tsRunner = do
         console.log(JSON.stringify(config));
       |]
     hClose mainHandle
-    Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
+    imap <- lookupEnv "DENO_IMPORT_MAP"
+    let importMap = case imap of
+          Nothing -> ""
+          Just imap -> "--import-map " <> imap
+    Stdout out <- cmd $ "deno run " <> importMap <> " --quiet --check --allow-write " <> mainPath
     case eitherDecode out :: Either String GarnerConfig of
       Left err -> error $ "Unexpected package export from garner.ts:\n" <> err
       Right writtenConfig -> return writtenConfig
@@ -60,7 +65,7 @@ readGarnerConfig tsRunner = do
 writeGarnerConfig :: GarnerConfig -> IO ()
 writeGarnerConfig garnerConfig = do
   writeFile "flake.nix" $ flakeFile garnerConfig
-  cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
+  cmd_ [EchoStderr False, EchoStdout False] "nixpkgs-fmt" "./flake.nix"
 
 checkGarnerFileExists :: IO ()
 checkGarnerFileExists = do

@@ -59,7 +59,8 @@
                   ];
                   preCheck = ''
                     export HOME=$(pwd)
-                    export PATH=${pkgs.curl}/bin:${pkgs.which}/bin:${pkgs.just}/bin:$PATH
+                    export PATH=${pkgs.nixpkgs-fmt}/bin:${pkgs.curl}/bin:${pkgs.which}/bin:${pkgs.just}/bin:$PATH
+                    export DENO_IMPORT_MAP=${./vendor}/import_map.json
                   '';
                   postInstall = ''
                     wrapProgram "$out/bin/codegen" \
@@ -69,6 +70,7 @@
                       pkgs.nix
                       pkgs.curl
                       pkgs.which
+                      pkgs.nixpkgs-fmt
                     ]}
                     wrapProgram "$out/bin/garner" \
                         --set LC_ALL C.UTF-8 \
