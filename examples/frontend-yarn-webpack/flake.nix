@@ -73,63 +73,45 @@
         in
         {
           frontend =
-            (
-              let
-                expr =
-                  let
-                    pkgs = import "${nixpkgs}" {
-                      config.permittedInsecurePackages = [ ];
-                      inherit system;
-                    };
-                    packageJson = pkgs.lib.importJSON ./package.json;
-                    yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-                      nodejs = pkgs.nodejs-18_x;
-                      yarn = pkgs.yarn;
-                      src =
-                        (
+            let
+              pkgs = import "${nixpkgs}" {
+                config.permittedInsecurePackages = [ ];
+                inherit system;
+              };
+              packageJson = pkgs.lib.importJSON ./package.json;
+              yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+                nodejs = pkgs.nodejs-18_x;
+                yarn = pkgs.yarn;
+                src =
+                  (
+                    let
+                      lib = pkgs.lib;
+                      lastSafe = list:
+                        if lib.lists.length list == 0
+                        then null
+                        else lib.lists.last list;
+                    in
+                    builtins.path
+                      {
+                        path = ./.;
+                        filter = path: type:
                           let
-                            lib = pkgs.lib;
-                            lastSafe = list:
-                              if lib.lists.length list == 0
-                              then null
-                              else lib.lists.last list;
+                            fileName = lastSafe (lib.strings.splitString "/" path);
                           in
-                          builtins.path
-                            {
-                              path = ./.;
-                              filter = path: type:
-                                let
-                                  fileName = lastSafe (lib.strings.splitString "/" path);
-                                in
-                                fileName != "flake.nix";
-                            }
-                        )
-                      ;
-                      buildPhase = "yarn mocha";
-                    };
-                  in
-                  (pkgs.writeScriptBin "start-server" ''
-                    #!/usr/bin/env bash
-
-                    set -eu
-
-                    export PATH=${pkgs.yarn}/bin:$PATH
-                    export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
-                    yarn --version
-                    yarn start
-                  '')
+                          fileName != "flake.nix";
+                      }
+                  )
                 ;
-              in
-              (if expr ? env
-              then expr.env
-              else pkgs.mkShell { inputsFrom = [ expr ]; }
-              )
-            ).overrideAttrs (finalAttrs: previousAttrs: {
-              nativeBuildInputs =
-                previousAttrs.nativeBuildInputs
-                ++
-                [ pkgs.yarn ];
-            })
+                buildPhase = "yarn mocha";
+              };
+            in
+            pkgs.mkShell {
+              buildInputs = [ pkgs.yarn ];
+              shellHook = ''
+                export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
+                export NODE_PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules:$NODE_PATH
+              '';
+            }
           ;
         });
       apps = forAllSystems (system:
@@ -140,121 +122,51 @@
           frontend = {
             type = "app";
             program = "${
+        let dev = 
+    let
+        pkgs = import "${nixpkgs}" {
+        config.permittedInsecurePackages = [];
+        inherit system;
+      };
+        packageJson = pkgs.lib.importJSON ./package.json;
+        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+          nodejs = pkgs.nodejs-18_x;
+          yarn = pkgs.yarn;
+          src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix";
+    })
+;
+          buildPhase = "yarn mocha";
+        };
+    in
+      pkgs.mkShell {
+        buildInputs = [ pkgs.yarn ];
+        shellHook = ''
+          export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
+          export NODE_PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules:$NODE_PATH
+        '';
+      }
+  ; in
         pkgs.runCommand "shell-env" {
-          buildInputs = (
-          (
-    let expr = 
-    let
-        pkgs = import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      };
-        packageJson = pkgs.lib.importJSON ./package.json;
-        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-          nodejs = pkgs.nodejs-18_x;
-          yarn = pkgs.yarn;
-          src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./.;
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix";
-    })
-;
-          buildPhase = "yarn mocha";
-        };
-    in
-      (pkgs.writeScriptBin "start-server" ''
-        #!/usr/bin/env bash
-
-        set -eu
-
-        export PATH=${pkgs.yarn}/bin:$PATH
-        export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
-        yarn --version
-        yarn start
-      '')
-  ;
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    ).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ pkgs.yarn ];
-          })
-        ).buildInputs;
-          nativeBuildInputs = (
-          (
-    let expr = 
-    let
-        pkgs = import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      };
-        packageJson = pkgs.lib.importJSON ./package.json;
-        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-          nodejs = pkgs.nodejs-18_x;
-          yarn = pkgs.yarn;
-          src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./.;
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix";
-    })
-;
-          buildPhase = "yarn mocha";
-        };
-    in
-      (pkgs.writeScriptBin "start-server" ''
-        #!/usr/bin/env bash
-
-        set -eu
-
-        export PATH=${pkgs.yarn}/bin:$PATH
-        export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
-        yarn --version
-        yarn start
-      '')
-  ;
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    ).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ pkgs.yarn ];
-          })
-        ).nativeBuildInputs;
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
         } ''
           echo "export PATH=$PATH:$PATH" > $out
+          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
           echo ${pkgs.lib.strings.escapeShellArg "yarn start"} >> $out
           chmod +x $out
         ''

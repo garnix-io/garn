@@ -1,4 +1,8 @@
-import { Environment, packageToEnvironment } from "./environment.ts";
+import {
+  Environment,
+  mkEnvironment,
+  packageToEnvironment,
+} from "./environment.ts";
 import { Executable } from "./executable.ts";
 import { mkPackage, Package } from "./package.ts";
 import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
@@ -110,20 +114,37 @@ export const mkYarnFrontend = (args: {
         ${args.serverStartCommand}
       '')
   `);
-  const yarn: Package = {
-    tag: "package",
-    nixExpression: nixpkgs.yarn.nixExpression,
-  };
-  const devShell: Environment = packageToEnvironment(pkg).withDevTools([yarn]);
+  const devShell: Environment = mkEnvironment(`
+    let
+        pkgs = ${pkgs};
+        packageJson = pkgs.lib.importJSON ./package.json;
+        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+          nodejs = ${nodejs};
+          yarn = pkgs.yarn;
+          src = ${nixSource(args.src)};
+          buildPhase = ${JSON.stringify(args.testCommand)};
+        };
+    in
+      pkgs.mkShell {
+        buildInputs = [ pkgs.yarn ];
+        shellHook = ''
+          export PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules/.bin:$PATH
+          export NODE_PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules:$NODE_PATH
+        '';
+      }
+  `);
   const startDev: Executable = devShell.shell`${args.serverStartCommand}`;
-  return mkProject({
-    pkg,
-    devShell,
-    startDev,
-  }, {
-    defaults: {
-      environment: "devShell",
-      executable: "startDev",
+  return mkProject(
+    {
+      pkg,
+      devShell,
+      startDev,
     },
-  });
+    {
+      defaults: {
+        environment: "devShell",
+        executable: "startDev",
+      },
+    },
+  );
 };

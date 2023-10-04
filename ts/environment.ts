@@ -28,20 +28,9 @@ export const emptyEnvironment: Environment = {
   },
 };
 
-export const isEnvironment = (e: unknown): e is Environment => {
-  return hasTag(e, "environment");
-};
-
-export const packageToEnvironment = (pkg: Package): Environment => ({
+export const mkEnvironment = (nixExpression: string): Environment => ({
   tag: "environment",
-  nixExpr: `
-    let expr = ${pkg.nixExpression};
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    `,
+  nixExpr: nixExpression,
   check(this) {
     throw 1;
   },
@@ -51,11 +40,13 @@ export const packageToEnvironment = (pkg: Package): Environment => ({
     }
     const shellEnv = {
       nixExpression: `
+        let dev = ${this.nixExpr}; in
         pkgs.runCommand "shell-env" {
-          buildInputs = (${this.nixExpr}).buildInputs;
-          nativeBuildInputs = (${this.nixExpr}).nativeBuildInputs;
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
         } ''
           echo "export PATH=$PATH:\$PATH" > $out
+          echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
           echo \${pkgs.lib.strings.escapeShellArg ${
         serializeNixStr(nixStringFromTemplate(s, ...args)).nixExpression
       }} >> $out
@@ -88,3 +79,19 @@ export const packageToEnvironment = (pkg: Package): Environment => ({
     }
   },
 });
+
+export const isEnvironment = (e: unknown): e is Environment => {
+  return hasTag(e, "environment");
+};
+
+export const packageToEnvironment = (pkg: Package): Environment =>
+  mkEnvironment(
+    `
+    let expr = ${pkg.nixExpression};
+    in
+      (if expr ? env
+        then expr.env
+        else pkgs.mkShell { inputsFrom = [ expr ]; }
+      )
+    `,
+  );
