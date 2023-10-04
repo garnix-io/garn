@@ -17,7 +17,7 @@ import Garner.Optparse
 import Paths_garner
 import System.Directory (doesFileExist)
 import System.Exit (exitWith)
-import System.IO (Handle)
+import System.IO (Handle, hPutStrLn, stderr)
 import qualified System.IO
 import qualified System.Posix.User as POSIX
 import System.Process
@@ -53,6 +53,7 @@ runWith env (WithGarnerTsOpts garnerConfig opts) = do
     Run (CommandOptions {..}) -> do
       cmd_ "nix run" nixArgs (".#" <> target)
     Enter (CommandOptions {..}) -> do
+      hPutStrLn stderr $ "[garner] Entering " <> target <> " shell. Type 'exit' to exit."
       let devProc =
             ( proc
                 "nix"
@@ -64,6 +65,7 @@ runWith env (WithGarnerTsOpts garnerConfig opts) = do
               }
       _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
         waitForProcess procHandle
+      hPutStrLn stderr $ "[garner] Exiting " <> target <> " shell."
       pure ()
     Ci (CommandOptions {target}) -> do
       Exit c <- cmd "nix build" nixArgs (".#" <> target)

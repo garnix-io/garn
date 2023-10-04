@@ -225,6 +225,14 @@ spec = do
           output <-
             runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
           stdout output `shouldBe` "using zsh"
+        it "provides a message indicating the command succeeded" $ do
+          writeHaskellProject repoDir
+          output <- runGarner ["enter", "foo"] "" repoDir Nothing
+          stderr output `shouldContain` "[garner] Entering foo shell. Type 'exit' to exit."
+        it "provides a message indicating the shell exited" $ do
+          writeHaskellProject repoDir
+          output <- runGarner ["enter", "foo"] "" repoDir Nothing
+          stderr output `shouldContain` "[garner] Exiting foo shell"
 
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
