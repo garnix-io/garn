@@ -303,9 +303,9 @@ writeHaskellProject repoDir = do
   writeFile
     "garner.ts"
     [i|
-      import { mkHaskellOld } from "#{repoDir}/ts/haskell.ts"
+      import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
-      export const foo = mkHaskellOld({
+      export const foo = mkHaskell({
         description: "mkHaskell-test",
         executable: "garner-test",
         compiler: "ghc94",

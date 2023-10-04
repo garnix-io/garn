@@ -6,6 +6,7 @@ import { Environment, packageToEnvironment } from "./environment.ts";
 import { NewPackage, mkNewPackage } from "./package.ts";
 import { ProjectWithDefaultEnvironment, mkProject } from "./project.ts";
 import { nixSource } from "./utils.ts";
+import { Executable, shell } from "./executable.ts";
 
 type MkHaskellArgs = {
   description: string;
@@ -30,14 +31,17 @@ export const mkHaskell = (
       }
   `);
   const devShell: Environment = packageToEnvironment(pkg);
+  const main: Executable = shell`${pkg}/bin/${args.executable}`;
   return mkProject(
     {
       pkg,
       devShell,
+      main,
     },
     {
       defaults: {
         environment: "devShell",
+        executable: 'main',
       },
     }
   );

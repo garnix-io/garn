@@ -1,6 +1,6 @@
 import { Check } from "./check.ts";
 import { Environment, isEnvironment } from "./environment.ts";
-import { Executable } from "./executable.ts";
+import { Executable, isExecutable } from "./executable.ts";
 import { NewPackage } from "./package.ts";
 import { hasTag } from "./utils.ts";
 
@@ -16,8 +16,8 @@ type ProjectSettings = {
   };
 };
 
-// In the future we plan on adding Project, Executable, etc..
-type Nestable = Environment | NewPackage;
+// In the future we plan on adding Project, Check, etc..
+type Nestable = Environment | NewPackage | Executable;
 
 function proxyEnvironmentHelpers(environment: Environment) {
   return {
@@ -28,7 +28,7 @@ function proxyEnvironmentHelpers(environment: Environment) {
       throw 1;
     },
     withDevTools<
-      T extends Project & { settings: { defaults: { environment: string } } }
+      T extends Project & { settings: { defaults: { environment: string } } },
     >(this: T, devTools: Array<NewPackage>): T {
       const newEnvironment = environment.withDevTools(devTools);
       return {
@@ -42,7 +42,7 @@ function proxyEnvironmentHelpers(environment: Environment) {
 export type ProjectWithDefaultEnvironment = Project & {
   withDevTools<T extends ProjectWithDefaultEnvironment>(
     this: T,
-    devTools: Array<NewPackage>
+    devTools: Array<NewPackage>,
   ): T;
   shell(
     this: ProjectWithDefaultEnvironment,
@@ -58,25 +58,26 @@ export type ProjectWithDefaultEnvironment = Project & {
 
 export function mkProject<Deps extends Record<string, Nestable>>(
   deps: Deps,
-  settings: { defaults: { environment: string } }
+  settings: ProjectSettings & { defaults: { environment: string } },
 ): Deps & ProjectWithDefaultEnvironment;
 
 export function mkProject<Deps extends Record<string, Nestable>>(
   deps: Deps,
-  settings: ProjectSettings
-): Deps & Project;
-
-export function mkProject<Deps extends Record<string, Nestable>>(
-  deps: Deps
+  settings: ProjectSettings,
 ): Deps & Project;
 
 export function mkProject<Deps extends Record<string, Nestable>>(
   deps: Deps,
-  settings: { defaults: { environment: string } } | ProjectSettings = {}
+): Deps & Project;
+
+export function mkProject<Deps extends Record<string, Nestable>>(
+  deps: Deps,
+  settings: { defaults: { environment: string } } | ProjectSettings = {},
 ): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
   const environment = getDefaultEnvironment(deps, settings);
-  const helpers =
-    environment != null ? proxyEnvironmentHelpers(environment) : {};
+  const helpers = environment != null
+    ? proxyEnvironmentHelpers(environment)
+    : {};
   return {
     ...deps,
     ...helpers,
@@ -91,32 +92,44 @@ export function isProject(p: unknown): p is Project {
 }
 
 export const projectDefaultEnvironment = (
-  project: Project
+  project: Project,
 ): Environment | undefined => {
   return getDefaultEnvironment(project, project.settings);
 };
 
-const getDefaultEnvironment = (
+export const projectDefaultExecutable = (
+  project: Project,
+): Executable | undefined => {
+  return getDefault("executable", isExecutable)(project, project.settings);
+};
+
+const getDefault = <T>(
+  key: keyof NonNullable<ProjectSettings["defaults"]>,
+  test: (x: unknown) => x is T,
+) =>
+(
   project: Record<string, unknown>,
-  settings: ProjectSettings
-): Environment | undefined => {
-  if (settings.defaults?.environment == null) {
+  settings: ProjectSettings,
+): T | undefined => {
+  const defaultKey = settings.defaults?.[key];
+  if (defaultKey == null) {
     return undefined;
   }
-  if (!(settings.defaults?.environment in project)) {
+  if (!(defaultKey in project)) {
     throw new Error(
-      `defaults.environment points to a non-existing field: ${settings.defaults.environment}`
+      `defaults.${key} points to a non-existing field: ${defaultKey}`,
     );
   }
-  const environment: unknown =
-    project[settings.defaults.environment as keyof typeof project];
-  if (!isEnvironment(environment)) {
+  const value: unknown = project[defaultKey as keyof typeof project];
+  if (!test(value)) {
     throw new Error(
-      `defaults.environment points to a non-environment: ${settings.defaults.environment}`
+      `defaults.${key} points to a non-${key}: ${defaultKey}`,
     );
   }
-  if (!environment.nixExpr) {
-    throw new Error(`TODO: Handle empty environment`);
-  }
-  return environment;
+  // if (!value.nixExpr) {
+  //   throw new Error(`TODO: Handle empty ${key}`);
+  // }
+  return value;
 };
+
+const getDefaultEnvironment = getDefault("environment", isEnvironment);

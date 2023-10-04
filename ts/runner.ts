@@ -1,7 +1,10 @@
-import { projectDefaultEnvironment, isProject, Project } from "./project.ts";
+import { isProject, Project, projectDefaultEnvironment, projectDefaultExecutable } from "./project.ts";
 import { Package } from "./base.ts";
 import { NewPackage, isNewPackage } from "./package.ts";
+import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { dbg } from "./utils.ts";
+import { Executable, isExecutable } from "./executable.ts";
+import { Environment } from "./environment.ts";
 
 type Targets = Record<
   string,
@@ -31,7 +34,7 @@ export const toTargets = <A>(
 
 export const formatFlake = (
   nixpkgsInput: string,
-  config: Record<string, Package | unknown>
+  config: Record<string, Package | unknown>,
 ): string => {
   if (isPackageRecord(config)) {
     return oldFormatFlake(nixpkgsInput, config);
@@ -41,7 +44,7 @@ export const formatFlake = (
 };
 
 function isPackageRecord(
-  config: Record<string, unknown>
+  config: Record<string, unknown>,
 ): config is Record<string, Package> {
   return (
     Object.values(config).find(
@@ -51,18 +54,18 @@ function isPackageRecord(
           c != null &&
           "tag" in c &&
           c.tag == "package"
-        )
+        ),
     ) == null
   );
 }
 
 const oldFormatFlake = (
   nixpkgsInput: string,
-  config: Record<string, Package>
+  config: Record<string, Package>,
 ): string => {
   const packages = Object.entries(config).reduce(
     (acc, [name, pkg]) => acc + `${name} = ${pkg.nixExpression};`,
-    ""
+    "",
   );
   const shells = Object.entries(config).reduce((acc, [name, pkg]) => {
     const pkgAttr = `self.packages.\${system}.${name}`;
@@ -117,31 +120,46 @@ const oldFormatFlake = (
 
 export const newFormatFlake = (
   nixpkgsInput: string,
-  config: Record<string, unknown>
+  config: Record<string, unknown>,
 ): string => {
-  const projects = findEnterable(config);
+  const projects = findProjects(config);
   const packages = collectPackages(projects);
   const packagesString = Object.entries(packages)
     .map(([name, pkg]) => `${name} = ${pkg.nixExpression};`)
     .join("\n");
   const shellsString = Object.entries(projects)
     .map(
-      ([name, project]) => [name, projectDefaultEnvironment(project)] as const
+      ([name, project]) => [name, projectDefaultEnvironment(project)] as const,
     )
-    .filter((x) => x[1] != null)
+    .filter((x): x is [string, Environment] => x[1] != null)
     .map(
       ([name, defaultEnvironment]) =>
         `${name} = ${
-          defaultEnvironment!.nixExpr ||
+          defaultEnvironment.nixExpr ||
           (() => {
             throw new Error(`bottom`);
           })()
-        };`
+        };`,
+    )
+    .join("\n");
+  const executables = Object.entries(projects)
+    .map(
+      ([name, project]) => [name, projectDefaultExecutable(project)] as const,
+    )
+    .filter((x): x is [string, Executable] => x[1] != null)
+    .map(([name, executable]) =>
+      outdent`
+        ${name} = {
+          type = "app";
+          program = ${executable.nixExpression};
+        };
+      `
     )
     .join("\n");
   return `{
     inputs.nixpkgs.url = "${nixpkgsInput}";
-    outputs = { self, nixpkgs }:
+    inputs.flake-utils.url = "github:numtide/flake-utils";
+    outputs = { self, nixpkgs, flake-utils }:
       let
         systems = [ "x86_64-linux" ];
         forAllSystems = nixpkgs.lib.genAttrs systems;
@@ -167,12 +185,18 @@ export const newFormatFlake = (
           {
             ${shellsString}
           });
+        apps = forAllSystems (system: let
+            pkgs = import "\${nixpkgs}" { inherit system; };
+        in
+        {
+          ${executables}
+        });
       };
   }`;
 };
 
-const findEnterable = (
-  config: Record<string, unknown>
+const findProjects = (
+  config: Record<string, unknown>,
 ): Record<string, Project> => {
   const result: Record<string, Project> = {};
   for (const [name, value] of Object.entries(config)) {
