@@ -1,5 +1,5 @@
-import * as garner from "http://localhost:8777/mod.ts";
-import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
+import * as garner from "https://garn.io/ts/v0.0.1/mod.ts";
+import * as nixpkgs from "https://garn.io/ts/v0.0.1/nixpkgs.ts";
 
 export const haskellExecutable = garner.haskell.mkHaskell({
   description: "My haskell executable",
