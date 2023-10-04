@@ -5,7 +5,7 @@ import {
   projectDefaultExecutable,
 } from "./project.ts";
 import { OldPackage } from "./base.ts";
-import { NewPackage, isNewPackage } from "./package.ts";
+import { Package, isPackage } from "./package.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { Executable } from "./executable.ts";
 import { Environment } from "./environment.ts";
@@ -214,8 +214,8 @@ const findProjects = (
 
 const collectPackages = (
   config: Record<string, Project>
-): Record<string, NewPackage> => {
-  let result: Record<string, NewPackage> = {};
+): Record<string, Package> => {
+  let result: Record<string, Package> = {};
   for (const [projectName, project] of Object.entries(config)) {
     result = {
       ...result,
@@ -228,10 +228,10 @@ const collectPackages = (
 const collectProjectPackages = (
   projectName: string,
   project: Project
-): Record<string, NewPackage> => {
-  const result: Record<string, NewPackage> = {};
+): Record<string, Package> => {
+  const result: Record<string, Package> = {};
   for (const [name, value] of Object.entries(project)) {
-    if (isNewPackage(value)) {
+    if (isPackage(value)) {
       result[`${projectName}_${name}`] = value;
     }
   }

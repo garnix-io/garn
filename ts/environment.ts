@@ -1,4 +1,4 @@
-import { NewPackage } from "./package.ts";
+import { Package } from "./package.ts";
 import { hasTag } from "./utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
@@ -6,7 +6,7 @@ import { Executable } from "./executable.ts";
 export type Environment = {
   tag: "environment";
   nixExpr?: string;
-  withDevTools(devTools: Array<NewPackage>): Environment;
+  withDevTools(devTools: Array<Package>): Environment;
   shell(_s: TemplateStringsArray, ..._args: Array<string>): Executable;
   check(_s: TemplateStringsArray, ..._args: Array<string>): Check;
 };
@@ -28,7 +28,7 @@ export const isEnvironment = (e: unknown): e is Environment => {
   return hasTag(e, "environment");
 };
 
-export const packageToEnvironment = (pkg: NewPackage): Environment => ({
+export const packageToEnvironment = (pkg: Package): Environment => ({
   tag: "environment",
   nixExpr: `
     let expr = ${pkg.nixExpression};

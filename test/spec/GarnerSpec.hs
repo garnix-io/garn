@@ -111,7 +111,7 @@ spec = do
                 [i|
                   import { mkOldPackage } from "#{repoDir}/ts/base.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
-                  import { mkNewPackage } from "#{repoDir}/ts/package.ts"
+                  import { mkPackage } from "#{repoDir}/ts/package.ts"
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
@@ -124,7 +124,7 @@ spec = do
                     expression: `pkgs.hello`,
                   });
 
-                  export const bar = foo.withDevTools([mkNewPackage(hello.nixExpression)]);
+                  export const bar = foo.withDevTools([mkPackage(hello.nixExpression)]);
                 |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -133,7 +133,7 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkNewPackage } from "#{repoDir}/ts/package.ts"
+                  import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
@@ -143,9 +143,9 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkNewPackage(`pkgs.hello`);
+                  const hello = mkPackage(`pkgs.hello`);
 
-                  const cowsay = mkNewPackage(`pkgs.cowsay`);
+                  const cowsay = mkPackage(`pkgs.cowsay`);
 
                   export const bar = foo.withDevTools([hello, cowsay]);
                 |]
@@ -158,7 +158,7 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkNewPackage } from "#{repoDir}/ts/package.ts"
+                  import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
@@ -168,7 +168,7 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkNewPackage(`pkgs.hello`);
+                  const hello = mkPackage(`pkgs.hello`);
 
                   export const bar = foo.withDevTools([hello]);
                 |]

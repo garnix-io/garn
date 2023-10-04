@@ -1,16 +1,15 @@
 import { hasTag } from "./utils.ts";
 
-export type NewPackage = {
+export type Package = {
   tag: "package";
   nixExpression: string;
 
   // disableCheck(this: Package): Package;
 };
 
-export const isNewPackage = (x: unknown): x is NewPackage =>
-  hasTag(x, "package");
+export const isPackage = (x: unknown): x is Package => hasTag(x, "package");
 
-export const mkNewPackage = (nixExpression: string): NewPackage => ({
+export const mkPackage = (nixExpression: string): Package => ({
   tag: "package",
   nixExpression,
 });

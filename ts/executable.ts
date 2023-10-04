@@ -1,7 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import { OldPackage } from "./base.ts";
 import { hasTag } from "./utils.ts";
-import { NewPackage } from "./package.ts";
+import { Package } from "./package.ts";
 
 export type Executable = {
   tag: "executable";
@@ -15,7 +15,7 @@ export const isExecutable = (e: unknown): e is Executable => {
 
 export const shell = (
   s: TemplateStringsArray,
-  ...args: Array<string | OldPackage | NewPackage>
+  ...args: Array<string | OldPackage | Package>
 ): Executable => {
   const { nixExpression } = serializeNixStr(nixStringFromTemplate(s, ...args));
   return {

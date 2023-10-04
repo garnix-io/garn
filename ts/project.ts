@@ -1,7 +1,7 @@
 import { Check } from "./check.ts";
 import { Environment, isEnvironment } from "./environment.ts";
 import { Executable, isExecutable } from "./executable.ts";
-import { NewPackage } from "./package.ts";
+import { Package } from "./package.ts";
 import { hasTag } from "./utils.ts";
 
 export type Project = {
@@ -17,7 +17,7 @@ type ProjectSettings = {
 };
 
 // In the future we plan on adding Project, Check, etc..
-type Nestable = Environment | NewPackage | Executable;
+type Nestable = Environment | Package | Executable;
 
 function proxyEnvironmentHelpers(environment: Environment) {
   return {
@@ -29,7 +29,7 @@ function proxyEnvironmentHelpers(environment: Environment) {
     },
     withDevTools<
       T extends Project & { settings: { defaults: { environment: string } } }
-    >(this: T, devTools: Array<NewPackage>): T {
+    >(this: T, devTools: Array<Package>): T {
       const newEnvironment = environment.withDevTools(devTools);
       return {
         ...this,
@@ -42,7 +42,7 @@ function proxyEnvironmentHelpers(environment: Environment) {
 export type ProjectWithDefaultEnvironment = Project & {
   withDevTools<T extends ProjectWithDefaultEnvironment>(
     this: T,
-    devTools: Array<NewPackage>
+    devTools: Array<Package>
   ): T;
   shell(
     this: ProjectWithDefaultEnvironment,
