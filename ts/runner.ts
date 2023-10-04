@@ -1,5 +1,33 @@
 import { projectDefaultEnvironment, isProject, Project } from "./project.ts";
 import { Package } from "./base.ts";
+import { NewPackage, isNewPackage } from "./package.ts";
+import { dbg } from "./utils.ts";
+
+type Targets = Record<
+  string,
+  {
+    description?: string;
+    checks?: Array<string>;
+  }
+>;
+
+export const toTargets = <A>(
+  garnerExports: Record<string, unknown>
+): Targets => {
+  if (isPackageRecord(garnerExports)) {
+    return garnerExports;
+  }
+  const result: Targets = {};
+  for (const [projectName, project] of Object.entries(garnerExports)) {
+    if (isProject(project)) {
+      const packages = collectProjectPackages(projectName, project);
+      result[projectName] = {
+        checks: Object.keys(packages),
+      };
+    }
+  }
+  return result;
+};
 
 export const formatFlake = (
   nixpkgsInput: string,
@@ -92,6 +120,10 @@ export const newFormatFlake = (
   config: Record<string, unknown>
 ): string => {
   const projects = findEnterable(config);
+  const packages = collectPackages(projects);
+  const packagesString = Object.entries(packages)
+    .map(([name, pkg]) => `${name} = ${pkg.nixExpression};`)
+    .join("\n");
   const shellsString = Object.entries(projects)
     .map(
       ([name, project]) => [name, projectDefaultEnvironment(project)] as const
@@ -115,6 +147,16 @@ export const newFormatFlake = (
         forAllSystems = nixpkgs.lib.genAttrs systems;
       in
       {
+        packages = forAllSystems (system:
+          let
+            pkgs = import "\${nixpkgs}" {
+              config.allowUnfree = true;
+              inherit system;
+            };
+          in
+          {
+            ${packagesString}
+          });
         devShells = forAllSystems (system:
           let
             pkgs = import "\${nixpkgs}" {
@@ -136,6 +178,32 @@ const findEnterable = (
   for (const [name, value] of Object.entries(config)) {
     if (isProject(value)) {
       result[name] = value;
+    }
+  }
+  return result;
+};
+
+const collectPackages = (
+  config: Record<string, Project>
+): Record<string, NewPackage> => {
+  let result: Record<string, NewPackage> = {};
+  for (const [projectName, project] of Object.entries(config)) {
+    result = {
+      ...result,
+      ...collectProjectPackages(projectName, project),
+    };
+  }
+  return result;
+};
+
+const collectProjectPackages = (
+  projectName: string,
+  project: Project
+): Record<string, NewPackage> => {
+  const result: Record<string, NewPackage> = {};
+  for (const [name, value] of Object.entries(project)) {
+    if (isNewPackage(value)) {
+      result[`${projectName}_${name}`] = value;
     }
   }
   return result;

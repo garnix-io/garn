@@ -9,6 +9,7 @@ module Garner
   )
 where
 
+import Control.Monad (forM_, when)
 import Development.Shake (Exit (Exit), cmd, cmd_)
 import Garner.Common (nixArgs)
 import Garner.GarnerConfig
@@ -16,7 +17,7 @@ import Garner.Init
 import Garner.Optparse
 import Paths_garner
 import System.Directory (doesFileExist)
-import System.Exit (exitWith)
+import System.Exit (ExitCode (..), exitWith)
 import System.IO (Handle, hPutStrLn, stderr)
 import qualified System.IO
 import qualified System.Posix.User as POSIX
@@ -67,9 +68,16 @@ runWith env (WithGarnerTsOpts garnerConfig opts) = do
         waitForProcess procHandle
       hPutStrLn stderr $ "[garner] Exiting " <> target <> " shell."
       pure ()
-    Check (CommandOptions {target}) -> do
-      Exit c <- cmd "nix build" nixArgs (".#" <> target)
-      exitWith c
+    Check (CommandOptions {target, targetConfig}) -> do
+      case checks targetConfig of
+        Just checks -> do
+          forM_ checks $ \check -> do
+            Exit c <- cmd "nix build" nixArgs (".#" <> check)
+            when (c /= ExitSuccess) $ do
+              exitWith c
+        Nothing -> do
+          Exit c <- cmd "nix build" nixArgs (".#" <> target)
+          exitWith c
 
 productionEnv :: IO Env
 productionEnv = do

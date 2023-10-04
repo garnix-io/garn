@@ -7,7 +7,6 @@ import { hasTag } from "./utils.ts";
 export type Project = {
   tag: "project";
   settings: ProjectSettings;
-  description: string;
 };
 
 type ProjectSettings = {
@@ -17,8 +16,8 @@ type ProjectSettings = {
   };
 };
 
-// In the future we plan on adding Project, Check, etc..
-type Nestable = Environment;
+// In the future we plan on adding Project, Executable, etc..
+type Nestable = Environment | NewPackage;
 
 function proxyEnvironmentHelpers(environment: Environment) {
   return {

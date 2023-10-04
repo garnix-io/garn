@@ -84,6 +84,7 @@ run-garner-and-check example target:
   just run-garner {{ example }} check {{ target }}
 
 run-example-check:
+  just run-garner-and-check haskell haskellExecutable
   just run-garner-and-check frontend-create-react-app main
   just run-garner-and-check frontend-yarn-webpack frontend
   just run-garner-and-check go-http-backend server

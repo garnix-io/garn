@@ -3,7 +3,7 @@ import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { Initializer, Package, mkPackage } from "./base.ts";
 import { Environment, packageToEnvironment } from "./environment.ts";
-import { NewPackage } from "./package.ts";
+import { NewPackage, mkNewPackage } from "./package.ts";
 import { ProjectWithDefaultEnvironment, mkProject } from "./project.ts";
 import { nixSource } from "./utils.ts";
 
@@ -16,9 +16,11 @@ type MkHaskellArgs = {
 
 export const mkHaskell = (
   args: MkHaskellArgs
-): ProjectWithDefaultEnvironment & { devShell: Environment } => {
-  const pkg: NewPackage = {
-    nixExpression: `
+): ProjectWithDefaultEnvironment & {
+  pkg: NewPackage;
+  devShell: Environment;
+} => {
+  const pkg: NewPackage = mkNewPackage(`
     (pkgs.haskell.packages.${args.compiler}.callCabal2nix
       "garner-pkg"
       ${nixSource(args.src)}
@@ -26,11 +28,11 @@ export const mkHaskell = (
       // {
         meta.mainProgram = "${args.executable}";
       }
-  `,
-  };
+  `);
   const devShell: Environment = packageToEnvironment(pkg);
   return mkProject(
     {
+      pkg,
       devShell,
     },
     {
