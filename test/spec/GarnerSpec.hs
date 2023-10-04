@@ -109,7 +109,6 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkOldPackage } from "#{repoDir}/ts/base.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
 
@@ -119,12 +118,9 @@ spec = do
                     compiler: "ghc94",
                     src: "."
                   })
-                  const hello = mkOldPackage({
-                    description: "hi",
-                    expression: `pkgs.hello`,
-                  });
+                  const hello = mkPackage(`pkgs.hello`)
 
-                  export const bar = foo.withDevTools([mkPackage(hello.nixExpression)]);
+                  export const bar = foo.withDevTools([hello]);
                 |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -193,18 +189,20 @@ spec = do
           writeFile
             "garner.ts"
             [i|
-              import { mkOldPackage } from "#{repoDir}/ts/base.ts"
+              import { mkPackage } from "#{repoDir}/ts/package.ts"
+              import { packageToEnvironment } from "#{repoDir}/ts/environment.ts"
+              import { mkProject } from "#{repoDir}/ts/project.ts"
 
-              export const foo = mkOldPackage({
-                description: "this is foo",
-                expression: `
-                  pkgs.stdenv.mkDerivation({
-                    name = "blah";
-                    src = ./.;
-                    buildInputs = [ pkgs.hello ];
-                  })
-                `,
-              })
+              const pkg = mkPackage(`
+                pkgs.stdenv.mkDerivation({
+                  name = "blah";
+                  src = ./.;
+                  buildInputs = [ pkgs.hello ];
+                })
+              `);
+              export const foo = mkProject({
+                devShell: packageToEnvironment(pkg),
+              }, { defaults: { environment: "devShell" }});
             |]
           output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
