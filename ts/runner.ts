@@ -13,7 +13,7 @@ import { Environment } from "./environment.ts";
 type Targets = Record<
   string,
   {
-    description?: string;
+    description: string;
     checks?: Array<string>;
   }
 >;
@@ -29,6 +29,7 @@ export const toTargets = <A>(
     if (isProject(project)) {
       const packages = collectProjectPackages(projectName, project);
       result[projectName] = {
+        description: project.description,
         checks: Object.keys(packages),
       };
     }

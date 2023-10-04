@@ -33,6 +33,7 @@ export const mkHaskell = (
   const devShell: Environment = packageToEnvironment(pkg);
   const main: Executable = shell`${pkg}/bin/${args.executable}`;
   return mkProject(
+    args.description,
     {
       pkg,
       devShell,

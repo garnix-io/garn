@@ -24,6 +24,7 @@ export const mkGoProject = (args: {
   );
 
   return mkProject(
+    args.description,
     {
       pkg,
       devShell: packageToEnvironment(pkg),

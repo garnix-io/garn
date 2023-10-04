@@ -200,9 +200,11 @@ spec = do
                   buildInputs = [ pkgs.hello ];
                 })
               `);
-              export const foo = mkProject({
-                devShell: packageToEnvironment(pkg),
-              }, { defaults: { environment: "devShell" }});
+              export const foo = mkProject(
+                "description",
+                { devShell: packageToEnvironment(pkg) },
+                { defaults: { environment: "devShell" } }
+              );
             |]
           output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"

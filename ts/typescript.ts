@@ -71,6 +71,7 @@ export const mkNpmFrontend = (args: {
   const devShell: Environment = packageToEnvironment(pkg);
   const startDev: Executable = devShell.shell`npm run start`;
   return mkProject(
+    args.description,
     {
       pkg,
       devShell,
@@ -136,6 +137,7 @@ export const mkYarnFrontend = (args: {
   `);
   const startDev: Executable = devShell.shell`${args.serverStartCommand}`;
   return mkProject(
+    args.description,
     {
       pkg,
       devShell,

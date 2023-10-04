@@ -10,6 +10,7 @@ export const haskellExecutable = garner.haskell.mkHaskell({
 });
 
 export const hello = mkProject(
+  "My hello executable",
   { hello: garner.shell`${nixpkgs.hello}/bin/hello` },
   { defaults: { executable: "hello" } }
 );

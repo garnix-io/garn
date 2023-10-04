@@ -7,6 +7,7 @@ import { hasTag } from "./utils.ts";
 export type Project = {
   tag: "project";
   settings: ProjectSettings;
+  description: string;
 };
 
 type ProjectSettings = {
@@ -57,20 +58,24 @@ export type ProjectWithDefaultEnvironment = Project & {
 };
 
 export function mkProject<Deps extends Record<string, Nestable>>(
+  description: string,
   deps: Deps,
   settings: ProjectSettings & { defaults: { environment: string } }
 ): Deps & ProjectWithDefaultEnvironment;
 
 export function mkProject<Deps extends Record<string, Nestable>>(
+  description: string,
   deps: Deps,
   settings: ProjectSettings
 ): Deps & Project;
 
 export function mkProject<Deps extends Record<string, Nestable>>(
+  description: string,
   deps: Deps
 ): Deps & Project;
 
 export function mkProject<Deps extends Record<string, Nestable>>(
+  description: string,
   deps: Deps,
   settings: { defaults: { environment: string } } | ProjectSettings = {}
 ): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
@@ -81,7 +86,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
     ...deps,
     ...helpers,
     tag: "project",
-    description: "huhu",
+    description,
     settings,
   };
 }
