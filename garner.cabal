@@ -1,0 +1,282 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.35.2.
+--
+-- see: https://github.com/sol/hpack
+
+name:           garner
+version:        0.1.0.0
+homepage:       https://github.com/garnix-io/garner#readme
+bug-reports:    https://github.com/garnix-io/garner/issues
+author:         garnix
+maintainer:     contact@garnix.io
+copyright:      AllRightsReserved
+license:        AllRightsReserved
+build-type:     Simple
+data-files:
+    ts/base.ts
+    ts/check.ts
+    ts/environment.ts
+    ts/executable.ts
+    ts/go.ts
+    ts/haskell.ts
+    ts/init.ts
+    ts/mod.ts
+    ts/nix.ts
+    ts/package.ts
+    ts/project.ts
+    ts/runner.ts
+    ts/typescript.ts
+    ts/utils.ts
+
+source-repository head
+  type: git
+  location: https://github.com/garnix-io/garner
+
+library
+  exposed-modules:
+      Garner
+      Garner.CodeGen
+      Garner.Common
+      Garner.GarnerConfig
+      Garner.Init
+      Garner.Optparse
+  other-modules:
+      Paths_garner
+  hs-source-dirs:
+      src
+  default-extensions:
+      BangPatterns
+      ConstraintKinds
+      DataKinds
+      DeriveAnyClass
+      DeriveFunctor
+      DeriveTraversable
+      DeriveGeneric
+      DerivingStrategies
+      DerivingVia
+      FunctionalDependencies
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      OverloadedLabels
+      PolyKinds
+      QuantifiedConstraints
+      RankNTypes
+      RecordWildCards
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      ScopedTypeVariables
+      StandaloneDeriving
+  ghc-options: -Wall -with-rtsopts=-T -Wno-name-shadowing
+  build-depends:
+      aeson
+    , ansi-wl-pprint
+    , base >=4.7 && <5
+    , containers
+    , directory
+    , getopt-generics
+    , interpolate
+    , optparse-applicative
+    , process
+    , shake
+    , string-conversions
+    , temporary
+    , text
+    , unix
+  default-language: Haskell2010
+
+executable codegen
+  main-is: exe/codegen.hs
+  other-modules:
+      Paths_garner
+  default-extensions:
+      BangPatterns
+      ConstraintKinds
+      DataKinds
+      DeriveAnyClass
+      DeriveFunctor
+      DeriveTraversable
+      DeriveGeneric
+      DerivingStrategies
+      DerivingVia
+      FunctionalDependencies
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      OverloadedLabels
+      PolyKinds
+      QuantifiedConstraints
+      RankNTypes
+      RecordWildCards
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      ScopedTypeVariables
+      StandaloneDeriving
+  ghc-options: -Wall -with-rtsopts=-T -Wno-name-shadowing
+  build-depends:
+      aeson
+    , ansi-wl-pprint
+    , base >=4.7 && <5
+    , containers
+    , directory
+    , garner
+    , getopt-generics
+    , interpolate
+    , optparse-applicative
+    , process
+    , shake
+    , string-conversions
+    , temporary
+    , text
+    , unix
+  default-language: Haskell2010
+
+executable garner
+  main-is: exe/garner.hs
+  other-modules:
+      Paths_garner
+  default-extensions:
+      BangPatterns
+      ConstraintKinds
+      DataKinds
+      DeriveAnyClass
+      DeriveFunctor
+      DeriveTraversable
+      DeriveGeneric
+      DerivingStrategies
+      DerivingVia
+      FunctionalDependencies
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      OverloadedLabels
+      PolyKinds
+      QuantifiedConstraints
+      RankNTypes
+      RecordWildCards
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      ScopedTypeVariables
+      StandaloneDeriving
+  ghc-options: -Wall -with-rtsopts=-T -Wno-name-shadowing
+  build-depends:
+      aeson
+    , ansi-wl-pprint
+    , base >=4.7 && <5
+    , containers
+    , directory
+    , garner
+    , getopt-generics
+    , interpolate
+    , optparse-applicative
+    , process
+    , shake
+    , string-conversions
+    , temporary
+    , text
+    , unix
+  default-language: Haskell2010
+
+test-suite spec
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      ExampleSpec
+      Garner.CodeGenSpec
+      GarnerSpec
+      Garner
+      Garner.CodeGen
+      Garner.Common
+      Garner.GarnerConfig
+      Garner.Init
+      Garner.Optparse
+      Paths_garner
+  hs-source-dirs:
+      test/spec
+      src
+  default-extensions:
+      BangPatterns
+      ConstraintKinds
+      DataKinds
+      DeriveAnyClass
+      DeriveFunctor
+      DeriveTraversable
+      DeriveGeneric
+      DerivingStrategies
+      DerivingVia
+      FunctionalDependencies
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      OverloadedLabels
+      PolyKinds
+      QuantifiedConstraints
+      RankNTypes
+      RecordWildCards
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      ScopedTypeVariables
+      StandaloneDeriving
+  ghc-options: -Wall -with-rtsopts=-T -Wno-name-shadowing -threaded -rtsopts -with-rtsopts=-N -fdefer-typed-holes
+  build-depends:
+      aeson
+    , ansi-wl-pprint
+    , async
+    , base >=4.7 && <5
+    , containers
+    , directory
+    , getopt-generics
+    , hspec
+    , hspec-discover
+    , hspec-golden
+    , http-client
+    , interpolate
+    , lens
+    , lens-aeson
+    , lens-regex-pcre
+    , mockery
+    , optparse-applicative
+    , pcre-heavy
+    , process
+    , shake
+    , silently
+    , string-conversions
+    , temporary
+    , text
+    , unix
+    , wreq
+    , yaml
+  default-language: Haskell2010
