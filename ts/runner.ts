@@ -8,6 +8,12 @@ import { Package, isPackage } from "./package.ts";
 import { Executable } from "./executable.ts";
 import { Environment } from "./environment.ts";
 
+// This needs to be in sync with `GarnerConfig` in GarnerConfig.hs
+export type GarnerConfig = {
+  targets: Targets;
+  flakeFile: string;
+};
+
 type Targets = Record<
   string,
   {
@@ -16,25 +22,33 @@ type Targets = Record<
   }
 >;
 
-export const toTargets = (garnerExports: Record<string, unknown>): Targets => {
+export const toGarnerConfig = (
+  nixpkgsInput: string,
+  garnerExports: Record<string, unknown>
+): GarnerConfig => ({
+  targets: toTargets(garnerExports),
+  flakeFile: formatFlake(nixpkgsInput, garnerExports),
+});
+
+const toTargets = (garnerExports: Record<string, unknown>): Targets => {
   const result: Targets = {};
-  for (const [projectName, project] of Object.entries(garnerExports)) {
-    if (isProject(project)) {
-      const packages = collectProjectPackages(projectName, project);
-      result[projectName] = {
-        description: project.description,
-        checks: Object.keys(packages),
-      };
-    }
+  for (const [projectName, project] of Object.entries(
+    findProjects(garnerExports)
+  )) {
+    const packages = collectProjectPackages(projectName, project);
+    result[projectName] = {
+      description: project.description,
+      checks: Object.keys(packages),
+    };
   }
   return result;
 };
 
-export const formatFlake = (
+const formatFlake = (
   nixpkgsInput: string,
-  config: Record<string, unknown>
+  garnerExports: Record<string, unknown>
 ): string => {
-  const projects = findProjects(config);
+  const projects = findProjects(garnerExports);
   const packages = collectPackages(projects);
   const packagesString = Object.entries(packages)
     .map(([name, pkg]) => `${name} = ${pkg.nixExpression};`)
