@@ -12,19 +12,19 @@ export const nixStrLit = (
   s: TemplateStringsArray,
   ...interpolations: Array<Interpolatable>
 ): NixExpression => {
-  const escapedTemplate = s.map((part) =>
+  const escape = (str: string) =>
     ["\\", '"', "$"].reduce(
       (str, char) => str.replaceAll(char, `\\${char}`),
-      part
-    )
-  );
+      str
+    );
+  const escapedTemplate = s.map(escape);
   const nixExpression =
     '"' +
     escapedTemplate.reduce((acc, part, i) => {
       const interpolation = interpolations[i];
       switch (typeof interpolation) {
         case "string":
-          return acc + part + interpolation;
+          return acc + part + escape(interpolation);
         case "object":
           return acc + part + "${" + interpolation.nixExpression + "}";
         case "undefined":
