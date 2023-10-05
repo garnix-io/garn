@@ -1,8 +1,7 @@
-import { mkProject } from "http://localhost:8777/project.ts";
-import { Package, mkPackage } from "./package.ts";
-import { ProjectWithDefaultEnvironment } from "./project.ts";
-import { Executable } from "./executable.ts";
 import { Environment, packageToEnvironment, shell } from "./environment.ts";
+import { Executable } from "./executable.ts";
+import { Package, mkPackage } from "./package.ts";
+import { ProjectWithDefaultEnvironment, mkProject } from "./project.ts";
 
 export const mkGoProject = (args: {
   description: string;

@@ -1,12 +1,7 @@
-import {
-  Environment,
-  mkEnvironment,
-  packageToEnvironment,
-} from "./environment.ts";
+import { Environment, mkEnvironment } from "./environment.ts";
 import { Executable } from "./executable.ts";
-import { mkPackage, Package } from "./package.ts";
-import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
-import { mkProject, Project } from "./project.ts";
+import { mkPackage } from "./package.ts";
+import { Project, mkProject } from "./project.ts";
 import { nixSource } from "./utils.ts";
 
 const nodeVersions = {
