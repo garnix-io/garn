@@ -17,7 +17,7 @@ type ProjectSettings = {
   };
 };
 
-// In the future we plan on adding Project, Check, etc..
+// In the future we plan on adding Project & Check.
 type Nestable = Environment | Package | Executable;
 
 function proxyEnvironmentHelpers(environment: Environment) {
