@@ -10,35 +10,16 @@ export type Project = {
   description: string;
 };
 
+export function isProject(p: unknown): p is Project {
+  return hasTag(p, "project");
+}
+
 type ProjectSettings = {
   defaults?: {
     executable?: string;
     environment?: string;
   };
 };
-
-// In the future we plan on adding Project & Check.
-type Nestable = Environment | Package | Executable;
-
-function proxyEnvironmentHelpers(environment: Environment) {
-  return {
-    shell() {
-      throw new Error(`not yet implemented`);
-    },
-    check() {
-      throw new Error(`not yet implemented`);
-    },
-    withDevTools<
-      T extends Project & { settings: { defaults: { environment: string } } }
-    >(this: T, devTools: Array<Package>): T {
-      const newEnvironment = environment.withDevTools(devTools);
-      return {
-        ...this,
-        [this.settings.defaults.environment]: newEnvironment,
-      };
-    },
-  };
-}
 
 export type ProjectWithDefaultEnvironment = Project & {
   withDevTools<T extends ProjectWithDefaultEnvironment>(
@@ -56,6 +37,9 @@ export type ProjectWithDefaultEnvironment = Project & {
     ..._args: Array<string>
   ): Check;
 };
+
+// In the future we plan on adding Project & Check.
+type Nestable = Environment | Package | Executable;
 
 export function mkProject<Deps extends Record<string, Nestable>>(
   description: string,
@@ -79,7 +63,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
   deps: Deps,
   settings: { defaults: { environment: string } } | ProjectSettings = {}
 ): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
-  const environment = getDefaultEnvironment(deps, settings);
+  const environment = getDefault("environment", isEnvironment)(deps, settings);
   const helpers =
     environment != null ? proxyEnvironmentHelpers(environment) : {};
   return {
@@ -91,14 +75,30 @@ export function mkProject<Deps extends Record<string, Nestable>>(
   };
 }
 
-export function isProject(p: unknown): p is Project {
-  return hasTag(p, "project");
-}
+const proxyEnvironmentHelpers = (environment: Environment) => ({
+  shell() {
+    throw new Error(`not yet implemented`);
+  },
+
+  check() {
+    throw new Error(`not yet implemented`);
+  },
+
+  withDevTools<
+    T extends Project & { settings: { defaults: { environment: string } } }
+  >(this: T, devTools: Array<Package>): T {
+    const newEnvironment = environment.withDevTools(devTools);
+    return {
+      ...this,
+      [this.settings.defaults.environment]: newEnvironment,
+    };
+  },
+});
 
 export const projectDefaultEnvironment = (
   project: Project
 ): Environment | undefined => {
-  return getDefaultEnvironment(project, project.settings);
+  return getDefault("environment", isEnvironment)(project, project.settings);
 };
 
 export const projectDefaultExecutable = (
@@ -131,5 +131,3 @@ const getDefault =
     }
     return value;
   };
-
-const getDefaultEnvironment = getDefault("environment", isEnvironment);
