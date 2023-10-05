@@ -98,9 +98,12 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
+
           foo = {
             type = "app";
-            program = "${pkgs.writeScriptBin "executable" "${
+            program =
+              let
+                shell = "${
     (pkgs.haskell.packages.ghc94.callCabal2nix
       "garner-pkg"
       
@@ -125,8 +128,11 @@
       // {
         meta.mainProgram = "garner-test";
       }
-  }/bin/garner-test"}/bin/executable";
+  }/bin/garner-test";
+              in
+              "${pkgs.writeScriptBin "executable" shell}/bin/executable";
           };
+
         });
     };
 }
