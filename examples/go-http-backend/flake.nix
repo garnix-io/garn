@@ -56,16 +56,22 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
+
           server = {
             type = "app";
-            program = "${pkgs.writeScriptBin "executable" "${
+            program =
+              let
+                shell = "${
     pkgs.buildGoModule {
       name = "go-project";
       src = ./.;
       vendorHash = null;
     }
-  }/bin/server"}/bin/executable";
+  }/bin/server";
+              in
+              "${pkgs.writeScriptBin "executable" shell}/bin/executable";
           };
+
         });
     };
 }

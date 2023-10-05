@@ -26,7 +26,7 @@ export const emptyEnvironment: Environment = {
         let
           shell = ${shellScript.nixExpression};
         in
-          "\${pkgs.writeScriptBin "executable" \${shell}}/bin/executable"`,
+          "\${pkgs.writeScriptBin "executable" shell}/bin/executable"`,
     };
   },
   withDevTools(this) {

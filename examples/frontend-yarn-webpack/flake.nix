@@ -119,10 +119,11 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
+
           frontend = {
             type = "app";
             program = "${
-        let dev = 
+          let dev = 
     let
         pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
@@ -161,17 +162,18 @@
         '';
       }
   ; in
-        pkgs.runCommand "shell-env" {
-          buildInputs = dev.buildInputs;
-          nativeBuildInputs = dev.nativeBuildInputs;
-        } ''
-          echo "export PATH=$PATH:$PATH" > $out
-          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo ${pkgs.lib.strings.escapeShellArg "yarn start"} >> $out
-          chmod +x $out
-        ''
-      }";
+          pkgs.runCommand "shell-env" {
+            buildInputs = dev.buildInputs;
+            nativeBuildInputs = dev.nativeBuildInputs;
+          } ''
+            echo "export PATH=$PATH:$PATH" > $out
+            echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+            echo ${pkgs.lib.strings.escapeShellArg "yarn start"} >> $out
+            chmod +x $out
+          ''
+        }";
           };
+
         });
     };
 }
