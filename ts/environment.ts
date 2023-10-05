@@ -36,34 +36,35 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
   },
   shell(this, s, ...args) {
     if (this.nixExpr == null) {
-      throw new Error(`not yet implemented`);
+      return emptyEnvironment.shell(s, ...args);
+    } else {
+      const shellEnv = {
+        nixExpression: `
+          let dev = ${this.nixExpr}; in
+          pkgs.runCommand "shell-env" {
+            buildInputs = dev.buildInputs;
+            nativeBuildInputs = dev.nativeBuildInputs;
+          } ''
+            echo "export PATH=$PATH:\$PATH" > $out
+            echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+            echo \${pkgs.lib.strings.escapeShellArg ${
+              serializeNixStr(nixStringFromTemplate(s, ...args)).nixExpression
+            }} >> $out
+            chmod +x $out
+          ''
+        `,
+      };
+      return {
+        tag: "executable",
+        description: `Executes TODO`,
+        nixExpression: serializeNixStr(nixStringFromTemplate`${shellEnv}`)
+          .nixExpression,
+      };
     }
-    const shellEnv = {
-      nixExpression: `
-        let dev = ${this.nixExpr}; in
-        pkgs.runCommand "shell-env" {
-          buildInputs = dev.buildInputs;
-          nativeBuildInputs = dev.nativeBuildInputs;
-        } ''
-          echo "export PATH=$PATH:\$PATH" > $out
-          echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo \${pkgs.lib.strings.escapeShellArg ${
-            serializeNixStr(nixStringFromTemplate(s, ...args)).nixExpression
-          }} >> $out
-          chmod +x $out
-        ''
-      `,
-    };
-    return {
-      tag: "executable",
-      description: `Executes TODO`,
-      nixExpression: serializeNixStr(nixStringFromTemplate`${shellEnv}`)
-        .nixExpression,
-    };
   },
   withDevTools(this, extraDevTools) {
     if (this.nixExpr == null) {
-      throw new Error(`not yet implemented`);
+      return emptyEnvironment.withDevTools(extraDevTools);
     } else {
       return {
         ...this,
