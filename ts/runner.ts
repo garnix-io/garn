@@ -50,7 +50,7 @@ export const formatFlake = (
         `${name} = ${
           defaultEnvironment.nixExpr ||
           (() => {
-            throw new Error(`bottom`);
+            throw new Error(`not yet implemented`);
           })()
         };`
     )

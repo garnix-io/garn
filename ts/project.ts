@@ -23,10 +23,10 @@ type Nestable = Environment | Package | Executable;
 function proxyEnvironmentHelpers(environment: Environment) {
   return {
     shell() {
-      throw 1;
+      throw new Error(`not yet implemented`);
     },
     check() {
-      throw 1;
+      throw new Error(`not yet implemented`);
     },
     withDevTools<
       T extends Project & { settings: { defaults: { environment: string } } }
@@ -129,9 +129,6 @@ const getDefault =
     if (!test(value)) {
       throw new Error(`defaults.${key} points to a non-${key}: ${defaultKey}`);
     }
-    // if (!value.nixExpr) {
-    //   throw new Error(`TODO: Handle empty ${key}`);
-    // }
     return value;
   };
 

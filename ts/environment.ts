@@ -18,13 +18,13 @@ export type Environment = {
 export const emptyEnvironment: Environment = {
   tag: "environment",
   check(this) {
-    throw 1;
+    throw new Error(`not yet implemented`);
   },
   shell(this) {
-    throw 1;
+    throw new Error(`not yet implemented`);
   },
   withDevTools(this) {
-    throw 1;
+    throw new Error(`not yet implemented`);
   },
 };
 
@@ -32,7 +32,7 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
   tag: "environment",
   nixExpr: nixExpression,
   check(this) {
-    throw 1;
+    throw new Error(`not yet implemented`);
   },
   shell(this, s, ...args) {
     if (this.nixExpr == null) {
