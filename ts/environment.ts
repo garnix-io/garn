@@ -1,18 +1,15 @@
 import { Package } from "./package.ts";
 import { hasTag } from "./utils.ts";
 import { Check } from "./check.ts";
-import {
-  Executable,
-  nixStringFromTemplate,
-  serializeNixStr,
-} from "./executable.ts";
+import { Executable } from "./executable.ts";
+import { Interpolatable, nixStrLit } from "./nix.ts";
 
 export type Environment = {
   tag: "environment";
   nixExpr?: string;
   withDevTools(devTools: Array<Package>): Environment;
-  shell(_s: TemplateStringsArray, ..._args: Array<string>): Executable;
-  check(_s: TemplateStringsArray, ..._args: Array<string>): Check;
+  shell(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Executable;
+  check(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Check;
 };
 
 export const emptyEnvironment: Environment = {
@@ -20,13 +17,27 @@ export const emptyEnvironment: Environment = {
   check(this) {
     throw new Error(`not yet implemented`);
   },
-  shell(this) {
-    throw new Error(`not yet implemented`);
+  shell(this, s, ...args) {
+    const shellScript = nixStrLit(s, ...args);
+    return {
+      tag: "executable",
+      description: `Executes ${shellScript}`,
+      nixExpression: `
+        let
+          shell = ${shellScript.nixExpression};
+        in
+          "\${pkgs.writeScriptBin "executable" \${shell}}/bin/executable"`,
+    };
   },
   withDevTools(this) {
     throw new Error(`not yet implemented`);
   },
 };
+
+export const shell = (
+  s: TemplateStringsArray,
+  ...args: Array<Interpolatable>
+) => emptyEnvironment.shell(s, ...args);
 
 export const mkEnvironment = (nixExpression: string): Environment => ({
   tag: "environment",
@@ -48,7 +59,7 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
             echo "export PATH=$PATH:\$PATH" > $out
             echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
             echo \${pkgs.lib.strings.escapeShellArg ${
-              serializeNixStr(nixStringFromTemplate(s, ...args)).nixExpression
+              nixStrLit(s, ...args).nixExpression
             }} >> $out
             chmod +x $out
           ''
@@ -57,8 +68,7 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
       return {
         tag: "executable",
         description: `Executes TODO`,
-        nixExpression: serializeNixStr(nixStringFromTemplate`${shellEnv}`)
-          .nixExpression,
+        nixExpression: nixStrLit`${shellEnv}`.nixExpression,
       };
     }
   },

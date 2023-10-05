@@ -2,11 +2,11 @@ import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { Initializer } from "./base.ts";
-import { Environment, packageToEnvironment } from "./environment.ts";
+import { Environment, packageToEnvironment, shell } from "./environment.ts";
 import { mkPackage, Package } from "./package.ts";
 import { mkProject, ProjectWithDefaultEnvironment } from "./project.ts";
 import { nixSource } from "./utils.ts";
-import { Executable, shell } from "./executable.ts";
+import { Executable } from "./executable.ts";
 
 type MkHaskellArgs = {
   description: string;
