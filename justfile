@@ -21,13 +21,14 @@ release-ts: codegen
  read -p "Release tag (e.g. v0.1.0): " tag
  git tag $tag
  git checkout gh-pages
- mkdir -p ts/$tag
- git --work-tree=ts/$tag checkout main -- ts
- mv ts/$tag/ts/* ts/$tag
+ mkdir -p tmp-$tag
+ git --work-tree=tmp-$tag checkout main -- ts
+ mv tmp-$tag/* ts/$tag
  mv ts/nixpkgs.ts ts/$tag
- rmdir ts/$tag/ts
+ rmdir tmp-$tag
  git add ts/$tag
  git commit -m "Release $tag"
+ git push && git push --tags
 
 fmt-nix:
   nixpkgs-fmt .
