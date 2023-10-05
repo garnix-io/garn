@@ -1,5 +1,7 @@
 /*.cabal
 /dist-newstyle/
-/result
+result
+node_modules/
+/website/dist/
 /ts/nixpkgs.ts
 /.golden/*/actual
