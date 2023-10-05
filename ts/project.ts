@@ -63,7 +63,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
   deps: Deps,
   settings: { defaults: { environment: string } } | ProjectSettings = {}
 ): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
-  const environment = getDefault("environment", isEnvironment)(deps, settings);
+  const environment = getDefault("environment", isEnvironment, deps, settings);
   const helpers =
     environment != null ? proxyEnvironmentHelpers(environment) : {};
   return {
@@ -98,36 +98,33 @@ const proxyEnvironmentHelpers = (environment: Environment) => ({
 export const projectDefaultEnvironment = (
   project: Project
 ): Environment | undefined => {
-  return getDefault("environment", isEnvironment)(project, project.settings);
+  return getDefault("environment", isEnvironment, project, project.settings);
 };
 
 export const projectDefaultExecutable = (
   project: Project
 ): Executable | undefined => {
-  return getDefault("executable", isExecutable)(project, project.settings);
+  return getDefault("executable", isExecutable, project, project.settings);
 };
 
-const getDefault =
-  <T>(
-    key: keyof NonNullable<ProjectSettings["defaults"]>,
-    test: (x: unknown) => x is T
-  ) =>
-  (
-    project: Record<string, unknown>,
-    settings: ProjectSettings
-  ): T | undefined => {
-    const defaultKey = settings.defaults?.[key];
-    if (defaultKey == null) {
-      return undefined;
-    }
-    if (!(defaultKey in project)) {
-      throw new Error(
-        `defaults.${key} points to a non-existing field: ${defaultKey}`
-      );
-    }
-    const value: unknown = project[defaultKey as keyof typeof project];
-    if (!test(value)) {
-      throw new Error(`defaults.${key} points to a non-${key}: ${defaultKey}`);
-    }
-    return value;
-  };
+const getDefault = <T>(
+  key: keyof NonNullable<ProjectSettings["defaults"]>,
+  test: (x: unknown) => x is T,
+  project: Record<string, unknown>,
+  settings: ProjectSettings
+): T | undefined => {
+  const defaultKey = settings.defaults?.[key];
+  if (defaultKey == null) {
+    return undefined;
+  }
+  if (!(defaultKey in project)) {
+    throw new Error(
+      `defaults.${key} points to a non-existing field: ${defaultKey}`
+    );
+  }
+  const value: unknown = project[defaultKey as keyof typeof project];
+  if (!test(value)) {
+    throw new Error(`defaults.${key} points to a non-${key}: ${defaultKey}`);
+  }
+  return value;
+};
