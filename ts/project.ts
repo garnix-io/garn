@@ -65,8 +65,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
   settings: { defaults: { environment: string } } | ProjectSettings = {}
 ): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
   const environment = getDefault("environment", isEnvironment, deps, settings);
-  const helpers =
-    environment != null ? proxyEnvironmentHelpers(environment) : {};
+  const helpers = environment != null ? proxyEnvironmentHelpers() : {};
   return {
     ...deps,
     ...helpers,
@@ -76,7 +75,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
   };
 }
 
-const proxyEnvironmentHelpers = (environment: Environment) => ({
+const proxyEnvironmentHelpers = () => ({
   shell() {
     throw new Error(`not yet implemented`);
   },
@@ -84,18 +83,24 @@ const proxyEnvironmentHelpers = (environment: Environment) => ({
   check<
     T extends Project & { settings: { defaults: { environment: string } } }
   >(this: T, s: TemplateStringsArray, ...args: Array<Interpolatable>) {
-    const env = projectDefaultEnvironment(this);
-    if (env == null) {
+    const environment = projectDefaultEnvironment(this);
+    if (environment == null) {
       throw new Error(
         `'.check' is only valid to be called on projects with a default environment`
       );
     }
-    return env.check(s, ...args);
+    return environment.check(s, ...args);
   },
 
   withDevTools<
     T extends Project & { settings: { defaults: { environment: string } } }
   >(this: T, devTools: Array<Package>): T {
+    const environment = projectDefaultEnvironment(this);
+    if (environment == null) {
+      throw new Error(
+        `'.withDevTools' is only valid to be called on projects with a default environment`
+      );
+    }
     const newEnvironment = environment.withDevTools(devTools);
     return {
       ...this,

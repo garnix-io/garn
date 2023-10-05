@@ -170,6 +170,31 @@ spec = do
                 |]
             output <- runGarner ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
             stderr output `shouldContain` "hello: command not found"
+          it "can safely be used twice" $ do
+            writeHaskellProject repoDir
+            writeFile "garner.ts" $
+              unindent
+                [i|
+                  import { mkPackage } from "#{repoDir}/ts/package.ts"
+                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+
+                  export const foo = mkHaskell({
+                    description: "mkHaskell-test",
+                    executable: "garner-test",
+                    compiler: "ghc94",
+                    src: "."
+                  })
+
+                  const hello = mkPackage(`pkgs.hello`);
+
+                  const cowsay = mkPackage(`pkgs.cowsay`);
+
+                  export const bar = foo.withDevTools([hello]).withDevTools([cowsay]);
+                |]
+            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
+            stdout output `shouldBe` "tool\n"
+            output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
+            stdout output `shouldStartWith` "/nix/store"
         it "has the right GHC version" $ do
           writeHaskellProject repoDir
           output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
