@@ -49,6 +49,7 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
     if (this.nixExpr == null) {
       return emptyEnvironment.shell(s, ...args);
     } else {
+      const cmdToExecute = nixStrLit(s, ...args);
       const shellEnv = {
         nixExpression: `
           let dev = ${this.nixExpr}; in
@@ -58,16 +59,14 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
           } ''
             echo "export PATH=$PATH:\$PATH" > $out
             echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-            echo \${pkgs.lib.strings.escapeShellArg ${
-              nixStrLit(s, ...args).nixExpression
-            }} >> $out
+            echo \${pkgs.lib.strings.escapeShellArg ${cmdToExecute.nixExpression}} >> $out
             chmod +x $out
           ''
         `,
       };
       return {
         tag: "executable",
-        description: `Executes TODO`,
+        description: `Executes ${cmdToExecute.nixExpression}`,
         nixExpression: nixStrLit`${shellEnv}`.nixExpression,
       };
     }
