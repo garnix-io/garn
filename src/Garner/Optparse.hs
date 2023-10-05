@@ -11,7 +11,6 @@ module Garner.Optparse
 where
 
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
 import Garner.GarnerConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
@@ -111,7 +110,7 @@ commandOptionsParser targets =
               target
               ( info
                   (pure (CommandOptions target targetConfig))
-                  (progDesc $ fromMaybe "huhu" (description targetConfig))
+                  (progDesc $ description targetConfig)
               )
         )
         $ Map.assocs targets

@@ -24,7 +24,7 @@ data GarnerConfig = GarnerConfig
 type Targets = Map String TargetConfig
 
 data TargetConfig = TargetConfig
-  { description :: Maybe String,
+  { description :: String,
     checks :: [String]
   }
   deriving (Generic, FromJSON, Eq, Show)
