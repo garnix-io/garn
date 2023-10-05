@@ -1,6 +1,7 @@
 import { Check } from "./check.ts";
 import { Environment, isEnvironment } from "./environment.ts";
 import { Executable, isExecutable } from "./executable.ts";
+import { Interpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
 import { hasTag } from "./utils.ts";
 
@@ -80,8 +81,16 @@ const proxyEnvironmentHelpers = (environment: Environment) => ({
     throw new Error(`not yet implemented`);
   },
 
-  check() {
-    throw new Error(`not yet implemented`);
+  check<
+    T extends Project & { settings: { defaults: { environment: string } } }
+  >(this: T, s: TemplateStringsArray, ...args: Array<Interpolatable>) {
+    const env = projectDefaultEnvironment(this);
+    if (env == null) {
+      throw new Error(
+        `'.check' is only valid to be called on projects with a default environment`
+      );
+    }
+    return env.check(s, ...args);
   },
 
   withDevTools<

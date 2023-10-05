@@ -235,6 +235,39 @@ spec = do
             output <- runGarner ["enter", "frontend"] "npm --version" repoDir Nothing
             stdout output `shouldStartWith` "9."
 
+      describe "check" $ do
+        it "runs manually added checks" $ do
+          writeHaskellProject repoDir
+          writeFile
+            "Main.hs"
+            [i|
+              main :: IO ()
+              main = return ()
+
+              f :: [Int] -> [Int]
+              f list = map (+ 1) list
+            |]
+          writeFile
+            "garner.ts"
+            [i|
+                import * as garner from "#{repoDir}/ts/mod.ts"
+
+                const haskellBase = garner.haskell.mkHaskell({
+                  description: "mkHaskell-test",
+                  executable: "garner-test",
+                  compiler: "ghc94",
+                  src: "."
+                }).withDevTools([garner.mkPackage(`pkgs.hlint`)])
+
+                export const haskell = {
+                  ...haskellBase,
+                  hlint: haskellBase.check`hlint *.hs`,
+                };
+            |]
+
+          output <- runGarner ["check", "haskell"] "" repoDir Nothing
+          stderr output `shouldContain` "Warning: Eta reduce"
+
       describe "init" $ do
         it "uses the provided init function if there is one" $ do
           writeFile

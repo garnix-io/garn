@@ -42,8 +42,27 @@ export const shell = (
 export const mkEnvironment = (nixExpression: string): Environment => ({
   tag: "environment",
   nixExpr: nixExpression,
-  check(this) {
-    throw new Error(`not yet implemented`);
+  check(this, s, ...args): Check {
+    if (this.nixExpr == null) {
+      return emptyEnvironment.check(s, ...args);
+    } else {
+      const innerScript = nixStrLit(s, ...args);
+      const wrappedScript = nixStrLit`
+        cp -r ${{ nixExpression: "./." }} src
+        cd src
+        ${innerScript}
+        touch $out
+      `;
+      return {
+        tag: "check",
+        nixExpression: `
+          let dev = ${this.nixExpr}; in
+          pkgs.runCommand "check" {
+            buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+          } ${wrappedScript.nixExpression}
+        `,
+      };
+    }
   },
   shell(this, s, ...args) {
     if (this.nixExpr == null) {

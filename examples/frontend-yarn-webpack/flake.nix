@@ -64,6 +64,14 @@
             '')
           ;
         });
+      checks = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+        { });
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
