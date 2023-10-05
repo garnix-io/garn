@@ -13,13 +13,11 @@ type Targets = Record<
   string,
   {
     description: string;
-    checks?: Array<string>;
+    checks: Array<string>;
   }
 >;
 
-export const toTargets = <A>(
-  garnerExports: Record<string, unknown>
-): Targets => {
+export const toTargets = (garnerExports: Record<string, unknown>): Targets => {
   const result: Targets = {};
   for (const [projectName, project] of Object.entries(garnerExports)) {
     if (isProject(project)) {

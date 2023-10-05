@@ -25,7 +25,7 @@ type Targets = Map String TargetConfig
 
 data TargetConfig = TargetConfig
   { description :: Maybe String,
-    checks :: Maybe [String]
+    checks :: [String]
   }
   deriving (Generic, FromJSON, Eq, Show)
 
@@ -43,7 +43,7 @@ readGarnerConfig tsRunner = do
         type GarnerConfig = {
           targets: Record<string, {
             description: string
-            checks?: Array<string>
+            checks: Array<string>
           }>,
           flakeFile: string,
         }

@@ -68,15 +68,10 @@ runWith env (WithGarnerTsOpts garnerConfig opts) = do
         waitForProcess procHandle
       hPutStrLn stderr $ "[garner] Exiting " <> target <> " shell."
       pure ()
-    Check (CommandOptions {target, targetConfig}) -> do
-      case checks targetConfig of
-        Just checks -> do
-          forM_ checks $ \check -> do
-            Exit c <- cmd "nix build" nixArgs (".#" <> check)
-            when (c /= ExitSuccess) $ do
-              exitWith c
-        Nothing -> do
-          Exit c <- cmd "nix build" nixArgs (".#" <> target)
+    Check (CommandOptions {targetConfig}) -> do
+      forM_ (checks targetConfig) $ \check -> do
+        Exit c <- cmd "nix build" nixArgs (".#" <> check)
+        when (c /= ExitSuccess) $ do
           exitWith c
 
 productionEnv :: IO Env
