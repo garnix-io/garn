@@ -69,7 +69,7 @@ test *args="": hpack
 watch *args="": hpack
   #!/usr/bin/env bash
 
-  ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
+  ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings --reload=ts
 
 fileserver *args="":
   nix run .#fileserver -- {{ args }}
