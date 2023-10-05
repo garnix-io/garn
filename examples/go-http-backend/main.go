@@ -1,15 +1,19 @@
 package main
 
 import (
-    "fmt"
-    "net/http"
+	"fmt"
+	"github.com/garnix-io/garner/examples/go-http-backend/server"
+	"github.com/gorilla/mux"
+	"net/http"
 )
 
 func handleRequest(w http.ResponseWriter, req *http.Request) {
-    fmt.Fprintf(w, "Hello from go: %v\n", Add(1, 2))
+	fmt.Fprintf(w, "Hello from go: %v\n", server.Add(1, 2))
 }
 
 func main() {
-    http.HandleFunc("/", handleRequest)
-    http.ListenAndServe(":3000", nil)
+	r := mux.NewRouter()
+	r.HandleFunc("/", handleRequest)
+	http.Handle("/", r)
+	http.ListenAndServe(":3000", nil)
 }

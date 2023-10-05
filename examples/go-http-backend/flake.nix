@@ -1,11 +1,15 @@
 {
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/841889913dfd06a70ffb39f603e29e46f45f0c1a";
   inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.gomod2nix-repo = {
+    url = "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
+    flake = true;
+  };
   inputs.npmlock2nix-repo = {
     url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81";
     flake = false;
   };
-  outputs = { self, nixpkgs, flake-utils, npmlock2nix-repo }:
+  outputs = { self, nixpkgs, flake-utils, npmlock2nix-repo, gomod2nix-repo }:
     let
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
@@ -20,10 +24,21 @@
         in
         {
           server_pkg =
-            pkgs.buildGoModule {
-              name = "go-project";
+            let
+              gomod2nix = gomod2nix-repo.legacyPackages.${system};
+              gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
+
+[mod]
+  [mod.\"github.com/gorilla/mux\"]
+    version = \"v1.8.0\"
+    hash = \"sha256-s905hpzMH9bOLue09E2JmzPXfIS4HhAlgT7g13HCwKE=\"
+";
+            in
+            gomod2nix.buildGoApplication {
+              pname = "go-http-backend";
+              version = "0.1";
               src = ./.;
-              vendorHash = null;
+              modules = gomod2nix-toml;
             }
           ;
         });
@@ -44,19 +59,37 @@
         in
         {
           server =
-            let
-              expr =
-                pkgs.buildGoModule {
-                  name = "go-project";
-                  src = ./.;
-                  vendorHash = null;
-                }
-              ;
-            in
-            (if expr ? env
-            then expr.env
-            else pkgs.mkShell { inputsFrom = [ expr ]; }
-            )
+            (
+              let
+                expr =
+                  let
+                    gomod2nix = gomod2nix-repo.legacyPackages.${system};
+                    gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
+
+[mod]
+  [mod.\"github.com/gorilla/mux\"]
+    version = \"v1.8.0\"
+    hash = \"sha256-s905hpzMH9bOLue09E2JmzPXfIS4HhAlgT7g13HCwKE=\"
+";
+                  in
+                  gomod2nix.buildGoApplication {
+                    pname = "go-http-backend";
+                    version = "0.1";
+                    src = ./.;
+                    modules = gomod2nix-toml;
+                  }
+                ;
+              in
+              (if expr ? env
+              then expr.env
+              else pkgs.mkShell { inputsFrom = [ expr ]; }
+              )
+            ).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.gopls ];
+            })
           ;
         });
       apps = forAllSystems (system:
@@ -70,12 +103,23 @@
             program =
               let
                 shell = "${
-    pkgs.buildGoModule {
-      name = "go-project";
-      src = ./.;
-      vendorHash = null;
-    }
-  }/bin/server";
+      let
+        gomod2nix = gomod2nix-repo.legacyPackages.${system};
+        gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
+
+[mod]
+  [mod.\"github.com/gorilla/mux\"]
+    version = \"v1.8.0\"
+    hash = \"sha256-s905hpzMH9bOLue09E2JmzPXfIS4HhAlgT7g13HCwKE=\"
+";
+      in
+        gomod2nix.buildGoApplication {
+          pname = "go-http-backend";
+          version = "0.1";
+          src = ./.;
+          modules = gomod2nix-toml;
+        }
+    }/bin/go-http-backend";
               in
               "${pkgs.writeScriptBin "executable" shell}/bin/executable";
           };
