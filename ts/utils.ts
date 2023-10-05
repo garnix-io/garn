@@ -18,7 +18,7 @@ export const nixSource = (src: string) => `
 `;
 
 export const dbg = <A>(a: A): A => {
-  console.error("here: ", a);
+  console.error("DBG =>", a);
   return a;
 };
 

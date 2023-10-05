@@ -5,7 +5,6 @@ import {
   projectDefaultExecutable,
 } from "./project.ts";
 import { Package, isPackage } from "./package.ts";
-import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { Executable } from "./executable.ts";
 import { Environment } from "./environment.ts";
 
@@ -62,7 +61,7 @@ export const formatFlake = (
     .filter((x): x is [string, Executable] => x[1] != null)
     .map(
       ([name, executable]) =>
-        outdent`
+        `
         ${name} = {
           type = "app";
           program = ${executable.nixExpression};
