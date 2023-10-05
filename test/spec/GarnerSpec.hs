@@ -8,7 +8,8 @@ import Control.Lens (from, (<>~))
 import Control.Monad (unless)
 import qualified Data.Aeson as Aeson
 import Data.Aeson.Lens
-import Data.List (sort)
+import Data.Char (isSpace)
+import Data.List (dropWhileEnd, sort)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
@@ -53,7 +54,7 @@ spec = do
                   run.*
                   enter.*
                   gen.*
-                  ci.*
+                  check.*
               |]
         it "lists unavailable commands" $ do
           output <- runGarner ["--help"] "" repoDir Nothing
@@ -64,7 +65,7 @@ spec = do
                   run
                   enter
                   gen
-                  ci
+                  check
               |]
           writeFile "garner.ts" ""
           output <- runGarner ["--help"] "" repoDir Nothing
@@ -102,14 +103,14 @@ spec = do
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
       describe "enter" $ do
-        describe "addDevTools" $ do
+        describe "withDevTools" $ do
           it "allows dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkPackage } from "#{repoDir}/ts/base.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkPackage } from "#{repoDir}/ts/package.ts"
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
@@ -117,12 +118,9 @@ spec = do
                     compiler: "ghc94",
                     src: "."
                   })
-                  const hello = mkPackage({
-                    description: "hi",
-                    expression: `pkgs.hello`,
-                  });
+                  const hello = mkPackage(`pkgs.hello`)
 
-                  export const bar = foo.addDevTools([hello]);
+                  export const bar = foo.withDevTools([hello]);
                 |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -131,7 +129,7 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkPackage } from "#{repoDir}/ts/base.ts"
+                  import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
@@ -141,17 +139,11 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkPackage({
-                    description: "hi",
-                    expression: `pkgs.hello`,
-                  });
+                  const hello = mkPackage(`pkgs.hello`);
 
-                  const cowsay = mkPackage({
-                    description: "moocow coming down along the road",
-                    expression: `pkgs.cowsay`,
-                  });
+                  const cowsay = mkPackage(`pkgs.cowsay`);
 
-                  export const bar = foo.addDevTools([hello, cowsay]);
+                  export const bar = foo.withDevTools([hello, cowsay]);
                 |]
             output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -162,7 +154,7 @@ spec = do
             writeFile "garner.ts" $
               unindent
                 [i|
-                  import { mkPackage } from "#{repoDir}/ts/base.ts"
+                  import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
                   export const foo = mkHaskell({
@@ -172,12 +164,9 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkPackage({
-                    description: "hi",
-                    expression: `pkgs.hello`,
-                  });
+                  const hello = mkPackage(`pkgs.hello`);
 
-                  export const bar = foo.addDevTools([hello]);
+                  export const bar = foo.withDevTools([hello]);
                 |]
             output <- runGarner ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
             stderr output `shouldContain` "hello: command not found"
@@ -200,18 +189,22 @@ spec = do
           writeFile
             "garner.ts"
             [i|
-              import { mkPackage } from "#{repoDir}/ts/base.ts"
+              import { mkPackage } from "#{repoDir}/ts/package.ts"
+              import { packageToEnvironment } from "#{repoDir}/ts/environment.ts"
+              import { mkProject } from "#{repoDir}/ts/project.ts"
 
-              export const foo = mkPackage({
-                description: "this is foo",
-                expression: `
-                  pkgs.stdenv.mkDerivation({
-                    name = "blah";
-                    src = ./.;
-                    buildInputs = [ pkgs.hello ];
-                  })
-                `,
-              })
+              const pkg = mkPackage(`
+                pkgs.stdenv.mkDerivation({
+                  name = "blah";
+                  src = ./.;
+                  buildInputs = [ pkgs.hello ];
+                })
+              `);
+              export const foo = mkProject(
+                "description",
+                { devShell: packageToEnvironment(pkg) },
+                { defaults: { environment: "devShell" } }
+              );
             |]
           output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
@@ -253,16 +246,20 @@ spec = do
           output <- runGarner ["init"] "" repoDir Nothing
           stderr output `shouldBe` "[garner] Creating a garner.ts file\n"
           readFile "garner.ts"
-            `shouldReturn` unindent
-              [i|
-                     import * as garner from "http://localhost:8777/mod.ts"
+            `shouldReturn` dropWhileEnd
+              isSpace
+              ( unindent
+                  [i|
+                    import * as garner from "http://localhost:8777/mod.ts"
 
-                     export const garner = garner.haskell.mkHaskell({
-                       description: "",
-                       executable: "",
-                       compiler: "ghc94",
-                       src: "."
-                     })|]
+                    export const garner = garner.haskell.mkHaskell({
+                      description: "",
+                      executable: "",
+                      compiler: "ghc94",
+                      src: "."
+                    })
+                  |]
+              )
         it "logs unexpected errors" $ do
           writeFile "garner.cabal" [i| badCabalfile |]
           output <- runGarner ["init"] "" repoDir Nothing
@@ -417,7 +414,7 @@ shellTestCommand =
     fi
   |]
 
-shouldMatch :: HasCallStack => String -> String -> Expectation
+shouldMatch :: (HasCallStack) => String -> String -> Expectation
 shouldMatch actual expected = case compileM (cs expected) [] of
   Left err -> expectationFailure $ "invalid regex: " <> show err
   Right regex ->

@@ -61,7 +61,7 @@ data WithGarnerTsCommand
   = Gen
   | Run CommandOptions
   | Enter CommandOptions
-  | Ci CommandOptions
+  | Check CommandOptions
   deriving stock (Eq, Show)
 
 withGarnerTsCommandInfo :: [(String, String, Targets -> Parser WithGarnerTsCommand)]
@@ -69,7 +69,7 @@ withGarnerTsCommandInfo =
   [ ("run", "Build and run the default executable of a target", withCommandOptions Run),
     ("enter", "Enter a devshell for a target", withCommandOptions Enter),
     ("gen", "Generate the flake.nix file and exit", const $ pure Gen),
-    ("ci", "Run the garnix ci tests locally", withCommandOptions Ci)
+    ("check", "Run your project's checks", withCommandOptions Check)
   ]
   where
     withCommandOptions constructor target =

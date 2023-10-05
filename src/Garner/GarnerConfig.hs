@@ -24,7 +24,8 @@ data GarnerConfig = GarnerConfig
 type Targets = Map String TargetConfig
 
 data TargetConfig = TargetConfig
-  { description :: String
+  { description :: String,
+    checks :: [String]
   }
   deriving (Generic, FromJSON, Eq, Show)
 
@@ -36,17 +37,20 @@ readGarnerConfig tsRunner = do
     hPutStr
       mainHandle
       [i|
-        import * as targets from "#{dir}/garner.ts"
-        import { formatFlake } from "#{tsRunner}"
+        import * as garnerExports from "#{dir}/garner.ts"
+        import { formatFlake, toTargets } from "#{tsRunner}"
 
         type GarnerConfig = {
-          targets: Record<string, { description: string }>,
+          targets: Record<string, {
+            description: string
+            checks: Array<string>
+          }>,
           flakeFile: string,
         }
 
         const config: GarnerConfig = {
-          targets,
-          flakeFile: formatFlake("#{nixpkgsInput}", targets),
+          targets: toTargets(garnerExports),
+          flakeFile: formatFlake("#{nixpkgsInput}", garnerExports),
         };
 
         console.log(JSON.stringify(config));

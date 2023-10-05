@@ -16,3 +16,11 @@ export const nixSource = (src: string) => `
          fileName != "flake.nix";
     })
 `;
+
+export const dbg = <A>(a: A): A => {
+  console.error("DBG =>", a);
+  return a;
+};
+
+export const hasTag = (x: unknown, tag: unknown): boolean =>
+  typeof x === "object" && x != null && "tag" in x && x.tag === tag;

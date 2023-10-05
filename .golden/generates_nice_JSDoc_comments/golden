@@ -1,17 +1,17 @@
-import { mkPackage } from "../../ts/base.ts";
+import { mkPackage } from "../../ts/package.ts";
 
 /**
  * This one - eh, not so good!
  */
-export const bar = mkPackage({
-  expression: `pkgs.bar`,
-  description: "This one - eh, not so good!"
-});
+export const bar = mkPackage(
+  `pkgs.bar`,
+  "This one - eh, not so good!",
+);
 
 /**
  * This is the bestest derivation.
  */
-export const foo = mkPackage({
-  expression: `pkgs.foo`,
-  description: "This is the bestest derivation."
-});
+export const foo = mkPackage(
+  `pkgs.foo`,
+  "This is the bestest derivation.",
+);

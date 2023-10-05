@@ -1,4 +1,7 @@
-import { Package, mkPackage } from "./base.ts";
+import { Environment, mkEnvironment } from "./environment.ts";
+import { Executable } from "./executable.ts";
+import { mkPackage } from "./package.ts";
+import { Project, mkProject } from "./project.ts";
 import { nixSource } from "./utils.ts";
 
 const nodeVersions = {
@@ -41,28 +44,53 @@ export const mkNpmFrontend = (args: {
   src: string;
   nodeVersion: NodeVersion;
   testCommand: string;
-}): Package => {
+}): Project => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
-  return mkPackage({
-    description: args.description,
-    expression: `
-      let
-        npmlock2nix = import npmlock2nix-repo {
-          inherit pkgs;
+  const pkg = mkPackage(`
+    let
+      npmlock2nix = import npmlock2nix-repo {
+        inherit pkgs;
+      };
+      pkgs = ${pkgs};
+    in
+    npmlock2nix.v2.build
+      {
+        src = ${nixSource(args.src)};
+        buildCommands = [ ${JSON.stringify(args.testCommand)} "mkdir $out" ];
+        installPhase = "true";
+        node_modules_attrs = {
+          nodejs = ${nodejs};
         };
-        pkgs = ${pkgs};
-      in
-      npmlock2nix.v2.build
-        {
-          src = ${nixSource(args.src)};
-          buildCommands = [ ${JSON.stringify(args.testCommand)} "mkdir $out" ];
-          installPhase = "true";
-          node_modules_attrs = {
-            nodejs = ${nodejs};
-          };
-        }
-  `,
-  }).setStartCommand(["npm", "run", "start"]);
+      }
+  `);
+  const devShell: Environment = mkEnvironment(`
+    let
+      npmlock2nix = import npmlock2nix-repo {
+        inherit pkgs;
+      };
+    in
+    npmlock2nix.v2.shell {
+      src = ${nixSource(args.src)};
+      node_modules_attrs = {
+        nodejs = ${nodejs};
+      };
+    }
+  `);
+  const startDev: Executable = devShell.shell`npm run start`;
+  return mkProject(
+    args.description,
+    {
+      pkg,
+      devShell,
+      startDev,
+    },
+    {
+      defaults: {
+        environment: "devShell",
+        executable: "startDev",
+      },
+    }
+  );
 };
 
 export const mkYarnFrontend = (args: {
@@ -71,31 +99,62 @@ export const mkYarnFrontend = (args: {
   nodeVersion: keyof typeof nodeVersions;
   testCommand: string;
   serverStartCommand: string;
-}): Package => {
+}): Project => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
-  return mkPackage({
-    description: args.description,
-    expression: `
-      let
-          pkgs = ${pkgs};
-          packageJson = pkgs.lib.importJSON ./package.json;
-          yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-            nodejs = ${nodejs};
-            yarn = pkgs.yarn;
-            src = ${nixSource(args.src)};
-            buildPhase = ${JSON.stringify(args.testCommand)};
-          };
-      in
-        (pkgs.writeScriptBin "start-server" ''
-          #!/usr/bin/env bash
+  const pkg = mkPackage(`
+    let
+        pkgs = ${pkgs};
+        packageJson = pkgs.lib.importJSON ./package.json;
+        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+          nodejs = ${nodejs};
+          yarn = pkgs.yarn;
+          src = ${nixSource(args.src)};
+          buildPhase = ${JSON.stringify(args.testCommand)};
+        };
+    in
+      (pkgs.writeScriptBin "start-server" ''
+        #!/usr/bin/env bash
 
-          set -eu
+        set -eu
 
-          export PATH=\${pkgs.yarn}/bin:$PATH
+        export PATH=\${pkgs.yarn}/bin:$PATH
+        export PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules/.bin:$PATH
+        yarn --version
+        ${args.serverStartCommand}
+      '')
+  `);
+  const devShell: Environment = mkEnvironment(`
+    let
+        pkgs = ${pkgs};
+        packageJson = pkgs.lib.importJSON ./package.json;
+        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+          nodejs = ${nodejs};
+          yarn = pkgs.yarn;
+          src = ${nixSource(args.src)};
+          buildPhase = ${JSON.stringify(args.testCommand)};
+        };
+    in
+      pkgs.mkShell {
+        buildInputs = [ pkgs.yarn ];
+        shellHook = ''
           export PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules/.bin:$PATH
-          yarn --version
-          ${args.serverStartCommand}
-        '')
-    `,
-  });
+          export NODE_PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules:$NODE_PATH
+        '';
+      }
+  `);
+  const startDev: Executable = devShell.shell`${args.serverStartCommand}`;
+  return mkProject(
+    args.description,
+    {
+      pkg,
+      devShell,
+      startDev,
+    },
+    {
+      defaults: {
+        environment: "devShell",
+        executable: "startDev",
+      },
+    }
+  );
 };

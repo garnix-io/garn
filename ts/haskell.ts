@@ -1,8 +1,12 @@
-import { nixSource } from "./utils.ts";
-import { mkPackage, Package, Initializer } from "./base.ts";
+import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
+import { Initializer } from "./base.ts";
+import { Environment, packageToEnvironment, shell } from "./environment.ts";
+import { mkPackage, Package } from "./package.ts";
+import { mkProject, ProjectWithDefaultEnvironment } from "./project.ts";
+import { nixSource } from "./utils.ts";
+import { Executable } from "./executable.ts";
 
 type MkHaskellArgs = {
   description: string;
@@ -11,8 +15,13 @@ type MkHaskellArgs = {
   src: string;
 };
 
-export const mkHaskell = (args: MkHaskellArgs): Package => {
-  const expression = `
+export const mkHaskell = (
+  args: MkHaskellArgs
+): ProjectWithDefaultEnvironment & {
+  pkg: Package;
+  devShell: Environment;
+} => {
+  const pkg: Package = mkPackage(`
     (pkgs.haskell.packages.${args.compiler}.callCabal2nix
       "garner-pkg"
       ${nixSource(args.src)}
@@ -20,11 +29,23 @@ export const mkHaskell = (args: MkHaskellArgs): Package => {
       // {
         meta.mainProgram = "${args.executable}";
       }
-  `;
-  return mkPackage({
-    expression,
-    description: args.description,
-  });
+  `);
+  const devShell: Environment = packageToEnvironment(pkg);
+  const main: Executable = shell`${pkg}/bin/${args.executable}`;
+  return mkProject(
+    args.description,
+    {
+      pkg,
+      devShell,
+      main,
+    },
+    {
+      defaults: {
+        environment: "devShell",
+        executable: "main",
+      },
+    }
+  );
 };
 
 // Initializer
@@ -57,7 +78,8 @@ const mkHaskellInitializer: Initializer = () => {
   return {
     tag: "ShouldRun",
     imports: 'import * as garner from "http://localhost:8777/mod.ts"',
-    makeTarget: () => outdent`
+    makeTarget: () =>
+      outdent`
       export const ${
         parsedCabal.description.package.name
       } = garner.haskell.mkHaskell({
