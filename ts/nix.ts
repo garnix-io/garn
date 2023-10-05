@@ -35,7 +35,7 @@ export const nixStrLit = (
   return { nixExpression };
 };
 
-Deno.test("serializeNixStr correctly serializees into a nix expression", () => {
+Deno.test("nixStrLit correctly serializes into a nix expression", () => {
   assertEquals(nixStrLit`foo`.nixExpression, '"foo"');
   assertEquals(
     nixStrLit`with ${"string"} interpolation`.nixExpression,
