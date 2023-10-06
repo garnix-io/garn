@@ -96,7 +96,7 @@ run-garner example *args="": hpack
   set -eux
 
   cd examples/{{ example }}
-  cabal run garner:garner -- {{ args }}
+  cabal run garn:garn -- {{ args }}
 
 check-examples:
   just run-garner haskell check haskellExecutable

@@ -73,7 +73,7 @@ spec = aroundAll_ withFileServer $ do
         withCmd
           ( cmd
               (Cwd "examples/frontend-yarn-webpack")
-              "cabal run garn:garner --"
+              "cabal run garn:garn --"
               "run frontend"
           )
           $ do
@@ -86,7 +86,7 @@ spec = aroundAll_ withFileServer $ do
         withCmd
           ( cmd
               (Cwd "examples/go-http-backend")
-              "cabal run garn:garner --"
+              "cabal run garn:garn --"
               "run server"
           )
           $ do

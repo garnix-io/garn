@@ -148,8 +148,8 @@ executable codegen
     , unix
   default-language: Haskell2010
 
-executable garner
-  main-is: exe/garner.hs
+executable garn
+  main-is: exe/garn.hs
   other-modules:
       Paths_garn
   default-extensions:
