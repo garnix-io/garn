@@ -11,7 +11,7 @@ where
 
 import Control.Monad (forM_, when)
 import Development.Shake (Exit (Exit), cmd, cmd_)
-import Garner.Common (nixArgs)
+import Garner.Common (currentSystem, nixArgs)
 import Garner.GarnerConfig
 import Garner.Init
 import Garner.Optparse
@@ -72,8 +72,9 @@ runWith env (WithGarnerTsOpts garnerConfig opts) = do
       forM_ (packages targetConfig) $ \package -> do
         Exit c <- cmd "nix build" nixArgs (".#" <> package)
         when (c /= ExitSuccess) $ exitWith c
+      system <- currentSystem
       forM_ (checks targetConfig) $ \check -> do
-        Exit c <- cmd "nix build" nixArgs (".#checks.x86_64-linux." <> check)
+        Exit c <- cmd "nix build" nixArgs (".#checks." <> system <> "." <> check)
         when (c /= ExitSuccess) $ exitWith c
 
 productionEnv :: IO Env
