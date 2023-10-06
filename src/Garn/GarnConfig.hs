@@ -39,10 +39,10 @@ readGarnConfig tsRunner = do
     hPutStr
       mainHandle
       [i|
-        import * as garnerExports from "#{dir}/garn.ts"
-        import { toGarnerConfig } from "#{tsRunner}"
+        import * as garnExports from "#{dir}/garn.ts"
+        import { toGarnConfig } from "#{tsRunner}"
 
-        console.log(JSON.stringify(toGarnerConfig("#{nixpkgsInput}", garnerExports)));
+        console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
       |]
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
@@ -66,9 +66,9 @@ checkGarnFileExists = do
 
           Here's an example `garn.ts` file for npm frontends:
 
-            import * as garner from "http://localhost:8777/mod.ts";
+            import * as garn from "http://localhost:8777/mod.ts";
 
-            export const frontend = garner.typescript.mkNpmFrontend({
+            export const frontend = garn.typescript.mkNpmFrontend({
               src: "./.",
               description: "An NPM frontend",
             });

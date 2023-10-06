@@ -41,7 +41,7 @@ getOpts oType =
         (parser <**> helper)
         ( fullDesc
             <> progDesc "Develop, build, and test your projects reliably and easily"
-            <> header "garner - the project manager"
+            <> header "garn - the project manager"
             <> footerDoc (Just unavailable)
         )
 

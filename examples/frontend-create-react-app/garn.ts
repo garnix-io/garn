@@ -1,6 +1,6 @@
-import * as garner from "http://localhost:8777/mod.ts";
+import * as garn from "http://localhost:8777/mod.ts";
 
-export const main = garner.typescript.mkNpmFrontend({
+export const main = garn.typescript.mkNpmFrontend({
   description: "frontend test app created by create-react-app",
   src: ".",
   nodeVersion: "18",

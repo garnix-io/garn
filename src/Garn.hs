@@ -54,7 +54,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
     Run (CommandOptions {..}) -> do
       cmd_ "nix run" nixArgs (".#" <> target)
     Enter (CommandOptions {..}) -> do
-      hPutStrLn stderr $ "[garner] Entering " <> target <> " shell. Type 'exit' to exit."
+      hPutStrLn stderr $ "[garn] Entering " <> target <> " shell. Type 'exit' to exit."
       let devProc =
             ( proc
                 "nix"
@@ -66,7 +66,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
               }
       _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
         waitForProcess procHandle
-      hPutStrLn stderr $ "[garner] Exiting " <> target <> " shell."
+      hPutStrLn stderr $ "[garn] Exiting " <> target <> " shell."
       pure ()
     Check (CommandOptions {targetConfig}) -> do
       forM_ (packages targetConfig) $ \package -> do
