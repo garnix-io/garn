@@ -114,3 +114,7 @@ typescript-check *args="":
 
 check-isolated-garner:
   test/check-isolated-garner.sh
+
+# Start the docs website server
+docs-server:
+  cd website && npm run dev
