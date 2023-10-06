@@ -1,5 +1,4 @@
 import React from "react";
-import { CookiesProvider } from "react-cookie";
 import { DropdownMenu } from "../components/Dropdown";
 import { Typography } from "../components/Typography";
 import { Outlet, NavLink, Link } from "react-router-dom";
@@ -7,18 +6,14 @@ import { docMenuItems } from "./docs";
 
 export const Main: React.FC = () => {
   return (
-    <CookiesProvider>
+    <>
       <header>
-        <div />
         <div className="header-title">
-          <div>
-            <Typography variant="h1">
-              <Link style={{ color: "black" }} to="/">
-                {" "}
-                garn
-              </Link>
-            </Typography>
-          </div>
+          <Typography variant="h1">
+            <Link style={{ color: "black" }} to="/">
+              garn
+            </Link>
+          </Typography>
         </div>
       </header>
 
@@ -35,21 +30,19 @@ export const Main: React.FC = () => {
         <div className="main-content">
           <Outlet />
         </div>
-        <div />
       </article>
       <footer>
         <p>
-          {" "}
-          Built by <b>garnix</b>.{" "}
+          Built by <b>garnix</b>.
         </p>
       </footer>
-    </CookiesProvider>
+    </>
   );
 };
 
 export const Info: React.FC = () => {
   return (
-    <React.Fragment>
+    <>
       <Typography variant="h2">just code</Typography>
       <br />
       <Typography variant="body">
@@ -96,6 +89,6 @@ export const Info: React.FC = () => {
       </Typography>
 
       <br />
-    </React.Fragment>
+    </>
   );
 };

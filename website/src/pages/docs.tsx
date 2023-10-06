@@ -25,7 +25,6 @@ export const docMenuItems: { name: string; url: string }[] = docEntries.map(
 export const Docs: React.FC<{ is_index?: boolean }> = () => {
   const params = useParams();
   const el = docEntries.find(([info, _]) => info.url == params.docItem);
-  console.log(docEntries);
   if (el === undefined) {
     return (
       <div>Could not find what you're looking for. Please check the URL.</div>

@@ -8,7 +8,7 @@ export const ServerError: React.FC<ServerErrorProps> = (props) => {
   return (
     <div>
       <b>Uh oh!</b>
-      <span> {props.message || "Something went wrong"}</span>
+      <span>{props.message || "Something went wrong"}</span>
     </div>
   );
 };

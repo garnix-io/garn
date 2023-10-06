@@ -15,12 +15,12 @@ interface DocProps {
 
 export const Doc: React.FC<DocProps> = ({ title, url, is_index, children }) => {
   const param = useParams();
-  const my_url = url ? url : title;
+  const my_url = url ?? title;
 
   if (is_index) {
     return (
       <div>
-        <Link to={`${my_url}`}>{title}</Link>
+        <Link to={my_url}>{title}</Link>
       </div>
     );
   }
@@ -28,7 +28,7 @@ export const Doc: React.FC<DocProps> = ({ title, url, is_index, children }) => {
     return (
       <div>
         <h2>{title}</h2>
-        <div> {children} </div>
+        <div>{children}</div>
       </div>
     );
   } else {

@@ -427,8 +427,15 @@ details.not-focused {
   z-index: 5;
 }
 
+.dropdown {
+  position: relative;
+}
+
 .dropdown .dropdown-content {
   position: absolute;
+  left: 0;
+  width: 100%;
+  top: 100%;
   min-inline-size: max-content;
 }
 
@@ -449,7 +456,7 @@ details.not-focused {
   display: none;
 }
 
-.dropdown.show {
+.dropdown-content.show {
   display: block;
 }
 
