@@ -63,19 +63,22 @@ export const mkNpmFrontend = (args: {
         };
       }
   `);
-  const devShell: Environment = mkEnvironment(`
-    let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-    in
-    npmlock2nix.v2.shell {
-      src = ${nixSource(args.src)};
-      node_modules_attrs = {
-        nodejs = ${nodejs};
-      };
-    }
-  `);
+  const devShell: Environment = mkEnvironment(
+    `
+      let
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+      in
+      npmlock2nix.v2.shell {
+        src = ${nixSource(args.src)};
+        node_modules_attrs = {
+          nodejs = ${nodejs};
+        };
+      }
+    `,
+    args.src
+  );
   const startDev: Executable = devShell.shell`npm run start`;
   return mkProject(
     args.description,
@@ -123,25 +126,28 @@ export const mkYarnFrontend = (args: {
         ${args.serverStartCommand}
       '')
   `);
-  const devShell: Environment = mkEnvironment(`
-    let
-        pkgs = ${pkgs};
-        packageJson = pkgs.lib.importJSON ./package.json;
-        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-          nodejs = ${nodejs};
-          yarn = pkgs.yarn;
-          src = ${nixSource(args.src)};
-          buildPhase = ${JSON.stringify(args.testCommand)};
-        };
-    in
-      pkgs.mkShell {
-        buildInputs = [ pkgs.yarn ];
-        shellHook = ''
-          export PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules/.bin:$PATH
-          export NODE_PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules:$NODE_PATH
-        '';
-      }
-  `);
+  const devShell: Environment = mkEnvironment(
+    `
+      let
+          pkgs = ${pkgs};
+          packageJson = pkgs.lib.importJSON ./package.json;
+          yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+            nodejs = ${nodejs};
+            yarn = pkgs.yarn;
+            src = ${nixSource(args.src)};
+            buildPhase = ${JSON.stringify(args.testCommand)};
+          };
+      in
+        pkgs.mkShell {
+          buildInputs = [ pkgs.yarn ];
+          shellHook = ''
+            export PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules/.bin:$PATH
+            export NODE_PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules:$NODE_PATH
+          '';
+        }
+    `,
+    args.src
+  );
   const startDev: Executable = devShell.shell`${args.serverStartCommand}`;
   return mkProject(
     args.description,

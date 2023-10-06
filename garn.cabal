@@ -41,6 +41,7 @@ library
       Garn.GarnConfig
       Garn.Init
       Garn.Optparse
+      Garn.Utils
   other-modules:
       Paths_garn
   hs-source-dirs:
@@ -215,6 +216,7 @@ test-suite spec
       Garn.GarnConfig
       Garn.Init
       Garn.Optparse
+      Garn.Utils
       Paths_garn
   hs-source-dirs:
       test/spec

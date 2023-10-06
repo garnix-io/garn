@@ -64,6 +64,14 @@
             '')
           ;
         });
+      checks = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+        { });
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -124,16 +132,16 @@
             type = "app";
             program = "${
           let dev = 
-    let
-        pkgs = import "${nixpkgs}" {
+      let
+          pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };
-        packageJson = pkgs.lib.importJSON ./package.json;
-        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-          nodejs = pkgs.nodejs-18_x;
-          yarn = pkgs.yarn;
-          src = 
+          packageJson = pkgs.lib.importJSON ./package.json;
+          yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
+            nodejs = pkgs.nodejs-18_x;
+            yarn = pkgs.yarn;
+            src = 
   (let
     lib = pkgs.lib;
     lastSafe = list :
@@ -151,17 +159,17 @@
          fileName != "flake.nix";
     })
 ;
-          buildPhase = "yarn mocha";
-        };
-    in
-      pkgs.mkShell {
-        buildInputs = [ pkgs.yarn ];
-        shellHook = ''
-          export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
-          export NODE_PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules:$NODE_PATH
-        '';
-      }
-  ; in
+            buildPhase = "yarn mocha";
+          };
+      in
+        pkgs.mkShell {
+          buildInputs = [ pkgs.yarn ];
+          shellHook = ''
+            export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
+            export NODE_PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules:$NODE_PATH
+          '';
+        }
+    ; in
           pkgs.runCommand "shell-env" {
             buildInputs = dev.buildInputs;
             nativeBuildInputs = dev.nativeBuildInputs;

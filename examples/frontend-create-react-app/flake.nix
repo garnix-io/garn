@@ -59,6 +59,14 @@
               }
           ;
         });
+      checks = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+        { });
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -110,13 +118,13 @@
             type = "app";
             program = "${
           let dev = 
-    let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-    in
-    npmlock2nix.v2.shell {
-      src = 
+      let
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+      in
+      npmlock2nix.v2.shell {
+        src = 
   (let
     lib = pkgs.lib;
     lastSafe = list :
@@ -134,11 +142,11 @@
          fileName != "flake.nix";
     })
 ;
-      node_modules_attrs = {
-        nodejs = pkgs.nodejs-18_x;
-      };
-    }
-  ; in
+        node_modules_attrs = {
+          nodejs = pkgs.nodejs-18_x;
+        };
+      }
+    ; in
           pkgs.runCommand "shell-env" {
             buildInputs = dev.buildInputs;
             nativeBuildInputs = dev.nativeBuildInputs;

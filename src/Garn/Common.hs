@@ -1,4 +1,7 @@
-module Garn.Common (nixpkgsInput, nixArgs) where
+module Garn.Common (nixpkgsInput, nixArgs, currentSystem) where
+
+import Data.Aeson (eitherDecode)
+import Development.Shake (Stdout (..), cmd)
 
 -- | pinned to release-23.05 on 2023-08-31
 nixpkgsInput :: String
@@ -10,3 +13,8 @@ nixArgs =
     "flakes nix-command",
     "--print-build-logs"
   ]
+
+currentSystem :: IO String
+currentSystem = do
+  Stdout json <- cmd "nix" nixArgs "eval --impure --json --expr builtins.currentSystem"
+  pure $ either error id $ eitherDecode json

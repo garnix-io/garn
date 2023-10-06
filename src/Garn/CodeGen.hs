@@ -18,12 +18,12 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import Development.Shake
 import GHC.Generics (Generic)
-import Garn.Common (nixpkgsInput)
+import Garn.Common (currentSystem, nixpkgsInput)
 import WithCli (withCli)
 
 run :: IO ()
 run = withCli $ do
-  StdoutTrim (system :: String) <- cmd "nix" nixArgs "eval --impure --raw --expr builtins.currentSystem"
+  system <- currentSystem
   let varName = "pkgs"
       nixpkgsExpression =
         [i|
