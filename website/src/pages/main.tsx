@@ -80,8 +80,7 @@ export const Info: React.FC = () => {
             <b>garn run foo</b>.
           </li>
           <li>
-            <b>garn check frontend</b> to run <i>reproducible</i>
-            tests.
+            <b>garn check frontend</b> to run <i>reproducible</i> tests.
           </li>
         </ul>
         Anyone can get started on the project immediately, without wondering how

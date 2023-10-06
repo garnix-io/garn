@@ -117,4 +117,5 @@ check-isolated-garner:
 
 # Start the docs website server
 docs-server:
+  cd website && npm install
   cd website && npm run dev
