@@ -6,10 +6,10 @@ shopt -s inherit_errexit
 PROJECT_ROOT="$(git rev-parse --show-toplevel)"
 
 nix build --print-build-logs \
-  "$PROJECT_ROOT#garner"
+  "$PROJECT_ROOT#garn"
 function run-in-isolation () {
   nix shell --ignore-environment --print-build-logs \
-    "$PROJECT_ROOT#garner" -c "$@"
+    "$PROJECT_ROOT#garn" -c "$@"
 }
 
 ## verify isolation is working
@@ -30,11 +30,11 @@ done
 
 cd examples/haskell
 expected=42
-res="$(run-in-isolation garner run haskellExecutable)"
+res="$(run-in-isolation garn run haskellExecutable)"
 if [[ $res == $expected ]]; then
   echo "Smoke test successful"
 else
-  echo "Garner ran, but gave a different result than expected."
+  echo "Garn ran, but gave a different result than expected."
   echo "  Expected: $expected"
   echo "  Received: $res"
   exit 1

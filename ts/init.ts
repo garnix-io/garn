@@ -5,13 +5,13 @@ let body = "";
 
 const initializers = haskell.initializers;
 
-console.error("[garner] Creating a garn.ts file");
+console.error("[garn] Creating a garn.ts file");
 
 for (const init of initializers) {
   const result = init();
   switch (result.tag) {
     case "UnexpectedError":
-      console.error("[garner] " + result.reason);
+      console.error("[garn] " + result.reason);
       break;
     case "ShouldNotRun":
       break;
