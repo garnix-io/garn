@@ -19,11 +19,11 @@
         lib = pkgs.lib;
         apps.default = {
           type = "app";
-          program = "${self.packages.${system}.default}/bin/garner";
+          program = "${self.packages.${system}.default}/bin/garn";
         };
         packages = {
-          default = self.packages.${system}.garner;
-          garner =
+          default = self.packages.${system}.garn;
+          garn =
             let
               # directories shouldn't have leading or trailing slashes
               ignored = [
@@ -32,12 +32,12 @@
                 ".github"
                 "justfile"
                 "scripts"
-                "test/check-isolated-garner.sh"
+                "test/check-isolated-garn.sh"
               ];
               src = builtins.path
                 {
                   path = ./.;
-                  name = "garner-source";
+                  name = "garn-source";
                   filter = path: type:
                     let
                       repoPath =
@@ -65,7 +65,7 @@
                       pkgs.git
                       pkgs.nix
                     ]}
-                    wrapProgram "$out/bin/garner" \
+                    wrapProgram "$out/bin/garn" \
                         --set LC_ALL C.UTF-8 \
                         --prefix PATH : ${pkgs.lib.makeBinPath [
                       pkgs.deno
