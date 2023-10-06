@@ -21,7 +21,7 @@
         {
           foo_pkg =
             (pkgs.haskell.packages.ghc94.callCabal2nix
-              "garner-pkg"
+              "garn-pkg"
 
               (
                 let
@@ -46,7 +46,7 @@
 
               { })
             // {
-              meta.mainProgram = "garner-test";
+              meta.mainProgram = "garn-test";
             }
           ;
         });
@@ -70,7 +70,7 @@
             let
               expr =
                 (pkgs.haskell.packages.ghc94.callCabal2nix
-                  "garner-pkg"
+                  "garn-pkg"
 
                   (
                     let
@@ -95,7 +95,7 @@
 
                   { })
                 // {
-                  meta.mainProgram = "garner-test";
+                  meta.mainProgram = "garn-test";
                 }
               ;
             in
@@ -117,7 +117,7 @@
               let
                 shell = "${
     (pkgs.haskell.packages.ghc94.callCabal2nix
-      "garner-pkg"
+      "garn-pkg"
       
   (let
     lib = pkgs.lib;
@@ -140,9 +140,9 @@
 
       { })
       // {
-        meta.mainProgram = "garner-test";
+        meta.mainProgram = "garn-test";
       }
-  }/bin/garner-test";
+  }/bin/garn-test";
               in
               "${pkgs.writeScriptBin "executable" shell}/bin/executable";
           };
