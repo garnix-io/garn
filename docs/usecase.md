@@ -39,7 +39,7 @@ $ garner test # run all tests
 $ garner help # show the garner help
 ```
 
-That creates `garner.ts`:
+That creates `garn.ts`:
 
 ```ts
 import {
@@ -90,7 +90,7 @@ Detected a haskell project in ./backend
 Detected a typescript frontend project in ./frontend
 ```
 
-This would autodetect a starting point for a `garner.ts`:
+This would autodetect a starting point for a `garn.ts`:
 
 ```ts
 import {
@@ -121,7 +121,7 @@ export const frontend = typescriptFrontend.mkProject({
 
 But it seems _much_ more important that `testCommand` is as accessible as possible.
 
-## checkout out a repo with an existing `garner.ts` config
+## checkout out a repo with an existing `garn.ts` config
 
 ```
 $ git clone $WHATEVER

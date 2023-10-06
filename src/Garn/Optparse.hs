@@ -85,7 +85,7 @@ withGarnTsParser targets =
 
 withouGarnTsCommandInfo :: [(String, String, Parser WithoutGarnTsCommand)]
 withouGarnTsCommandInfo =
-  [("init", "Infer a garner.ts file from the project layout", pure Init)]
+  [("init", "Infer a garn.ts file from the project layout", pure Init)]
 
 withoutGarnTsParser :: Parser WithoutGarnTsCommand
 withoutGarnTsParser =

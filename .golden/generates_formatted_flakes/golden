@@ -40,7 +40,7 @@
                         fileName = lastSafe (lib.strings.splitString "/" path);
                       in
                       fileName != "flake.nix" &&
-                      fileName != "garner.ts";
+                      fileName != "garn.ts";
                   }
               )
 
@@ -81,7 +81,7 @@
                             fileName = lastSafe (lib.strings.splitString "/" path);
                           in
                           fileName != "flake.nix" &&
-                          fileName != "garner.ts";
+                          fileName != "garn.ts";
                       }
                   )
 
@@ -127,7 +127,7 @@
           fileName = lastSafe (lib.strings.splitString "/" path);
         in
          fileName != "flake.nix" &&
-         fileName != "garner.ts";
+         fileName != "garn.ts";
     })
 
       { })

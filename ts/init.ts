@@ -5,7 +5,7 @@ let body = "";
 
 const initializers = haskell.initializers;
 
-console.error("[garner] Creating a garner.ts file");
+console.error("[garner] Creating a garn.ts file");
 
 for (const init of initializers) {
   const result = init();
@@ -22,4 +22,4 @@ for (const init of initializers) {
   }
 }
 
-Deno.writeTextFileSync("garner.ts", imports + "\n\n" + body);
+Deno.writeTextFileSync("garn.ts", imports + "\n\n" + body);

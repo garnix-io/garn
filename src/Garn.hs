@@ -38,7 +38,7 @@ run = do
 
 readOptionsAndConfig :: Env -> IO Options
 readOptionsAndConfig env = do
-  hasGarn <- doesFileExist "garner.ts"
+  hasGarn <- doesFileExist "garn.ts"
   if hasGarn
     then do
       garnConfig <- readGarnConfig (tsRunnerFilename env)

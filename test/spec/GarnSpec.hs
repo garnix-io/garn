@@ -45,7 +45,7 @@ spec = do
                 Available commands:
                   init.*
               |]
-          writeFile "garner.ts" ""
+          writeFile "garn.ts" ""
           output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
@@ -67,7 +67,7 @@ spec = do
                   gen
                   check
               |]
-          writeFile "garner.ts" ""
+          writeFile "garn.ts" ""
           output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
@@ -106,7 +106,7 @@ spec = do
         describe "withDevTools" $ do
           it "allows dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
-            writeFile "garner.ts" $
+            writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
@@ -126,7 +126,7 @@ spec = do
             stdout output `shouldBe` "tool\n"
           it "allows multiple dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
-            writeFile "garner.ts" $
+            writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
@@ -151,7 +151,7 @@ spec = do
             stdout output `shouldStartWith` "/nix/store"
           it "does not destructively update the given package" $ do
             writeHaskellProject repoDir
-            writeFile "garner.ts" $
+            writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
@@ -187,7 +187,7 @@ spec = do
           dropWhile (== ' ') (stdout output) `shouldStartWith` "string-conversions"
         it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
           writeFile
-            "garner.ts"
+            "garn.ts"
             [i|
               import { mkPackage } from "#{repoDir}/ts/package.ts"
               import { packageToEnvironment } from "#{repoDir}/ts/environment.ts"
@@ -244,8 +244,8 @@ spec = do
               version: 0.0.1
             |]
           output <- runGarn ["init"] "" repoDir Nothing
-          stderr output `shouldBe` "[garner] Creating a garner.ts file\n"
-          readFile "garner.ts"
+          stderr output `shouldBe` "[garner] Creating a garn.ts file\n"
+          readFile "garn.ts"
             `shouldReturn` dropWhileEnd
               isSpace
               ( unindent
@@ -266,7 +266,7 @@ spec = do
           stderr output
             `shouldBe` unindent
               [i|
-                [garner] Creating a garner.ts file
+                [garner] Creating a garn.ts file
                 [garner] Found but could not parse cabal file
               |]
 
@@ -297,7 +297,7 @@ modifyPackageJson modifier = do
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
   writeFile
-    "garner.ts"
+    "garn.ts"
     [i|
       import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
@@ -327,7 +327,7 @@ writeHaskellProject repoDir = do
 writeNpmFrontendProject :: FilePath -> IO ()
 writeNpmFrontendProject repoDir = do
   writeFile
-    "garner.ts"
+    "garn.ts"
     [i|
       import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts"
 

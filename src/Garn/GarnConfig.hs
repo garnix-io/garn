@@ -33,11 +33,11 @@ readGarnConfig :: String -> IO GarnConfig
 readGarnConfig tsRunner = do
   checkGarnFileExists
   dir <- getCurrentDirectory
-  withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
+  withSystemTempFile "garn-main.ts" $ \mainPath mainHandle -> do
     hPutStr
       mainHandle
       [i|
-        import * as garnerExports from "#{dir}/garner.ts"
+        import * as garnerExports from "#{dir}/garn.ts"
         import { toGarnerConfig } from "#{tsRunner}"
 
         console.log(JSON.stringify(toGarnerConfig("#{nixpkgsInput}", garnerExports)));
@@ -45,7 +45,7 @@ readGarnConfig tsRunner = do
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
     case eitherDecode out :: Either String GarnConfig of
-      Left err -> error $ "Unexpected package export from garner.ts:\n" <> err
+      Left err -> error $ "Unexpected package export from garn.ts:\n" <> err
       Right writtenConfig -> return writtenConfig
 
 writeGarnConfig :: GarnConfig -> IO ()
@@ -55,14 +55,14 @@ writeGarnConfig garnConfig = do
 
 checkGarnFileExists :: IO ()
 checkGarnFileExists = do
-  exists <- doesFileExist "garner.ts"
+  exists <- doesFileExist "garn.ts"
   when (not exists) $ do
     hPutStr stderr $
       unindent
         [i|
-          No `garner.ts` file found in the current directory.
+          No `garn.ts` file found in the current directory.
 
-          Here's an example `garner.ts` file for npm frontends:
+          Here's an example `garn.ts` file for npm frontends:
 
             import * as garner from "http://localhost:8777/mod.ts";
 
