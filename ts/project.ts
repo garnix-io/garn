@@ -86,7 +86,7 @@ const proxyEnvironmentHelpers = () => ({
     const environment = projectDefaultEnvironment(this);
     if (environment == null) {
       throw new Error(
-        `'.check' is only valid to be called on projects with a default environment`
+        `'.check' can only be called on projects with a default environment`
       );
     }
     return environment.check(s, ...args);
@@ -98,7 +98,7 @@ const proxyEnvironmentHelpers = () => ({
     const environment = projectDefaultEnvironment(this);
     if (environment == null) {
       throw new Error(
-        `'.withDevTools' is only valid to be called on projects with a default environment`
+        `'.withDevTools' can only be called on projects with a default environment`
       );
     }
     const newEnvironment = environment.withDevTools(devTools);
