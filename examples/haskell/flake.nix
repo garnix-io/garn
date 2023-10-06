@@ -126,10 +126,10 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
+        touch \$out
         cp -r ${src} src
         cd src
         ${"hlint *.hs"}
-        touch \$out
       "
           ;
         });

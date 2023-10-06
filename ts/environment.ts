@@ -51,10 +51,10 @@ export const mkEnvironment = (
     } else {
       const innerScript = nixStrLit(s, ...args);
       const wrappedScript = nixStrLit`
+        touch $out
         cp -r ${{ nixExpression: "src" }} src
         cd src
         ${innerScript}
-        touch $out
       `;
       return {
         tag: "check",
