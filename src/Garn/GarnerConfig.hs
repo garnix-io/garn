@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Garner.GarnerConfig where
+module Garn.GarnerConfig where
 
 import Control.Monad
 import Data.Aeson (FromJSON, eitherDecode)
@@ -9,7 +9,7 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util
 import Development.Shake (CmdOption (EchoStderr, EchoStdout), Stdout (Stdout), cmd, cmd_)
 import GHC.Generics (Generic)
-import Garner.Common (nixArgs, nixpkgsInput)
+import Garn.Common (nixArgs, nixpkgsInput)
 import System.Directory (doesFileExist, getCurrentDirectory)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)

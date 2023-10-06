@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Garner.CodeGen
+module Garn.CodeGen
   ( run,
     fromToplevelDerivation,
   )
@@ -18,7 +18,7 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import Development.Shake
 import GHC.Generics (Generic)
-import Garner.Common (nixpkgsInput)
+import Garn.Common (nixpkgsInput)
 import WithCli (withCli)
 
 run :: IO ()

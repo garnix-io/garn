@@ -35,12 +35,12 @@ source-repository head
 
 library
   exposed-modules:
-      Garner
-      Garner.CodeGen
-      Garner.Common
-      Garner.GarnerConfig
-      Garner.Init
-      Garner.Optparse
+      Garn
+      Garn.CodeGen
+      Garn.Common
+      Garn.GarnerConfig
+      Garn.Init
+      Garn.Optparse
   other-modules:
       Paths_garner
   hs-source-dirs:
@@ -207,14 +207,14 @@ test-suite spec
   main-is: Spec.hs
   other-modules:
       ExampleSpec
-      Garner.CodeGenSpec
-      GarnerSpec
-      Garner
-      Garner.CodeGen
-      Garner.Common
-      Garner.GarnerConfig
-      Garner.Init
-      Garner.Optparse
+      Garn.CodeGenSpec
+      GarnSpec
+      Garn
+      Garn.CodeGen
+      Garn.Common
+      Garn.GarnerConfig
+      Garn.Init
+      Garn.Optparse
       Paths_garner
   hs-source-dirs:
       test/spec

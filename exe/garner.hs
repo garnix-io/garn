@@ -1,6 +1,6 @@
 module Main where
 
-import qualified Garner
+import qualified Garn
 
 main :: IO ()
-main = Garner.run
+main = Garn.run

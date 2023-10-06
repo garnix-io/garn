@@ -1,6 +1,6 @@
 module Main where
 
-import Garner.CodeGen (run)
+import Garn.CodeGen (run)
 
 main :: IO ()
 main = run

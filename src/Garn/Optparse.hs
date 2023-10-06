@@ -1,6 +1,6 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Garner.Optparse
+module Garn.Optparse
   ( getOpts,
     Options (..),
     OptionType (..),
@@ -11,7 +11,7 @@ module Garner.Optparse
 where
 
 import qualified Data.Map as Map
-import Garner.GarnerConfig
+import Garn.GarnerConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 import qualified Options.Applicative.Help.Pretty as OA

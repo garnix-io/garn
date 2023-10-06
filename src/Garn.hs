@@ -1,6 +1,6 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Garner
+module Garn
   ( Options (..),
     Env (..),
     run,
@@ -11,10 +11,10 @@ where
 
 import Control.Monad (forM_, when)
 import Development.Shake (Exit (Exit), cmd, cmd_)
-import Garner.Common (nixArgs)
-import Garner.GarnerConfig
-import Garner.Init
-import Garner.Optparse
+import Garn.Common (nixArgs)
+import Garn.GarnerConfig
+import Garn.Init
+import Garn.Optparse
 import Paths_garner
 import System.Directory (doesFileExist)
 import System.Exit (ExitCode (..), exitWith)

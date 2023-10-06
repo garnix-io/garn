@@ -1,4 +1,4 @@
-module Garner.Init (initGarnerTs) where
+module Garn.Init (initGarnerTs) where
 
 import Development.Shake (cmd_)
 

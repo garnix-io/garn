@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module GarnerSpec where
+module GarnSpec where
 
 import Control.Exception (bracket, catch)
 import Control.Lens (from, (<>~))
@@ -16,7 +16,7 @@ import Data.String.Interpolate.Util (unindent)
 import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
 import Development.Shake (StdoutTrim (..), cmd)
-import Garner
+import Garn
 import System.Directory
 import System.Environment (withArgs)
 import System.Exit (ExitCode (..))
@@ -38,7 +38,7 @@ spec = do
     describe "garner" $ around_ inTempDirectory $ do
       describe "--help" $ do
         it "lists available commands" $ do
-          output <- runGarner ["--help"] "" repoDir Nothing
+          output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
@@ -46,7 +46,7 @@ spec = do
                   init.*
               |]
           writeFile "garner.ts" ""
-          output <- runGarner ["--help"] "" repoDir Nothing
+          output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
@@ -57,7 +57,7 @@ spec = do
                   check.*
               |]
         it "lists unavailable commands" $ do
-          output <- runGarner ["--help"] "" repoDir Nothing
+          output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
@@ -68,7 +68,7 @@ spec = do
                   check
               |]
           writeFile "garner.ts" ""
-          output <- runGarner ["--help"] "" repoDir Nothing
+          output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
@@ -79,12 +79,12 @@ spec = do
       describe "run" $ do
         it "runs a simple Haskell program" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["run", "foo"] "" repoDir Nothing
+          output <- runGarn ["run", "foo"] "" repoDir Nothing
           stdout output `shouldBe` "haskell test output\n"
         it "writes flake.{lock,nix}, but no other files" $ do
           writeHaskellProject repoDir
           filesBefore <- listDirectory "."
-          _ <- runGarner ["run", "foo"] "" repoDir Nothing
+          _ <- runGarn ["run", "foo"] "" repoDir Nothing
           filesAfter <- sort <$> listDirectory "."
           filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
         it "doesn’t format other Nix files" $ do
@@ -99,7 +99,7 @@ spec = do
                 |]
           writeFile "unformatted.nix" unformattedNix
           writeHaskellProject repoDir
-          _ <- runGarner ["run", "foo"] "" repoDir Nothing
+          _ <- runGarn ["run", "foo"] "" repoDir Nothing
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
       describe "enter" $ do
@@ -122,7 +122,7 @@ spec = do
 
                   export const bar = foo.withDevTools([hello]);
                 |]
-            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
           it "allows multiple dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
@@ -145,9 +145,9 @@ spec = do
 
                   export const bar = foo.withDevTools([hello, cowsay]);
                 |]
-            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
-            output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "/nix/store"
           it "does not destructively update the given package" $ do
             writeHaskellProject repoDir
@@ -168,11 +168,11 @@ spec = do
 
                   export const bar = foo.withDevTools([hello]);
                 |]
-            output <- runGarner ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
             stderr output `shouldContain` "hello: command not found"
         it "has the right GHC version" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
+          output <- runGarn ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
           stdout output `shouldStartWith` "9.4"
         it "registers Haskell dependencies with ghc-pkg" $ do
           writeHaskellProject repoDir
@@ -183,7 +183,7 @@ spec = do
               . _Array
               . from vector
               <>~ ["string-conversions"]
-          output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir Nothing
+          output <- runGarn ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir Nothing
           dropWhile (== ' ') (stdout output) `shouldStartWith` "string-conversions"
         it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
           writeFile
@@ -206,33 +206,33 @@ spec = do
                 { defaults: { environment: "devShell" } }
               );
             |]
-          output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir Nothing
+          output <- runGarn ["enter", "foo"] "hello\nexit\n" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
         it "starts the shell defined in $SHELL" $ do
           writeHaskellProject repoDir
           StdoutTrim userShell <- cmd ("which bash" :: String)
           output <-
-            runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
+            runGarn ["enter", "foo"] shellTestCommand repoDir $ Just userShell
           stdout output `shouldBe` "using bash"
           StdoutTrim userShell <- cmd ("which zsh" :: String)
           output <-
-            runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
+            runGarn ["enter", "foo"] shellTestCommand repoDir $ Just userShell
           stdout output `shouldBe` "using zsh"
         it "provides a message indicating the command succeeded" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["enter", "foo"] "" repoDir Nothing
+          output <- runGarn ["enter", "foo"] "" repoDir Nothing
           stderr output `shouldContain` "[garner] Entering foo shell. Type 'exit' to exit."
         it "provides a message indicating the shell exited" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["enter", "foo"] "" repoDir Nothing
+          output <- runGarn ["enter", "foo"] "" repoDir Nothing
           stderr output `shouldContain` "[garner] Exiting foo shell"
 
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
             writeNpmFrontendProject repoDir
-            output <- runGarner ["enter", "frontend"] "node --version" repoDir Nothing
+            output <- runGarn ["enter", "frontend"] "node --version" repoDir Nothing
             stdout output `shouldStartWith` "v18."
-            output <- runGarner ["enter", "frontend"] "npm --version" repoDir Nothing
+            output <- runGarn ["enter", "frontend"] "npm --version" repoDir Nothing
             stdout output `shouldStartWith` "9."
 
       describe "init" $ do
@@ -243,7 +243,7 @@ spec = do
               name: garner
               version: 0.0.1
             |]
-          output <- runGarner ["init"] "" repoDir Nothing
+          output <- runGarn ["init"] "" repoDir Nothing
           stderr output `shouldBe` "[garner] Creating a garner.ts file\n"
           readFile "garner.ts"
             `shouldReturn` dropWhileEnd
@@ -262,7 +262,7 @@ spec = do
               )
         it "logs unexpected errors" $ do
           writeFile "garner.cabal" [i| badCabalfile |]
-          output <- runGarner ["init"] "" repoDir Nothing
+          output <- runGarn ["init"] "" repoDir Nothing
           stderr output
             `shouldBe` unindent
               [i|
@@ -278,7 +278,7 @@ spec = do
         it "generates formatted flakes" $ do
           inTempDirectory $ do
             writeHaskellProject repoDir
-            _ <- runGarner ["run", "foo"] "" repoDir Nothing
+            _ <- runGarn ["run", "foo"] "" repoDir Nothing
             flake <- readFile "./flake.nix"
             pure $ defaultGolden "generates_formatted_flakes" flake
 
@@ -367,8 +367,8 @@ writeNpmFrontendProject repoDir = do
       }
     |]
 
-runGarner :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
-runGarner args stdin repoDir shell = do
+runGarn :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
+runGarn args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
   (stderr, stdout) <- hCapture [Sys.stderr] $
     hCapture_ [Sys.stdout] $

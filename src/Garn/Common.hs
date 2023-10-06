@@ -1,4 +1,4 @@
-module Garner.Common (nixpkgsInput, nixArgs) where
+module Garn.Common (nixpkgsInput, nixArgs) where
 
 -- | pinned to release-23.05 on 2023-08-31
 nixpkgsInput :: String
