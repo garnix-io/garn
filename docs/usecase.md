@@ -1,21 +1,21 @@
-# `garner` use cases
+# `garn` use cases
 
-This is an aspirational document about how `garner` could work in the future. Details are going to change.
+This is an aspirational document about how `garn` could work in the future. Details are going to change.
 
-## installing `garner`
+## installing `garn`
 
 For now:
 
-Install `nix` and `garner`:
+Install `nix` and `garn`:
 
 ```sh
-nix profile install github:garnix-io/garner
+nix profile install github:garnix-io/garn
 ```
 
 ## getting started from scratch
 
 ```sh
-garner intro
+garn intro
 ```
 
 It'll allow you to multi-select which language presets to use:
@@ -32,14 +32,14 @@ name for your haskell backend: backend
 name for your typescript frontend: frontend
 
 You can now try:
-$ garner start # this will spin up the haskell backend and the typescript frontend
-$ garner test # run all tests
-  $ garner test backend # run all backend tests
-  $ garner test frontend # run all frontend tests
-$ garner help # show the garner help
+$ garn start # this will spin up the haskell backend and the typescript frontend
+$ garn test # run all tests
+  $ garn test backend # run all backend tests
+  $ garn test frontend # run all frontend tests
+$ garn help # show the garn help
 ```
 
-That creates `garner.ts`:
+That creates `garn.ts`:
 
 ```ts
 import {
@@ -70,7 +70,7 @@ Also, it creates
 - `frontend/yarn.lock`
 
 ```sh
-$ garner start
+$ garn start
 backend running on $BACKEND_URL
 frontend running on $FRONTEND_URL
 $ curl $BACKEND_URL
@@ -78,19 +78,19 @@ $ curl $FRONTEND_URL
 ```
 
 ```sh
-$ garner edit # opens an editor where the deno extension is set up
-$ garner init-vscode # makes deno work well for an existing vscode installation
+$ garn edit # opens an editor where the deno extension is set up
+$ garn init-vscode # makes deno work well for an existing vscode installation
 ```
 
-## adding garner to an existing project
+## adding garn to an existing project
 
 ```sh
-$ garner init
+$ garn init
 Detected a haskell project in ./backend
 Detected a typescript frontend project in ./frontend
 ```
 
-This would autodetect a starting point for a `garner.ts`:
+This would autodetect a starting point for a `garn.ts`:
 
 ```ts
 import {
@@ -121,18 +121,18 @@ export const frontend = typescriptFrontend.mkProject({
 
 But it seems _much_ more important that `testCommand` is as accessible as possible.
 
-## checkout out a repo with an existing `garner.ts` config
+## checkout out a repo with an existing `garn.ts` config
 
 ```
 $ git clone $WHATEVER
 $ cd whatever
-$ garner help
-garner -- a tool for project configurations
+$ garn help
+garn -- a tool for project configurations
 
 subcommands:
-  garner help -- show this help
-  garner test -- run all tests
-    garner test backend -- run all backend tests
-    garner test frontend -- run all backend tests
-  garner start -- starts the haskell backend and the typescript frontend
+  garn help -- show this help
+  garn test -- run all tests
+    garn test backend -- run all backend tests
+    garn test frontend -- run all backend tests
+  garn start -- starts the haskell backend and the typescript frontend
 ```

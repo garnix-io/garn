@@ -21,7 +21,7 @@
         {
           haskellExecutable_pkg =
             (pkgs.haskell.packages.ghc94.callCabal2nix
-              "garner-pkg"
+              "garn-pkg"
 
               (
                 let
@@ -44,8 +44,93 @@
 
               { })
             // {
-              meta.mainProgram = "garnerTest";
+              meta.mainProgram = "garnTest";
             }
+          ;
+        });
+      checks = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+        {
+          haskellExecutable_hlint =
+            let
+              src =
+                (
+                  let
+                    lib = pkgs.lib;
+                    lastSafe = list:
+                      if lib.lists.length list == 0
+                      then null
+                      else lib.lists.last list;
+                  in
+                  builtins.path
+                    {
+                      path = ./.;
+                      filter = path: type:
+                        let
+                          fileName = lastSafe (lib.strings.splitString "/" path);
+                        in
+                        fileName != "flake.nix";
+                    }
+                )
+              ;
+              dev =
+                (
+                  let
+                    expr =
+                      (pkgs.haskell.packages.ghc94.callCabal2nix
+                        "garn-pkg"
+
+                        (
+                          let
+                            lib = pkgs.lib;
+                            lastSafe = list:
+                              if lib.lists.length list == 0
+                              then null
+                              else lib.lists.last list;
+                          in
+                          builtins.path
+                            {
+                              path = ./.;
+                              filter = path: type:
+                                let
+                                  fileName = lastSafe (lib.strings.splitString "/" path);
+                                in
+                                fileName != "flake.nix";
+                            }
+                        )
+
+                        { })
+                      // {
+                        meta.mainProgram = "garnTest";
+                      }
+                    ;
+                  in
+                  (if expr ? env
+                  then expr.env
+                  else pkgs.mkShell { inputsFrom = [ expr ]; }
+                  )
+                ).overrideAttrs (finalAttrs: previousAttrs: {
+                  nativeBuildInputs =
+                    previousAttrs.nativeBuildInputs
+                    ++
+                    [ pkgs.hlint ];
+                })
+              ;
+            in
+            pkgs.runCommand "check"
+              {
+                buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+              } "
+        touch \$out
+        cp -r ${src} src
+        cd src
+        ${"hlint *.hs"}
+      "
           ;
         });
       devShells = forAllSystems (system:
@@ -57,40 +142,47 @@
         in
         {
           haskellExecutable =
-            let
-              expr =
-                (pkgs.haskell.packages.ghc94.callCabal2nix
-                  "garner-pkg"
+            (
+              let
+                expr =
+                  (pkgs.haskell.packages.ghc94.callCabal2nix
+                    "garn-pkg"
 
-                  (
-                    let
-                      lib = pkgs.lib;
-                      lastSafe = list:
-                        if lib.lists.length list == 0
-                        then null
-                        else lib.lists.last list;
-                    in
-                    builtins.path
-                      {
-                        path = ./.;
-                        filter = path: type:
-                          let
-                            fileName = lastSafe (lib.strings.splitString "/" path);
-                          in
-                          fileName != "flake.nix";
-                      }
-                  )
+                    (
+                      let
+                        lib = pkgs.lib;
+                        lastSafe = list:
+                          if lib.lists.length list == 0
+                          then null
+                          else lib.lists.last list;
+                      in
+                      builtins.path
+                        {
+                          path = ./.;
+                          filter = path: type:
+                            let
+                              fileName = lastSafe (lib.strings.splitString "/" path);
+                            in
+                            fileName != "flake.nix";
+                        }
+                    )
 
-                  { })
-                // {
-                  meta.mainProgram = "garnerTest";
-                }
-              ;
-            in
-            (if expr ? env
-            then expr.env
-            else pkgs.mkShell { inputsFrom = [ expr ]; }
-            )
+                    { })
+                  // {
+                    meta.mainProgram = "garnTest";
+                  }
+                ;
+              in
+              (if expr ? env
+              then expr.env
+              else pkgs.mkShell { inputsFrom = [ expr ]; }
+              )
+            ).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.hlint ];
+            })
           ;
         });
       apps = forAllSystems (system:
@@ -105,7 +197,7 @@
               let
                 shell = "${
     (pkgs.haskell.packages.ghc94.callCabal2nix
-      "garner-pkg"
+      "garn-pkg"
       
   (let
     lib = pkgs.lib;
@@ -126,9 +218,9 @@
 
       { })
       // {
-        meta.mainProgram = "garnerTest";
+        meta.mainProgram = "garnTest";
       }
-  }/bin/garnerTest";
+  }/bin/garnTest";
               in
               "${pkgs.writeScriptBin "executable" shell}/bin/executable";
           };

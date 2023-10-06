@@ -1,10 +1,10 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Garner.CodeGenSpec (spec) where
+module Garn.CodeGenSpec (spec) where
 
 import Data.String.Interpolate (i)
 import Development.Shake (cmd_)
-import Garner.CodeGen
+import Garn.CodeGen
 import System.Directory (getCurrentDirectory)
 import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)

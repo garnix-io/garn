@@ -21,7 +21,7 @@
         {
           foo_pkg =
             (pkgs.haskell.packages.ghc94.callCabal2nix
-              "garner-pkg"
+              "garn-pkg"
 
               (
                 let
@@ -34,20 +34,30 @@
                 builtins.path
                   {
                     path = ./.;
+                    name = "source";
                     filter = path: type:
                       let
                         fileName = lastSafe (lib.strings.splitString "/" path);
                       in
-                      fileName != "flake.nix";
+                      fileName != "flake.nix" &&
+                      fileName != "garn.ts";
                   }
               )
 
               { })
             // {
-              meta.mainProgram = "garner-test";
+              meta.mainProgram = "garn-test";
             }
           ;
         });
+      checks = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+        { });
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -60,7 +70,7 @@
             let
               expr =
                 (pkgs.haskell.packages.ghc94.callCabal2nix
-                  "garner-pkg"
+                  "garn-pkg"
 
                   (
                     let
@@ -73,17 +83,19 @@
                     builtins.path
                       {
                         path = ./.;
+                        name = "source";
                         filter = path: type:
                           let
                             fileName = lastSafe (lib.strings.splitString "/" path);
                           in
-                          fileName != "flake.nix";
+                          fileName != "flake.nix" &&
+                          fileName != "garn.ts";
                       }
                   )
 
                   { })
                 // {
-                  meta.mainProgram = "garner-test";
+                  meta.mainProgram = "garn-test";
                 }
               ;
             in
@@ -105,7 +117,7 @@
               let
                 shell = "${
     (pkgs.haskell.packages.ghc94.callCabal2nix
-      "garner-pkg"
+      "garn-pkg"
       
   (let
     lib = pkgs.lib;
@@ -117,18 +129,20 @@
   builtins.path
     {
       path = ./.;
+      name = "source";
       filter = path: type:
         let
           fileName = lastSafe (lib.strings.splitString "/" path);
         in
-         fileName != "flake.nix";
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
     })
 
       { })
       // {
-        meta.mainProgram = "garner-test";
+        meta.mainProgram = "garn-test";
       }
-  }/bin/garner-test";
+  }/bin/garn-test";
               in
               "${pkgs.writeScriptBin "executable" shell}/bin/executable";
           };

@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Garner.GarnerConfig where
+module Garn.GarnConfig where
 
 import Control.Monad
 import Data.Aeson (FromJSON, eitherDecode)
@@ -9,13 +9,14 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util
 import Development.Shake (CmdOption (EchoStderr, EchoStdout), Stdout (Stdout), cmd, cmd_)
 import GHC.Generics (Generic)
-import Garner.Common (nixArgs, nixpkgsInput)
+import Garn.Common (nixArgs, nixpkgsInput)
 import System.Directory (doesFileExist, getCurrentDirectory)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)
 import System.IO.Temp (withSystemTempFile)
 
-data GarnerConfig = GarnerConfig
+-- This needs to be in sync with `GarnConfig` in runner.ts
+data GarnConfig = GarnConfig
   { targets :: Targets,
     flakeFile :: String
   }
@@ -25,48 +26,49 @@ type Targets = Map String TargetConfig
 
 data TargetConfig = TargetConfig
   { description :: String,
+    packages :: [String],
     checks :: [String]
   }
   deriving (Generic, FromJSON, Eq, Show)
 
-readGarnerConfig :: String -> IO GarnerConfig
-readGarnerConfig tsRunner = do
-  checkGarnerFileExists
+readGarnConfig :: String -> IO GarnConfig
+readGarnConfig tsRunner = do
+  checkGarnFileExists
   dir <- getCurrentDirectory
-  withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
+  withSystemTempFile "garn-main.ts" $ \mainPath mainHandle -> do
     hPutStr
       mainHandle
       [i|
-        import * as garnerExports from "#{dir}/garner.ts"
-        import { toGarnerConfig } from "#{tsRunner}"
+        import * as garnExports from "#{dir}/garn.ts"
+        import { toGarnConfig } from "#{tsRunner}"
 
-        console.log(JSON.stringify(toGarnerConfig("#{nixpkgsInput}", garnerExports)));
+        console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
       |]
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
-    case eitherDecode out :: Either String GarnerConfig of
-      Left err -> error $ "Unexpected package export from garner.ts:\n" <> err
+    case eitherDecode out :: Either String GarnConfig of
+      Left err -> error $ "Unexpected package export from garn.ts:\n" <> err
       Right writtenConfig -> return writtenConfig
 
-writeGarnerConfig :: GarnerConfig -> IO ()
-writeGarnerConfig garnerConfig = do
-  writeFile "flake.nix" $ flakeFile garnerConfig
+writeGarnConfig :: GarnConfig -> IO ()
+writeGarnConfig garnConfig = do
+  writeFile "flake.nix" $ flakeFile garnConfig
   cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
 
-checkGarnerFileExists :: IO ()
-checkGarnerFileExists = do
-  exists <- doesFileExist "garner.ts"
+checkGarnFileExists :: IO ()
+checkGarnFileExists = do
+  exists <- doesFileExist "garn.ts"
   when (not exists) $ do
     hPutStr stderr $
       unindent
         [i|
-          No `garner.ts` file found in the current directory.
+          No `garn.ts` file found in the current directory.
 
-          Here's an example `garner.ts` file for npm frontends:
+          Here's an example `garn.ts` file for npm frontends:
 
-            import * as garner from "http://localhost:8777/mod.ts";
+            import * as garn from "http://localhost:8777/mod.ts";
 
-            export const frontend = garner.typescript.mkNpmFrontend({
+            export const frontend = garn.typescript.mkNpmFrontend({
               src: "./.",
               description: "An NPM frontend",
             });

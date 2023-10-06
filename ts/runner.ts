@@ -7,9 +7,11 @@ import {
 import { Package, isPackage } from "./package.ts";
 import { Executable } from "./executable.ts";
 import { Environment } from "./environment.ts";
+import { Check, isCheck } from "./check.ts";
+import { mapKeys } from "./utils.ts";
 
-// This needs to be in sync with `GarnerConfig` in GarnerConfig.hs
-export type GarnerConfig = {
+// This needs to be in sync with `GarnConfig` in GarnConfig.hs
+export type GarnConfig = {
   targets: Targets;
   flakeFile: string;
 };
@@ -18,27 +20,30 @@ type Targets = Record<
   string,
   {
     description: string;
+    packages: Array<string>;
     checks: Array<string>;
   }
 >;
 
-export const toGarnerConfig = (
+export const toGarnConfig = (
   nixpkgsInput: string,
-  garnerExports: Record<string, unknown>
-): GarnerConfig => ({
-  targets: toTargets(garnerExports),
-  flakeFile: formatFlake(nixpkgsInput, garnerExports),
+  garnExports: Record<string, unknown>
+): GarnConfig => ({
+  targets: toTargets(garnExports),
+  flakeFile: formatFlake(nixpkgsInput, garnExports),
 });
 
-const toTargets = (garnerExports: Record<string, unknown>): Targets => {
+const toTargets = (garnExports: Record<string, unknown>): Targets => {
   const result: Targets = {};
   for (const [projectName, project] of Object.entries(
-    findProjects(garnerExports)
+    findProjects(garnExports)
   )) {
     const packages = collectProjectPackages(projectName, project);
+    const checks = collectProjectChecks(projectName, project);
     result[projectName] = {
       description: project.description,
-      checks: Object.keys(packages),
+      packages: Object.keys(packages),
+      checks: Object.keys(checks),
     };
   }
   return result;
@@ -46,12 +51,16 @@ const toTargets = (garnerExports: Record<string, unknown>): Targets => {
 
 const formatFlake = (
   nixpkgsInput: string,
-  garnerExports: Record<string, unknown>
+  garnExports: Record<string, unknown>
 ): string => {
-  const projects = findProjects(garnerExports);
+  const projects = findProjects(garnExports);
   const packages = collectPackages(projects);
   const packagesString = Object.entries(packages)
     .map(([name, pkg]) => `${name} = ${pkg.nixExpression};`)
+    .join("\n");
+  const checks = collectChecks(projects);
+  const checksString = Object.entries(checks)
+    .map(([name, check]) => `${name} = ${check.nixExpression};`)
     .join("\n");
   const shellsString = Object.entries(projects)
     .map(
@@ -68,7 +77,7 @@ const formatFlake = (
         };`
     )
     .join("\n");
-  const executables = Object.entries(projects)
+  const appsString = Object.entries(projects)
     .map(
       ([name, project]) => [name, projectDefaultExecutable(project)] as const
     )
@@ -106,6 +115,16 @@ const formatFlake = (
           {
             ${packagesString}
           });
+        checks = forAllSystems (system:
+          let
+            pkgs = import "\${nixpkgs}" {
+              config.allowUnfree = true;
+              inherit system;
+            };
+          in
+          {
+            ${checksString}
+          });
         devShells = forAllSystems (system:
           let
             pkgs = import "\${nixpkgs}" {
@@ -120,7 +139,7 @@ const formatFlake = (
             pkgs = import "\${nixpkgs}" { inherit system; };
         in
         {
-          ${executables}
+          ${appsString}
         });
       };
   }`;
@@ -154,11 +173,42 @@ const collectPackages = (
 const collectProjectPackages = (
   projectName: string,
   project: Project
-): Record<string, Package> => {
-  const result: Record<string, Package> = {};
+): Record<string, Package> =>
+  mapKeys(
+    (name) => `${projectName}_${name}`,
+    collectByPredicate(isPackage, project)
+  );
+
+const collectChecks = (
+  config: Record<string, Project>
+): Record<string, Check> => {
+  let result: Record<string, Check> = {};
+  for (const [projectName, project] of Object.entries(config)) {
+    result = {
+      ...result,
+      ...collectProjectChecks(projectName, project),
+    };
+  }
+  return result;
+};
+
+const collectProjectChecks = (
+  projectName: string,
+  project: Project
+): Record<string, Check> =>
+  mapKeys(
+    (name) => `${projectName}_${name}`,
+    collectByPredicate(isCheck, project)
+  );
+
+const collectByPredicate = <T>(
+  predicate: (t: unknown) => t is T,
+  project: Project
+): Record<string, T> => {
+  const result: Record<string, T> = {};
   for (const [name, value] of Object.entries(project)) {
-    if (isPackage(value)) {
-      result[`${projectName}_${name}`] = value;
+    if (predicate(value)) {
+      result[name] = value;
     }
   }
   return result;
