@@ -12,7 +12,7 @@ where
 import Control.Monad (forM_, when)
 import Development.Shake (Exit (Exit), cmd, cmd_)
 import Garn.Common (nixArgs)
-import Garn.GarnerConfig
+import Garn.GarnConfig
 import Garn.Init
 import Garn.Optparse
 import Paths_garn
@@ -38,17 +38,17 @@ run = do
 
 readOptionsAndConfig :: Env -> IO Options
 readOptionsAndConfig env = do
-  hasGarner <- doesFileExist "garner.ts"
-  if hasGarner
+  hasGarn <- doesFileExist "garner.ts"
+  if hasGarn
     then do
-      garnerConfig <- readGarnerConfig (tsRunnerFilename env)
-      getOpts (WithGarnerTs garnerConfig)
-    else getOpts WithoutGarnerTs
+      garnConfig <- readGarnConfig (tsRunnerFilename env)
+      getOpts (WithGarnTs garnConfig)
+    else getOpts WithoutGarnTs
 
 runWith :: Env -> Options -> IO ()
-runWith env (WithoutGarnerTsOpts Init) = initGarnerTs $ initFileName env
-runWith env (WithGarnerTsOpts garnerConfig opts) = do
-  writeGarnerConfig garnerConfig
+runWith env (WithoutGarnTsOpts Init) = initGarnTs $ initFileName env
+runWith env (WithGarnTsOpts garnConfig opts) = do
+  writeGarnConfig garnConfig
   case opts of
     Gen -> pure ()
     Run (CommandOptions {..}) -> do

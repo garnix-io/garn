@@ -36,7 +36,7 @@ run = withCli $ do
   writeFile "ts/nixpkgs.ts" code
 
 fromToplevelDerivation :: String -> String -> String -> IO String
-fromToplevelDerivation garnerLibRoot varName rootExpr = do
+fromToplevelDerivation garnLibRoot varName rootExpr = do
   system :: String <- do
     Stdout json <- cmd "nix" nixArgs "eval --impure --json --expr builtins.currentSystem"
     pure $ either error id $ eitherDecode json
@@ -48,7 +48,7 @@ fromToplevelDerivation garnerLibRoot varName rootExpr = do
   pure $
     unindent
       [i|
-        import { mkPackage } from "#{garnerLibRoot}/package.ts";
+        import { mkPackage } from "#{garnLibRoot}/package.ts";
 
       |]
       <> pkgsString varName sanitizedPkgs

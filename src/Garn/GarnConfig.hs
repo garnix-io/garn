@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Garn.GarnerConfig where
+module Garn.GarnConfig where
 
 import Control.Monad
 import Data.Aeson (FromJSON, eitherDecode)
@@ -15,7 +15,7 @@ import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)
 import System.IO.Temp (withSystemTempFile)
 
-data GarnerConfig = GarnerConfig
+data GarnConfig = GarnConfig
   { targets :: Targets,
     flakeFile :: String
   }
@@ -29,9 +29,9 @@ data TargetConfig = TargetConfig
   }
   deriving (Generic, FromJSON, Eq, Show)
 
-readGarnerConfig :: String -> IO GarnerConfig
-readGarnerConfig tsRunner = do
-  checkGarnerFileExists
+readGarnConfig :: String -> IO GarnConfig
+readGarnConfig tsRunner = do
+  checkGarnFileExists
   dir <- getCurrentDirectory
   withSystemTempFile "garner-main.ts" $ \mainPath mainHandle -> do
     hPutStr
@@ -44,17 +44,17 @@ readGarnerConfig tsRunner = do
       |]
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
-    case eitherDecode out :: Either String GarnerConfig of
+    case eitherDecode out :: Either String GarnConfig of
       Left err -> error $ "Unexpected package export from garner.ts:\n" <> err
       Right writtenConfig -> return writtenConfig
 
-writeGarnerConfig :: GarnerConfig -> IO ()
-writeGarnerConfig garnerConfig = do
-  writeFile "flake.nix" $ flakeFile garnerConfig
+writeGarnConfig :: GarnConfig -> IO ()
+writeGarnConfig garnConfig = do
+  writeFile "flake.nix" $ flakeFile garnConfig
   cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
 
-checkGarnerFileExists :: IO ()
-checkGarnerFileExists = do
+checkGarnFileExists :: IO ()
+checkGarnFileExists = do
   exists <- doesFileExist "garner.ts"
   when (not exists) $ do
     hPutStr stderr $
