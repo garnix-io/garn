@@ -15,7 +15,7 @@ export const nixSource = (src: string) => `
           fileName = lastSafe (lib.strings.splitString "/" path);
         in
          fileName != "flake.nix" &&
-         fileName != "garner.ts";
+         fileName != "garn.ts";
     })
 `;
 

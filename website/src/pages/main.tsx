@@ -53,14 +53,14 @@ export const Info: React.FC = () => {
       <code>
         <pre>
           {`
-        import { garner } from "https://garn.io/ts/v0.0.1/mod.ts";
+        import { garn } from "https://garn.io/ts/v0.0.1/mod.ts";
         import { pkgs } from "https://garn.io/ts/v0.0.1/nixpkgs.ts";
 
-        export const frontend = garner.mkNpmFrontend({
+        export const frontend = garn.mkNpmFrontend({
 
         });
 
-        export const backend = garner.mkHaskell({
+        export const backend = garn.mkHaskell({
         });
         `}
         </pre>

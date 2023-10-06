@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           garner
+name:           garn
 version:        0.1.0.0
-homepage:       https://github.com/garnix-io/garner#readme
-bug-reports:    https://github.com/garnix-io/garner/issues
+homepage:       https://github.com/garnix-io/garn#readme
+bug-reports:    https://github.com/garnix-io/garn/issues
 author:         garnix
 maintainer:     contact@garnix.io
 copyright:      AllRightsReserved
@@ -31,19 +31,19 @@ data-files:
 
 source-repository head
   type: git
-  location: https://github.com/garnix-io/garner
+  location: https://github.com/garnix-io/garn
 
 library
   exposed-modules:
-      Garner
-      Garner.CodeGen
-      Garner.Common
-      Garner.GarnerConfig
-      Garner.Init
-      Garner.Optparse
-      Garner.Utils
+      Garn
+      Garn.CodeGen
+      Garn.Common
+      Garn.GarnConfig
+      Garn.Init
+      Garn.Optparse
+      Garn.Utils
   other-modules:
-      Paths_garner
+      Paths_garn
   hs-source-dirs:
       src
   default-extensions:
@@ -98,7 +98,7 @@ library
 executable codegen
   main-is: exe/codegen.hs
   other-modules:
-      Paths_garner
+      Paths_garn
   default-extensions:
       BangPatterns
       ConstraintKinds
@@ -137,7 +137,7 @@ executable codegen
     , base >=4.7 && <5
     , containers
     , directory
-    , garner
+    , garn
     , getopt-generics
     , interpolate
     , optparse-applicative
@@ -149,10 +149,10 @@ executable codegen
     , unix
   default-language: Haskell2010
 
-executable garner
-  main-is: exe/garner.hs
+executable garn
+  main-is: exe/garn.hs
   other-modules:
-      Paths_garner
+      Paths_garn
   default-extensions:
       BangPatterns
       ConstraintKinds
@@ -191,7 +191,7 @@ executable garner
     , base >=4.7 && <5
     , containers
     , directory
-    , garner
+    , garn
     , getopt-generics
     , interpolate
     , optparse-applicative
@@ -208,16 +208,16 @@ test-suite spec
   main-is: Spec.hs
   other-modules:
       ExampleSpec
-      Garner.CodeGenSpec
-      GarnerSpec
-      Garner
-      Garner.CodeGen
-      Garner.Common
-      Garner.GarnerConfig
-      Garner.Init
-      Garner.Optparse
-      Garner.Utils
-      Paths_garner
+      Garn.CodeGenSpec
+      GarnSpec
+      Garn
+      Garn.CodeGen
+      Garn.Common
+      Garn.GarnConfig
+      Garn.Init
+      Garn.Optparse
+      Garn.Utils
+      Paths_garn
   hs-source-dirs:
       test/spec
       src

@@ -1,7 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE QuasiQuotes #-}
 
-module GarnerSpec where
+module GarnSpec where
 
 import Control.Exception (bracket, catch)
 import Control.Lens (from, (<>~))
@@ -16,7 +16,7 @@ import Data.String.Interpolate.Util (unindent)
 import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
 import Development.Shake (StdoutTrim (..), cmd)
-import Garner
+import Garn
 import System.Directory
 import System.Environment (withArgs)
 import System.Exit (ExitCode (..))
@@ -35,18 +35,18 @@ spec = do
   repoDir <- runIO getCurrentDirectory
 
   around_ (withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]) $ do
-    describe "garner" $ around_ inTempDirectory $ do
+    describe "garn" $ around_ inTempDirectory $ do
       describe "--help" $ do
         it "lists available commands" $ do
-          output <- runGarner ["--help"] "" repoDir Nothing
+          output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
                 Available commands:
                   init.*
               |]
-          writeFile "garner.ts" ""
-          output <- runGarner ["--help"] "" repoDir Nothing
+          writeFile "garn.ts" ""
+          output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
@@ -57,7 +57,7 @@ spec = do
                   check.*
               |]
         it "lists unavailable commands" $ do
-          output <- runGarner ["--help"] "" repoDir Nothing
+          output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
@@ -67,8 +67,8 @@ spec = do
                   gen
                   check
               |]
-          writeFile "garner.ts" ""
-          output <- runGarner ["--help"] "" repoDir Nothing
+          writeFile "garn.ts" ""
+          output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
@@ -79,12 +79,12 @@ spec = do
       describe "run" $ do
         it "runs a simple Haskell program" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["run", "foo"] "" repoDir Nothing
+          output <- runGarn ["run", "foo"] "" repoDir Nothing
           stdout output `shouldBe` "haskell test output\n"
         it "writes flake.{lock,nix}, but no other files" $ do
           writeHaskellProject repoDir
           filesBefore <- listDirectory "."
-          _ <- runGarner ["run", "foo"] "" repoDir Nothing
+          _ <- runGarn ["run", "foo"] "" repoDir Nothing
           filesAfter <- sort <$> listDirectory "."
           filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
         it "doesn’t format other Nix files" $ do
@@ -99,14 +99,14 @@ spec = do
                 |]
           writeFile "unformatted.nix" unformattedNix
           writeHaskellProject repoDir
-          _ <- runGarner ["run", "foo"] "" repoDir Nothing
+          _ <- runGarn ["run", "foo"] "" repoDir Nothing
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
       describe "enter" $ do
         describe "withDevTools" $ do
           it "allows dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
-            writeFile "garner.ts" $
+            writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
@@ -114,7 +114,7 @@ spec = do
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
-                    executable: "garner-test",
+                    executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   })
@@ -122,11 +122,11 @@ spec = do
 
                   export const bar = foo.withDevTools([hello]);
                 |]
-            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
           it "allows multiple dev tools to be added to the dev shell" $ do
             writeHaskellProject repoDir
-            writeFile "garner.ts" $
+            writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
@@ -134,7 +134,7 @@ spec = do
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
-                    executable: "garner-test",
+                    executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   })
@@ -145,13 +145,13 @@ spec = do
 
                   export const bar = foo.withDevTools([hello, cowsay]);
                 |]
-            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
-            output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "/nix/store"
           it "does not destructively update the given package" $ do
             writeHaskellProject repoDir
-            writeFile "garner.ts" $
+            writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
@@ -159,7 +159,7 @@ spec = do
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
-                    executable: "garner-test",
+                    executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   })
@@ -168,11 +168,11 @@ spec = do
 
                   export const bar = foo.withDevTools([hello]);
                 |]
-            output <- runGarner ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
             stderr output `shouldContain` "hello: command not found"
           it "can safely be used twice" $ do
             writeHaskellProject repoDir
-            writeFile "garner.ts" $
+            writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
@@ -180,7 +180,7 @@ spec = do
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
-                    executable: "garner-test",
+                    executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   })
@@ -191,28 +191,28 @@ spec = do
 
                   export const bar = foo.withDevTools([hello]).withDevTools([cowsay]);
                 |]
-            output <- runGarner ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
-            output <- runGarner ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
+            output <- runGarn ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "/nix/store"
         it "has the right GHC version" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
+          output <- runGarn ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
           stdout output `shouldStartWith` "9.4"
         it "registers Haskell dependencies with ghc-pkg" $ do
           writeHaskellProject repoDir
           modifyPackageYaml $
             key "executables"
-              . key "garner-test"
+              . key "garn-test"
               . key "dependencies"
               . _Array
               . from vector
               <>~ ["string-conversions"]
-          output <- runGarner ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir Nothing
+          output <- runGarn ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir Nothing
           dropWhile (== ' ') (stdout output) `shouldStartWith` "string-conversions"
         it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
           writeFile
-            "garner.ts"
+            "garn.ts"
             [i|
               import { mkPackage } from "#{repoDir}/ts/package.ts"
               import { packageToEnvironment } from "#{repoDir}/ts/environment.ts"
@@ -231,33 +231,33 @@ spec = do
                 { defaults: { environment: "devShell" } }
               );
             |]
-          output <- runGarner ["enter", "foo"] "hello\nexit\n" repoDir Nothing
+          output <- runGarn ["enter", "foo"] "hello\nexit\n" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
         it "starts the shell defined in $SHELL" $ do
           writeHaskellProject repoDir
           StdoutTrim userShell <- cmd ("which bash" :: String)
           output <-
-            runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
+            runGarn ["enter", "foo"] shellTestCommand repoDir $ Just userShell
           stdout output `shouldBe` "using bash"
           StdoutTrim userShell <- cmd ("which zsh" :: String)
           output <-
-            runGarner ["enter", "foo"] shellTestCommand repoDir $ Just userShell
+            runGarn ["enter", "foo"] shellTestCommand repoDir $ Just userShell
           stdout output `shouldBe` "using zsh"
         it "provides a message indicating the command succeeded" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["enter", "foo"] "" repoDir Nothing
-          stderr output `shouldContain` "[garner] Entering foo shell. Type 'exit' to exit."
+          output <- runGarn ["enter", "foo"] "" repoDir Nothing
+          stderr output `shouldContain` "[garn] Entering foo shell. Type 'exit' to exit."
         it "provides a message indicating the shell exited" $ do
           writeHaskellProject repoDir
-          output <- runGarner ["enter", "foo"] "" repoDir Nothing
-          stderr output `shouldContain` "[garner] Exiting foo shell"
+          output <- runGarn ["enter", "foo"] "" repoDir Nothing
+          stderr output `shouldContain` "[garn] Exiting foo shell"
 
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
             writeNpmFrontendProject repoDir
-            output <- runGarner ["enter", "frontend"] "node --version" repoDir Nothing
+            output <- runGarn ["enter", "frontend"] "node --version" repoDir Nothing
             stdout output `shouldStartWith` "v18."
-            output <- runGarner ["enter", "frontend"] "npm --version" repoDir Nothing
+            output <- runGarn ["enter", "frontend"] "npm --version" repoDir Nothing
             stdout output `shouldStartWith` "9."
 
       describe "check" $ do
@@ -273,34 +273,34 @@ spec = do
               f list = map (+ 1) list
             |]
           writeFile
-            "garner.ts"
+            "garn.ts"
             [i|
-              import * as garner from "#{repoDir}/ts/mod.ts"
+              import * as garn from "#{repoDir}/ts/mod.ts"
 
-              const haskellBase = garner.haskell.mkHaskell({
+              const haskellBase = garn.haskell.mkHaskell({
                 description: "mkHaskell-test",
-                executable: "garner-test",
+                executable: "garn-test",
                 compiler: "ghc94",
                 src: "."
-              }).withDevTools([garner.mkPackage(`pkgs.hlint`)]);
+              }).withDevTools([garn.mkPackage(`pkgs.hlint`)]);
 
               export const haskell = {
                 ...haskellBase,
                 hlint: haskellBase.check`hlint *.hs`,
               };
             |]
-          output <- runGarner ["check", "haskell"] "" repoDir Nothing
+          output <- runGarn ["check", "haskell"] "" repoDir Nothing
           stderr output `shouldContain` "Warning: Eta reduce"
         it "runs checks on source directories that ignore the flake.nix file" $ do
           writeHaskellProject repoDir
           writeFile
-            "garner.ts"
+            "garn.ts"
             [i|
-              import * as garner from "#{repoDir}/ts/mod.ts"
+              import * as garn from "#{repoDir}/ts/mod.ts"
 
-              const haskellBase = garner.haskell.mkHaskell({
+              const haskellBase = garn.haskell.mkHaskell({
                 description: "mkHaskell-test",
-                executable: "garner-test",
+                executable: "garn-test",
                 compiler: "ghc94",
                 src: "."
               });
@@ -313,7 +313,7 @@ spec = do
                 `,
               };
             |]
-          output <- runGarner ["check", "haskell"] "" repoDir Nothing
+          output <- runGarn ["check", "haskell"] "" repoDir Nothing
           stderr output `shouldNotContain` "flake.nix"
         describe "exit-codes" $ do
           let testCases =
@@ -328,13 +328,13 @@ spec = do
             it ("reports exit-codes correctly for check '" <> checkName <> "'") $ do
               writeHaskellProject repoDir
               writeFile
-                "garner.ts"
+                "garn.ts"
                 [i|
-                  import * as garner from "#{repoDir}/ts/mod.ts"
+                  import * as garn from "#{repoDir}/ts/mod.ts"
 
-                  const haskellBase = garner.haskell.mkHaskell({
+                  const haskellBase = garn.haskell.mkHaskell({
                     description: "mkHaskell-test",
-                    executable: "garner-test",
+                    executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   });
@@ -344,7 +344,7 @@ spec = do
                     check: haskellBase.check`#{check}`,
                   };
                 |]
-              result <- runGarner ["check", "haskell"] "" repoDir Nothing
+              result <- runGarn ["check", "haskell"] "" repoDir Nothing
               putStrLn $ stdout result
               putStrLn $ stderr result
               stderr result `shouldNotContain` "Invalid argument"
@@ -353,21 +353,21 @@ spec = do
       describe "init" $ do
         it "uses the provided init function if there is one" $ do
           writeFile
-            "garner.cabal"
+            "garn.cabal"
             [i|
-              name: garner
+              name: garn
               version: 0.0.1
             |]
-          output <- runGarner ["init"] "" repoDir Nothing
-          stderr output `shouldBe` "[garner] Creating a garner.ts file\n"
-          readFile "garner.ts"
+          output <- runGarn ["init"] "" repoDir Nothing
+          stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
+          readFile "garn.ts"
             `shouldReturn` dropWhileEnd
               isSpace
               ( unindent
                   [i|
-                    import * as garner from "http://localhost:8777/mod.ts"
+                    import * as garn from "http://localhost:8777/mod.ts"
 
-                    export const garner = garner.haskell.mkHaskell({
+                    export const garn = garn.haskell.mkHaskell({
                       description: "",
                       executable: "",
                       compiler: "ghc94",
@@ -376,24 +376,24 @@ spec = do
                   |]
               )
         it "logs unexpected errors" $ do
-          writeFile "garner.cabal" [i| badCabalfile |]
-          output <- runGarner ["init"] "" repoDir Nothing
+          writeFile "garn.cabal" [i| badCabalfile |]
+          output <- runGarn ["init"] "" repoDir Nothing
           stderr output
             `shouldBe` unindent
               [i|
-                [garner] Creating a garner.ts file
-                [garner] Found but could not parse cabal file
+                [garn] Creating a garn.ts file
+                [garn] Found but could not parse cabal file
               |]
 
     -- TODO: Golden tests currently can’t be integrated with the other test cases
     --       because stackbuilders/hspec-golden#40. The case below shows the
     --       effect that @`around_` `inTempDirectory`@ _should_ have.
-    describe "garner-golden" $ do
+    describe "garn-golden" $ do
       describe "run" $ do
         it "generates formatted flakes" $ do
           inTempDirectory $ do
             writeHaskellProject repoDir
-            _ <- runGarner ["run", "foo"] "" repoDir Nothing
+            _ <- runGarn ["run", "foo"] "" repoDir Nothing
             flake <- readFile "./flake.nix"
             pure $ defaultGolden "generates_formatted_flakes" flake
 
@@ -412,13 +412,13 @@ modifyPackageJson modifier = do
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
   writeFile
-    "garner.ts"
+    "garn.ts"
     [i|
       import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
 
       export const foo = mkHaskell({
         description: "mkHaskell-test",
-        executable: "garner-test",
+        executable: "garn-test",
         compiler: "ghc94",
         src: "."
       })
@@ -433,7 +433,7 @@ writeHaskellProject repoDir = do
     "package.yaml"
     [i|
       executables:
-        garner-test:
+        garn-test:
           main: Main.hs
           dependencies:
            - base
@@ -442,7 +442,7 @@ writeHaskellProject repoDir = do
 writeNpmFrontendProject :: FilePath -> IO ()
 writeNpmFrontendProject repoDir = do
   writeFile
-    "garner.ts"
+    "garn.ts"
     [i|
       import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts"
 
@@ -482,8 +482,8 @@ writeNpmFrontendProject repoDir = do
       }
     |]
 
-runGarner :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
-runGarner args stdin repoDir shell = do
+runGarn :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
+runGarn args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
   (stderr, (stdout, exitCode)) <- hCapture [Sys.stderr] $
     hCapture [Sys.stdout] $
@@ -511,7 +511,7 @@ runGarner args stdin repoDir shell = do
     withTempFile :: (Handle -> IO a) -> IO a
     withTempFile action =
       bracket
-        (writeSystemTempFile "garner-test-stdin" stdin)
+        (writeSystemTempFile "garn-test-stdin" stdin)
         removeFile
         (\file -> withFile file ReadMode action)
 

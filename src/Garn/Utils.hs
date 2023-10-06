@@ -1,4 +1,4 @@
-module Garner.Utils where
+module Garn.Utils where
 
 import Debug.Trace (trace)
 

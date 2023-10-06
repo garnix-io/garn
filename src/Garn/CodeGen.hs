@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes #-}
 
-module Garner.CodeGen
+module Garn.CodeGen
   ( run,
     fromToplevelDerivation,
   )
@@ -18,7 +18,7 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import Development.Shake
 import GHC.Generics (Generic)
-import Garner.Common (currentSystem, nixpkgsInput)
+import Garn.Common (currentSystem, nixpkgsInput)
 import WithCli (withCli)
 
 run :: IO ()
@@ -36,7 +36,7 @@ run = withCli $ do
   writeFile "ts/nixpkgs.ts" code
 
 fromToplevelDerivation :: String -> String -> String -> IO String
-fromToplevelDerivation garnerLibRoot varName rootExpr = do
+fromToplevelDerivation garnLibRoot varName rootExpr = do
   system :: String <- do
     Stdout json <- cmd "nix" nixArgs "eval --impure --json --expr builtins.currentSystem"
     pure $ either error id $ eitherDecode json
@@ -48,7 +48,7 @@ fromToplevelDerivation garnerLibRoot varName rootExpr = do
   pure $
     unindent
       [i|
-        import { mkPackage } from "#{garnerLibRoot}/package.ts";
+        import { mkPackage } from "#{garnLibRoot}/package.ts";
 
       |]
       <> pkgsString varName sanitizedPkgs

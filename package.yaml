@@ -1,6 +1,6 @@
-name: garner
+name: garn
 version: 0.1.0.0
-github: "garnix-io/garner"
+github: "garnix-io/garn"
 license: AllRightsReserved
 author: "garnix"
 maintainer: "contact@garnix.io"
@@ -107,12 +107,12 @@ library:
     - src
 
 executables:
-  garner:
-    main: exe/garner.hs
+  garn:
+    main: exe/garn.hs
     dependencies:
-      - garner
+      - garn
 
   codegen:
     main: exe/codegen.hs
     dependencies:
-      - garner
+      - garn

@@ -8,7 +8,7 @@ pre-push: fmt github-ci
 fast-pre-push: fmt test check-examples typescript-check test-ts
 
 # Run checks that we can’t yet run via the flake
-github-ci: test codegen check-isolated-garner check-examples test-ts
+github-ci: test codegen check-isolated-garn check-examples test-ts
 
 fmt: fmt-nix fmt-haskell fmt-typescript
 
@@ -70,7 +70,7 @@ hpack-check:
   import System.Process
 
   main = do
-    oldCabal <- readFile "garner.cabal"
+    oldCabal <- readFile "garn.cabal"
     newCabal <- readProcess "hpack" (words "-") ""
     when (oldCabal /= newCabal) $
       error "package.yaml has changed, please run hpack"
@@ -79,7 +79,7 @@ test-ts:
   deno test --allow-write --allow-read --allow-run ts/*.ts
 
 test *args="": hpack
-  cabal run --test-show-details=streaming garner:spec -- {{ args }}
+  cabal run --test-show-details=streaming garn:spec -- {{ args }}
 
 # Run the tests continuously as the code changes
 watch *args="": hpack
@@ -90,21 +90,21 @@ watch *args="": hpack
 fileserver *args="":
   nix run .#fileserver -- {{ args }}
 
-run-garner example *args="": hpack
+run-garn example *args="": hpack
   #!/usr/bin/env bash
 
   set -eux
 
   cd examples/{{ example }}
-  cabal run garner:garner -- {{ args }}
+  cabal run garn:garn -- {{ args }}
 
 check-examples:
-  just run-garner haskell check haskellExecutable
-  just run-garner haskell run haskellExecutable
-  echo "node --version" | just run-garner npm-frontend enter frontend
-  just run-garner frontend-create-react-app check main
-  just run-garner frontend-yarn-webpack check frontend
-  just run-garner go-http-backend check server
+  just run-garn haskell check haskellExecutable
+  just run-garn haskell run haskellExecutable
+  echo "node --version" | just run-garn npm-frontend enter frontend
+  just run-garn frontend-create-react-app check main
+  just run-garn frontend-yarn-webpack check frontend
+  just run-garn go-http-backend check server
 
 codegen: hpack && typescript-check
   cabal run codegen
@@ -112,8 +112,8 @@ codegen: hpack && typescript-check
 typescript-check *args="":
   deno check ts/*.ts {{ args }}
 
-check-isolated-garner:
-  test/check-isolated-garner.sh
+check-isolated-garn:
+  test/check-isolated-garn.sh
 
 # Start the docs website server
 docs-server:

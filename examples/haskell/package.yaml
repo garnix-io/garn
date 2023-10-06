@@ -1,5 +1,5 @@
 executables:
-  garnerTest:
+  garnTest:
     main: Main.hs
     dependencies:
       - base

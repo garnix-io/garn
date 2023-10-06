@@ -23,7 +23,7 @@ export const mkHaskell = (
 } => {
   const pkg: Package = mkPackage(`
     (pkgs.haskell.packages.${args.compiler}.callCabal2nix
-      "garner-pkg"
+      "garn-pkg"
       ${nixSource(args.src)}
       { })
       // {
@@ -77,12 +77,12 @@ const mkHaskellInitializer: Initializer = () => {
 
   return {
     tag: "ShouldRun",
-    imports: 'import * as garner from "http://localhost:8777/mod.ts"',
+    imports: 'import * as garn from "http://localhost:8777/mod.ts"',
     makeTarget: () =>
       outdent`
       export const ${
         parsedCabal.description.package.name
-      } = garner.haskell.mkHaskell({
+      } = garn.haskell.mkHaskell({
         description: "${
           parsedCabal.description.synopsis ||
           parsedCabal.description.description ||
@@ -138,7 +138,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     assertEquals(
       result.makeTarget(),
       outdent`
-          export const foo = garner.haskell.mkHaskell({
+          export const foo = garn.haskell.mkHaskell({
             description: "",
             executable: "",
             compiler: "ghc94",

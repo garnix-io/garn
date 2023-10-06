@@ -1,4 +1,4 @@
-module Garner.Common (nixpkgsInput, nixArgs, currentSystem) where
+module Garn.Common (nixpkgsInput, nixArgs, currentSystem) where
 
 import Data.Aeson (eitherDecode)
 import Development.Shake (Stdout (..), cmd)
