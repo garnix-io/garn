@@ -11,7 +11,7 @@ const haskellExecutableBase = garner.haskell
   })
   .withDevTools([nixpkgs.hlint]);
 
-export const haskellExecutable = {
+export const haskellExecutable: garner.Project & { hlint: garner.Check } = {
   ...haskellExecutableBase,
   hlint: haskellExecutableBase.check`hlint *.hs`,
 };
