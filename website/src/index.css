@@ -1,0 +1,595 @@
+@import "syntax-highlight.css";
+
+:root {
+  --very-light-gray: #fafbfc;
+}
+
+header {
+  background-color: white;
+  grid-area: header;
+  display: grid;
+  z-index: 1;
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0px;
+  grid-template-columns: auto auto 200px;
+  grid-template-areas: ". title signin";
+
+  border-bottom: 1px solid;
+  padding-bottom: 50px;
+}
+
+nav {
+  border-bottom: 1px solid;
+  /* background-color: #f5f8fa; */
+  /* background-color: #fafbfc; */
+  text-align: center;
+  margin-bottom: 20px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas: "home docs";
+  font-size: 16px;
+}
+
+.nav-bar-home {
+  grid-area: home;
+}
+
+.black {
+  color: black;
+}
+
+.gray {
+  color: gray;
+}
+
+
+.small-caps {
+  font-variant: small-caps;
+}
+
+.garnix-name {
+  font-size: 85%;
+  font-weight: bold;
+  font-family: "Space Mono", monospace;
+  font-variant-ligatures: none;
+}
+
+blockquote {
+  margin-bottom: 10px;
+  padding: 0;
+}
+
+blockquote p {
+  line-height: 1;
+  text-align: justify;
+  margin-top: 0;
+  margin-bottom: 5px;
+  padding-bottom: 0;
+}
+
+article {
+  counter-reset: figures;
+}
+
+.figure {
+  counter-increment: figures;
+}
+
+.figure figcaption:before {
+  content: "Fig. " counter(figures) ": ";
+}
+
+.quote-figure figcaption {
+  margin: 0;
+}
+
+.docs {
+  font-size: 16px;
+}
+
+.blog h1 {
+  font-size: 33px;
+}
+
+.blog h2 {
+  font-size: 24px;
+}
+
+.blog h3 {
+  font-size: 22px;
+}
+
+.blog-summary-item {
+  padding-left: 25px;
+  padding-right: 20px;
+  padding-bottom: 10px;
+  border-top: solid 1px lightgray;
+  border-bottom: solid 1px lightgray;
+}
+
+.blog-item {
+  margin-bottom: 25px;
+}
+.blog-item-content {
+  margin-bottom: 20px;
+}
+.read-more {
+  text-align: right;
+}
+
+.blog-title {
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid lightgray;
+}
+
+.header-title {
+  margin: auto;
+
+  /* background-color: red; */
+  grid-area: title;
+}
+
+.header-title h1 {
+  margin-bottom: 0;
+}
+
+.sign-in {
+  grid-area: signin;
+  margin-top: auto;
+  margin-bottom: auto;
+  margin-right: 20px;
+  margin-left: auto;
+  margin-bottom: 0;
+}
+
+ul {
+}
+
+article {
+  /* display: grid; */
+  grid-area: article;
+  counter-reset: hovernotes;
+}
+
+.hovernote {
+  counter-increment: hovernotes; /* 1 */
+  text-decoration: none; /* 2 */
+  color: blue;
+  cursor: default;
+  outline: none;
+}
+
+.hovernote-content {
+  content: attr(data-hover);
+  border: solid 1px black;
+  background-color: white;
+  padding: 5px;
+  font-size: 80%;
+
+  position: absolute;
+  max-width: 40vh;
+  z-index: 1;
+}
+
+.hovernote::after {
+  content: "[" counter(hovernotes) "]"; /* 1 */
+  vertical-align: super; /* 2 */
+  font-size: 80%;
+  /* font-size: 0.5em; */
+  margin-left: 2px; /* 4 */
+  /* text-decoration: underline; 5 */
+  cursor: pointer; /* 5 */
+}
+
+.col-1 {
+  width: 10%;
+}
+
+.col-2 {
+  width: 20%;
+}
+
+.col-4 {
+  width: 40%;
+}
+
+.right {
+  float: right;
+  margin-right: 20px;
+  position: relative;
+}
+
+.beta-sub {
+  font-size: 12px;
+}
+
+.main-content {
+  text-align: left;
+  margin-top: 20px;
+  width: 100%;
+  display: block;
+  position: relative;
+  /* background-color: blue; */
+}
+
+/* The great debugger */
+/*
+* {
+   outline: 1px solid red;
+}
+*/
+
+footer {
+  text-align: center;
+  /* background-color: green; */
+  grid-area: footer;
+  padding-top: 2vh;
+  padding-bottom: 4vh;
+  border-top: 1px solid;
+}
+
+body {
+  background-color: white;
+  margin: 0;
+  font-family: "Space Mono", monospace;
+  font-variant-ligatures: none; /* inappropriate fi/fl ligatures in Space Mono */
+}
+
+a {
+  color: blue;
+  text-decoration: none;
+}
+
+#root {
+  display: grid;
+  min-height: 100vh;
+  grid-template-rows: 70px 1fr auto;
+  grid-template-columns: minmax(20px, auto) minmax(100px, 700px) minmax(
+      20px,
+      auto
+    );
+  grid-template-areas:
+    ". header ."
+    ". article . "
+    ". footer .";
+}
+
+button {
+  border: solid 1px black;
+  font-family: "Space Mono", monospace;
+  font-variant-ligatures: none;
+}
+
+code {
+  font-family: "Space Mono", monospace;
+  font-variant-ligatures: none;
+}
+
+.blog code {
+  font-size: 85%;
+}
+aside {
+  float: right;
+  align: right;
+  padding-top: 0px;
+  padding-left: 7px;
+  padding-right: 7px;
+  margin-bottom: 5px;
+  margin-left: 15px;
+  margin-top: 0px;
+  margin-right: 0;
+  width: 60%;
+}
+
+.text-aside {
+  border: 1px solid black;
+  background: var(--very-light-gray);
+}
+
+figcaption {
+  text-align: center;
+  font-size: 85%;
+}
+
+.blog pre,
+.docs pre {
+  border: 1px solid gray;
+  background: var(--very-light-gray);
+  padding-left: 1vh;
+
+  /* Linewrap. See https://stackoverflow.com/questions/248011/how-do-i-wrap-text-in-a-pre-tag
+   */
+  white-space: pre-wrap; /* Since CSS 2.1 */
+  white-space: -moz-pre-wrap; /* Mozilla, since 1999 */
+  white-space: -pre-wrap; /* Opera 4-6 */
+  white-space: -o-pre-wrap; /* Opera 7 */
+  word-wrap: break-word; /* Internet Explorer 5.5+ */
+
+  margin-left: 10px;
+  margin-right: 20px;
+  overflow-wrap: break-word;
+  overflow-y: auto;
+}
+.blog pre code {
+  white-space: pre;
+}
+
+pre.line-numbers {
+  display: grid;
+  grid-template-columns: 30px auto;
+  overflow-y: hidden;
+}
+
+pre.line-numbers::before {
+  border-right: 1px dotted;
+  color: lightgray;
+  height: 0em;
+  content: "1      " "2      " "3      " "4      " "5      " "6      " "7      "
+    "8      " "9      " "10     " "11     " "12     " "13     " "14     "
+    "15     " "16     " "17     " "18     " "19     " "20     " "21     "
+    "22     ";
+}
+
+details summary {
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.phase-log-contents {
+  font-size: 12px;
+  padding-left: 15px;
+  margin-bottom: 20px;
+}
+
+.phase {
+  padding-left: 15px;
+  padding-top: 6px;
+  margin: 5px;
+  position: relative;
+}
+
+.phase::before {
+  content: "";
+  width: 150px;
+  background-color: lightgray;
+  height: 1px;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+.phase::after {
+  content: "";
+  width: 150px;
+  background-color: lightgray;
+  width: 1px;
+  height: 9px;
+  top: 0;
+  left: 0;
+  position: absolute;
+}
+
+a {
+  cursor: pointer;
+}
+
+.center {
+  display: flex;
+  justify-content: center;
+}
+
+details summary > * {
+  display: inline;
+}
+
+.signup-items dl {
+  margin-bottom: 20px;
+}
+
+.signup-items > div {
+  margin-right: 5px;
+  margin-left: 5px;
+  text-justify: inter-word;
+}
+
+.signup-items details {
+  margin-bottom: 20px;
+  padding-left: 20px;
+}
+
+.grayed-out {
+  color: lightgray;
+}
+.hidden {
+  display: none;
+}
+
+details.not-focused {
+  color: lightgray;
+}
+
+.signup-items details div {
+  margin-top: 5px;
+}
+
+.signup-items details p {
+  margin: 0px;
+  margin-top: 2px;
+  margin-left: 25px;
+  padding: 0px;
+}
+
+.menu-item {
+  position: relative;
+  z-index: 5;
+}
+
+.dropdown {
+  position: relative;
+}
+
+.dropdown .dropdown-content {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  top: 100%;
+  min-inline-size: max-content;
+}
+
+.dropdown ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  border: solid 1px black;
+  margin: 0;
+  margin-top: 5px;
+  background: white;
+  margin-left: 0px;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  margin-bottom: 5px;
+  display: none;
+}
+
+.dropdown-content.show {
+  display: block;
+}
+
+.dropdown li {
+  margin: 1px;
+}
+
+.black {
+  color: black
+}
+
+form {
+  display: table;
+}
+
+form div {
+  display: table-row;
+}
+form label,
+input {
+  display: table-cell;
+}
+
+form label {
+  padding-right: 15px;
+  text-align: right;
+}
+
+form .submit {
+  padding-right: 10px;
+  padding-left: 20px;
+}
+
+input {
+  padding: 2px;
+  border: none;
+  border-bottom: dotted 1px black;
+  font-family: "Space Mono", monospace;
+  font-variant-ligatures: none;
+}
+
+ul.leaders {
+  padding-left: 10px;
+  margin-right: 25px;
+  overflow-x: hidden;
+  list-style: none;
+}
+
+ul.leaders li:before {
+  float: left;
+  width: 0;
+  white-space: nowrap;
+  content: "........................................"
+    "........................................"
+    "........................................"
+    "........................................";
+}
+
+ul.leaders span:first-child {
+  padding-right: 0.33em;
+  background: white;
+}
+ul.leaders span + span {
+  float: right;
+  padding-left: 0.33em;
+  background: white;
+}
+
+.build-item-short-desc {
+  max-width: 60%;
+  overflow: hidden;
+  display: inline-block;
+  vertical-align: top;
+}
+
+dl.grid {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-column-gap: 10px;
+}
+
+dl.grid dd {
+  margin: 0;
+}
+
+dt::after {
+  content: ":";
+}
+
+/*
+.modal {
+  top: 0;
+  left: 0;
+  width:100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
+}
+.modal-main {
+  width: auto;
+  position: relative !important;
+  z-index: 10;
+  margin: 0 !important;
+  background: white;
+  height: auto;
+}
+*/
+.modal {
+  position: absolute !important;
+  top: 0;
+  margin-top: -10px;
+  padding-top: 20px;
+  padding-left: 20px;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  height: auto;
+  z-index: 999;
+  background: white;
+}
+
+.modal-main {
+  border: solid 1px;
+  padding-bottom: 30px;
+  padding-left: 10px;
+}
+
+.tos-content {
+  margin: 5px;
+}
+
+.display-block {
+  display: block;
+}
+
+.display-none {
+  display: none;
+}
