@@ -227,7 +227,7 @@ spec = do
               `);
               export const foo = mkProject(
                 "description",
-                { devShell: packageToEnvironment(pkg) },
+                { devShell: packageToEnvironment(pkg, ".") },
                 { defaults: { environment: "devShell" } }
               );
             |]
