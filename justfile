@@ -14,6 +14,22 @@ fmt: fmt-nix fmt-haskell fmt-typescript
 
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
+# Push the current version of the ts files to gh-pages
+release-ts: codegen
+ #!/usr/bin/env bash
+ set -eux
+ read -p "Release tag (e.g. v0.1.0): " tag
+ git tag $tag
+ git checkout gh-pages
+ mkdir -p tmp-$tag
+ git --work-tree=tmp-$tag checkout main -- ts
+ mv tmp-$tag/* ts/$tag
+ mv ts/nixpkgs.ts ts/$tag
+ rmdir tmp-$tag
+ git add ts/$tag
+ git commit -m "Release $tag"
+ git push && git push --tags
+
 fmt-nix:
   nixpkgs-fmt .
 
@@ -69,7 +85,7 @@ test *args="": hpack
 watch *args="": hpack
   #!/usr/bin/env bash
 
-  ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings
+  ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings --reload=ts
 
 fileserver *args="":
   nix run .#fileserver -- {{ args }}
