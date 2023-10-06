@@ -1,6 +1,7 @@
 import { Check } from "./check.ts";
 import { Environment, isEnvironment } from "./environment.ts";
 import { Executable, isExecutable } from "./executable.ts";
+import { Interpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
 import { hasTag } from "./utils.ts";
 
@@ -64,8 +65,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
   settings: { defaults: { environment: string } } | ProjectSettings = {}
 ): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
   const environment = getDefault("environment", isEnvironment, deps, settings);
-  const helpers =
-    environment != null ? proxyEnvironmentHelpers(environment) : {};
+  const helpers = environment != null ? proxyEnvironmentHelpers() : {};
   return {
     ...deps,
     ...helpers,
@@ -75,18 +75,32 @@ export function mkProject<Deps extends Record<string, Nestable>>(
   };
 }
 
-const proxyEnvironmentHelpers = (environment: Environment) => ({
+const proxyEnvironmentHelpers = () => ({
   shell() {
     throw new Error(`not yet implemented`);
   },
 
-  check() {
-    throw new Error(`not yet implemented`);
+  check<
+    T extends Project & { settings: { defaults: { environment: string } } }
+  >(this: T, s: TemplateStringsArray, ...args: Array<Interpolatable>) {
+    const environment = projectDefaultEnvironment(this);
+    if (environment == null) {
+      throw new Error(
+        `'.check' can only be called on projects with a default environment`
+      );
+    }
+    return environment.check(s, ...args);
   },
 
   withDevTools<
     T extends Project & { settings: { defaults: { environment: string } } }
   >(this: T, devTools: Array<Package>): T {
+    const environment = projectDefaultEnvironment(this);
+    if (environment == null) {
+      throw new Error(
+        `'.withDevTools' can only be called on projects with a default environment`
+      );
+    }
     const newEnvironment = environment.withDevTools(devTools);
     return {
       ...this,

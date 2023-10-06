@@ -15,6 +15,7 @@ import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)
 import System.IO.Temp (withSystemTempFile)
 
+-- This needs to be in sync with `GarnerConfig` in runner.ts
 data GarnerConfig = GarnerConfig
   { targets :: Targets,
     flakeFile :: String
@@ -25,6 +26,7 @@ type Targets = Map String TargetConfig
 
 data TargetConfig = TargetConfig
   { description :: String,
+    packages :: [String],
     checks :: [String]
   }
   deriving (Generic, FromJSON, Eq, Show)

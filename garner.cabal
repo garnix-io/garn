@@ -41,6 +41,7 @@ library
       Garner.GarnerConfig
       Garner.Init
       Garner.Optparse
+      Garner.Utils
   other-modules:
       Paths_garner
   hs-source-dirs:
@@ -215,6 +216,7 @@ test-suite spec
       Garner.GarnerConfig
       Garner.Init
       Garner.Optparse
+      Garner.Utils
       Paths_garner
   hs-source-dirs:
       test/spec

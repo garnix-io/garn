@@ -11,7 +11,7 @@ where
 
 import Control.Monad (forM_, when)
 import Development.Shake (Exit (Exit), cmd, cmd_)
-import Garner.Common (nixArgs)
+import Garner.Common (currentSystem, nixArgs)
 import Garner.GarnerConfig
 import Garner.Init
 import Garner.Optparse
@@ -69,10 +69,13 @@ runWith env (WithGarnerTsOpts garnerConfig opts) = do
       hPutStrLn stderr $ "[garner] Exiting " <> target <> " shell."
       pure ()
     Check (CommandOptions {targetConfig}) -> do
+      forM_ (packages targetConfig) $ \package -> do
+        Exit c <- cmd "nix build" nixArgs (".#" <> package)
+        when (c /= ExitSuccess) $ exitWith c
+      system <- currentSystem
       forM_ (checks targetConfig) $ \check -> do
-        Exit c <- cmd "nix build" nixArgs (".#" <> check)
-        when (c /= ExitSuccess) $ do
-          exitWith c
+        Exit c <- cmd "nix build" nixArgs (".#checks." <> system <> "." <> check)
+        when (c /= ExitSuccess) $ exitWith c
 
 productionEnv :: IO Env
 productionEnv = do
