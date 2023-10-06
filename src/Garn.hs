@@ -15,7 +15,7 @@ import Garn.Common (nixArgs)
 import Garn.GarnerConfig
 import Garn.Init
 import Garn.Optparse
-import Paths_garner
+import Paths_garn
 import System.Directory (doesFileExist)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (Handle, hPutStrLn, stderr)

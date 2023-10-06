@@ -70,7 +70,7 @@ hpack-check:
   import System.Process
 
   main = do
-    oldCabal <- readFile "garner.cabal"
+    oldCabal <- readFile "garn.cabal"
     newCabal <- readProcess "hpack" (words "-") ""
     when (oldCabal /= newCabal) $
       error "package.yaml has changed, please run hpack"
@@ -79,7 +79,7 @@ test-ts:
   deno test --allow-write --allow-read --allow-run ts/*.ts
 
 test *args="": hpack
-  cabal run --test-show-details=streaming garner:spec -- {{ args }}
+  cabal run --test-show-details=streaming garn:spec -- {{ args }}
 
 # Run the tests continuously as the code changes
 watch *args="": hpack

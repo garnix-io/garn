@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 
-name:           garner
+name:           garn
 version:        0.1.0.0
-homepage:       https://github.com/garnix-io/garner#readme
-bug-reports:    https://github.com/garnix-io/garner/issues
+homepage:       https://github.com/garnix-io/garn#readme
+bug-reports:    https://github.com/garnix-io/garn/issues
 author:         garnix
 maintainer:     contact@garnix.io
 copyright:      AllRightsReserved
@@ -31,7 +31,7 @@ data-files:
 
 source-repository head
   type: git
-  location: https://github.com/garnix-io/garner
+  location: https://github.com/garnix-io/garn
 
 library
   exposed-modules:
@@ -42,7 +42,7 @@ library
       Garn.Init
       Garn.Optparse
   other-modules:
-      Paths_garner
+      Paths_garn
   hs-source-dirs:
       src
   default-extensions:
@@ -97,7 +97,7 @@ library
 executable codegen
   main-is: exe/codegen.hs
   other-modules:
-      Paths_garner
+      Paths_garn
   default-extensions:
       BangPatterns
       ConstraintKinds
@@ -136,7 +136,7 @@ executable codegen
     , base >=4.7 && <5
     , containers
     , directory
-    , garner
+    , garn
     , getopt-generics
     , interpolate
     , optparse-applicative
@@ -151,7 +151,7 @@ executable codegen
 executable garner
   main-is: exe/garner.hs
   other-modules:
-      Paths_garner
+      Paths_garn
   default-extensions:
       BangPatterns
       ConstraintKinds
@@ -190,7 +190,7 @@ executable garner
     , base >=4.7 && <5
     , containers
     , directory
-    , garner
+    , garn
     , getopt-generics
     , interpolate
     , optparse-applicative
@@ -215,7 +215,7 @@ test-suite spec
       Garn.GarnerConfig
       Garn.Init
       Garn.Optparse
-      Paths_garner
+      Paths_garn
   hs-source-dirs:
       test/spec
       src
