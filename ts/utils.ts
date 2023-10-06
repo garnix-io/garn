@@ -9,11 +9,13 @@ export const nixSource = (src: string) => `
   builtins.path
     {
       path = ./${src};
+      name = "source";
       filter = path: type:
         let
           fileName = lastSafe (lib.strings.splitString "/" path);
         in
-         fileName != "flake.nix";
+         fileName != "flake.nix" &&
+         fileName != "garner.ts";
     })
 `;
 
