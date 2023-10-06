@@ -282,16 +282,39 @@ spec = do
                   executable: "garner-test",
                   compiler: "ghc94",
                   src: "."
-                }).withDevTools([garner.mkPackage(`pkgs.hlint`)])
+                }).withDevTools([garner.mkPackage(`pkgs.hlint`)]);
 
                 export const haskell = {
                   ...haskellBase,
                   hlint: haskellBase.check`hlint *.hs`,
                 };
             |]
-
           output <- runGarner ["check", "haskell"] "" repoDir Nothing
           stderr output `shouldContain` "Warning: Eta reduce"
+        it "runs checks on source directories that ignore the flake.nix file" $ do
+          writeHaskellProject repoDir
+          writeFile
+            "garner.ts"
+            [i|
+                import * as garner from "#{repoDir}/ts/mod.ts"
+
+                const haskellBase = garner.haskell.mkHaskell({
+                  description: "mkHaskell-test",
+                  executable: "garner-test",
+                  compiler: "ghc94",
+                  src: "."
+                });
+
+                export const haskell = {
+                  ...haskellBase,
+                  hlint: haskellBase.check`
+                    ls
+                    false
+                  `,
+                };
+            |]
+          output <- runGarner ["check", "haskell"] "" repoDir Nothing
+          stderr output `shouldNotContain` "flake.nix"
 
       describe "init" $ do
         it "uses the provided init function if there is one" $ do

@@ -58,6 +58,26 @@
         {
           haskellExecutable_hlint =
             let
+              src =
+                (
+                  let
+                    lib = pkgs.lib;
+                    lastSafe = list:
+                      if lib.lists.length list == 0
+                      then null
+                      else lib.lists.last list;
+                  in
+                  builtins.path
+                    {
+                      path = ./.;
+                      filter = path: type:
+                        let
+                          fileName = lastSafe (lib.strings.splitString "/" path);
+                        in
+                        fileName != "flake.nix";
+                    }
+                )
+              ;
               dev =
                 (
                   let
@@ -106,7 +126,7 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-        cp -r ${./.} src
+        cp -r ${src} src
         cd src
         ${"hlint *.hs"}
         touch \$out

@@ -1,5 +1,5 @@
 import { Package } from "./package.ts";
-import { hasTag } from "./utils.ts";
+import { hasTag, nixSource } from "./utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
 import { Interpolatable, nixStrLit } from "./nix.ts";
@@ -39,7 +39,10 @@ export const shell = (
   ...args: Array<Interpolatable>
 ) => emptyEnvironment.shell(s, ...args);
 
-export const mkEnvironment = (nixExpression: string): Environment => ({
+export const mkEnvironment = (
+  nixExpression: string,
+  src: string
+): Environment => ({
   tag: "environment",
   nixExpr: nixExpression,
   check(this, s, ...args): Check {
@@ -48,7 +51,7 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
     } else {
       const innerScript = nixStrLit(s, ...args);
       const wrappedScript = nixStrLit`
-        cp -r ${{ nixExpression: "./." }} src
+        cp -r ${{ nixExpression: "src" }} src
         cd src
         ${innerScript}
         touch $out
@@ -56,7 +59,10 @@ export const mkEnvironment = (nixExpression: string): Environment => ({
       return {
         tag: "check",
         nixExpression: `
-          let dev = ${this.nixExpr}; in
+          let
+              src = ${nixSource(src)};
+              dev = ${this.nixExpr};
+          in
           pkgs.runCommand "check" {
             buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
           } ${wrappedScript.nixExpression}
@@ -113,7 +119,7 @@ export const isEnvironment = (e: unknown): e is Environment => {
   return hasTag(e, "environment");
 };
 
-export const packageToEnvironment = (pkg: Package): Environment =>
+export const packageToEnvironment = (pkg: Package, src: string): Environment =>
   mkEnvironment(
     `
     let expr = ${pkg.nixExpression};
@@ -122,5 +128,6 @@ export const packageToEnvironment = (pkg: Package): Environment =>
         then expr.env
         else pkgs.mkShell { inputsFrom = [ expr ]; }
       )
-    `
+    `,
+    src
   );

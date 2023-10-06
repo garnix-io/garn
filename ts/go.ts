@@ -26,7 +26,7 @@ export const mkGoProject = (args: {
     args.description,
     {
       pkg,
-      devShell: packageToEnvironment(pkg),
+      devShell: packageToEnvironment(pkg, args.src),
       main: shell`${pkg}/bin/${args.moduleName}`,
     },
     {
