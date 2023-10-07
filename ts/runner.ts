@@ -101,7 +101,7 @@ const formatFlake = (
     };
     outputs = { self, nixpkgs, flake-utils, npmlock2nix-repo }:
       let
-        systems = [ "x86_64-linux" ];
+        systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
         forAllSystems = nixpkgs.lib.genAttrs systems;
       in
       {
