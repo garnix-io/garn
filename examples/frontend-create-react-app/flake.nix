@@ -43,11 +43,13 @@
                     builtins.path
                       {
                         path = ./.;
+                        name = "source";
                         filter = path: type:
                           let
                             fileName = lastSafe (lib.strings.splitString "/" path);
                           in
-                          fileName != "flake.nix";
+                          fileName != "flake.nix" &&
+                          fileName != "garn.ts";
                       }
                   )
                 ;
@@ -94,11 +96,13 @@
                   builtins.path
                     {
                       path = ./.;
+                      name = "source";
                       filter = path: type:
                         let
                           fileName = lastSafe (lib.strings.splitString "/" path);
                         in
-                        fileName != "flake.nix";
+                        fileName != "flake.nix" &&
+                        fileName != "garn.ts";
                     }
                 )
               ;
@@ -135,11 +139,13 @@
   builtins.path
     {
       path = ./.;
+      name = "source";
       filter = path: type:
         let
           fileName = lastSafe (lib.strings.splitString "/" path);
         in
-         fileName != "flake.nix";
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
     })
 ;
         node_modules_attrs = {
