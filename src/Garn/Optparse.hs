@@ -59,6 +59,7 @@ data WithoutGarnTsCommand
 
 data WithGarnTsCommand
   = Gen
+  | Build CommandOptions
   | Run CommandOptions
   | Enter CommandOptions
   | Check CommandOptions
@@ -66,10 +67,11 @@ data WithGarnTsCommand
 
 withGarnTsCommandInfo :: [(String, String, Targets -> Parser WithGarnTsCommand)]
 withGarnTsCommandInfo =
-  [ ("run", "Build and run the default executable of a target", withCommandOptions Run),
-    ("enter", "Enter a devshell for a target", withCommandOptions Enter),
+  [ ("build", "Build the default executable of a project", withCommandOptions Build),
+    ("run", "Build and run the default executable of a project", withCommandOptions Run),
+    ("enter", "Enter the default devshell for a project", withCommandOptions Enter),
     ("gen", "Generate the flake.nix file and exit", const $ pure Gen),
-    ("check", "Run your project's checks", withCommandOptions Check)
+    ("check", "Run the checks of a project", withCommandOptions Check)
   ]
   where
     withCommandOptions constructor target =
