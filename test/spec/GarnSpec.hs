@@ -51,6 +51,7 @@ spec = do
             `shouldMatch` unindent
               [i|
                 Available commands:
+                  build.*
                   run.*
                   enter.*
                   gen.*
@@ -62,6 +63,7 @@ spec = do
             `shouldMatch` unindent
               [i|
                 Unavailable commands:
+                  build
                   run
                   enter
                   gen
