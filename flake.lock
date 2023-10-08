@@ -91,16 +91,17 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1666018748,
-        "narHash": "sha256-bvCp1F1i7kNzO0ONV8n+bqON1INcgIk/kmRBGQnTrbI=",
+        "lastModified": 1696777152,
+        "narHash": "sha256-Dkf0T/eqwicdC3QjNGLiv3I1IBjPKiA1Rr2GCo/j+E4=",
         "owner": "DavHau",
         "repo": "cabal2json",
-        "rev": "7f1286fef2dd96b6cf3aba3d8dedfaf0c9a823f6",
+        "rev": "bae129492bd30667ea7665480ca91c2c52fcd52d",
         "type": "github"
       },
       "original": {
         "owner": "DavHau",
         "repo": "cabal2json",
+        "rev": "bae129492bd30667ea7665480ca91c2c52fcd52d",
         "type": "github"
       }
     },
