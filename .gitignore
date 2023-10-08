@@ -1,0 +1,6 @@
+/dist-newstyle/
+result
+node_modules/
+/website/dist/
+/ts/nixpkgs.ts
+/.golden/*/actual
