@@ -2,7 +2,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
   inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
-  inputs.cabal2json.url = "github:DavHau/cabal2json";
+  inputs.cabal2json.url = "github:DavHau/cabal2json?rev=bae129492bd30667ea7665480ca91c2c52fcd52d";
 
   outputs = { self, nixpkgs, flake-utils, fhi, cabal2json }:
     flake-utils.lib.eachDefaultSystem (system:
@@ -56,7 +56,7 @@
                     pkgs.makeWrapper
                     pkgs.nix
                     pkgs.zsh
-                    cabal2json.packages.${system}.cabal2json
+                    cabal2json.packages.${system}.cabal2json-haskell-nix
                   ];
                   postInstall = ''
                     wrapProgram "$out/bin/codegen" \
