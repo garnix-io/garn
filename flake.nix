@@ -96,6 +96,13 @@
         };
         devShells = {
           default = pkgs.mkShell {
+            shellHook =
+              # For prerendering the frontend
+              (pkgs.lib.optionalString (! pkgs.stdenv.isDarwin)
+                ''
+                  export PUPPETEER_EXECUTABLE_PATH="${pkgs.chromium}/bin/chromium"
+                  export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+                '');
             inputsFrom =
               builtins.attrValues self.checks.${system}
               ++ builtins.attrValues self.packages.${system};

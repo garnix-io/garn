@@ -14,6 +14,27 @@ fmt: fmt-nix fmt-haskell fmt-typescript
 
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
+# Deploy the current website
+deploy-website:
+  #!/usr/bin/env bash
+  set -eux
+  if [[ -z $(git status -s) ]]; then
+    COMMIT=$(git rev-parse HEAD)
+    TMP_DIR=$(mktemp --directory)
+    (cd website && npm run build)
+    echo $PWD
+    ls website/dist/*
+    mv website/dist/* $TMP_DIR
+    git checkout gh-pages
+    cp -r $TMP_DIR/* .
+    rm -rf $TMP_DIR
+    git add .
+    git commit -m "Website update from commit $COMMIT"
+    git push
+  else
+    echo "Working directory is dirty. Please commit, stash or reset before continuing"
+  fi
+
 # Push the current version of the ts files to gh-pages
 release-ts: codegen
  #!/usr/bin/env bash
