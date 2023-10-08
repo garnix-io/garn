@@ -515,11 +515,10 @@ runGarn args stdin repoDir shell = do
                 Env
                   { stdin,
                     userShell,
-                    tsRunnerFilename = repoDir <> "/ts/runner.ts",
                     initFileName = repoDir <> "/ts/init.ts"
                   }
           let go = do
-                options <- readOptionsAndConfig env
+                options <- readOptionsAndConfig
                 runWith env options
                 return ExitSuccess
           go `catch` \(e :: ExitCode) -> pure e

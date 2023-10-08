@@ -25,7 +25,6 @@ import System.Process
 
 data Env = Env
   { stdin :: Handle,
-    tsRunnerFilename :: FilePath,
     initFileName :: FilePath,
     userShell :: FilePath
   }
@@ -33,15 +32,15 @@ data Env = Env
 run :: IO ()
 run = do
   env <- productionEnv
-  options <- readOptionsAndConfig env
+  options <- readOptionsAndConfig
   runWith env options
 
-readOptionsAndConfig :: Env -> IO Options
-readOptionsAndConfig env = do
+readOptionsAndConfig :: IO Options
+readOptionsAndConfig = do
   hasGarn <- doesFileExist "garn.ts"
   if hasGarn
     then do
-      garnConfig <- readGarnConfig (tsRunnerFilename env)
+      garnConfig <- readGarnConfig
       getOpts (WithGarnTs garnConfig)
     else getOpts WithoutGarnTs
 
@@ -83,13 +82,11 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
 
 productionEnv :: IO Env
 productionEnv = do
-  tsRunnerFilename <- getDataFileName "ts/runner.ts"
   initFileName <- getDataFileName "ts/init.ts"
   userShell <- findUserShell
   pure $
     Env
       { stdin = System.IO.stdin,
-        tsRunnerFilename,
         initFileName,
         userShell
       }

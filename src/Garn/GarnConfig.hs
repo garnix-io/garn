@@ -31,16 +31,18 @@ data TargetConfig = TargetConfig
   }
   deriving (Generic, FromJSON, Eq, Show)
 
-readGarnConfig :: String -> IO GarnConfig
-readGarnConfig tsRunner = do
+readGarnConfig :: IO GarnConfig
+readGarnConfig = do
   checkGarnFileExists
   dir <- getCurrentDirectory
-  withSystemTempFile "garn-main.ts" $ \mainPath mainHandle -> do
+  withSystemTempFile "garn-main.js" $ \mainPath mainHandle -> do
     hPutStr
       mainHandle
       [i|
         import * as garnExports from "#{dir}/garn.ts"
-        import { toGarnConfig } from "#{tsRunner}"
+
+        const internalLib = window.__garnGetInternalLib();
+        const { toGarnConfig } = internalLib;
 
         console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
       |]

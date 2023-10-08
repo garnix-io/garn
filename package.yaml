@@ -18,7 +18,7 @@ data-files:
   - ts/nix.ts
   - ts/package.ts
   - ts/project.ts
-  - ts/runner.ts
+  - ts/internal/runner.ts
   - ts/typescript.ts
   - ts/utils.ts
 
