@@ -30,7 +30,7 @@ done
 
 cd examples/haskell
 expected=42
-res="$(run-in-isolation garn run haskellExecutable)"
+res="$(run-in-isolation garn run helloFromHaskell)"
 if [[ $res == $expected ]]; then
   echo "Smoke test successful"
 else
