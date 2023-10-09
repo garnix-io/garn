@@ -1,6 +1,7 @@
 import {
   isProject,
   Project,
+  ProjectComponents,
   projectDefaultEnvironment,
   projectDefaultExecutable,
 } from "./project.ts";
@@ -147,8 +148,8 @@ const formatFlake = (
 
 const findProjects = (
   config: Record<string, unknown>
-): Record<string, Project> => {
-  const result: Record<string, Project> = {};
+): Record<string, Project<ProjectComponents>> => {
+  const result: Record<string, Project<ProjectComponents>> = {};
   for (const [name, value] of Object.entries(config)) {
     if (isProject(value)) {
       result[name] = value;
@@ -158,7 +159,7 @@ const findProjects = (
 };
 
 const collectPackages = (
-  config: Record<string, Project>
+  config: Record<string, Project<ProjectComponents>>
 ): Record<string, Package> => {
   let result: Record<string, Package> = {};
   for (const [projectName, project] of Object.entries(config)) {
@@ -172,7 +173,7 @@ const collectPackages = (
 
 const collectProjectPackages = (
   projectName: string,
-  project: Project
+  project: Project<ProjectComponents>
 ): Record<string, Package> =>
   mapKeys(
     (name) => `${projectName}_${name}`,
@@ -180,7 +181,7 @@ const collectProjectPackages = (
   );
 
 const collectChecks = (
-  config: Record<string, Project>
+  config: Record<string, Project<ProjectComponents>>
 ): Record<string, Check> => {
   let result: Record<string, Check> = {};
   for (const [projectName, project] of Object.entries(config)) {
@@ -194,7 +195,7 @@ const collectChecks = (
 
 const collectProjectChecks = (
   projectName: string,
-  project: Project
+  project: Project<ProjectComponents>
 ): Record<string, Check> =>
   mapKeys(
     (name) => `${projectName}_${name}`,
@@ -203,7 +204,7 @@ const collectProjectChecks = (
 
 const collectByPredicate = <T>(
   predicate: (t: unknown) => t is T,
-  project: Project
+  project: Project<ProjectComponents>
 ): Record<string, T> => {
   const result: Record<string, T> = {};
   for (const [name, value] of Object.entries(project)) {

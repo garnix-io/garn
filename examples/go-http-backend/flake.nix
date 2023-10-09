@@ -19,6 +19,13 @@
           };
         in
         {
+          foo_pkg =
+            pkgs.buildGoModule {
+              name = "go-project";
+              src = ./.;
+              vendorHash = null;
+            }
+          ;
           server_pkg =
             pkgs.buildGoModule {
               name = "go-project";

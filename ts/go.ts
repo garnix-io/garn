@@ -1,17 +1,17 @@
 import { Environment, packageToEnvironment, shell } from "./environment.ts";
 import { Executable } from "./executable.ts";
 import { Package, mkPackage } from "./package.ts";
-import { ProjectWithDefaultEnvironment, mkProject } from "./project.ts";
+import { Project, mkProject } from "./project.ts";
 
 export const mkGoProject = (args: {
   description: string;
   moduleName: string;
   src: string;
-}): ProjectWithDefaultEnvironment & {
+}): Project<{
   pkg: Package;
   devShell: Environment;
   main: Executable;
-} => {
+}> => {
   const pkg = mkPackage(
     `
     pkgs.buildGoModule {

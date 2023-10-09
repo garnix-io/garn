@@ -15,6 +15,7 @@ data-files:
   - ts/haskell.ts
   - ts/init.ts
   - ts/mod.ts
+  - ts/nested-key.ts
   - ts/nix.ts
   - ts/package.ts
   - ts/project.ts

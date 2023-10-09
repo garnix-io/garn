@@ -1,6 +1,6 @@
 import { Environment, mkEnvironment } from "./environment.ts";
 import { Executable } from "./executable.ts";
-import { mkPackage } from "./package.ts";
+import { mkPackage, Package } from "./package.ts";
 import { Project, mkProject } from "./project.ts";
 import { nixSource } from "./utils.ts";
 
@@ -44,7 +44,11 @@ export const mkNpmFrontend = (args: {
   src: string;
   nodeVersion: NodeVersion;
   testCommand: string;
-}): Project => {
+}): Project<{
+  pkg: Package;
+  devShell: Environment;
+  startDev: Executable;
+}> => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   const pkg = mkPackage(`
     let
@@ -102,7 +106,11 @@ export const mkYarnFrontend = (args: {
   nodeVersion: keyof typeof nodeVersions;
   testCommand: string;
   serverStartCommand: string;
-}): Project => {
+}): Project<{
+  pkg: Package;
+  devShell: Environment;
+  startDev: Executable;
+}> => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   const pkg = mkPackage(`
     let
