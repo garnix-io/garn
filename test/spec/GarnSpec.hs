@@ -515,7 +515,7 @@ runGarn args stdin repoDir shell = do
                 Env
                   { stdin,
                     userShell,
-                    initFileName = repoDir <> "/ts/init.ts"
+                    initFileName = repoDir <> "/ts/internal/init.ts"
                   }
           let go = do
                 options <- readOptionsAndConfig

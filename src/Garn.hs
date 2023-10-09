@@ -82,7 +82,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
 
 productionEnv :: IO Env
 productionEnv = do
-  initFileName <- getDataFileName "ts/init.ts"
+  initFileName <- getDataFileName "ts/internal/init.ts"
   userShell <- findUserShell
   pure $
     Env
