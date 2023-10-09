@@ -41,16 +41,20 @@ readGarnConfig = do
       [i|
         import * as garnExports from "#{dir}/garn.ts"
 
-        const internalLib = window.__garnGetInternalLib();
-        const { toGarnConfig } = internalLib;
-
-        console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
+        if (window.__garnGetInternalLib == null) {
+          console.log("null");
+        } else {
+          const internalLib = window.__garnGetInternalLib();
+          const { toGarnConfig } = internalLib;
+          console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
+        }
       |]
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
-    case eitherDecode out :: Either String GarnConfig of
+    case eitherDecode out :: Either String (Maybe GarnConfig) of
       Left err -> error $ "Unexpected package export from garn.ts:\n" <> err
-      Right writtenConfig -> return writtenConfig
+      Right Nothing -> error $ "No garn library imported in garn.ts"
+      Right (Just writtenConfig) -> return writtenConfig
 
 writeGarnConfig :: GarnConfig -> IO ()
 writeGarnConfig garnConfig = do
