@@ -10,6 +10,9 @@ import { Environment } from "./environment.ts";
 import { Check, isCheck } from "./check.ts";
 import { mapKeys } from "./utils.ts";
 
+export const GOMOD2NIX_REPO =
+  "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
+
 // This needs to be in sync with `GarnConfig` in GarnConfig.hs
 export type GarnConfig = {
   targets: Targets;
@@ -96,7 +99,7 @@ const formatFlake = (
     inputs.nixpkgs.url = "${nixpkgsInput}";
     inputs.flake-utils.url = "github:numtide/flake-utils";
     inputs.gomod2nix-repo = {
-      url = "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
+      url = "${GOMOD2NIX_REPO}";
       flake = true;
     };
     inputs.npmlock2nix-repo = {

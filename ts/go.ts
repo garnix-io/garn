@@ -5,12 +5,13 @@ import { mkPackage, Package } from "./package.ts";
 import { mkProject, ProjectWithDefaultEnvironment } from "./project.ts";
 import * as path from "https://deno.land/std@0.202.0/path/mod.ts";
 import { getDotGarnProjectDir } from "./internals/garn_dir.ts";
+import { GOMOD2NIX_REPO } from "./runner.ts";
 
 const getGoModNixToml = (src: string) => {
   const gen = new Deno.Command("nix", {
     args: [
       "run",
-      "github:nix-community/gomod2nix",
+      GOMOD2NIX_REPO,
       "--",
       "--dir",
       src,
