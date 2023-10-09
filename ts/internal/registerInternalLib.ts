@@ -12,4 +12,10 @@ const garnGetInternalLib = (): InternalLibrary => ({
 });
 
 // deno-lint-ignore no-explicit-any
+if ((window as any).__garnGetInternalLib != null) {
+  throw new Error(
+    "Registering __garnGetInternalLib twice, using two different garn library versions is not supported."
+  );
+}
+// deno-lint-ignore no-explicit-any
 (window as any).__garnGetInternalLib = garnGetInternalLib;
