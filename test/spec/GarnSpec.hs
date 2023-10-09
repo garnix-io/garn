@@ -45,7 +45,7 @@ spec = do
                 Available commands:
                   init.*
               |]
-          writeFile "garn.ts" [i|import {} from "#{repoDir}/ts/haskell.ts"|]
+          writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]
           output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
@@ -69,7 +69,7 @@ spec = do
                   gen
                   check
               |]
-          writeFile "garn.ts" [i|import {} from "#{repoDir}/ts/haskell.ts"|]
+          writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]
           output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
