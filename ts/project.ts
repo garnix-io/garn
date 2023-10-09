@@ -3,7 +3,7 @@ import { Environment, isEnvironment } from "./environment.ts";
 import { Executable, isExecutable } from "./executable.ts";
 import { Interpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
-import { hasTag } from "./utils.ts";
+import { hasTag } from "./internal/utils.ts";
 import {} from "./internal/registerInternalLib.ts";
 
 export type Project = {

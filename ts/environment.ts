@@ -1,5 +1,5 @@
 import { Package } from "./package.ts";
-import { hasTag, nixSource } from "./utils.ts";
+import { hasTag, nixSource } from "./internal/utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
 import { Interpolatable, nixStrLit } from "./nix.ts";

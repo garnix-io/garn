@@ -5,7 +5,7 @@ import { Initializer } from "./base.ts";
 import { Environment, packageToEnvironment, shell } from "./environment.ts";
 import { mkPackage, Package } from "./package.ts";
 import { mkProject, ProjectWithDefaultEnvironment } from "./project.ts";
-import { nixSource } from "./utils.ts";
+import { nixSource } from "./internal/utils.ts";
 import { Executable } from "./executable.ts";
 
 type MkHaskellArgs = {
