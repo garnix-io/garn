@@ -29,7 +29,7 @@ while ! nc localhost 8777 -z; do
 done
 
 cd examples/haskell
-expected=42
+expected="Hello, world!"
 res="$(run-in-isolation garn run helloFromHaskell)"
 if [[ $res == $expected ]]; then
   echo "Smoke test successful"
