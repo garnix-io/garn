@@ -273,6 +273,12 @@ spec = do
           writeHaskellProject repoDir
           output <- runGarn ["enter", "foo"] "" repoDir Nothing
           stderr output `shouldContain` "[garn] Exiting foo shell"
+        it "fails when the shell cannot be entered" $ do
+          writeHaskellProject repoDir
+          removeFile "package.yaml"
+          output <- runGarn ["enter", "foo"] "echo 'This cannot be executed.'" repoDir Nothing
+          exitCode output `shouldBe` ExitFailure 1
+          stderr output `shouldContain` "Found neither a .cabal file nor package.yaml. Exiting."
 
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
