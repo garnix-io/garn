@@ -13,21 +13,26 @@ type ProjectSettings = {
 };
 
 /**
- * A Project is a logical grouping of packages and environments. For example,
- * you may have a 'frontend' project, a 'backend' project, a 'cli' project, etc.
+ * A Project is a logical grouping of Packages and Environments. For example,
+ * you may have a 'frontend' Project, a 'backend' Project, a 'cli' Project, etc.
  */
 export type Project = {
   tag: "project";
   settings: ProjectSettings;
   description: string;
   /**
-   * Returns a new project with the provided devtools added to the default
-   * environment.
+   * Returns a new Project with the provided devtools added to the default
+   * Environment.
    */
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T;
   /**
-   * A tagged template literal that runs the given command inside the project's
-   * default env ronment.
+   * A tagged template literal that runs the given command inside the Project's
+   * default environment.
+   *
+   * Example:
+   * ```typescript
+   * const myExecutable = myProject.shell`echo "hello world"`;
+   * ```
    */
   shell(
     this: Project,
@@ -35,7 +40,7 @@ export type Project = {
     ..._args: Array<string>
   ): Executable;
   /**
-   * Returns a check that runs in a *pure* version of the project's default
+   * Returns a check that runs in a *pure* version of the Project's default
    * environment.
    */
   check(
@@ -53,11 +58,11 @@ export function isProject(p: unknown): p is Project {
 type Nestable = Environment | Package | Executable;
 
 /**
- * Create a new project.
+ * Create a new Project.
  *
- * @param description A human-readable description of the project.
+ * @param description A human-readable description of the Project.
  * @param deps A record of Environments, Packages and Executables,
- * @param settings Settings such as defaults for environments and executables.
+ * @param settings Settings such as defaults for Environments and Executables.
  */
 export function mkProject<Deps extends Record<string, Nestable>>(
   description: string,
