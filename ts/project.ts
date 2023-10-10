@@ -5,16 +5,6 @@ import { Interpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
 import { hasTag } from "./utils.ts";
 
-export type Project = {
-  tag: "project";
-  settings: ProjectSettings;
-  description: string;
-};
-
-export function isProject(p: unknown): p is Project {
-  return hasTag(p, "project");
-}
-
 type ProjectSettings = {
   defaults?: {
     executable?: string;
@@ -22,50 +12,59 @@ type ProjectSettings = {
   };
 };
 
-export type ProjectWithDefaultEnvironment = Project & {
-  withDevTools<T extends ProjectWithDefaultEnvironment>(
-    this: T,
-    devTools: Array<Package>
-  ): T;
+/**
+ * A Project is a logical grouping of packages and environments. For example,
+ * you may have a 'frontend' project, a 'backend' project, a 'cli' project, etc.
+ */
+export type Project = {
+  tag: "project";
+  settings: ProjectSettings;
+  description: string;
+  /**
+   * Returns a new project with the provided devtools added to the default
+   * environment.
+   */
+  withDevTools<T extends Project>(this: T, devTools: Array<Package>): T;
+  /**
+   * A tagged template literal that runs the given command inside the project's
+   * default env ronment.
+   */
   shell(
-    this: ProjectWithDefaultEnvironment,
+    this: Project,
     _s: TemplateStringsArray,
     ..._args: Array<string>
   ): Executable;
+  /**
+   * Returns a check that runs in a *pure* version of the project's default
+   * environment.
+   */
   check(
-    this: ProjectWithDefaultEnvironment,
+    this: Project,
     _s: TemplateStringsArray,
     ..._args: Array<string>
   ): Check;
 };
 
+export function isProject(p: unknown): p is Project {
+  return hasTag(p, "project");
+}
+
 // In the future we plan on adding Project & Check.
 type Nestable = Environment | Package | Executable;
 
-export function mkProject<Deps extends Record<string, Nestable>>(
-  description: string,
-  deps: Deps,
-  settings: ProjectSettings & { defaults: { environment: string } }
-): Deps & ProjectWithDefaultEnvironment;
-
+/**
+ * Create a new project.
+ *
+ * @param description A human-readable description of the project.
+ * @param deps A record of Environments, Packages and Executables,
+ * @param settings Settings such as defaults for environments and executables.
+ */
 export function mkProject<Deps extends Record<string, Nestable>>(
   description: string,
   deps: Deps,
   settings: ProjectSettings
-): Deps & Project;
-
-export function mkProject<Deps extends Record<string, Nestable>>(
-  description: string,
-  deps: Deps
-): Deps & Project;
-
-export function mkProject<Deps extends Record<string, Nestable>>(
-  description: string,
-  deps: Deps,
-  settings: { defaults: { environment: string } } | ProjectSettings = {}
-): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
-  const environment = getDefault("environment", isEnvironment, deps, settings);
-  const helpers = environment != null ? proxyEnvironmentHelpers() : {};
+): Deps & Project {
+  const helpers = proxyEnvironmentHelpers();
   return {
     ...deps,
     ...helpers,
@@ -80,9 +79,11 @@ const proxyEnvironmentHelpers = () => ({
     throw new Error(`not yet implemented`);
   },
 
-  check<
-    T extends Project & { settings: { defaults: { environment: string } } }
-  >(this: T, s: TemplateStringsArray, ...args: Array<Interpolatable>) {
+  check<T extends Project>(
+    this: T,
+    s: TemplateStringsArray,
+    ...args: Array<Interpolatable>
+  ) {
     const environment = projectDefaultEnvironment(this);
     if (environment == null) {
       throw new Error(
@@ -92,11 +93,9 @@ const proxyEnvironmentHelpers = () => ({
     return environment.check(s, ...args);
   },
 
-  withDevTools<
-    T extends Project & { settings: { defaults: { environment: string } } }
-  >(this: T, devTools: Array<Package>): T {
+  withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {
     const environment = projectDefaultEnvironment(this);
-    if (environment == null) {
+    if (environment == null || this.settings.defaults?.environment == null) {
       throw new Error(
         `'.withDevTools' can only be called on projects with a default environment`
       );
