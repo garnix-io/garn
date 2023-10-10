@@ -12,49 +12,41 @@ export type Environment = {
   check(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Check;
 };
 
-export const emptyEnvironment: Environment = {
-  tag: "environment",
-  check(this) {
-    throw new Error(`not yet implemented`);
-  },
-  shell(this, s, ...args) {
-    const shellScript = nixStrLit(s, ...args);
-    return {
-      tag: "executable",
-      description: `Executes ${shellScript}`,
-      nixExpression: `
-        let
-          shell = ${shellScript.nixExpression};
-        in
-          "\${pkgs.writeScriptBin "executable" shell}/bin/executable"`,
-    };
-  },
-  withDevTools(this) {
-    throw new Error(`not yet implemented`);
-  },
-};
-
 export const shell = (
   s: TemplateStringsArray,
   ...args: Array<Interpolatable>
 ) => emptyEnvironment.shell(s, ...args);
 
+export const check = (
+  s: TemplateStringsArray,
+  ...args: Array<Interpolatable>
+) => emptyEnvironment.check(s, ...args);
+
 export const mkEnvironment = (
-  nixExpression: string,
+  nixExpression: string | undefined,
   src: string
 ): Environment => ({
   tag: "environment",
   nixExpr: nixExpression,
   check(this, s, ...args): Check {
+    const checkScript = nixStrLit(s, ...args);
     if (this.nixExpr == null) {
-      return emptyEnvironment.check(s, ...args);
+      const wrappedScript = nixStrLit`
+        touch $out
+        ${checkScript}
+      `;
+      return {
+        tag: "check",
+        nixExpression: `
+          pkgs.runCommand "check" {} ${wrappedScript.nixExpression}
+        `,
+      };
     } else {
-      const innerScript = nixStrLit(s, ...args);
       const wrappedScript = nixStrLit`
         touch $out
         cp -r ${{ nixExpression: "src" }} src
         cd src
-        ${innerScript}
+        ${checkScript}
       `;
       return {
         tag: "check",
@@ -71,10 +63,18 @@ export const mkEnvironment = (
     }
   },
   shell(this, s, ...args) {
+    const cmdToExecute = nixStrLit(s, ...args);
     if (this.nixExpr == null) {
-      return emptyEnvironment.shell(s, ...args);
+      return {
+        tag: "executable",
+        description: `Executes ${cmdToExecute}`,
+        nixExpression: `
+          let
+            shell = ${cmdToExecute.nixExpression};
+          in
+            "\${pkgs.writeScriptBin "executable" shell}/bin/executable"`,
+      };
     } else {
-      const cmdToExecute = nixStrLit(s, ...args);
       const shellEnv = {
         nixExpression: `
           let dev = ${this.nixExpr}; in
@@ -97,23 +97,23 @@ export const mkEnvironment = (
     }
   },
   withDevTools(this, extraDevTools) {
-    if (this.nixExpr == null) {
-      return emptyEnvironment.withDevTools(extraDevTools);
-    } else {
-      return {
-        ...this,
-        nixExpr: `
-          (${this.nixExpr}).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ ${extraDevTools.map((p) => p.nixExpression).join(" ")} ];
-          })
-        `,
-      };
-    }
+    return {
+      ...this,
+      nixExpr: `
+        (${
+          this.nixExpr ?? "pkgs.mkShell {}"
+        }).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [ ${extraDevTools.map((p) => p.nixExpression).join(" ")} ];
+        })
+      `,
+    };
   },
 });
+
+export const emptyEnvironment: Environment = mkEnvironment(undefined, "");
 
 export const isEnvironment = (e: unknown): e is Environment => {
   return hasTag(e, "environment");

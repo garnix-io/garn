@@ -54,8 +54,7 @@ export function isProject(p: unknown): p is Project {
   return hasTag(p, "project");
 }
 
-// In the future we plan on adding Project & Check.
-type Nestable = Environment | Package | Executable;
+type Nestable = Environment | Package | Executable | Check;
 
 /**
  * Create a new Project.
@@ -67,7 +66,7 @@ type Nestable = Environment | Package | Executable;
 export function mkProject<Deps extends Record<string, Nestable>>(
   description: string,
   deps: Deps,
-  settings: ProjectSettings
+  settings: ProjectSettings = {}
 ): Deps & Project {
   const helpers = proxyEnvironmentHelpers();
   return {
@@ -80,12 +79,22 @@ export function mkProject<Deps extends Record<string, Nestable>>(
 }
 
 const proxyEnvironmentHelpers = () => ({
-  shell() {
-    throw new Error(`not yet implemented`);
+  shell(
+    this: Project,
+    s: TemplateStringsArray,
+    ...args: Array<Interpolatable>
+  ) {
+    const environment = projectDefaultEnvironment(this);
+    if (environment == null) {
+      throw new Error(
+        `'.shell' can only be called on projects with a default environment`
+      );
+    }
+    return environment.shell(s, ...args);
   },
 
-  check<T extends Project>(
-    this: T,
+  check(
+    this: Project,
     s: TemplateStringsArray,
     ...args: Array<Interpolatable>
   ) {
