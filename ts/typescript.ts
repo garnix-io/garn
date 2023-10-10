@@ -56,6 +56,10 @@ export const mkNpmFrontend = (args: {
     npmlock2nix.v2.build
       {
         src = ${nixSource(args.src)};
+        preBuild = ''
+          mkdir fake-home
+          HOME=$(pwd)/fake-home
+        '';
         buildCommands = [ ${JSON.stringify(args.testCommand)} "mkdir $out" ];
         installPhase = "true";
         node_modules_attrs = {
