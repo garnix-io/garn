@@ -27,7 +27,7 @@ export type Project = {
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T;
   /**
    * A tagged template literal that runs the given command inside the Project's
-   * default environment.
+   * default Environment.
    *
    * Example:
    * ```typescript
@@ -41,7 +41,7 @@ export type Project = {
   ): Executable;
   /**
    * Returns a check that runs in a *pure* version of the Project's default
-   * environment.
+   * Environment.
    */
   check(
     this: Project,
