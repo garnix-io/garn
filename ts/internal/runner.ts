@@ -9,7 +9,7 @@ import { Executable } from "../executable.ts";
 import { Environment } from "../environment.ts";
 import { Check, isCheck } from "../check.ts";
 import { mapKeys } from "./utils.ts";
-import { GOMOD2NIX_REPO } from "./go.ts";
+import { GOMOD2NIX_REPO } from "../go.ts";
 
 // This needs to be in sync with `GarnConfig` in GarnConfig.hs
 export type GarnConfig = {
