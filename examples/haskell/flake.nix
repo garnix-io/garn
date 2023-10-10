@@ -203,14 +203,9 @@
           helloFromHaskell = {
             type = "app";
             program = "${
-        let dev = pkgs.mkShell {}; in
-        pkgs.runCommand "shell-env" {
-          buildInputs = dev.buildInputs;
-          nativeBuildInputs = dev.nativeBuildInputs;
-        } ''
-          echo "export PATH=$PATH:$PATH" > $out
-          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo ${pkgs.lib.strings.escapeShellArg "${
+        let
+          dev = pkgs.mkShell {};
+          shell = "${
     (pkgs.haskell.packages.ghc94.callCabal2nix
       "garn-pkg"
       
@@ -237,7 +232,15 @@
       // {
         meta.mainProgram = "helloFromHaskell";
       }
-  }/bin/helloFromHaskell"} >> $out
+  }/bin/helloFromHaskell";
+        in
+        pkgs.runCommand "shell-env" {
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
+        } ''
+          echo "export PATH=$PATH:$PATH" > $out
+          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
           chmod +x $out
         ''
       }";

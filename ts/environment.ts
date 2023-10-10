@@ -71,14 +71,17 @@ export const mkEnvironment = (
     const cmdToExecute = nixStrLit(s, ...args);
     const shellEnv = {
       nixExpression: `
-        let dev = ${this.nixExpr}; in
+        let
+          dev = ${this.nixExpr};
+          shell = ${cmdToExecute.nixExpression};
+        in
         pkgs.runCommand "shell-env" {
           buildInputs = dev.buildInputs;
           nativeBuildInputs = dev.nativeBuildInputs;
         } ''
           echo "export PATH=$PATH:\$PATH" > $out
           echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo \${pkgs.lib.strings.escapeShellArg ${cmdToExecute.nixExpression}} >> $out
+          echo \${pkgs.lib.strings.escapeShellArg shell} >> $out
           chmod +x $out
         ''
       `,

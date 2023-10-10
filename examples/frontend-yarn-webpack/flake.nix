@@ -136,7 +136,8 @@
           frontend = {
             type = "app";
             program = "${
-        let dev = 
+        let
+          dev = 
       let
           pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
@@ -176,14 +177,16 @@
             export NODE_PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules:$NODE_PATH
           '';
         }
-    ; in
+    ;
+          shell = "yarn start";
+        in
         pkgs.runCommand "shell-env" {
           buildInputs = dev.buildInputs;
           nativeBuildInputs = dev.nativeBuildInputs;
         } ''
           echo "export PATH=$PATH:$PATH" > $out
           echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo ${pkgs.lib.strings.escapeShellArg "yarn start"} >> $out
+          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
           chmod +x $out
         ''
       }";
