@@ -5,7 +5,9 @@ import { mkPackage, Package } from "./package.ts";
 import { mkProject, ProjectWithDefaultEnvironment } from "./project.ts";
 import * as path from "https://deno.land/std@0.202.0/path/mod.ts";
 import { getDotGarnProjectDir } from "./internals/garn_dir.ts";
-import { GOMOD2NIX_REPO } from "./runner.ts";
+
+export const GOMOD2NIX_REPO =
+  "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
 
 const getGoModNixToml = (src: string) => {
   const gen = new Deno.Command("nix", {
@@ -37,6 +39,9 @@ const getGoModNixToml = (src: string) => {
   );
 };
 
+/**
+ * Create a go-based garn Project.
+ */
 export const mkGoProject = (args: {
   description: string;
   moduleName: string;

@@ -1,10 +1,7 @@
 {
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/841889913dfd06a70ffb39f603e29e46f45f0c1a";
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.gomod2nix-repo = {
-    url = "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
-    flake = true;
-  };
+  inputs.gomod2nix-repo.url = "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
   inputs.npmlock2nix-repo = {
     url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81";
     flake = false;

@@ -9,9 +9,7 @@ import { Executable } from "./executable.ts";
 import { Environment } from "./environment.ts";
 import { Check, isCheck } from "./check.ts";
 import { mapKeys } from "./utils.ts";
-
-export const GOMOD2NIX_REPO =
-  "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
+import { GOMOD2NIX_REPO } from "./go.ts";
 
 // This needs to be in sync with `GarnConfig` in GarnConfig.hs
 export type GarnConfig = {
@@ -72,12 +70,7 @@ const formatFlake = (
     .filter((x): x is [string, Environment] => x[1] != null)
     .map(
       ([name, defaultEnvironment]) =>
-        `${name} = ${
-          defaultEnvironment.nixExpr ||
-          (() => {
-            throw new Error(`not yet implemented`);
-          })()
-        };`
+        `${name} = ${defaultEnvironment.nixExpr || "pkgs.mkShell {}"};`
     )
     .join("\n");
   const appsString = Object.entries(projects)
@@ -98,10 +91,7 @@ const formatFlake = (
   return `{
     inputs.nixpkgs.url = "${nixpkgsInput}";
     inputs.flake-utils.url = "github:numtide/flake-utils";
-    inputs.gomod2nix-repo = {
-      url = "${GOMOD2NIX_REPO}";
-      flake = true;
-    };
+    inputs.gomod2nix-repo.url = "${GOMOD2NIX_REPO}";
     inputs.npmlock2nix-repo = {
       url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81";
       flake = false;
