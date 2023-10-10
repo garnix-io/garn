@@ -99,8 +99,8 @@ run-garn example *args="": hpack
   cabal run garn:garn -- {{ args }}
 
 check-examples:
-  just run-garn haskell check haskellExecutable
-  just run-garn haskell run haskellExecutable
+  just run-garn haskell check helloFromHaskell
+  just run-garn haskell run helloFromHaskell
   echo "node --version" | just run-garn npm-frontend enter frontend
   just run-garn frontend-create-react-app check main
   just run-garn frontend-yarn-webpack check frontend

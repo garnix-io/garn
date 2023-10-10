@@ -50,7 +50,7 @@ readGarnConfig = do
         }
       |]
     hClose mainHandle
-    Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
+    Stdout out <- cmd "deno run --quiet --check --allow-write --allow-run --allow-read" mainPath
     case eitherDecode out :: Either String (Maybe GarnConfig) of
       Left err -> error $ "Unexpected package export from garn.ts:\n" <> err
       Right Nothing -> error $ "No garn library imported in garn.ts"
