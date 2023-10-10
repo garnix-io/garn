@@ -20,7 +20,7 @@
           };
         in
         {
-          haskellExecutable_pkg =
+          helloFromHaskell_pkg =
             (pkgs.haskell.packages.ghc94.callCabal2nix
               "garn-pkg"
 
@@ -47,7 +47,7 @@
 
               { })
             // {
-              meta.mainProgram = "garnTest";
+              meta.mainProgram = "helloFromHaskell";
             }
           ;
         });
@@ -59,7 +59,7 @@
           };
         in
         {
-          haskellExecutable_hlint =
+          helloFromHaskell_hlint =
             let
               src =
                 (
@@ -113,7 +113,7 @@
 
                         { })
                       // {
-                        meta.mainProgram = "garnTest";
+                        meta.mainProgram = "helloFromHaskell";
                       }
                     ;
                   in
@@ -148,7 +148,7 @@
           };
         in
         {
-          haskellExecutable =
+          helloFromHaskell =
             (
               let
                 expr =
@@ -178,7 +178,7 @@
 
                     { })
                   // {
-                    meta.mainProgram = "garnTest";
+                    meta.mainProgram = "helloFromHaskell";
                   }
                 ;
               in
@@ -200,7 +200,7 @@
         in
         {
 
-          haskellExecutable = {
+          helloFromHaskell = {
             type = "app";
             program =
               let
@@ -229,19 +229,9 @@
 
       { })
       // {
-        meta.mainProgram = "garnTest";
+        meta.mainProgram = "helloFromHaskell";
       }
-  }/bin/garnTest";
-              in
-              "${pkgs.writeScriptBin "executable" shell}/bin/executable";
-          };
-
-
-          hello = {
-            type = "app";
-            program =
-              let
-                shell = "${pkgs.hello}/bin/hello";
+  }/bin/helloFromHaskell";
               in
               "${pkgs.writeScriptBin "executable" shell}/bin/executable";
           };
