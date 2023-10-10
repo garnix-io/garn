@@ -45,7 +45,7 @@ spec = do
                 Available commands:
                   init.*
               |]
-          writeFile "garn.ts" ""
+          writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]
           output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
@@ -69,7 +69,7 @@ spec = do
                   gen
                   check
               |]
-          writeFile "garn.ts" ""
+          writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]
           output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
@@ -521,11 +521,10 @@ runGarn args stdin repoDir shell = do
                 Env
                   { stdin,
                     userShell,
-                    tsRunnerFilename = repoDir <> "/ts/runner.ts",
-                    initFileName = repoDir <> "/ts/init.ts"
+                    initFileName = repoDir <> "/ts/internal/init.ts"
                   }
           let go = do
-                options <- readOptionsAndConfig env
+                options <- readOptionsAndConfig
                 runWith env options
                 return ExitSuccess
           go `catch` \(e :: ExitCode) -> pure e

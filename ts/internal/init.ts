@@ -1,4 +1,4 @@
-import * as haskell from "./haskell.ts";
+import * as haskell from "../haskell.ts";
 
 let imports = "";
 let body = "";
