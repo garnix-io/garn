@@ -2,7 +2,7 @@ import { Environment, packageToEnvironment, shell } from "./environment.ts";
 import { Executable } from "./executable.ts";
 import { nixStrLit } from "./nix.ts";
 import { mkPackage, Package } from "./package.ts";
-import { mkProject, ProjectWithDefaultEnvironment } from "./project.ts";
+import { mkProject, Project } from "./project.ts";
 import * as path from "https://deno.land/std@0.202.0/path/mod.ts";
 import { getDotGarnProjectDir } from "./internals/garn_dir.ts";
 
@@ -46,7 +46,7 @@ export const mkGoProject = (args: {
   description: string;
   moduleName: string;
   src: string;
-}): ProjectWithDefaultEnvironment & {
+}): Project & {
   pkg: Package;
   devShell: Environment;
   main: Executable;
