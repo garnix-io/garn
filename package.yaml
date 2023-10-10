@@ -14,6 +14,7 @@ data-files:
   - ts/go.ts
   - ts/haskell.ts
   - ts/init.ts
+  - ts/internals/garn_dir.ts
   - ts/mod.ts
   - ts/nix.ts
   - ts/package.ts

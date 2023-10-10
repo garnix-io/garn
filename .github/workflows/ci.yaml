@@ -13,6 +13,8 @@ jobs:
             extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
             extra-substituters = https://cache.garnix.io
             fallback = true
+      - name: Remove /opt to free up disk space
+        run: sudo rm -rf /opt/*
       - uses: lriesebos/nix-develop-command@v1
         with:
           command: "just github-ci"

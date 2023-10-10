@@ -64,10 +64,15 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
                 std_out = Inherit,
                 std_err = Inherit
               }
-      _ <- withCreateProcess devProc $ \_ _ _ procHandle -> do
+      c <- withCreateProcess devProc $ \_ _ _ procHandle -> do
         waitForProcess procHandle
+      when (c /= ExitSuccess) $ exitWith c
       hPutStrLn stderr $ "[garn] Exiting " <> target <> " shell."
       pure ()
+    Build (CommandOptions {targetConfig}) -> do
+      forM_ (packages targetConfig) $ \package -> do
+        Exit c <- cmd "nix build" nixArgs (".#" <> package)
+        when (c /= ExitSuccess) $ exitWith c
     Check (CommandOptions {targetConfig}) -> do
       forM_ (packages targetConfig) $ \package -> do
         Exit c <- cmd "nix build" nixArgs (".#" <> package)

@@ -45,7 +45,7 @@ readGarnConfig tsRunner = do
         console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
       |]
     hClose mainHandle
-    Stdout out <- cmd "deno run --quiet --check --allow-write" mainPath
+    Stdout out <- cmd "deno run --quiet --check --allow-write --allow-run --allow-read" mainPath
     case eitherDecode out :: Either String GarnConfig of
       Left err -> error $ "Unexpected package export from garn.ts:\n" <> err
       Right writtenConfig -> return writtenConfig

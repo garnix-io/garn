@@ -51,6 +51,7 @@ spec = do
             `shouldMatch` unindent
               [i|
                 Available commands:
+                  build.*
                   run.*
                   enter.*
                   gen.*
@@ -62,6 +63,7 @@ spec = do
             `shouldMatch` unindent
               [i|
                 Unavailable commands:
+                  build
                   run
                   enter
                   gen
@@ -75,6 +77,26 @@ spec = do
                 Unavailable commands:
                   init
               |]
+
+      describe "build" $ do
+        it "builds packages and creates a result link" $ do
+          writeHaskellProject repoDir
+          _ <- runGarn ["build", "foo"] "" repoDir Nothing
+          doesDirectoryExist "result" `shouldReturn` True
+          StdoutTrim output <- cmd ("result/bin/garn-test" :: String)
+          output `shouldBe` ("haskell test output" :: String)
+
+        it "complains about packages that cannot be built" $ do
+          writeHaskellProject repoDir
+          writeFile
+            "Main.hs"
+            [i|
+              main :: IO ()
+              main = "foo"
+            |]
+          output <- runGarn ["build", "foo"] "" repoDir Nothing
+          stderr output `shouldContain` "Couldn't match type"
+          exitCode output `shouldBe` ExitFailure 1
 
       describe "run" $ do
         it "runs a simple Haskell program" $ do
@@ -251,6 +273,12 @@ spec = do
           writeHaskellProject repoDir
           output <- runGarn ["enter", "foo"] "" repoDir Nothing
           stderr output `shouldContain` "[garn] Exiting foo shell"
+        it "fails when the shell cannot be entered" $ do
+          writeHaskellProject repoDir
+          removeFile "package.yaml"
+          output <- runGarn ["enter", "foo"] "echo 'This cannot be executed.'" repoDir Nothing
+          exitCode output `shouldBe` ExitFailure 1
+          stderr output `shouldContain` "Found neither a .cabal file nor package.yaml. Exiting."
 
         describe "npm project" $ do
           it "puts node into the $PATH" $ do
