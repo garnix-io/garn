@@ -4,7 +4,7 @@ import { nixStrLit } from "./nix.ts";
 import { mkPackage, Package } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
 import * as path from "https://deno.land/std@0.202.0/path/mod.ts";
-import { getDotGarnProjectDir } from "./internals/garn_dir.ts";
+import { getDotGarnProjectDir } from "./internal/garn_dir.ts";
 
 export const GOMOD2NIX_REPO =
   "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
