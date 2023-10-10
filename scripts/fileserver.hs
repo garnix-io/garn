@@ -1,7 +1,7 @@
 import Control.Concurrent
 import Control.Monad
 import Data.Function
-import Development.Shake
+import Development.Shake (CmdOption (..), Exit (..), cmd)
 import Network.Wai.Application.Static
 import Network.Wai.Handler.Warp
 import System.Directory
@@ -42,12 +42,12 @@ startDenoCacheInvalidator :: IO ()
 startDenoCacheInvalidator = void $ forkIO $ do
   withManager $ \manager -> do
     -- invalidate all files on startup
-    tsFiles <- listDirectory "ts"
+    tsFiles <- listDirectoryRecursive "ts"
     forM_ tsFiles reload
     hPutStrLn stderr "initial reloading done"
     -- invalidate individual files on changes
     tsDirectory <- makeAbsolute "ts"
-    _ <- watchDir manager "ts" (const True) $ \event -> do
+    _ <- watchTree manager "ts" (const True) $ \event -> do
       when (takeExtension (eventPath event) == ".ts") $ do
         reload $ makeRelative tsDirectory $ eventPath event
     forever $ threadDelay 1000000
@@ -57,3 +57,17 @@ reload file = do
   let url = "http://localhost:8777/" <> file
   Exit _ <- cmd "deno cache --reload" url
   pure ()
+
+listDirectoryRecursive :: FilePath -> IO [FilePath]
+listDirectoryRecursive anchor =
+  go "."
+  where
+    go path = do
+      isFile <- doesFileExist (anchor </> path)
+      isDir <- doesDirectoryExist (anchor </> path)
+      case (isFile, isDir) of
+        (True, False) -> pure [path]
+        (False, True) -> do
+          entries <- listDirectory (anchor </> path)
+          mconcat <$> mapM go (map (path </>) entries)
+        _ -> error ("not a file or directory: " <> path)
