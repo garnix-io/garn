@@ -21,16 +21,15 @@ deploy-website:
   if [[ -z $(git status -s) ]]; then
     COMMIT=$(git rev-parse HEAD)
     TMP_DIR=$(mktemp --directory)
-    (cd website && npm run build)
-    echo $PWD
+    (cd website && npm install && npm run build)
     ls website/dist/*
     mv website/dist/* $TMP_DIR
     git checkout gh-pages
-    cp -r $TMP_DIR/* .
+    cp -rv $TMP_DIR/* .
     rm -rf $TMP_DIR
     git add .
     git commit -m "Website update from commit $COMMIT"
-    git push
+    echo "Created a new commit. It is not yet pushed."
   else
     echo "Working directory is dirty. Please commit, stash or reset before continuing"
   fi
