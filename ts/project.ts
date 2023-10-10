@@ -1,9 +1,11 @@
+import "./internal/registerInternalLib.ts";
+
 import { Check } from "./check.ts";
 import { Environment, isEnvironment } from "./environment.ts";
 import { Executable, isExecutable } from "./executable.ts";
+import { hasTag } from "./internal/utils.ts";
 import { Interpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
-import { hasTag } from "./utils.ts";
 
 type ProjectSettings = {
   defaults?: {
