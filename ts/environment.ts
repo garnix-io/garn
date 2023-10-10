@@ -23,14 +23,14 @@ export const check = (
 ) => emptyEnvironment.check(s, ...args);
 
 export const mkEnvironment = (
-  nixExpression: string | undefined,
-  src: string
+  nixExpression = "pkgs.mkShell {}",
+  src?: string
 ): Environment => ({
   tag: "environment",
   nixExpr: nixExpression,
   check(this, s, ...args): Check {
     const checkScript = nixStrLit(s, ...args);
-    if (this.nixExpr == null) {
+    if (src == null) {
       const wrappedScript = nixStrLit`
         touch $out
         ${checkScript}
@@ -38,7 +38,12 @@ export const mkEnvironment = (
       return {
         tag: "check",
         nixExpression: `
-          pkgs.runCommand "check" {} ${wrappedScript.nixExpression}
+          let
+              dev = ${this.nixExpr};
+          in
+          pkgs.runCommand "check" {
+            buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+          } ${wrappedScript.nixExpression}
         `,
       };
     } else {
@@ -64,45 +69,31 @@ export const mkEnvironment = (
   },
   shell(this, s, ...args) {
     const cmdToExecute = nixStrLit(s, ...args);
-    if (this.nixExpr == null) {
-      return {
-        tag: "executable",
-        description: `Executes ${cmdToExecute}`,
-        nixExpression: `
-          let
-            shell = ${cmdToExecute.nixExpression};
-          in
-            "\${pkgs.writeScriptBin "executable" shell}/bin/executable"`,
-      };
-    } else {
-      const shellEnv = {
-        nixExpression: `
-          let dev = ${this.nixExpr}; in
-          pkgs.runCommand "shell-env" {
-            buildInputs = dev.buildInputs;
-            nativeBuildInputs = dev.nativeBuildInputs;
-          } ''
-            echo "export PATH=$PATH:\$PATH" > $out
-            echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-            echo \${pkgs.lib.strings.escapeShellArg ${cmdToExecute.nixExpression}} >> $out
-            chmod +x $out
-          ''
-        `,
-      };
-      return {
-        tag: "executable",
-        description: `Executes ${cmdToExecute.nixExpression}`,
-        nixExpression: nixStrLit`${shellEnv}`.nixExpression,
-      };
-    }
+    const shellEnv = {
+      nixExpression: `
+        let dev = ${this.nixExpr}; in
+        pkgs.runCommand "shell-env" {
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
+        } ''
+          echo "export PATH=$PATH:\$PATH" > $out
+          echo \${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+          echo \${pkgs.lib.strings.escapeShellArg ${cmdToExecute.nixExpression}} >> $out
+          chmod +x $out
+        ''
+      `,
+    };
+    return {
+      tag: "executable",
+      description: `Executes ${cmdToExecute.nixExpression}`,
+      nixExpression: nixStrLit`${shellEnv}`.nixExpression,
+    };
   },
   withDevTools(this, extraDevTools) {
     return {
       ...this,
       nixExpr: `
-        (${
-          this.nixExpr ?? "pkgs.mkShell {}"
-        }).overrideAttrs (finalAttrs: previousAttrs: {
+        (${this.nixExpr}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
@@ -113,7 +104,7 @@ export const mkEnvironment = (
   },
 });
 
-export const emptyEnvironment: Environment = mkEnvironment(undefined, "");
+export const emptyEnvironment: Environment = mkEnvironment();
 
 export const isEnvironment = (e: unknown): e is Environment => {
   return hasTag(e, "environment");
