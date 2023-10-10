@@ -4,6 +4,10 @@
   --very-light-gray: #fafbfc;
 }
 
+h1 {
+    font-size: 32px;
+}
+
 header {
   background-color: white;
   grid-area: header;
@@ -57,6 +61,34 @@ nav {
   font-variant-ligatures: none;
 }
 
+div.garn-ts {
+  border: lightgray 1px solid;
+  margin: 1px;
+  padding: 10px;
+  font-size: 16px;
+  overflow: scroll;
+}
+
+div.filename {
+  margin: 1px;
+  margin-right: 25px;
+  text-align: right;
+  font-size: 14px;
+}
+
+figcaption.garn-ts {
+  padding-top: 5px;
+  font-size: 100%;
+}
+
+div.feature {
+  padding-bottom: 50px;
+  box-sizing: border-box;
+}
+div.feature:not(:last-child) {
+  min-height: 60vh;
+}
+
 blockquote {
   margin-bottom: 10px;
   padding: 0;
@@ -70,60 +102,8 @@ blockquote p {
   padding-bottom: 0;
 }
 
-article {
-  counter-reset: figures;
-}
-
-.figure {
-  counter-increment: figures;
-}
-
-.figure figcaption:before {
-  content: "Fig. " counter(figures) ": ";
-}
-
-.quote-figure figcaption {
-  margin: 0;
-}
-
 .docs {
   font-size: 16px;
-}
-
-.blog h1 {
-  font-size: 33px;
-}
-
-.blog h2 {
-  font-size: 24px;
-}
-
-.blog h3 {
-  font-size: 22px;
-}
-
-.blog-summary-item {
-  padding-left: 25px;
-  padding-right: 20px;
-  padding-bottom: 10px;
-  border-top: solid 1px lightgray;
-  border-bottom: solid 1px lightgray;
-}
-
-.blog-item {
-  margin-bottom: 25px;
-}
-.blog-item-content {
-  margin-bottom: 20px;
-}
-.read-more {
-  text-align: right;
-}
-
-.blog-title {
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid lightgray;
 }
 
 .header-title {
@@ -135,6 +115,7 @@ article {
 
 .header-title h1 {
   margin-bottom: 0;
+  font-size: 32px;
 }
 
 .sign-in {
@@ -183,6 +164,24 @@ article {
   margin-left: 2px; /* 4 */
   /* text-decoration: underline; 5 */
   cursor: pointer; /* 5 */
+}
+
+.tooltip {
+  text-decoration: underline; /* 2 */
+  text-decoration-style: dotted;
+  cursor: default;
+  outline: none;
+}
+
+.tooltip-content {
+  content: attr(data-hover);
+  border: solid 1px black;
+  background-color: white;
+  padding: 5px;
+  position: absolute;
+  max-width: 80vh;
+  white-space: normal;
+  z-index: 1;
 }
 
 .col-1 {
@@ -269,9 +268,6 @@ code {
   font-variant-ligatures: none;
 }
 
-.blog code {
-  font-size: 85%;
-}
 aside {
   float: right;
   align: right;
@@ -290,12 +286,24 @@ aside {
   background: var(--very-light-gray);
 }
 
+.align-right {
+  text-align: right;
+}
+
+.align-center {
+  text-align: center;
+}
+
 figcaption {
   text-align: center;
   font-size: 85%;
 }
 
-.blog pre,
+section.say {
+  padding-top: 50px;
+  min-height: 60vh;
+}
+
 .docs pre {
   border: 1px solid gray;
   background: var(--very-light-gray);
@@ -314,8 +322,9 @@ figcaption {
   overflow-wrap: break-word;
   overflow-y: auto;
 }
-.blog pre code {
-  white-space: pre;
+
+pre {
+  margin: 0px;
 }
 
 pre.line-numbers {

@@ -1,0 +1,528 @@
+div.ap-wrapper {
+  outline: none;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+}
+div.ap-wrapper .title-bar {
+  display: none;
+  top: -78px;
+  transition: top 0.15s linear;
+  position: absolute;
+  left: 0;
+  right: 0;
+  box-sizing: content-box;
+  font-size: 20px;
+  line-height: 1em;
+  padding: 15px;
+  font-family: sans-serif;
+  color: white;
+  background-color: rgba(0, 0, 0, 0.8);
+}
+div.ap-wrapper .title-bar img {
+  vertical-align: middle;
+  height: 48px;
+  margin-right: 16px;
+}
+div.ap-wrapper .title-bar a {
+  color: white;
+  text-decoration: underline;
+}
+div.ap-wrapper .title-bar a:hover {
+  text-decoration: none;
+}
+div.ap-wrapper:fullscreen {
+  background-color: black;
+  width: 100%;
+  align-items: center;
+}
+div.ap-wrapper:fullscreen div.ap-player {
+  position: static;
+}
+div.ap-wrapper:fullscreen .title-bar {
+  display: initial;
+}
+div.ap-wrapper:fullscreen.hud .title-bar {
+  top: 0;
+}
+div.ap-wrapper div.ap-player {
+  text-align: left;
+  display: inline-block;
+  padding: 5px;
+  position: relative;
+  box-sizing: content-box;
+  overflow: hidden;
+  max-width: 100%;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+pre.ap-terminal {
+  box-sizing: content-box;
+  overflow: hidden;
+  padding: 0;
+  margin: 0px;
+  display: block;
+  white-space: pre;
+  word-wrap: normal;
+  word-break: normal;
+  border-radius: 0;
+  border-style: solid;
+  cursor: text;
+  border-width: 0.75em;
+  font-family: Consolas, Menlo, 'Bitstream Vera Sans Mono', monospace, 'Powerline Symbols';
+  font-variant-ligatures: none;
+}
+pre.ap-terminal .ap-line {
+  letter-spacing: normal;
+  overflow: hidden;
+}
+pre.ap-terminal .ap-line span {
+  padding: 0;
+  display: inline-block;
+  height: 100%;
+}
+pre.ap-terminal .ap-line {
+  display: block;
+  width: 200%;
+}
+pre.ap-terminal .ap-line .ap-cursor-a {
+  display: inline-block;
+}
+pre.ap-terminal .ap-line .ap-cursor-b {
+  display: none;
+  border-radius: 0.05em;
+}
+pre.ap-terminal .ap-line .ap-blink {
+  visibility: hidden;
+}
+pre.ap-terminal.ap-cursor .ap-line .ap-cursor-a {
+  display: none;
+}
+pre.ap-terminal.ap-cursor .ap-line .ap-cursor-b {
+  display: inline-block;
+}
+pre.ap-terminal.ap-blink .ap-line .ap-blink {
+  visibility: visible;
+}
+pre.ap-terminal .ap-bright {
+  font-weight: bold;
+}
+pre.ap-terminal .ap-faint {
+  opacity: 0.5;
+}
+pre.ap-terminal .ap-underline {
+  text-decoration: underline;
+}
+pre.ap-terminal .ap-italic {
+  font-style: italic;
+}
+pre.ap-terminal .ap-strikethrough {
+  text-decoration: line-through;
+}
+div.ap-player div.ap-control-bar {
+  width: 100%;
+  height: 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: stretch;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.5) 0%, #000000 25%, #000000 100%);
+  color: black;
+  box-sizing: content-box;
+  line-height: 1;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 0.15s linear;
+  user-select: none;
+  z-index: 30;
+}
+div.ap-player div.ap-control-bar * {
+  box-sizing: inherit;
+  font-size: 0;
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: bold;
+}
+div.ap-control-bar svg.ap-icon path {
+  fill: #bbb;
+}
+div.ap-control-bar span.ap-playback-button {
+  display: block;
+  flex: 0 0 auto;
+  cursor: pointer;
+  height: 12px;
+  width: 12px;
+  padding: 10px;
+}
+div.ap-control-bar span.ap-playback-button svg {
+  height: 12px;
+  width: 12px;
+}
+div.ap-control-bar span.ap-timer {
+  display: block;
+  flex: 0 0 auto;
+  min-width: 50px;
+  margin: 0 10px;
+  height: 100%;
+  text-align: center;
+  font-size: 11px;
+  line-height: 34px;
+  cursor: default;
+}
+div.ap-control-bar span.ap-timer span {
+  display: inline-block;
+  font-size: inherit;
+}
+div.ap-control-bar span.ap-timer .ap-time-remaining {
+  display: none;
+}
+div.ap-control-bar span.ap-timer:hover .ap-time-elapsed {
+  display: none;
+}
+div.ap-control-bar span.ap-timer:hover .ap-time-remaining {
+  display: inline;
+}
+div.ap-control-bar .ap-progressbar {
+  display: block;
+  flex: 1 1 auto;
+  height: 100%;
+  padding: 0 10px;
+}
+div.ap-control-bar .ap-progressbar .ap-bar {
+  display: block;
+  position: relative;
+  cursor: default;
+  height: 100%;
+  font-size: 0;
+}
+div.ap-control-bar .ap-progressbar .ap-bar .ap-gutter {
+  display: block;
+  position: absolute;
+  top: 15px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background-color: black;
+}
+div.ap-control-bar .ap-progressbar .ap-bar .ap-gutter .ap-gutter-fill {
+  display: inline-block;
+  height: 100%;
+  background-color: black;
+  border-radius: 3px;
+  z-index: 10;
+}
+div.ap-control-bar.ap-seekable .ap-progressbar .ap-bar {
+  cursor: pointer;
+}
+div.ap-control-bar .ap-fullscreen-button {
+  display: block;
+  flex: 0 0 auto;
+  width: 14px;
+  height: 14px;
+  padding: 9px;
+  cursor: pointer;
+}
+div.ap-control-bar .ap-fullscreen-button svg {
+  width: 14px;
+  height: 14px;
+}
+div.ap-control-bar .ap-fullscreen-button svg:first-child {
+  display: inline;
+}
+div.ap-control-bar .ap-fullscreen-button svg:last-child {
+  display: none;
+}
+div.ap-wrapper.ap-hud .ap-control-bar {
+  opacity: 1;
+}
+div.ap-wrapper:fullscreen .ap-fullscreen-button svg:first-child {
+  display: none;
+}
+div.ap-wrapper:fullscreen .ap-fullscreen-button svg:last-child {
+  display: inline;
+}
+span.ap-progressbar span.ap-marker-container {
+  display: block;
+  top: 0;
+  bottom: 0;
+  width: 21px;
+  position: absolute;
+  margin-left: -10px;
+  z-index: 9;
+}
+span.ap-marker-container span.ap-marker {
+  display: block;
+  top: 13px;
+  bottom: 12px;
+  left: 7px;
+  right: 7px;
+  background-color: black;
+  position: absolute;
+  transition: top 0.1s, bottom 0.1s, left 0.1s, right 0.1s, background-color 0.1s;
+  border-radius: 50%;
+}
+span.ap-marker-container span.ap-marker.ap-marker-past {
+  background-color: black;
+}
+span.ap-marker-container span.ap-marker:hover,
+span.ap-marker-container:hover span.ap-marker {
+  background-color: black;
+  top: 11px;
+  bottom: 10px;
+  left: 5px;
+  right: 5px;
+}
+span.ap-marker-container span.ap-marker-tooltip {
+  visibility: hidden;
+  background-color: black;
+  color: black;
+  text-align: center;
+  padding: 2px 8px 0px 8px;
+  border-radius: 4px;
+  position: absolute;
+  z-index: 1;
+  white-space: nowrap;
+  /* Prevents the text from wrapping and makes sure the tooltip width adapts to the text length */
+  font-size: 11px;
+  line-height: 2em;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+span.ap-marker-container:hover span.ap-marker-tooltip {
+  visibility: visible;
+}
+.ap-player .ap-overlay {
+  z-index: 10;
+  background-repeat: no-repeat;
+  background-position: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.ap-player .ap-overlay-start {
+  cursor: pointer;
+}
+.ap-player .ap-overlay-start .ap-play-button {
+  font-size: 0px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  text-align: center;
+  color: white;
+  height: 80px;
+  max-height: 66%;
+  margin: auto;
+}
+.ap-player .ap-overlay-start .ap-play-button div {
+  height: 100%;
+}
+.ap-player .ap-overlay-start .ap-play-button div span {
+  height: 100%;
+  display: block;
+}
+.ap-player .ap-overlay-start .ap-play-button div span svg {
+  height: 100%;
+}
+.ap-player .ap-overlay-loading .ap-loader {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: inline-block;
+  position: relative;
+  border: 10px solid;
+  border-color: rgba(255, 255, 255, 0.15) rgba(255, 255, 255, 0.25) rgba(255, 255, 255, 0.35) rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
+  animation: ap-loader-rotation 1s linear infinite;
+}
+.ap-player .ap-overlay-offline span {
+  font-family: Consolas, Menlo, 'Bitstream Vera Sans Mono', monospace, 'Powerline Symbols';
+  font-variant-ligatures: none;
+  font-size: 2em;
+}
+.ap-player .ap-overlay-offline span .ap-line {
+  letter-spacing: normal;
+  overflow: hidden;
+}
+.ap-player .ap-overlay-offline span .ap-line span {
+  padding: 0;
+  display: inline-block;
+  height: 100%;
+}
+.ap-player .ap-overlay-error span {
+  font-size: 8em;
+}
+@keyframes ap-loader-rotation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+asciinema-theme-garn .asciinema-terminal {
+color: black; /* default text color */
+background-color: white; /* terminal background color */
+border-color: white;
+}
+
+pre.ap-terminal {
+    border-width: 0px;
+}
+
+.asciinema-theme-garn .fg-bg { /* inverse for default text color */
+color: black;
+}
+
+.asciinema-theme-garn .bg-fg { /* inverse for terminal background color */
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-0 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-0 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-1 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-1 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-2 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-2 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-3 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-3 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-4 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-4 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-5 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-5 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-6 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-6 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-7 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-7 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-8 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-8 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-9 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-9 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-10 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-10 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-11 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-11 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-12 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-12 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-13 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-13 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-14 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-14 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-15 {
+color: black;
+}
+
+.asciinema-theme-garn .bg-15 {
+background-color: black;
+}
+
+.asciinema-theme-garn .fg-8,
+.asciinema-theme-garn .fg-9,
+.asciinema-theme-garn .fg-10,
+.asciinema-theme-garn .fg-11,
+.asciinema-theme-garn .fg-12,
+.asciinema-theme-garn .fg-13,
+.asciinema-theme-garn .fg-14,
+.asciinema-theme-garn .fg-15 {
+font-weight: bold;
+}
+
+/*# sourceMappingURL=asciinema-theme-garn.css.map */
