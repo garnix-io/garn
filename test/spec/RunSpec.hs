@@ -36,13 +36,13 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.mkProject('Project with an executable', {
-                print: garn.shell`echo foobarbaz`,
-              }, {
-                defaults: {
-                  executable: 'print',
+              export const main = garn.mkProject(
+                {
+                  description: 'Project with an executable',
+                  defaultExecutable: garn.shell`echo foobarbaz`,
                 },
-              });
+                {},
+              );
             |]
           output <- runGarn ["run", "main"] "" repoDir Nothing
           stdout output `shouldBe` "foobarbaz\n"
