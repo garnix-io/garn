@@ -2,7 +2,8 @@
 
 module TestUtils where
 
-import Control.Exception (bracket, catch)
+import Control.Concurrent
+import Control.Exception (SomeException, bracket, catch, throwIO)
 import qualified Data.Aeson as Aeson
 import Data.String.Interpolate
 import qualified Data.Yaml as Yaml
@@ -11,7 +12,7 @@ import Garn
 import System.Directory
 import System.Environment (withArgs)
 import System.Exit
-import System.IO (Handle, IOMode (..), withFile)
+import System.IO (Handle, IOMode (..), hPutStrLn, withFile)
 import qualified System.IO as Sys
 import System.IO.Silently (hCapture)
 import System.IO.Temp
@@ -154,3 +155,25 @@ shellTestCommand =
         fi
     fi
   |]
+
+withLog :: ((ProcResult -> IO ()) -> IO a) -> IO a
+withLog test = do
+  mvar <- newMVar []
+  let log :: ProcResult -> IO ()
+      log x = do
+        modifyMVar_ mvar $ \acc ->
+          return $
+            acc
+              ++ [ "exitcode: " <> show (exitCode x),
+                   "=======",
+                   "stdout: \n" <> stdout x,
+                   "=======",
+                   "stderr: \n" <> stderr x,
+                   "======="
+                 ]
+  test log
+    `catch` ( \(e :: SomeException) -> do
+                logs <- readMVar mvar
+                hPutStrLn Sys.stderr (unlines logs)
+                throwIO e
+            )
