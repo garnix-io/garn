@@ -199,9 +199,11 @@ test-suite spec
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      EnterSpec
       ExampleSpec
       Garn.CodeGenSpec
       GarnSpec
+      TestUtils
       Garn
       Garn.CodeGen
       Garn.Common
