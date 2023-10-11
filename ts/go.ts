@@ -109,12 +109,7 @@ function parseGoMod(goModContents: string): {
     }
     if (moduleName && goVersion) return { moduleName, goVersion };
   }
-  throw Error(
-    "go.mod missing module name or go version: " +
-      JSON.stringify({ moduleName, goVersion }) +
-      "\n\n" +
-      goModContents
-  );
+  throw new Error("go.mod missing module name or go version");
 }
 
 // Initializers
@@ -122,19 +117,29 @@ const goModuleInitializer: Initializer = () => {
   if (!fs.existsSync("go.mod")) {
     return { tag: "ShouldNotRun" };
   }
-  const { moduleName } = parseGoMod(Deno.readTextFileSync("go.mod"));
-  return {
-    tag: "ShouldRun",
-    imports: 'import * as garn from "http://localhost:8777/mod.ts"',
-    makeTarget: () =>
-      outdent`
-        export const ${camelCase(moduleName)} = garn.go.mkGoProject({
-          description: "My go project",
-          moduleName: ${JSON.stringify(moduleName)},
-          src: ".",
-        });
-      `,
-  };
+  try {
+    const { moduleName } = parseGoMod(Deno.readTextFileSync("go.mod"));
+    return {
+      tag: "ShouldRun",
+      imports: 'import * as garn from "http://localhost:8777/mod.ts"',
+      makeTarget: () =>
+        outdent`
+          export const ${camelCase(moduleName)} = garn.go.mkGoProject({
+            description: "My go project",
+            moduleName: ${JSON.stringify(moduleName)},
+            src: ".",
+          });
+        `,
+    };
+  } catch (e) {
+    if (e instanceof Error) {
+      return {
+        tag: "ShouldNotRun",
+        reason: e.message,
+      };
+    }
+    throw e;
+  }
 };
 
 export const initializers = [goModuleInitializer];
