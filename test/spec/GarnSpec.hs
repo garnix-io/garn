@@ -4,16 +4,11 @@
 module GarnSpec where
 
 import Control.Exception (bracket, catch)
-import Control.Lens (from, (<>~))
-import Control.Monad (forM_, unless)
+import Control.Monad (unless)
 import qualified Data.Aeson as Aeson
-import Data.Aeson.Lens
-import Data.Char (isSpace)
-import Data.List (dropWhileEnd, sort)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
-import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
 import Development.Shake (StdoutTrim (..), cmd)
 import Garn
@@ -45,7 +40,7 @@ spec = do
                 Available commands:
                   init.*
               |]
-          writeFile "garn.ts" ""
+          writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]
           output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
@@ -69,348 +64,13 @@ spec = do
                   gen
                   check
               |]
-          writeFile "garn.ts" ""
+          writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]
           output <- runGarn ["--help"] "" repoDir Nothing
           stdout output
             `shouldMatch` unindent
               [i|
                 Unavailable commands:
                   init
-              |]
-
-      describe "build" $ do
-        it "builds packages and creates a result link" $ do
-          writeHaskellProject repoDir
-          _ <- runGarn ["build", "foo"] "" repoDir Nothing
-          doesDirectoryExist "result" `shouldReturn` True
-          StdoutTrim output <- cmd ("result/bin/garn-test" :: String)
-          output `shouldBe` ("haskell test output" :: String)
-
-        it "complains about packages that cannot be built" $ do
-          writeHaskellProject repoDir
-          writeFile
-            "Main.hs"
-            [i|
-              main :: IO ()
-              main = "foo"
-            |]
-          output <- runGarn ["build", "foo"] "" repoDir Nothing
-          stderr output `shouldContain` "Couldn't match type"
-          exitCode output `shouldBe` ExitFailure 1
-
-      describe "run" $ do
-        it "runs a simple Haskell program" $ do
-          writeHaskellProject repoDir
-          output <- runGarn ["run", "foo"] "" repoDir Nothing
-          stdout output `shouldBe` "haskell test output\n"
-        it "writes flake.{lock,nix}, but no other files" $ do
-          writeHaskellProject repoDir
-          filesBefore <- listDirectory "."
-          _ <- runGarn ["run", "foo"] "" repoDir Nothing
-          filesAfter <- sort <$> listDirectory "."
-          filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
-        it "doesn’t format other Nix files" $ do
-          let unformattedNix =
-                [i|
-                      { ...
-                        }
-                  :       {
-                    some              =     poorly
-                  formatted nix;
-                        }
-                |]
-          writeFile "unformatted.nix" unformattedNix
-          writeHaskellProject repoDir
-          _ <- runGarn ["run", "foo"] "" repoDir Nothing
-          readFile "./unformatted.nix" `shouldReturn` unformattedNix
-
-      describe "enter" $ do
-        describe "withDevTools" $ do
-          it "allows dev tools to be added to the dev shell" $ do
-            writeHaskellProject repoDir
-            writeFile "garn.ts" $
-              unindent
-                [i|
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
-                  import { mkPackage } from "#{repoDir}/ts/package.ts"
-
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
-                    executable: "garn-test",
-                    compiler: "ghc94",
-                    src: "."
-                  })
-                  const hello = mkPackage(`pkgs.hello`)
-
-                  export const bar = foo.withDevTools([hello]);
-                |]
-            output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
-            stdout output `shouldBe` "tool\n"
-          it "allows multiple dev tools to be added to the dev shell" $ do
-            writeHaskellProject repoDir
-            writeFile "garn.ts" $
-              unindent
-                [i|
-                  import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
-
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
-                    executable: "garn-test",
-                    compiler: "ghc94",
-                    src: "."
-                  })
-
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  const cowsay = mkPackage(`pkgs.cowsay`);
-
-                  export const bar = foo.withDevTools([hello, cowsay]);
-                |]
-            output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
-            stdout output `shouldBe` "tool\n"
-            output <- runGarn ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
-            stdout output `shouldStartWith` "/nix/store"
-          it "does not destructively update the given package" $ do
-            writeHaskellProject repoDir
-            writeFile "garn.ts" $
-              unindent
-                [i|
-                  import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
-
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
-                    executable: "garn-test",
-                    compiler: "ghc94",
-                    src: "."
-                  })
-
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  export const bar = foo.withDevTools([hello]);
-                |]
-            output <- runGarn ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
-            stderr output `shouldContain` "hello: command not found"
-          it "can safely be used twice" $ do
-            writeHaskellProject repoDir
-            writeFile "garn.ts" $
-              unindent
-                [i|
-                  import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
-
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
-                    executable: "garn-test",
-                    compiler: "ghc94",
-                    src: "."
-                  })
-
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  const cowsay = mkPackage(`pkgs.cowsay`);
-
-                  export const bar = foo.withDevTools([hello]).withDevTools([cowsay]);
-                |]
-            output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
-            stdout output `shouldBe` "tool\n"
-            output <- runGarn ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
-            stdout output `shouldStartWith` "/nix/store"
-        it "has the right GHC version" $ do
-          writeHaskellProject repoDir
-          output <- runGarn ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
-          stdout output `shouldStartWith` "9.4"
-        it "registers Haskell dependencies with ghc-pkg" $ do
-          writeHaskellProject repoDir
-          modifyPackageYaml $
-            key "executables"
-              . key "garn-test"
-              . key "dependencies"
-              . _Array
-              . from vector
-              <>~ ["string-conversions"]
-          output <- runGarn ["enter", "foo"] "ghc-pkg list | grep string-conversions\nexit\n" repoDir Nothing
-          dropWhile (== ' ') (stdout output) `shouldStartWith` "string-conversions"
-        it "includes dependencies of simple packages that don't provide an 'env' attribute" $ do
-          writeFile
-            "garn.ts"
-            [i|
-              import { mkPackage } from "#{repoDir}/ts/package.ts"
-              import { packageToEnvironment } from "#{repoDir}/ts/environment.ts"
-              import { mkProject } from "#{repoDir}/ts/project.ts"
-
-              const pkg = mkPackage(`
-                pkgs.stdenv.mkDerivation({
-                  name = "blah";
-                  src = ./.;
-                  buildInputs = [ pkgs.hello ];
-                })
-              `);
-              export const foo = mkProject(
-                "description",
-                { devShell: packageToEnvironment(pkg, ".") },
-                { defaults: { environment: "devShell" } }
-              );
-            |]
-          output <- runGarn ["enter", "foo"] "hello\nexit\n" repoDir Nothing
-          stdout output `shouldBe` "Hello, world!\n"
-        it "starts the shell defined in $SHELL" $ do
-          writeHaskellProject repoDir
-          StdoutTrim userShell <- cmd ("which bash" :: String)
-          output <-
-            runGarn ["enter", "foo"] shellTestCommand repoDir $ Just userShell
-          stdout output `shouldBe` "using bash"
-          StdoutTrim userShell <- cmd ("which zsh" :: String)
-          output <-
-            runGarn ["enter", "foo"] shellTestCommand repoDir $ Just userShell
-          stdout output `shouldBe` "using zsh"
-        it "provides a message indicating the command succeeded" $ do
-          writeHaskellProject repoDir
-          output <- runGarn ["enter", "foo"] "" repoDir Nothing
-          stderr output `shouldContain` "[garn] Entering foo shell. Type 'exit' to exit."
-        it "provides a message indicating the shell exited" $ do
-          writeHaskellProject repoDir
-          output <- runGarn ["enter", "foo"] "" repoDir Nothing
-          stderr output `shouldContain` "[garn] Exiting foo shell"
-        it "fails when the shell cannot be entered" $ do
-          writeHaskellProject repoDir
-          removeFile "package.yaml"
-          output <- runGarn ["enter", "foo"] "echo 'This cannot be executed.'" repoDir Nothing
-          exitCode output `shouldBe` ExitFailure 1
-          stderr output `shouldContain` "Found neither a .cabal file nor package.yaml. Exiting."
-
-        describe "npm project" $ do
-          it "puts node into the $PATH" $ do
-            writeNpmFrontendProject repoDir
-            output <- runGarn ["enter", "frontend"] "node --version" repoDir Nothing
-            stdout output `shouldStartWith` "v18."
-            output <- runGarn ["enter", "frontend"] "npm --version" repoDir Nothing
-            stdout output `shouldStartWith` "9."
-
-      describe "check" $ do
-        it "runs manually added checks" $ do
-          writeHaskellProject repoDir
-          writeFile
-            "Main.hs"
-            [i|
-              main :: IO ()
-              main = return ()
-
-              f :: [Int] -> [Int]
-              f list = map (+ 1) list
-            |]
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-
-              const haskellBase = garn.haskell.mkHaskell({
-                description: "mkHaskell-test",
-                executable: "garn-test",
-                compiler: "ghc94",
-                src: "."
-              }).withDevTools([garn.mkPackage(`pkgs.hlint`)]);
-
-              export const haskell = {
-                ...haskellBase,
-                hlint: haskellBase.check`hlint *.hs`,
-              };
-            |]
-          output <- runGarn ["check", "haskell"] "" repoDir Nothing
-          stderr output `shouldContain` "Warning: Eta reduce"
-        it "runs checks on source directories that ignore the flake.nix file" $ do
-          writeHaskellProject repoDir
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-
-              const haskellBase = garn.haskell.mkHaskell({
-                description: "mkHaskell-test",
-                executable: "garn-test",
-                compiler: "ghc94",
-                src: "."
-              });
-
-              export const haskell = {
-                ...haskellBase,
-                hlint: haskellBase.check`
-                  ls
-                  false
-                `,
-              };
-            |]
-          output <- runGarn ["check", "haskell"] "" repoDir Nothing
-          stderr output `shouldNotContain` "flake.nix"
-        describe "exit-codes" $ do
-          let testCases =
-                [ ("passing", "true", ExitSuccess),
-                  ("failing", "false", ExitFailure 1),
-                  ("unknownCommand", "does-not-exist", ExitFailure 1),
-                  ("failureBeforeOtherCommands", "false; true", ExitFailure 1),
-                  ("negated", "! true", ExitFailure 1),
-                  ("pipefail", "false | true", ExitFailure 1)
-                ]
-          forM_ testCases $ \(checkName, check :: String, expectedExitCode) -> do
-            it ("reports exit-codes correctly for check '" <> checkName <> "'") $ do
-              writeHaskellProject repoDir
-              writeFile
-                "garn.ts"
-                [i|
-                  import * as garn from "#{repoDir}/ts/mod.ts"
-
-                  const haskellBase = garn.haskell.mkHaskell({
-                    description: "mkHaskell-test",
-                    executable: "garn-test",
-                    compiler: "ghc94",
-                    src: "."
-                  });
-
-                  export const haskell = {
-                    ...haskellBase,
-                    check: haskellBase.check`#{check}`,
-                  };
-                |]
-              result <- runGarn ["check", "haskell"] "" repoDir Nothing
-              putStrLn $ stdout result
-              putStrLn $ stderr result
-              stderr result `shouldNotContain` "Invalid argument"
-              exitCode result `shouldBe` expectedExitCode
-
-      describe "init" $ do
-        it "uses the provided init function if there is one" $ do
-          writeFile
-            "garn.cabal"
-            [i|
-              name: garn
-              version: 0.0.1
-            |]
-          output <- runGarn ["init"] "" repoDir Nothing
-          stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
-          readFile "garn.ts"
-            `shouldReturn` dropWhileEnd
-              isSpace
-              ( unindent
-                  [i|
-                    import * as garn from "http://localhost:8777/mod.ts"
-
-                    export const garn = garn.haskell.mkHaskell({
-                      description: "",
-                      executable: "",
-                      compiler: "ghc94",
-                      src: "."
-                    })
-                  |]
-              )
-        it "logs unexpected errors" $ do
-          writeFile "garn.cabal" [i| badCabalfile |]
-          output <- runGarn ["init"] "" repoDir Nothing
-          stderr output
-            `shouldBe` unindent
-              [i|
-                [garn] Creating a garn.ts file
-                [garn] Found but could not parse cabal file
               |]
 
     -- TODO: Golden tests currently can’t be integrated with the other test cases
@@ -521,11 +181,10 @@ runGarn args stdin repoDir shell = do
                 Env
                   { stdin,
                     userShell,
-                    tsRunnerFilename = repoDir <> "/ts/runner.ts",
-                    initFileName = repoDir <> "/ts/init.ts"
+                    initFileName = repoDir <> "/ts/internal/init.ts"
                   }
           let go = do
-                options <- readOptionsAndConfig env
+                options <- readOptionsAndConfig
                 runWith env options
                 return ExitSuccess
           go `catch` \(e :: ExitCode) -> pure e

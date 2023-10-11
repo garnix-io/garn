@@ -1,4 +1,4 @@
-cabal-version: 1.12
+cabal-version: 2.4
 
 -- This file has been generated from package.yaml by hpack version 0.35.2.
 --
@@ -11,24 +11,9 @@ bug-reports:    https://github.com/garnix-io/garn/issues
 author:         garnix
 maintainer:     contact@garnix.io
 copyright:      AllRightsReserved
-license:        AllRightsReserved
+license:        NONE
 build-type:     Simple
-data-files:
-    ts/base.ts
-    ts/check.ts
-    ts/environment.ts
-    ts/executable.ts
-    ts/go.ts
-    ts/haskell.ts
-    ts/init.ts
-    ts/internals/garn_dir.ts
-    ts/mod.ts
-    ts/nix.ts
-    ts/package.ts
-    ts/project.ts
-    ts/runner.ts
-    ts/typescript.ts
-    ts/utils.ts
+data-files:     ts/**/*.ts
 
 source-repository head
   type: git
@@ -44,6 +29,8 @@ library
       Garn.Optparse
       Garn.Utils
   other-modules:
+      Paths_garn
+  autogen-modules:
       Paths_garn
   hs-source-dirs:
       src
@@ -100,6 +87,8 @@ executable codegen
   main-is: exe/codegen.hs
   other-modules:
       Paths_garn
+  autogen-modules:
+      Paths_garn
   default-extensions:
       BangPatterns
       ConstraintKinds
@@ -153,6 +142,8 @@ executable codegen
 executable garn
   main-is: exe/garn.hs
   other-modules:
+      Paths_garn
+  autogen-modules:
       Paths_garn
   default-extensions:
       BangPatterns
@@ -208,9 +199,15 @@ test-suite spec
   type: exitcode-stdio-1.0
   main-is: Spec.hs
   other-modules:
+      BuildSpec
+      CheckSpec
+      EnterSpec
       ExampleSpec
       Garn.CodeGenSpec
       GarnSpec
+      InitSpec
+      RunSpec
+      TestUtils
       Garn
       Garn.CodeGen
       Garn.Common
@@ -218,6 +215,8 @@ test-suite spec
       Garn.Init
       Garn.Optparse
       Garn.Utils
+      Paths_garn
+  autogen-modules:
       Paths_garn
   hs-source-dirs:
       test/spec

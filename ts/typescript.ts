@@ -2,7 +2,7 @@ import { Environment, mkEnvironment } from "./environment.ts";
 import { Executable } from "./executable.ts";
 import { mkPackage } from "./package.ts";
 import { Project, mkProject } from "./project.ts";
-import { nixSource } from "./utils.ts";
+import { nixSource } from "./internal/utils.ts";
 
 const nodeVersions = {
   "14": {

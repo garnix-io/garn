@@ -1,19 +1,11 @@
+import "./internal/registerInternalLib.ts";
+
 import { Check } from "./check.ts";
 import { Environment, isEnvironment } from "./environment.ts";
 import { Executable, isExecutable } from "./executable.ts";
+import { hasTag } from "./internal/utils.ts";
 import { Interpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
-import { hasTag } from "./utils.ts";
-
-export type Project = {
-  tag: "project";
-  settings: ProjectSettings;
-  description: string;
-};
-
-export function isProject(p: unknown): p is Project {
-  return hasTag(p, "project");
-}
 
 type ProjectSettings = {
   defaults?: {
@@ -22,50 +14,78 @@ type ProjectSettings = {
   };
 };
 
-export type ProjectWithDefaultEnvironment = Project & {
-  withDevTools<T extends ProjectWithDefaultEnvironment>(
-    this: T,
-    devTools: Array<Package>
-  ): T;
+/**
+ * A Project is a logical grouping of Packages and Environments. For example,
+ * you may have a 'frontend' Project, a 'backend' Project, a 'cli' Project, etc.
+ */
+export type Project = {
+  tag: "project";
+  settings: ProjectSettings;
+  description: string;
+  /**
+   * Returns a new Project with the provided devtools added to the default
+   * Environment.
+   */
+  withDevTools<T extends Project>(this: T, devTools: Array<Package>): T;
+  /**
+   * A tagged template literal that runs the given command inside the Project's
+   * default Environment.
+   *
+   * Example:
+   * ```typescript
+   * const myExecutable = myProject.shell`echo "hello world"`;
+   * ```
+   */
   shell(
-    this: ProjectWithDefaultEnvironment,
+    this: Project,
     _s: TemplateStringsArray,
     ..._args: Array<string>
   ): Executable;
+  /**
+   * Returns a check that runs in a *pure* version of the Project's default
+   * Environment.
+   */
   check(
-    this: ProjectWithDefaultEnvironment,
+    this: Project,
     _s: TemplateStringsArray,
     ..._args: Array<string>
   ): Check;
+  /**
+   * Adds a Check with the given name to the Project that runs in a *pure*
+   * version of the Project's default Environment.
+   *
+   * Example:
+   * ```typescript
+   * myProject.addCheck("noTodos")`! grep -r TODO .`
+   * ```
+   */
+  addCheck<T extends Project, Name extends string>(
+    name: Name
+  ): (
+    _s: TemplateStringsArray,
+    ..._args: Array<string>
+  ) => T & Record<Name, Check>;
 };
 
-// In the future we plan on adding Project & Check.
-type Nestable = Environment | Package | Executable;
+export function isProject(p: unknown): p is Project {
+  return hasTag(p, "project");
+}
 
+type Nestable = Environment | Package | Executable | Check;
+
+/**
+ * Create a new Project.
+ *
+ * @param description A human-readable description of the Project.
+ * @param deps A record of Environments, Packages and Executables,
+ * @param settings Settings such as defaults for Environments and Executables.
+ */
 export function mkProject<Deps extends Record<string, Nestable>>(
   description: string,
   deps: Deps,
-  settings: ProjectSettings & { defaults: { environment: string } }
-): Deps & ProjectWithDefaultEnvironment;
-
-export function mkProject<Deps extends Record<string, Nestable>>(
-  description: string,
-  deps: Deps,
-  settings: ProjectSettings
-): Deps & Project;
-
-export function mkProject<Deps extends Record<string, Nestable>>(
-  description: string,
-  deps: Deps
-): Deps & Project;
-
-export function mkProject<Deps extends Record<string, Nestable>>(
-  description: string,
-  deps: Deps,
-  settings: { defaults: { environment: string } } | ProjectSettings = {}
-): (Deps & ProjectWithDefaultEnvironment) | (Deps & Project) {
-  const environment = getDefault("environment", isEnvironment, deps, settings);
-  const helpers = environment != null ? proxyEnvironmentHelpers() : {};
+  settings: ProjectSettings = {}
+): Deps & Project {
+  const helpers = proxyEnvironmentHelpers();
   return {
     ...deps,
     ...helpers,
@@ -76,13 +96,25 @@ export function mkProject<Deps extends Record<string, Nestable>>(
 }
 
 const proxyEnvironmentHelpers = () => ({
-  shell() {
-    throw new Error(`not yet implemented`);
+  shell(
+    this: Project,
+    s: TemplateStringsArray,
+    ...args: Array<Interpolatable>
+  ) {
+    const environment = projectDefaultEnvironment(this);
+    if (environment == null) {
+      throw new Error(
+        `'.shell' can only be called on projects with a default environment`
+      );
+    }
+    return environment.shell(s, ...args);
   },
 
-  check<
-    T extends Project & { settings: { defaults: { environment: string } } }
-  >(this: T, s: TemplateStringsArray, ...args: Array<Interpolatable>) {
+  check(
+    this: Project,
+    s: TemplateStringsArray,
+    ...args: Array<Interpolatable>
+  ) {
     const environment = projectDefaultEnvironment(this);
     if (environment == null) {
       throw new Error(
@@ -92,11 +124,19 @@ const proxyEnvironmentHelpers = () => ({
     return environment.check(s, ...args);
   },
 
-  withDevTools<
-    T extends Project & { settings: { defaults: { environment: string } } }
-  >(this: T, devTools: Array<Package>): T {
+  addCheck<T extends Project, Name extends string>(this: T, name: Name) {
+    return (s: TemplateStringsArray, ...args: Array<string>) => {
+      const newCheck = this.check(s, ...args);
+      return {
+        ...this,
+        [name]: newCheck,
+      };
+    };
+  },
+
+  withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {
     const environment = projectDefaultEnvironment(this);
-    if (environment == null) {
+    if (environment == null || this.settings.defaults?.environment == null) {
       throw new Error(
         `'.withDevTools' can only be called on projects with a default environment`
       );

@@ -14,6 +14,26 @@ fmt: fmt-nix fmt-haskell fmt-typescript
 
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
+# Deploy the current website
+deploy-website:
+  #!/usr/bin/env bash
+  set -eux
+  if [[ -z $(git status -s) ]]; then
+    COMMIT=$(git rev-parse HEAD)
+    TMP_DIR=$(mktemp --directory)
+    (cd website && npm install && npm run build)
+    ls website/dist/*
+    mv website/dist/* $TMP_DIR
+    git checkout gh-pages
+    cp -rv $TMP_DIR/* .
+    rm -rf $TMP_DIR
+    git add .
+    git commit -m "Website update from commit $COMMIT"
+    echo "Created a new commit. It is not yet pushed."
+  else
+    echo "Working directory is dirty. Please commit, stash or reset before continuing"
+  fi
+
 # Push the current version of the ts files to gh-pages
 release-ts: codegen
  #!/usr/bin/env bash
@@ -99,8 +119,8 @@ run-garn example *args="": hpack
   cabal run garn:garn -- {{ args }}
 
 check-examples:
-  just run-garn haskell check haskellExecutable
-  just run-garn haskell run haskellExecutable
+  just run-garn haskell check helloFromHaskell
+  just run-garn haskell run helloFromHaskell
   echo "node --version" | just run-garn npm-frontend enter frontend
   just run-garn frontend-create-react-app check main
   just run-garn frontend-yarn-webpack check frontend
