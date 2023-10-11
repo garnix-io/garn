@@ -21,7 +21,7 @@ spec = do
           . inTempDirectory
       )
       $ do
-        it "uses the provided init function if there is one" $ do
+        it "can initialize haskell projects" $ do
           writeFile
             "garn.cabal"
             [i|
@@ -43,6 +43,31 @@ spec = do
                       compiler: "ghc94",
                       src: "."
                     })
+                  |]
+              )
+        it "can initialize go projects" $ do
+          writeFile
+            "go.mod"
+            ( unindent
+                [i|
+                  module github.com/garnix-io/some-go-project
+                  go 1.20
+                |]
+            )
+          output <- runGarn ["init"] "" repoDir Nothing
+          stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
+          readFile "garn.ts"
+            `shouldReturn` dropWhileEnd
+              isSpace
+              ( unindent
+                  [i|
+                    import * as garn from "http://localhost:8777/mod.ts"
+
+                    export const someGoProject = garn.go.mkGoProject({
+                      description: "My go project",
+                      moduleName: "some-go-project",
+                      src: ".",
+                    });
                   |]
               )
         it "logs unexpected errors" $ do

@@ -34,7 +34,28 @@
             gomod2nix.buildGoApplication {
               pname = "go-http-backend";
               version = "0.1";
-              src = ./.;
+              src =
+                (
+                  let
+                    lib = pkgs.lib;
+                    lastSafe = list:
+                      if lib.lists.length list == 0
+                      then null
+                      else lib.lists.last list;
+                  in
+                  builtins.path
+                    {
+                      path = ./.;
+                      name = "source";
+                      filter = path: type:
+                        let
+                          fileName = lastSafe (lib.strings.splitString "/" path);
+                        in
+                        fileName != "flake.nix" &&
+                        fileName != "garn.ts";
+                    }
+                )
+              ;
               modules = gomod2nix-toml;
             }
           ;
@@ -72,7 +93,28 @@
                   gomod2nix.buildGoApplication {
                     pname = "go-http-backend";
                     version = "0.1";
-                    src = ./.;
+                    src =
+                      (
+                        let
+                          lib = pkgs.lib;
+                          lastSafe = list:
+                            if lib.lists.length list == 0
+                            then null
+                            else lib.lists.last list;
+                        in
+                        builtins.path
+                          {
+                            path = ./.;
+                            name = "source";
+                            filter = path: type:
+                              let
+                                fileName = lastSafe (lib.strings.splitString "/" path);
+                              in
+                              fileName != "flake.nix" &&
+                              fileName != "garn.ts";
+                          }
+                      )
+                    ;
                     modules = gomod2nix-toml;
                   }
                 ;
@@ -97,9 +139,10 @@
 
           server = {
             type = "app";
-            program =
-              let
-                shell = "${
+            program = "${
+        let
+          dev = pkgs.mkShell {};
+          shell = "${
       let
         gomod2nix = gomod2nix-repo.legacyPackages.${system};
         gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -113,12 +156,40 @@
         gomod2nix.buildGoApplication {
           pname = "go-http-backend";
           version = "0.1";
-          src = ./.;
+          src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
           modules = gomod2nix-toml;
         }
     }/bin/go-http-backend";
-              in
-              "${pkgs.writeScriptBin "executable" shell}/bin/executable";
+        in
+        pkgs.runCommand "shell-env" {
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
+        } ''
+          echo "export PATH=$PATH:$PATH" > $out
+          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
+          chmod +x $out
+        ''
+      }";
           };
 
         });

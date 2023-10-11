@@ -74,6 +74,21 @@ spec = do
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           stderr output `shouldNotContain` "flake.nix"
+        it "supports running checks in the default environment" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const failing = garn.mkProject('Failing Project', {
+                check1: garn.check`echo ABC`,
+                check2: garn.check`echo DEF && false`,
+                check3: garn.check`echo GHI`,
+              });
+            |]
+          output <- runGarn ["check", "failing"] "" repoDir Nothing
+          stderr output `shouldContain` "DEF"
+          exitCode output `shouldBe` ExitFailure 1
         describe "exit-codes" $ do
           let testCases =
                 [ ("passing", "true", ExitSuccess),

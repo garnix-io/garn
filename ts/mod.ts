@@ -1,7 +1,7 @@
 export { type Check } from "./check.ts";
-export { shell } from "./environment.ts";
-export { type Package, mkPackage } from "./package.ts";
-export { type Project, mkProject } from "./project.ts";
+export { check, mkEnvironment, shell } from "./environment.ts";
+export { mkPackage, type Package } from "./package.ts";
+export { mkProject, type Project } from "./project.ts";
 
 // languages
 export * as go from "./go.ts";
