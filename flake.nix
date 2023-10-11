@@ -20,7 +20,7 @@
           type = "app";
           program = "${self.packages.${system}.default}/bin/garn";
         };
-        packages = {
+        packages = rec {
           default = self.packages.${system}.garn;
           garn =
             let
@@ -70,6 +70,7 @@
                       pkgs.deno
                       pkgs.git
                       pkgs.nix
+                      cabal2json
                     ]}
                   '';
 
