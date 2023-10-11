@@ -4,4 +4,5 @@ export const server: garn.Project = garn.go.mkGoProject({
   description: "example backend server in go",
   moduleName: "go-http-backend",
   src: ".",
+  goVersion: "1.20",
 });

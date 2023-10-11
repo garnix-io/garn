@@ -44,6 +44,12 @@ const getGoModNixToml = (src: string) => {
   );
 };
 
+const GO_VERSION_TO_NIXPKG_NAME = {
+  "1.18": "go_1_18",
+  "1.19": "go_1_19",
+  "1.20": "go_1_20",
+};
+
 /**
  * Create a go-based garn Project.
  */
@@ -51,6 +57,7 @@ export const mkGoProject = (args: {
   description: string;
   moduleName: string;
   src: string;
+  goVersion?: keyof typeof GO_VERSION_TO_NIXPKG_NAME;
 }): Project & {
   pkg: Package;
   devShell: Environment;
@@ -67,6 +74,7 @@ export const mkGoProject = (args: {
         gomod2nix.buildGoApplication {
           pname = ${nixStrLit`${args.moduleName}`.nixExpression};
           version = "0.1";
+          go = pkgs.${GO_VERSION_TO_NIXPKG_NAME[args.goVersion ?? "1.20"]};
           src = ${nixSource(args.src)};
           modules = gomod2nix-toml;
         }
@@ -118,7 +126,9 @@ const goModuleInitializer: Initializer = () => {
     return { tag: "ShouldNotRun" };
   }
   try {
-    const { moduleName } = parseGoMod(Deno.readTextFileSync("go.mod"));
+    const { goVersion, moduleName } = parseGoMod(
+      Deno.readTextFileSync("go.mod")
+    );
     return {
       tag: "ShouldRun",
       imports: 'import * as garn from "http://localhost:8777/mod.ts"',
@@ -128,6 +138,7 @@ const goModuleInitializer: Initializer = () => {
             description: "My go project",
             moduleName: ${JSON.stringify(moduleName)},
             src: ".",
+            goVersion: ${JSON.stringify(goVersion)},
           });
         `,
     };
