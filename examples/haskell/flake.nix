@@ -20,7 +20,7 @@
           };
         in
         {
-          haskellExecutable_pkg =
+          helloFromHaskell_pkg =
             (pkgs.haskell.packages.ghc94.callCabal2nix
               "garn-pkg"
 
@@ -47,7 +47,7 @@
 
               { })
             // {
-              meta.mainProgram = "garnTest";
+              meta.mainProgram = "helloFromHaskell";
             }
           ;
         });
@@ -59,7 +59,7 @@
           };
         in
         {
-          haskellExecutable_hlint =
+          helloFromHaskell_hlint =
             let
               src =
                 (
@@ -113,7 +113,7 @@
 
                         { })
                       // {
-                        meta.mainProgram = "garnTest";
+                        meta.mainProgram = "helloFromHaskell";
                       }
                     ;
                   in
@@ -148,7 +148,7 @@
           };
         in
         {
-          haskellExecutable =
+          helloFromHaskell =
             (
               let
                 expr =
@@ -178,7 +178,7 @@
 
                     { })
                   // {
-                    meta.mainProgram = "garnTest";
+                    meta.mainProgram = "helloFromHaskell";
                   }
                 ;
               in
@@ -200,11 +200,12 @@
         in
         {
 
-          haskellExecutable = {
+          helloFromHaskell = {
             type = "app";
-            program =
-              let
-                shell = "${
+            program = "${
+        let
+          dev = pkgs.mkShell {};
+          shell = "${
     (pkgs.haskell.packages.ghc94.callCabal2nix
       "garn-pkg"
       
@@ -229,21 +230,20 @@
 
       { })
       // {
-        meta.mainProgram = "garnTest";
+        meta.mainProgram = "helloFromHaskell";
       }
-  }/bin/garnTest";
-              in
-              "${pkgs.writeScriptBin "executable" shell}/bin/executable";
-          };
-
-
-          hello = {
-            type = "app";
-            program =
-              let
-                shell = "${pkgs.hello}/bin/hello";
-              in
-              "${pkgs.writeScriptBin "executable" shell}/bin/executable";
+  }/bin/helloFromHaskell";
+        in
+        pkgs.runCommand "shell-env" {
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
+        } ''
+          echo "export PATH=$PATH:$PATH" > $out
+          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
+          chmod +x $out
+        ''
+      }";
           };
 
         });

@@ -31,24 +31,30 @@ data TargetConfig = TargetConfig
   }
   deriving (Generic, FromJSON, Eq, Show)
 
-readGarnConfig :: String -> IO GarnConfig
-readGarnConfig tsRunner = do
+readGarnConfig :: IO GarnConfig
+readGarnConfig = do
   checkGarnFileExists
   dir <- getCurrentDirectory
-  withSystemTempFile "garn-main.ts" $ \mainPath mainHandle -> do
+  withSystemTempFile "garn-main.js" $ \mainPath mainHandle -> do
     hPutStr
       mainHandle
       [i|
         import * as garnExports from "#{dir}/garn.ts"
-        import { toGarnConfig } from "#{tsRunner}"
 
-        console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
+        if (window.__garnGetInternalLib == null) {
+          console.log("null");
+        } else {
+          const internalLib = window.__garnGetInternalLib();
+          const { toGarnConfig } = internalLib;
+          console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
+        }
       |]
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write --allow-run --allow-read" mainPath
-    case eitherDecode out :: Either String GarnConfig of
+    case eitherDecode out :: Either String (Maybe GarnConfig) of
       Left err -> error $ "Unexpected package export from garn.ts:\n" <> err
-      Right writtenConfig -> return writtenConfig
+      Right Nothing -> error $ "No garn library imported in garn.ts"
+      Right (Just writtenConfig) -> return writtenConfig
 
 writeGarnConfig :: GarnConfig -> IO ()
 writeGarnConfig garnConfig = do

@@ -1,9 +1,10 @@
-import * as haskell from "./haskell.ts";
+import * as haskell from "../haskell.ts";
+import * as go from "../go.ts";
 
 let imports = "";
 let body = "";
 
-const initializers = haskell.initializers;
+const initializers = [...go.initializers, ...haskell.initializers];
 
 console.error("[garn] Creating a garn.ts file");
 

@@ -1,6 +1,9 @@
+name: helloFromHaskell
+
 executables:
-  garnTest:
+  helloFromHaskell:
     main: Main.hs
     dependencies:
       - base
+      - text
       - string-conversions

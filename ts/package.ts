@@ -1,4 +1,4 @@
-import { hasTag } from "./utils.ts";
+import { hasTag } from "./internal/utils.ts";
 
 export type Package = {
   tag: "package";
