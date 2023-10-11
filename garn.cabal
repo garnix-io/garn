@@ -203,6 +203,7 @@ test-suite spec
       ExampleSpec
       Garn.CodeGenSpec
       GarnSpec
+      InitSpec
       TestUtils
       Garn
       Garn.CodeGen
