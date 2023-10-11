@@ -85,17 +85,15 @@ export const mkNpmFrontend = (args: {
   );
   const startDev: Executable = devShell.shell`npm run start`;
   return mkProject(
-    args.description,
+    {
+      description: args.description,
+      defaultEnvironment: devShell,
+      defaultExecutable: startDev,
+    },
     {
       pkg,
       devShell,
       startDev,
-    },
-    {
-      defaults: {
-        environment: "devShell",
-        executable: "startDev",
-      },
     }
   );
 };
@@ -152,17 +150,15 @@ export const mkYarnFrontend = (args: {
   );
   const startDev: Executable = devShell.shell`${args.serverStartCommand}`;
   return mkProject(
-    args.description,
+    {
+      description: args.description,
+      defaultEnvironment: devShell,
+      defaultExecutable: startDev,
+    },
     {
       pkg,
       devShell,
       startDev,
-    },
-    {
-      defaults: {
-        environment: "devShell",
-        executable: "startDev",
-      },
     }
   );
 };
