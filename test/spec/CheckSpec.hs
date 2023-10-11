@@ -28,7 +28,6 @@ spec = do
             [i|
               main :: IO ()
               main = return ()
-
               f :: [Int] -> [Int]
               f list = map (+ 1) list
             |]
@@ -37,17 +36,14 @@ spec = do
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              const haskellBase = garn.haskell.mkHaskell({
+              export const haskell = garn.haskell.mkHaskell({
                 description: "mkHaskell-test",
                 executable: "garn-test",
                 compiler: "ghc94",
                 src: "."
-              }).withDevTools([garn.mkPackage(`pkgs.hlint`)]);
-
-              export const haskell = {
-                ...haskellBase,
-                hlint: haskellBase.check`hlint *.hs`,
-              };
+              })
+                .withDevTools([garn.mkPackage(`pkgs.hlint`)])
+                .addCheck("hlint")`hlint *.hs`;
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output
@@ -59,20 +55,16 @@ spec = do
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              const haskellBase = garn.haskell.mkHaskell({
+              export const haskell = garn.haskell.mkHaskell({
                 description: "mkHaskell-test",
                 executable: "garn-test",
                 compiler: "ghc94",
                 src: "."
-              });
-
-              export const haskell = {
-                ...haskellBase,
-                hlint: haskellBase.check`
+              })
+                .addCheck("check")`
                   ls
                   false
-                `,
-              };
+                `;
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output
@@ -110,17 +102,13 @@ spec = do
                 [i|
                   import * as garn from "#{repoDir}/ts/mod.ts"
 
-                  const haskellBase = garn.haskell.mkHaskell({
+                  export const haskell = garn.haskell.mkHaskell({
                     description: "mkHaskell-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
-                  });
-
-                  export const haskell = {
-                    ...haskellBase,
-                    check: haskellBase.check`#{check}`,
-                  };
+                  })
+                    .addCheck("check")`#{check}`;
                 |]
               output <- runGarn ["check", "haskell"] "" repoDir Nothing
               onTestFailureLog output
