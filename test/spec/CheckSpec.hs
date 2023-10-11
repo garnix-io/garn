@@ -19,9 +19,9 @@ spec = do
       ( withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]
           . inTempDirectory
       )
-      . around withLog
+      . around onTestFailureLogger
       $ do
-        it "runs manually added checks" $ \log -> do
+        it "runs manually added checks" $ \onTestFailureLog -> do
           writeHaskellProject repoDir
           writeFile
             "Main.hs"
@@ -50,9 +50,9 @@ spec = do
               };
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
-          log output
+          onTestFailureLog output
           stderr output `shouldContain` "Warning: Eta reduce"
-        it "runs checks on source directories that ignore the flake.nix file" $ \log -> do
+        it "runs checks on source directories that ignore the flake.nix file" $ \onTestFailureLog -> do
           writeHaskellProject repoDir
           writeFile
             "garn.ts"
@@ -75,9 +75,9 @@ spec = do
               };
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
-          log output
+          onTestFailureLog output
           stderr output `shouldNotContain` "flake.nix"
-        it "supports running checks in the default environment" $ \log -> do
+        it "supports running checks in the default environment" $ \onTestFailureLog -> do
           writeFile
             "garn.ts"
             [i|
@@ -90,7 +90,7 @@ spec = do
               });
             |]
           output <- runGarn ["check", "failing"] "" repoDir Nothing
-          log output
+          onTestFailureLog output
           stderr output `shouldContain` "DEF"
           exitCode output `shouldBe` ExitFailure 1
         describe "exit-codes" $ do
@@ -103,7 +103,7 @@ spec = do
                   ("pipefail", "false | true", ExitFailure 1)
                 ]
           forM_ testCases $ \(checkName, check :: String, expectedExitCode) -> do
-            it ("reports exit-codes correctly for check '" <> checkName <> "'") $ \log -> do
+            it ("reports exit-codes correctly for check '" <> checkName <> "'") $ \onTestFailureLog -> do
               writeHaskellProject repoDir
               writeFile
                 "garn.ts"
@@ -123,6 +123,6 @@ spec = do
                   };
                 |]
               output <- runGarn ["check", "haskell"] "" repoDir Nothing
-              log output
+              onTestFailureLog output
               stderr output `shouldNotContain` "Invalid argument"
               exitCode output `shouldBe` expectedExitCode

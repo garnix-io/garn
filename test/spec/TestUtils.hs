@@ -156,8 +156,8 @@ shellTestCommand =
     fi
   |]
 
-withLog :: ((ProcResult -> IO ()) -> IO a) -> IO a
-withLog test = do
+onTestFailureLogger :: ((ProcResult -> IO ()) -> IO a) -> IO a
+onTestFailureLogger test = do
   mvar <- newMVar []
   let log :: ProcResult -> IO ()
       log x = do
