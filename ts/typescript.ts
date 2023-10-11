@@ -117,6 +117,7 @@ export const mkYarnFrontend = (args: {
           yarn = pkgs.yarn;
           src = ${nixSource(args.src)};
           buildPhase = ${JSON.stringify(args.testCommand)};
+          dontStrip = true;
         };
     in
       (pkgs.writeScriptBin "start-server" ''
@@ -140,6 +141,7 @@ export const mkYarnFrontend = (args: {
             yarn = pkgs.yarn;
             src = ${nixSource(args.src)};
             buildPhase = ${JSON.stringify(args.testCommand)};
+            dontStrip = true;
           };
       in
         pkgs.mkShell {

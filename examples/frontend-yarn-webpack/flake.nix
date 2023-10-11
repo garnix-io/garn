@@ -53,6 +53,7 @@
                   )
                 ;
                 buildPhase = "yarn mocha";
+                dontStrip = true;
               };
             in
             (pkgs.writeScriptBin "start-server" ''
@@ -116,6 +117,7 @@
                   )
                 ;
                 buildPhase = "yarn mocha";
+                dontStrip = true;
               };
             in
             pkgs.mkShell {
@@ -168,6 +170,7 @@
     })
 ;
             buildPhase = "yarn mocha";
+            dontStrip = true;
           };
       in
         pkgs.mkShell {
