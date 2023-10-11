@@ -6,29 +6,33 @@ import { Asciinema } from "../components/Asciinema";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { docMenuItems } from "./docs";
 
+const Keyword: React.FC = props => <span className="keyword">{props.children}</span>;
+const String: React.FC = props => <span className="string">{props.children}</span>;
+const Export: React.FC = props => <span className="export">{props.children}</span>;
+
 const garnTs = <pre>
-        import &#123; garn &#125; from "https://garn.io/ts/v0.0.1/mod.ts";<br />
-        import &#123; <Tooltip item="pkgs">
+        <Keyword>import</Keyword> * as garn from <String>"https://garn.io/ts/v0.0.1/mod.ts"</String>;<br />
+        <Keyword>import</Keyword> &#123; <Tooltip item="pkgs">
 {`This is a gigantic collection
 of packages, nixpkgs. If you
 need a tool or dependency,
 it's probably here`}
-</Tooltip> &#125; from "https://garn.io/ts/v0.0.1/nixpkgs.ts";<br />
+</Tooltip> &#125; from <String>"https://garn.io/ts/v0.0.1/nixpkgs.ts"</String>;<br />
         <br />
-        export const frontend = garn.javascript.mkNpmFrontend(&#123; <br />
-  {"  "}description: "My npm app",<br />
-  {"  "}<Tooltip item={`src: "frontend"`}>
+        <Export>export</Export> <Keyword>const</Keyword> frontend = garn.javascript.mkNpmFrontend(&#123; <br />
+  {"  "}description: <String>"My npm app"</String>,<br />
+  {"  "}<Tooltip item={<>src: <String>"frontend"</String></>}>
 {`Supports mono-repos and multiple languages.
 `}
   </Tooltip>,<br />
-  {"  "}nodeVersion: "18",<br />
-  {"  "}testCommand: "npm run test -- --watchAll=false",<br />
+  {"  "}nodeVersion: <String>"18"</String>,<br />
+  {"  "}testCommand: <String>"npm run test -- --watchAll=false"</String>,<br />
 &#125;).<Tooltip item="withDevTools">
 {`withDevTools is all you need
 to add a dev tool to your shell.
 `}</Tooltip>([pkgs.cowsay]);<br />
         <br />
-        export const <Tooltip item="backend">
+        <Export>export</Export> <Keyword>const</Keyword> <Tooltip item="backend">
 {`const backend: garn.Project<{
   pkg: garn.Package;
   devShell: garn.Environment;
@@ -39,9 +43,9 @@ packages, environments, and
 executables.
 `}
         </Tooltip> = garn.go.mkGoProject(&#123; <br />
-{"  "}description: "A go server",<br />
-{"  "}moduleName: "server",<br />
-{"  "}src: "backend",<br />
+{"  "}description: <String>"A go server"</String>,<br />
+{"  "}moduleName: <String>"server"</String>,<br />
+{"  "}src: <String>"backend"</String>,<br />
 &#125;);<br />
         </pre>
 

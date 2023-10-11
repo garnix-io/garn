@@ -81,6 +81,18 @@ figcaption.garn-ts {
   font-size: 100%;
 }
 
+.garn-ts .keyword {
+  color: #227;
+}
+
+.garn-ts .string {
+  color: #252;
+}
+
+.garn-ts .export {
+  color: #722;
+}
+
 div.feature {
   padding-bottom: 50px;
   box-sizing: border-box;
