@@ -179,7 +179,7 @@ article {
   background-color: white;
   padding: 5px;
   position: absolute;
-  max-width: 80vh;
+  max-width: 80vw;
   white-space: normal;
   z-index: 1;
 }
