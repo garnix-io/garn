@@ -4,16 +4,11 @@
 module GarnSpec where
 
 import Control.Exception (bracket, catch)
-import Control.Lens (from, (<>~))
-import Control.Monad (forM_, unless)
+import Control.Monad (unless)
 import qualified Data.Aeson as Aeson
-import Data.Aeson.Lens
-import Data.Char (isSpace)
-import Data.List (dropWhileEnd, sort)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
-import Data.Vector.Generic.Lens (vector)
 import qualified Data.Yaml as Yaml
 import Development.Shake (StdoutTrim (..), cmd)
 import Garn
