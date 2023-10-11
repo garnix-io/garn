@@ -144,7 +144,7 @@
       // {
         meta.mainProgram = "garn-test";
       }
-  }/bin/garn-test";
+  }/bin/garn-test \"\$@\"";
         in
         pkgs.runCommand "shell-env" {
           buildInputs = dev.buildInputs;

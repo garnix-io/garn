@@ -181,7 +181,7 @@
 ;
           modules = gomod2nix-toml;
         }
-    }/bin/go-http-backend";
+    }/bin/go-http-backend \"\$@\"";
         in
         pkgs.runCommand "shell-env" {
           buildInputs = dev.buildInputs;
