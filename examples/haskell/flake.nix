@@ -202,9 +202,10 @@
 
           helloFromHaskell = {
             type = "app";
-            program =
-              let
-                shell = "${
+            program = "${
+        let
+          dev = pkgs.mkShell {};
+          shell = "${
     (pkgs.haskell.packages.ghc94.callCabal2nix
       "garn-pkg"
       
@@ -232,8 +233,17 @@
         meta.mainProgram = "helloFromHaskell";
       }
   }/bin/helloFromHaskell";
-              in
-              "${pkgs.writeScriptBin "executable" shell}/bin/executable";
+        in
+        pkgs.runCommand "shell-env" {
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
+        } ''
+          echo "export PATH=$PATH:$PATH" > $out
+          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
+          chmod +x $out
+        ''
+      }";
           };
 
         });

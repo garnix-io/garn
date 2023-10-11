@@ -139,9 +139,10 @@
 
           server = {
             type = "app";
-            program =
-              let
-                shell = "${
+            program = "${
+        let
+          dev = pkgs.mkShell {};
+          shell = "${
       let
         gomod2nix = gomod2nix-repo.legacyPackages.${system};
         gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -178,8 +179,17 @@
           modules = gomod2nix-toml;
         }
     }/bin/go-http-backend";
-              in
-              "${pkgs.writeScriptBin "executable" shell}/bin/executable";
+        in
+        pkgs.runCommand "shell-env" {
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
+        } ''
+          echo "export PATH=$PATH:$PATH" > $out
+          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
+          chmod +x $out
+        ''
+      }";
           };
 
         });
