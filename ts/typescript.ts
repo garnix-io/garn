@@ -108,17 +108,19 @@ export const mkYarnFrontend = (args: {
   serverStartCommand: string;
 }): Project => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
+  const yarnPackage = `
+    pkgs.yarn2nix-moretea.mkYarnPackage {
+      nodejs = ${nodejs};
+      yarn = pkgs.yarn;
+      src = ${nixSource(args.src)};
+      buildPhase = ${JSON.stringify(args.testCommand)};
+      dontStrip = true;
+    }`;
   const pkg = mkPackage(`
     let
         pkgs = ${pkgs};
         packageJson = pkgs.lib.importJSON ./package.json;
-        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-          nodejs = ${nodejs};
-          yarn = pkgs.yarn;
-          src = ${nixSource(args.src)};
-          buildPhase = ${JSON.stringify(args.testCommand)};
-          dontStrip = true;
-        };
+        yarnPackage = ${yarnPackage};
     in
       (pkgs.writeScriptBin "start-server" ''
         #!/usr/bin/env bash
@@ -136,13 +138,7 @@ export const mkYarnFrontend = (args: {
       let
           pkgs = ${pkgs};
           packageJson = pkgs.lib.importJSON ./package.json;
-          yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-            nodejs = ${nodejs};
-            yarn = pkgs.yarn;
-            src = ${nixSource(args.src)};
-            buildPhase = ${JSON.stringify(args.testCommand)};
-            dontStrip = true;
-          };
+          yarnPackage = ${yarnPackage};
       in
         pkgs.mkShell {
           buildInputs = [ pkgs.yarn ];
