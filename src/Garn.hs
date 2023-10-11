@@ -51,8 +51,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
   case opts of
     Gen -> pure ()
     Run (CommandOptions {..}) -> do
-      _ <- callProcess "nix" $ ["run"] <> nixArgs <> [".#" <> target]
-      pure ()
+      callProcess "nix" $ ["run"] <> nixArgs <> [".#" <> target]
     Enter (CommandOptions {..}) -> do
       hPutStrLn stderr $ "[garn] Entering " <> target <> " shell. Type 'exit' to exit."
       let devProc =
