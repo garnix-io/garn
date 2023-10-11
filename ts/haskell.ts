@@ -33,7 +33,7 @@ export const mkHaskell = (args: MkHaskellArgs): Project & { pkg: Package } => {
     {
       pkg,
     }
-  ).withDevTools([mkPackage("pkgs.cabal-install")]);
+  ).mkPackage(`pkgs.haskell.packages.${args.compiler}.cabal-install`);
 };
 
 // Initializer
