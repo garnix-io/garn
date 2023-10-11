@@ -148,9 +148,11 @@ spec = do
                 })
               `);
               export const foo = mkProject(
-                "description",
-                { devShell: packageToEnvironment(pkg, ".") },
-                { defaults: { environment: "devShell" } }
+                {
+                  description: "description",
+                  defaultEnvironment: packageToEnvironment(pkg, "."),
+                },
+                {},
               );
             |]
           output <- runGarn ["enter", "foo"] "hello\nexit\n" repoDir Nothing

@@ -1,15 +1,10 @@
-import {
-  isProject,
-  Project,
-  projectDefaultEnvironment,
-  projectDefaultExecutable,
-} from "../project.ts";
+import { isProject, Project } from "../project.ts";
 import { Package, isPackage } from "../package.ts";
 import { Executable } from "../executable.ts";
-import { Environment } from "../environment.ts";
 import { Check, isCheck } from "../check.ts";
 import { mapKeys } from "./utils.ts";
 import { GOMOD2NIX_REPO } from "../go.ts";
+import { Environment } from "../environment.ts";
 
 // This needs to be in sync with `GarnConfig` in GarnConfig.hs
 export type GarnConfig = {
@@ -64,9 +59,7 @@ const formatFlake = (
     .map(([name, check]) => `${name} = ${check.nixExpression};`)
     .join("\n");
   const shellsString = Object.entries(projects)
-    .map(
-      ([name, project]) => [name, projectDefaultEnvironment(project)] as const
-    )
+    .map(([name, project]) => [name, project.defaultEnvironment] as const)
     .filter((x): x is [string, Environment] => x[1] != null)
     .map(
       ([name, defaultEnvironment]) =>
@@ -74,9 +67,7 @@ const formatFlake = (
     )
     .join("\n");
   const appsString = Object.entries(projects)
-    .map(
-      ([name, project]) => [name, projectDefaultExecutable(project)] as const
-    )
+    .map(([name, project]) => [name, project.defaultExecutable] as const)
     .filter((x): x is [string, Executable] => x[1] != null)
     .map(
       ([name, executable]) =>
