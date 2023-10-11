@@ -69,11 +69,11 @@ const mkHaskellInitializer: Initializer = () => {
     makeTarget: () =>
       outdent`
       export const ${
-        parsedCabal.description.package.name
+        parsedCabal.name
       } = garn.haskell.mkHaskell({
         description: "${
-          parsedCabal.description.synopsis ||
-          parsedCabal.description.description ||
+          parsedCabal.synopsis ||
+          parsedCabal.description ||
           ""
         }",
         executable: "",
