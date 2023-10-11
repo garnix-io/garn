@@ -83,7 +83,7 @@ export const mkNpmFrontend = (args: {
     `,
     args.src
   );
-  const startDev: Executable = devShell.shell`npm run start`;
+  const startDev: Executable = devShell.shell`cd ${args.src} && npm run start`;
   return mkProject(
     {
       description: args.description,
@@ -117,7 +117,7 @@ export const mkYarnFrontend = (args: {
   const pkg = mkPackage(`
     let
         pkgs = ${pkgs};
-        packageJson = pkgs.lib.importJSON ./package.json;
+        packageJson = pkgs.lib.importJSON ${args.src}/package.json;
         yarnPackage = ${yarnPackage};
     in
       (pkgs.writeScriptBin "start-server" ''
@@ -135,7 +135,7 @@ export const mkYarnFrontend = (args: {
     `
       let
           pkgs = ${pkgs};
-          packageJson = pkgs.lib.importJSON ./package.json;
+          packageJson = pkgs.lib.importJSON ${args.src}/package.json;
           yarnPackage = ${yarnPackage};
       in
         pkgs.mkShell {
@@ -148,7 +148,7 @@ export const mkYarnFrontend = (args: {
     `,
     args.src
   );
-  const startDev: Executable = devShell.shell`${args.serverStartCommand}`;
+  const startDev: Executable = devShell.shell`cd ${args.src} && ${args.serverStartCommand}`;
   return mkProject(
     {
       description: args.description,

@@ -184,7 +184,7 @@
           '';
         }
     ;
-          shell = "yarn start";
+          shell = "cd . && yarn start";
         in
         pkgs.runCommand "shell-env" {
           buildInputs = dev.buildInputs;
