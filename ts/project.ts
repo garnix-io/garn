@@ -44,6 +44,21 @@ export type Project = {
     _s: TemplateStringsArray,
     ..._args: Array<string>
   ): Check;
+  /**
+   * Adds a Check with the given name to the Project that runs in a *pure*
+   * version of the Project's default Environment.
+   *
+   * Example:
+   * ```typescript
+   * myProject.addCheck("noTodos")`! grep -r TODO .`
+   * ```
+   */
+  addCheck<T extends Project, Name extends string>(
+    name: Name
+  ): (
+    _s: TemplateStringsArray,
+    ..._args: Array<string>
+  ) => T & Record<Name, Check>;
 };
 
 export function isProject(p: unknown): p is Project {
@@ -105,6 +120,16 @@ const proxyEnvironmentHelpers = () => ({
       );
     }
     return this.defaultEnvironment.check(s, ...args);
+  },
+
+  addCheck<T extends Project, Name extends string>(this: T, name: Name) {
+    return (s: TemplateStringsArray, ...args: Array<string>) => {
+      const newCheck = this.check(s, ...args);
+      return {
+        ...this,
+        [name]: newCheck,
+      };
+    };
   },
 
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {
