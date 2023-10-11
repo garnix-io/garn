@@ -56,6 +56,10 @@ export const mkNpmFrontend = (args: {
     npmlock2nix.v2.build
       {
         src = ${nixSource(args.src)};
+        preBuild = ''
+          mkdir fake-home
+          HOME=$(pwd)/fake-home
+        '';
         buildCommands = [ ${JSON.stringify(args.testCommand)} "mkdir $out" ];
         installPhase = "true";
         node_modules_attrs = {
@@ -102,16 +106,19 @@ export const mkYarnFrontend = (args: {
   serverStartCommand: string;
 }): Project => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
+  const yarnPackage = `
+    pkgs.yarn2nix-moretea.mkYarnPackage {
+      nodejs = ${nodejs};
+      yarn = pkgs.yarn;
+      src = ${nixSource(args.src)};
+      buildPhase = ${JSON.stringify(args.testCommand)};
+      dontStrip = true;
+    }`;
   const pkg = mkPackage(`
     let
         pkgs = ${pkgs};
         packageJson = pkgs.lib.importJSON ./package.json;
-        yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-          nodejs = ${nodejs};
-          yarn = pkgs.yarn;
-          src = ${nixSource(args.src)};
-          buildPhase = ${JSON.stringify(args.testCommand)};
-        };
+        yarnPackage = ${yarnPackage};
     in
       (pkgs.writeScriptBin "start-server" ''
         #!/usr/bin/env bash
@@ -129,12 +136,7 @@ export const mkYarnFrontend = (args: {
       let
           pkgs = ${pkgs};
           packageJson = pkgs.lib.importJSON ./package.json;
-          yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-            nodejs = ${nodejs};
-            yarn = pkgs.yarn;
-            src = ${nixSource(args.src)};
-            buildPhase = ${JSON.stringify(args.testCommand)};
-          };
+          yarnPackage = ${yarnPackage};
       in
         pkgs.mkShell {
           buildInputs = [ pkgs.yarn ];

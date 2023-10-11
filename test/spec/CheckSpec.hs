@@ -19,8 +19,9 @@ spec = do
       ( withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]
           . inTempDirectory
       )
+      . around onTestFailureLogger
       $ do
-        it "runs manually added checks" $ do
+        it "runs manually added checks" $ \onTestFailureLog -> do
           writeHaskellProject repoDir
           writeFile
             "Main.hs"
@@ -45,8 +46,9 @@ spec = do
                 .addCheck("hlint")`hlint *.hs`;
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
+          onTestFailureLog output
           stderr output `shouldContain` "Warning: Eta reduce"
-        it "runs checks on source directories that ignore the flake.nix file" $ do
+        it "runs checks on source directories that ignore the flake.nix file" $ \onTestFailureLog -> do
           writeHaskellProject repoDir
           writeFile
             "garn.ts"
@@ -65,8 +67,9 @@ spec = do
                 `;
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
+          onTestFailureLog output
           stderr output `shouldNotContain` "flake.nix"
-        it "supports running checks in the default environment" $ do
+        it "supports running checks in the default environment" $ \onTestFailureLog -> do
           writeFile
             "garn.ts"
             [i|
@@ -82,6 +85,7 @@ spec = do
               );
             |]
           output <- runGarn ["check", "failing"] "" repoDir Nothing
+          onTestFailureLog output
           stderr output `shouldContain` "DEF"
           exitCode output `shouldBe` ExitFailure 1
         describe "exit-codes" $ do
@@ -94,7 +98,7 @@ spec = do
                   ("pipefail", "false | true", ExitFailure 1)
                 ]
           forM_ testCases $ \(checkName, check :: String, expectedExitCode) -> do
-            it ("reports exit-codes correctly for check '" <> checkName <> "'") $ do
+            it ("reports exit-codes correctly for check '" <> checkName <> "'") $ \onTestFailureLog -> do
               writeHaskellProject repoDir
               writeFile
                 "garn.ts"
@@ -109,8 +113,7 @@ spec = do
                   })
                     .addCheck("check")`#{check}`;
                 |]
-              result <- runGarn ["check", "haskell"] "" repoDir Nothing
-              putStrLn $ stdout result
-              putStrLn $ stderr result
-              stderr result `shouldNotContain` "Invalid argument"
-              exitCode result `shouldBe` expectedExitCode
+              output <- runGarn ["check", "haskell"] "" repoDir Nothing
+              onTestFailureLog output
+              stderr output `shouldNotContain` "Invalid argument"
+              exitCode output `shouldBe` expectedExitCode
