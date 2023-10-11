@@ -5,7 +5,6 @@ import { remarkMdxCodeMeta } from "remark-mdx-code-meta";
 import remarkGfm from "remark-gfm";
 import compress from "vite-plugin-compression";
 import * as path from "path";
-import mdx from "@mdx-js/rollup";
 import remarkToc from "remark-toc";
 import withSlugs from "rehype-slug";
 import { createRequire } from "node:module";
@@ -26,14 +25,7 @@ export default defineConfig(async () => {
   };
   const vitePrerenderOpts = {
     staticDir: path.join(__dirname, "dist"),
-    routes: [ ],
-    postProcess(renderedRoute) {
-      // We make the file be called index.static.html so it can co-exist
-      // with index.html
-      const p = path.join(__dirname, "dist", renderedRoute.route);
-      renderedRoute.outputPath = path.join(p, "index.static.html");
-      return renderedRoute;
-    },
+    routes: ["/", "/docs/concepts", "/docs/installing"],
     renderer: new Renderer({
       args: ["--no-sandbox", "--single-process", "--disable-gpu"],
     }),
