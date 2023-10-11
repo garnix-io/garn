@@ -122,7 +122,8 @@
           main = {
             type = "app";
             program = "${
-          let dev = 
+        let
+          dev = 
       let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
@@ -153,17 +154,19 @@
           nodejs = pkgs.nodejs-18_x;
         };
       }
-    ; in
-          pkgs.runCommand "shell-env" {
-            buildInputs = dev.buildInputs;
-            nativeBuildInputs = dev.nativeBuildInputs;
-          } ''
-            echo "export PATH=$PATH:$PATH" > $out
-            echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-            echo ${pkgs.lib.strings.escapeShellArg "npm run start"} >> $out
-            chmod +x $out
-          ''
-        }";
+    ;
+          shell = "npm run start";
+        in
+        pkgs.runCommand "shell-env" {
+          buildInputs = dev.buildInputs;
+          nativeBuildInputs = dev.nativeBuildInputs;
+        } ''
+          echo "export PATH=$PATH:$PATH" > $out
+          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
+          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
+          chmod +x $out
+        ''
+      }";
           };
 
         });

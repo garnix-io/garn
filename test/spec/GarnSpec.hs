@@ -109,6 +109,45 @@ spec = do
           _ <- runGarn ["run", "foo"] "" repoDir Nothing
           filesAfter <- sort <$> listDirectory "."
           filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
+        it "runs arbitrary executables" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const main = garn.mkProject('Project with an executable', {
+                print: garn.shell`echo foobarbaz`,
+              }, {
+                defaults: {
+                  executable: 'print',
+                },
+              });
+            |]
+          output <- runGarn ["run", "main"] "" repoDir Nothing
+          stdout output `shouldBe` "foobarbaz\n"
+          exitCode output `shouldBe` ExitSuccess
+        it "runs executables within an environment" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              const myEnv = garn.mkEnvironment(
+                'pkgs.mkShell { nativeBuildInputs = [pkgs.hello]; }',
+                '.'
+              );
+              export const main = garn.mkProject('Project with an executable', {
+                sayHello: myEnv.shell`hello`,
+              }, {
+                defaults: {
+                  executable: 'sayHello',
+                },
+              });
+            |]
+          output <- runGarn ["run", "main"] "" repoDir Nothing
+          stdout output `shouldBe` "Hello, world!\n"
+          exitCode output `shouldBe` ExitSuccess
+
         it "doesn’t format other Nix files" $ do
           let unformattedNix =
                 [i|
@@ -343,6 +382,21 @@ spec = do
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           stderr output `shouldNotContain` "flake.nix"
+        it "supports running checks in the default environment" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const failing = garn.mkProject('Failing Project', {
+                check1: garn.check`echo ABC`,
+                check2: garn.check`echo DEF && false`,
+                check3: garn.check`echo GHI`,
+              });
+            |]
+          output <- runGarn ["check", "failing"] "" repoDir Nothing
+          stderr output `shouldContain` "DEF"
+          exitCode output `shouldBe` ExitFailure 1
         describe "exit-codes" $ do
           let testCases =
                 [ ("passing", "true", ExitSuccess),
