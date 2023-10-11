@@ -68,14 +68,8 @@ const mkHaskellInitializer: Initializer = () => {
     imports: 'import * as garn from "http://localhost:8777/mod.ts"',
     makeTarget: () =>
       outdent`
-      export const ${
-        parsedCabal.name
-      } = garn.haskell.mkHaskell({
-        description: "${
-          parsedCabal.synopsis ||
-          parsedCabal.description ||
-          ""
-        }",
+      export const ${parsedCabal.name} = garn.haskell.mkHaskell({
+        description: "${parsedCabal.synopsis || parsedCabal.description || ""}",
         executable: "",
         compiler: "ghc94",
         src: "."
