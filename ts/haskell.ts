@@ -2,11 +2,10 @@ import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { Initializer } from "./base.ts";
-import { Environment, packageToEnvironment, shell } from "./environment.ts";
+import { packageToEnvironment, shell } from "./environment.ts";
 import { mkPackage, Package } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
 import { nixSource } from "./internal/utils.ts";
-import { Executable } from "./executable.ts";
 
 type MkHaskellArgs = {
   description: string;
@@ -15,12 +14,7 @@ type MkHaskellArgs = {
   src: string;
 };
 
-export const mkHaskell = (
-  args: MkHaskellArgs
-): Project & {
-  pkg: Package;
-  devShell: Environment;
-} => {
+export const mkHaskell = (args: MkHaskellArgs): Project & { pkg: Package } => {
   const pkg: Package = mkPackage(`
     (pkgs.haskell.packages.${args.compiler}.callCabal2nix
       "garn-pkg"
@@ -30,20 +24,14 @@ export const mkHaskell = (
         meta.mainProgram = "${args.executable}";
       }
   `);
-  const devShell: Environment = packageToEnvironment(pkg, args.src);
-  const main: Executable = shell`${pkg}/bin/${args.executable}`;
   return mkProject(
-    args.description,
     {
-      pkg,
-      devShell,
-      main,
+      description: args.description,
+      defaultEnvironment: packageToEnvironment(pkg, args.src),
+      defaultExecutable: shell`${pkg}/bin/${args.executable}`,
     },
     {
-      defaults: {
-        environment: "devShell",
-        executable: "main",
-      },
+      pkg,
     }
   );
 };

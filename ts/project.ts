@@ -1,18 +1,11 @@
 import "./internal/registerInternalLib.ts";
 
 import { Check } from "./check.ts";
-import { Environment, isEnvironment } from "./environment.ts";
-import { Executable, isExecutable } from "./executable.ts";
+import { Environment } from "./environment.ts";
+import { Executable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
 import { Interpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
-
-type ProjectSettings = {
-  defaults?: {
-    executable?: string;
-    environment?: string;
-  };
-};
 
 /**
  * A Project is a logical grouping of Packages and Environments. For example,
@@ -20,8 +13,9 @@ type ProjectSettings = {
  */
 export type Project = {
   tag: "project";
-  settings: ProjectSettings;
   description: string;
+  defaultEnvironment?: Environment;
+  defaultExecutable?: Executable;
   /**
    * Returns a new Project with the provided devtools added to the default
    * Environment.
@@ -73,6 +67,12 @@ export function isProject(p: unknown): p is Project {
 
 type Nestable = Environment | Package | Executable | Check;
 
+type ProjectSettings = {
+  description: string;
+  defaultEnvironment?: Environment;
+  defaultExecutable?: Executable;
+};
+
 /**
  * Create a new Project.
  *
@@ -81,17 +81,17 @@ type Nestable = Environment | Package | Executable | Check;
  * @param settings Settings such as defaults for Environments and Executables.
  */
 export function mkProject<Deps extends Record<string, Nestable>>(
-  description: string,
-  deps: Deps,
-  settings: ProjectSettings = {}
+  args: ProjectSettings,
+  deps: Deps
 ): Deps & Project {
   const helpers = proxyEnvironmentHelpers();
   return {
     ...deps,
     ...helpers,
     tag: "project",
-    description,
-    settings,
+    description: args.description,
+    defaultEnvironment: args.defaultEnvironment,
+    defaultExecutable: args.defaultExecutable,
   };
 }
 
@@ -101,13 +101,12 @@ const proxyEnvironmentHelpers = () => ({
     s: TemplateStringsArray,
     ...args: Array<Interpolatable>
   ) {
-    const environment = projectDefaultEnvironment(this);
-    if (environment == null) {
+    if (this.defaultEnvironment == null) {
       throw new Error(
         `'.shell' can only be called on projects with a default environment`
       );
     }
-    return environment.shell(s, ...args);
+    return this.defaultEnvironment.shell(s, ...args);
   },
 
   check(
@@ -115,13 +114,12 @@ const proxyEnvironmentHelpers = () => ({
     s: TemplateStringsArray,
     ...args: Array<Interpolatable>
   ) {
-    const environment = projectDefaultEnvironment(this);
-    if (environment == null) {
+    if (this.defaultEnvironment == null) {
       throw new Error(
         `'.check' can only be called on projects with a default environment`
       );
     }
-    return environment.check(s, ...args);
+    return this.defaultEnvironment.check(s, ...args);
   },
 
   addCheck<T extends Project, Name extends string>(this: T, name: Name) {
@@ -135,50 +133,15 @@ const proxyEnvironmentHelpers = () => ({
   },
 
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {
-    const environment = projectDefaultEnvironment(this);
-    if (environment == null || this.settings.defaults?.environment == null) {
+    if (this.defaultEnvironment == null) {
       throw new Error(
         `'.withDevTools' can only be called on projects with a default environment`
       );
     }
-    const newEnvironment = environment.withDevTools(devTools);
+    const newEnvironment = this.defaultEnvironment.withDevTools(devTools);
     return {
       ...this,
-      [this.settings.defaults.environment]: newEnvironment,
+      defaultEnvironment: newEnvironment,
     };
   },
 });
-
-export const projectDefaultEnvironment = (
-  project: Project
-): Environment | undefined => {
-  return getDefault("environment", isEnvironment, project, project.settings);
-};
-
-export const projectDefaultExecutable = (
-  project: Project
-): Executable | undefined => {
-  return getDefault("executable", isExecutable, project, project.settings);
-};
-
-const getDefault = <T>(
-  key: keyof NonNullable<ProjectSettings["defaults"]>,
-  test: (x: unknown) => x is T,
-  project: Record<string, unknown>,
-  settings: ProjectSettings
-): T | undefined => {
-  const defaultKey = settings.defaults?.[key];
-  if (defaultKey == null) {
-    return undefined;
-  }
-  if (!(defaultKey in project)) {
-    throw new Error(
-      `defaults.${key} points to a non-existing field: ${defaultKey}`
-    );
-  }
-  const value: unknown = project[defaultKey as keyof typeof project];
-  if (!test(value)) {
-    throw new Error(`defaults.${key} points to a non-${key}: ${defaultKey}`);
-  }
-  return value;
-};

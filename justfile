@@ -131,6 +131,7 @@ codegen: hpack && typescript-check
 
 typescript-check *args="":
   deno check ts/*.ts {{ args }}
+  echo checked!
 
 check-isolated-garn:
   test/check-isolated-garn.sh
