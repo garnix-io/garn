@@ -27,33 +27,35 @@
                 inherit system;
               };
               packageJson = pkgs.lib.importJSON ./package.json;
-              yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-                nodejs = pkgs.nodejs-18_x;
-                yarn = pkgs.yarn;
-                src =
-                  (
-                    let
-                      lib = pkgs.lib;
-                      lastSafe = list:
-                        if lib.lists.length list == 0
-                        then null
-                        else lib.lists.last list;
-                    in
-                    builtins.path
-                      {
-                        path = ./.;
-                        name = "source";
-                        filter = path: type:
-                          let
-                            fileName = lastSafe (lib.strings.splitString "/" path);
-                          in
-                          fileName != "flake.nix" &&
-                          fileName != "garn.ts";
-                      }
-                  )
-                ;
-                buildPhase = "yarn mocha";
-              };
+              yarnPackage =
+                pkgs.yarn2nix-moretea.mkYarnPackage {
+                  nodejs = pkgs.nodejs-18_x;
+                  yarn = pkgs.yarn;
+                  src =
+                    (
+                      let
+                        lib = pkgs.lib;
+                        lastSafe = list:
+                          if lib.lists.length list == 0
+                          then null
+                          else lib.lists.last list;
+                      in
+                      builtins.path
+                        {
+                          path = ./.;
+                          name = "source";
+                          filter = path: type:
+                            let
+                              fileName = lastSafe (lib.strings.splitString "/" path);
+                            in
+                            fileName != "flake.nix" &&
+                            fileName != "garn.ts";
+                        }
+                    )
+                  ;
+                  buildPhase = "yarn mocha";
+                  dontStrip = true;
+                };
             in
             (pkgs.writeScriptBin "start-server" ''
               #!/usr/bin/env bash
@@ -90,33 +92,35 @@
                 inherit system;
               };
               packageJson = pkgs.lib.importJSON ./package.json;
-              yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-                nodejs = pkgs.nodejs-18_x;
-                yarn = pkgs.yarn;
-                src =
-                  (
-                    let
-                      lib = pkgs.lib;
-                      lastSafe = list:
-                        if lib.lists.length list == 0
-                        then null
-                        else lib.lists.last list;
-                    in
-                    builtins.path
-                      {
-                        path = ./.;
-                        name = "source";
-                        filter = path: type:
-                          let
-                            fileName = lastSafe (lib.strings.splitString "/" path);
-                          in
-                          fileName != "flake.nix" &&
-                          fileName != "garn.ts";
-                      }
-                  )
-                ;
-                buildPhase = "yarn mocha";
-              };
+              yarnPackage =
+                pkgs.yarn2nix-moretea.mkYarnPackage {
+                  nodejs = pkgs.nodejs-18_x;
+                  yarn = pkgs.yarn;
+                  src =
+                    (
+                      let
+                        lib = pkgs.lib;
+                        lastSafe = list:
+                          if lib.lists.length list == 0
+                          then null
+                          else lib.lists.last list;
+                      in
+                      builtins.path
+                        {
+                          path = ./.;
+                          name = "source";
+                          filter = path: type:
+                            let
+                              fileName = lastSafe (lib.strings.splitString "/" path);
+                            in
+                            fileName != "flake.nix" &&
+                            fileName != "garn.ts";
+                        }
+                    )
+                  ;
+                  buildPhase = "yarn mocha";
+                  dontStrip = true;
+                };
             in
             pkgs.mkShell {
               buildInputs = [ pkgs.yarn ];
@@ -144,10 +148,11 @@
         inherit system;
       };
           packageJson = pkgs.lib.importJSON ./package.json;
-          yarnPackage = pkgs.yarn2nix-moretea.mkYarnPackage {
-            nodejs = pkgs.nodejs-18_x;
-            yarn = pkgs.yarn;
-            src = 
+          yarnPackage = 
+    pkgs.yarn2nix-moretea.mkYarnPackage {
+      nodejs = pkgs.nodejs-18_x;
+      yarn = pkgs.yarn;
+      src = 
   (let
     lib = pkgs.lib;
     lastSafe = list :
@@ -167,8 +172,9 @@
          fileName != "garn.ts";
     })
 ;
-            buildPhase = "yarn mocha";
-          };
+      buildPhase = "yarn mocha";
+      dontStrip = true;
+    };
       in
         pkgs.mkShell {
           buildInputs = [ pkgs.yarn ];

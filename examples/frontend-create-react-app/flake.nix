@@ -54,6 +54,10 @@
                       }
                   )
                 ;
+                preBuild = ''
+                  mkdir fake-home
+                  HOME=$(pwd)/fake-home
+                '';
                 buildCommands = [ "npm run test -- --watchAll=false" "mkdir $out" ];
                 installPhase = "true";
                 node_modules_attrs = {
