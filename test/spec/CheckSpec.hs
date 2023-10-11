@@ -80,11 +80,14 @@ spec = do
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const failing = garn.mkProject('Failing Project', {
-                check1: garn.check`echo ABC`,
-                check2: garn.check`echo DEF && false`,
-                check3: garn.check`echo GHI`,
-              });
+              export const failing = garn.mkProject(
+                { description: 'Failing Project' },
+                {
+                  check1: garn.check`echo ABC`,
+                  check2: garn.check`echo DEF && false`,
+                  check3: garn.check`echo GHI`,
+                }
+              );
             |]
           output <- runGarn ["check", "failing"] "" repoDir Nothing
           stderr output `shouldContain` "DEF"

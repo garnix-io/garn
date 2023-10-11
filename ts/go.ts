@@ -1,5 +1,4 @@
-import { Environment, packageToEnvironment, shell } from "./environment.ts";
-import { Executable } from "./executable.ts";
+import { packageToEnvironment, shell } from "./environment.ts";
 import { nixStrLit } from "./nix.ts";
 import { mkPackage, Package } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
@@ -53,8 +52,6 @@ export const mkGoProject = (args: {
   src: string;
 }): Project & {
   pkg: Package;
-  devShell: Environment;
-  main: Executable;
 } => {
   const pkg = mkPackage(
     `
@@ -74,19 +71,15 @@ export const mkGoProject = (args: {
   );
 
   return mkProject(
-    args.description,
     {
-      pkg,
-      devShell: packageToEnvironment(pkg, args.src).withDevTools([
+      description: args.description,
+      defaultEnvironment: packageToEnvironment(pkg, args.src).withDevTools([
         mkPackage("pkgs.gopls"),
       ]),
-      main: shell`${pkg}/bin/${args.moduleName}`,
+      defaultExecutable: shell`${pkg}/bin/${args.moduleName}`,
     },
     {
-      defaults: {
-        environment: "devShell",
-        executable: "main",
-      },
+      pkg,
     }
   );
 };
