@@ -53,6 +53,11 @@ export type Project = {
   /**
    * Adds a Check with the given name to the Project that runs in a *pure*
    * version of the Project's default Environment.
+   *
+   * Example:
+   * ```typescript
+   * myProject.addCheck("noTodos")`! grep -r TODO .`
+   * ```
    */
   addCheck<T extends Project, Name extends string>(
     name: Name
