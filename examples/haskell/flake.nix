@@ -85,42 +85,49 @@
               ;
               dev =
                 (
-                  let
-                    expr =
-                      (pkgs.haskell.packages.ghc94.callCabal2nix
-                        "garn-pkg"
+                  (
+                    let
+                      expr =
+                        (pkgs.haskell.packages.ghc94.callCabal2nix
+                          "garn-pkg"
 
-                        (
-                          let
-                            lib = pkgs.lib;
-                            lastSafe = list:
-                              if lib.lists.length list == 0
-                              then null
-                              else lib.lists.last list;
-                          in
-                          builtins.path
-                            {
-                              path = ./.;
-                              name = "source";
-                              filter = path: type:
-                                let
-                                  fileName = lastSafe (lib.strings.splitString "/" path);
-                                in
-                                fileName != "flake.nix" &&
-                                fileName != "garn.ts";
-                            }
-                        )
+                          (
+                            let
+                              lib = pkgs.lib;
+                              lastSafe = list:
+                                if lib.lists.length list == 0
+                                then null
+                                else lib.lists.last list;
+                            in
+                            builtins.path
+                              {
+                                path = ./.;
+                                name = "source";
+                                filter = path: type:
+                                  let
+                                    fileName = lastSafe (lib.strings.splitString "/" path);
+                                  in
+                                  fileName != "flake.nix" &&
+                                  fileName != "garn.ts";
+                              }
+                          )
 
-                        { })
-                      // {
-                        meta.mainProgram = "helloFromHaskell";
-                      }
-                    ;
-                  in
-                  (if expr ? env
-                  then expr.env
-                  else pkgs.mkShell { inputsFrom = [ expr ]; }
-                  )
+                          { })
+                        // {
+                          meta.mainProgram = "helloFromHaskell";
+                        }
+                      ;
+                    in
+                    (if expr ? env
+                    then expr.env
+                    else pkgs.mkShell { inputsFrom = [ expr ]; }
+                    )
+                  ).overrideAttrs (finalAttrs: previousAttrs: {
+                    nativeBuildInputs =
+                      previousAttrs.nativeBuildInputs
+                      ++
+                      [ pkgs.cabal-install ];
+                  })
                 ).overrideAttrs (finalAttrs: previousAttrs: {
                   nativeBuildInputs =
                     previousAttrs.nativeBuildInputs
@@ -150,42 +157,49 @@
         {
           helloFromHaskell =
             (
-              let
-                expr =
-                  (pkgs.haskell.packages.ghc94.callCabal2nix
-                    "garn-pkg"
+              (
+                let
+                  expr =
+                    (pkgs.haskell.packages.ghc94.callCabal2nix
+                      "garn-pkg"
 
-                    (
-                      let
-                        lib = pkgs.lib;
-                        lastSafe = list:
-                          if lib.lists.length list == 0
-                          then null
-                          else lib.lists.last list;
-                      in
-                      builtins.path
-                        {
-                          path = ./.;
-                          name = "source";
-                          filter = path: type:
-                            let
-                              fileName = lastSafe (lib.strings.splitString "/" path);
-                            in
-                            fileName != "flake.nix" &&
-                            fileName != "garn.ts";
-                        }
-                    )
+                      (
+                        let
+                          lib = pkgs.lib;
+                          lastSafe = list:
+                            if lib.lists.length list == 0
+                            then null
+                            else lib.lists.last list;
+                        in
+                        builtins.path
+                          {
+                            path = ./.;
+                            name = "source";
+                            filter = path: type:
+                              let
+                                fileName = lastSafe (lib.strings.splitString "/" path);
+                              in
+                              fileName != "flake.nix" &&
+                              fileName != "garn.ts";
+                          }
+                      )
 
-                    { })
-                  // {
-                    meta.mainProgram = "helloFromHaskell";
-                  }
-                ;
-              in
-              (if expr ? env
-              then expr.env
-              else pkgs.mkShell { inputsFrom = [ expr ]; }
-              )
+                      { })
+                    // {
+                      meta.mainProgram = "helloFromHaskell";
+                    }
+                  ;
+                in
+                (if expr ? env
+                then expr.env
+                else pkgs.mkShell { inputsFrom = [ expr ]; }
+                )
+              ).overrideAttrs (finalAttrs: previousAttrs: {
+                nativeBuildInputs =
+                  previousAttrs.nativeBuildInputs
+                  ++
+                  [ pkgs.cabal-install ];
+              })
             ).overrideAttrs (finalAttrs: previousAttrs: {
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
