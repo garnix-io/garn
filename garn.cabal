@@ -11,7 +11,8 @@ bug-reports:    https://github.com/garnix-io/garn/issues
 author:         garnix
 maintainer:     contact@garnix.io
 copyright:      AllRightsReserved
-license:        NONE
+license:        Apache-2.0
+license-file:   LICENSE
 build-type:     Simple
 data-files:     ts/**/*.ts
 

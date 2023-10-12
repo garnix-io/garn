@@ -159,7 +159,7 @@
         };
       }
     ;
-          shell = "npm run start";
+          shell = "npm run start \"\$@\"";
         in
         pkgs.runCommand "shell-env" {
           buildInputs = dev.buildInputs;
