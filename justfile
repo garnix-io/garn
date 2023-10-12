@@ -144,4 +144,4 @@ docs-server: build-install-script
 build-install-script:
   nix build -L .#installScript
   mkdir -p website/public
-  cp result website/public/install.sh
+  cat result > website/public/install.sh
