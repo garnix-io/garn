@@ -53,7 +53,7 @@ writeNpmFrontendProject repoDir = do
   writeFile
     "garn.ts"
     [i|
-      import { mkNpmFrontend } from "#{repoDir}/ts/typescript.ts"
+      import { mkNpmFrontend } from "#{repoDir}/ts/javascript.ts"
 
       export const frontend = mkNpmFrontend({
         description: "mkNpmFrontend-test",

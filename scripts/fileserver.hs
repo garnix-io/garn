@@ -55,7 +55,7 @@ startDenoCacheInvalidator = void $ forkIO $ do
 reload :: FilePath -> IO ()
 reload file = do
   let url = "http://localhost:8777/" <> file
-  Exit _ <- cmd "deno cache --reload" url
+  Exit _ <- cmd ("deno cache --reload=" <> url) url
   pure ()
 
 listDirectoryRecursive :: FilePath -> IO [FilePath]
