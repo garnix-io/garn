@@ -1,5 +1,5 @@
 import { packageToEnvironment, shell } from "./environment.ts";
-import { nixStrLit } from "./nix.ts";
+import { nixRaw, nixStrLit } from "./nix.ts";
 import { mkPackage, Package } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
 import * as path from "https://deno.land/std@0.202.0/path/mod.ts";
@@ -61,17 +61,19 @@ export const mkGoProject = (args: {
   pkg: Package;
 } => {
   const pkg = mkPackage(
-    `
+    nixRaw`
       let
         gomod2nix = gomod2nix-repo.legacyPackages.\${system};
-        gomod2nix-toml = pkgs.writeText "gomod2nix-toml" ${
-          nixStrLit`${getGoModNixToml(args.src)}`.nixExpression
-        };
+        gomod2nix-toml = pkgs.writeText "gomod2nix-toml" ${nixStrLit(
+          getGoModNixToml(args.src)
+        )};
       in
         gomod2nix.buildGoApplication {
-          pname = ${nixStrLit`${args.moduleName}`.nixExpression};
+          pname = ${nixStrLit(args.moduleName)};
           version = "0.1";
-          go = pkgs.${GO_VERSION_TO_NIXPKG_NAME[args.goVersion ?? "1.20"]};
+          go = pkgs.${nixRaw(
+            GO_VERSION_TO_NIXPKG_NAME[args.goVersion ?? "1.20"]
+          )};
           src = ${nixSource(args.src)};
           modules = gomod2nix-toml;
         }
@@ -82,7 +84,7 @@ export const mkGoProject = (args: {
     {
       description: args.description,
       defaultEnvironment: packageToEnvironment(pkg, args.src).withDevTools([
-        mkPackage("pkgs.gopls"),
+        mkPackage(nixRaw`pkgs.gopls`),
       ]),
       defaultExecutable: shell`${pkg}/bin/${args.moduleName}`,
     },

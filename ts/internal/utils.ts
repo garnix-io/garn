@@ -1,4 +1,6 @@
-export const nixSource = (src: string) => `
+import { nixRaw } from "../nix.ts";
+
+export const nixSource = (src: string) => nixRaw`
   (let
     lib = pkgs.lib;
     lastSafe = list :
@@ -8,7 +10,7 @@ export const nixSource = (src: string) => `
   in
   builtins.path
     {
-      path = ./${src};
+      path = ./${nixRaw(src)};
       name = "source";
       filter = path: type:
         let
@@ -34,6 +36,17 @@ export const mapKeys = <T>(
   const result: Record<string, T> = {};
   for (const [key, value] of Object.entries(x)) {
     result[f(key)] = value;
+  }
+  return result;
+};
+
+export const mapValues = <T, R>(
+  f: (i: T) => R,
+  x: Record<string, T>
+): Record<string, R> => {
+  const result: Record<string, R> = {};
+  for (const [key, value] of Object.entries(x)) {
+    result[key] = f(value);
   }
   return result;
 };

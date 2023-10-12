@@ -33,6 +33,7 @@ spec = do
                 [i|
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
+                  import * as pkgs from "#{repoDir}/ts/nixpkgs.ts";
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
@@ -40,9 +41,8 @@ spec = do
                     compiler: "ghc94",
                     src: "."
                   })
-                  const hello = mkPackage(`pkgs.hello`)
 
-                  export const bar = foo.withDevTools([hello]);
+                  export const bar = foo.withDevTools([pkgs.hello]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -53,6 +53,7 @@ spec = do
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import * as pkgs from "#{repoDir}/ts/nixpkgs.ts";
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
@@ -61,11 +62,7 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  const cowsay = mkPackage(`pkgs.cowsay`);
-
-                  export const bar = foo.withDevTools([hello, cowsay]);
+                  export const bar = foo.withDevTools([pkgs.hello, pkgs.cowsay]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -78,6 +75,7 @@ spec = do
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import * as pkgs from "#{repoDir}/ts/nixpkgs.ts";
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
@@ -86,9 +84,7 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  export const bar = foo.withDevTools([hello]);
+                  export const bar = foo.withDevTools([pkgs.hello]);
                 |]
             output <- runGarn ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
             stderr output `shouldContain` "hello: command not found"
@@ -99,6 +95,7 @@ spec = do
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import * as pkgs from "#{repoDir}/ts/nixpkgs.ts";
 
                   export const foo = mkHaskell({
                     description: "mkHaskell-test",
@@ -107,11 +104,7 @@ spec = do
                     src: "."
                   })
 
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  const cowsay = mkPackage(`pkgs.cowsay`);
-
-                  export const bar = foo.withDevTools([hello]).withDevTools([cowsay]);
+                  export const bar = foo.withDevTools([pkgs.hello]).withDevTools([pkgs.cowsay]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -139,8 +132,9 @@ spec = do
               import { mkPackage } from "#{repoDir}/ts/package.ts"
               import { packageToEnvironment } from "#{repoDir}/ts/environment.ts"
               import { mkProject } from "#{repoDir}/ts/project.ts"
+              import { nixRaw } from "#{repoDir}/ts/nix.ts"
 
-              const pkg = mkPackage(`
+              const pkg = mkPackage(nixRaw`
                 pkgs.stdenv.mkDerivation({
                   name = "blah";
                   src = ./.;

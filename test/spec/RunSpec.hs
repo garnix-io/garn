@@ -52,11 +52,9 @@ spec =
             "garn.ts"
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
+              import * as pkgs from "#{repoDir}/ts/nixpkgs.ts";
 
-              const myEnv = garn.mkEnvironment(
-                'pkgs.mkShell { nativeBuildInputs = [pkgs.hello]; }',
-                '.'
-              );
+              const myEnv = garn.mkEnvironment().withDevTools([pkgs.hello]);
               export const main = garn.mkProject(
                 {
                   description: 'Project with an executable',
