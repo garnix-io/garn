@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "vite --port 3001",
     "tsc": "tsc",
+    "tsc:watch": "tsc --watch",
     "build": "vite build",
     "serve": "vite preview",
     "vitest": "vitest",
