@@ -119,7 +119,7 @@ export const Info: React.FC = () => {
               <li>Unlike containers, combines well with your personal dev environment</li>
               <li>Works on Linux and Macs</li>
             </ul>
-            <Asciinema src="src/casts/placeholder.cast" />
+            <Asciinema src="src/casts/env-demo.cast" />
           </div>
 
           <div className="feature">
