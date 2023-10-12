@@ -34,7 +34,7 @@
             gomod2nix.buildGoApplication {
               pname = "go-http-backend";
               version = "0.1";
-              go = pkgs.go_1_18;
+              go = pkgs.go_1_20;
               src =
                 (
                   let
@@ -94,7 +94,7 @@
                   gomod2nix.buildGoApplication {
                     pname = "go-http-backend";
                     version = "0.1";
-                    go = pkgs.go_1_18;
+                    go = pkgs.go_1_20;
                     src =
                       (
                         let
@@ -158,7 +158,7 @@
         gomod2nix.buildGoApplication {
           pname = "go-http-backend";
           version = "0.1";
-          go = pkgs.go_1_18;
+          go = pkgs.go_1_20;
           src = 
   (let
     lib = pkgs.lib;
