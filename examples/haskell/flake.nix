@@ -232,7 +232,7 @@
       // {
         meta.mainProgram = "helloFromHaskell";
       }
-  }/bin/helloFromHaskell";
+  }/bin/helloFromHaskell \"\$@\"";
         in
         pkgs.runCommand "shell-env" {
           buildInputs = dev.buildInputs;

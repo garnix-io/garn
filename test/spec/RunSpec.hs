@@ -69,6 +69,21 @@ spec =
           stdout output `shouldBe` "Hello, world!\n"
           exitCode output `shouldBe` ExitSuccess
 
+        it "allows specifying argv to the executable" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const main = garn.mkProject({
+                description: 'Project with an executable',
+                defaultExecutable: garn.shell`printf "%s,%s,%s"`,
+              }, {});
+            |]
+          output <- runGarn ["run", "main", "foo bar", "baz"] "" repoDir Nothing
+          stdout output `shouldBe` "foo bar,baz,"
+          exitCode output `shouldBe` ExitSuccess
+
         it "doesn’t format other Nix files" $ do
           let unformattedNix =
                 [i|
