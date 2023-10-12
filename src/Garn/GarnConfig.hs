@@ -2,6 +2,7 @@
 
 module Garn.GarnConfig where
 
+import Control.Exception (IOException, catch)
 import Control.Monad
 import Data.Aeson (FromJSON, eitherDecode)
 import Data.Map (Map)
@@ -60,6 +61,7 @@ writeGarnConfig :: GarnConfig -> IO ()
 writeGarnConfig garnConfig = do
   writeFile "flake.nix" $ flakeFile garnConfig
   cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
+  void (cmd [EchoStderr False, EchoStdout False] "git add --intent-to-add flake.nix" :: IO ExitCode) `catch` \(_ :: IOException) -> pure ()
 
 checkGarnFileExists :: IO ()
 checkGarnFileExists = do
