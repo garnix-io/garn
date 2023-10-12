@@ -98,3 +98,17 @@ spec =
           writeHaskellProject repoDir
           _ <- runGarn ["run", "foo"] "" repoDir Nothing
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
+        it "forwards the user's tty" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const printTty = garn.mkProject({
+                description: "tty",
+                defaultExecutable: garn.shell`tty`,
+              }, {});
+            |]
+          output <- runGarn ["run", "printTty"] "" repoDir Nothing
+          stdout output `shouldStartWith` "/dev/"
+          exitCode output `shouldBe` ExitSuccess

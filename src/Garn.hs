@@ -10,7 +10,7 @@ module Garn
 where
 
 import Control.Monad (forM_, when)
-import Development.Shake (Exit (Exit), cmd, cmd_)
+import Development.Shake (Exit (Exit), cmd)
 import Garn.Common (currentSystem, nixArgs)
 import Garn.GarnConfig
 import Garn.Init
@@ -51,7 +51,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
   case opts of
     Gen -> pure ()
     Run (CommandOptions {..}) argv -> do
-      cmd_ "nix run" nixArgs (".#" <> target) "--" argv
+      callProcess "nix" $ ["run"] <> nixArgs <> [".#" <> target, "--"] <> argv
     Enter (CommandOptions {..}) -> do
       hPutStrLn stderr $ "[garn] Entering " <> target <> " shell. Type 'exit' to exit."
       let devProc =
