@@ -17,4 +17,4 @@ jobs:
         run: sudo rm -rf /opt/*
       - uses: lriesebos/nix-develop-command@v1
         with:
-          command: "just github-ci"
+          command: "script --quiet --command 'just github-ci' /dev/null"
