@@ -2,8 +2,9 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
   inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
+  inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer";
 
-  outputs = { self, nixpkgs, flake-utils, fhi }:
+  outputs = { self, nixpkgs, flake-utils, fhi, nix-tool-installer }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import "${nixpkgs}" {
@@ -105,6 +106,11 @@
               export PATH=${pkgs.deno}/bin:$PATH
               exec ${ghc}/bin/runhaskell ${./scripts/fileserver.hs} "$@"
             '');
+          installScript = nix-tool-installer.lib.${system}.mkInstallScript {
+            toolName = "garn";
+            flakeLocation = "github:garnix-io/garn";
+            testCommand = "garn --help";
+          };
         };
         devShells = {
           default = pkgs.mkShell {
