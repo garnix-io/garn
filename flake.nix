@@ -2,9 +2,8 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
   inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
-  inputs.cabal2json.url = "github:DavHau/cabal2json?rev=bae129492bd30667ea7665480ca91c2c52fcd52d";
 
-  outputs = { self, nixpkgs, flake-utils, fhi, cabal2json }:
+  outputs = { self, nixpkgs, flake-utils, fhi }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import "${nixpkgs}" {
@@ -21,7 +20,7 @@
           type = "app";
           program = "${self.packages.${system}.default}/bin/garn";
         };
-        packages = {
+        packages = rec {
           default = self.packages.${system}.garn;
           garn =
             let
@@ -56,7 +55,7 @@
                     pkgs.makeWrapper
                     pkgs.nix
                     pkgs.zsh
-                    cabal2json.packages.${system}.cabal2json-haskell-nix
+                    self.packages.${system}.cabal2json
                   ];
                   postInstall = ''
                     wrapProgram "$out/bin/codegen" \
@@ -71,12 +70,25 @@
                       pkgs.deno
                       pkgs.git
                       pkgs.nix
+                      cabal2json
                     ]}
                   '';
 
                   doCheck = false;
                 }
               );
+          cabal2json =
+            let
+              ghc = ourHaskell.ghc.withPackages (p:
+                [
+                  p.Cabal-syntax
+                  p.aeson
+                  p.bytestring
+                ]);
+            in
+            (pkgs.writeScriptBin "cabal2json" ''
+              exec ${ghc}/bin/runhaskell ${./scripts/cabal2json.hs} "$@"
+            '');
           fileserver =
             let
               ghc = ourHaskell.ghc.withPackages (p:
@@ -118,6 +130,7 @@
               })
               ourHaskell.cabal2nix
               fhi.packages.${system}.default
+              self.packages.${system}.cabal2json
             ];
           };
         };
