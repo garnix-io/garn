@@ -1,5 +1,5 @@
 import { packageToEnvironment, shell } from "./environment.ts";
-import { nixRaw, nixStrLit } from "./nix.ts";
+import { NixExpression, nixRaw, nixStrLit } from "./nix.ts";
 import { mkPackage, Package } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
 import * as path from "https://deno.land/std@0.202.0/path/mod.ts";
@@ -13,7 +13,7 @@ import { camelCase } from "https://deno.land/x/case@2.2.0/mod.ts";
 export const GOMOD2NIX_REPO =
   "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
 
-const getGoModNixToml = (src: string) => {
+const getGoModNixToml = (src: string): NixExpression => {
   const gen = new Deno.Command("nix", {
     args: [
       "run",
@@ -38,8 +38,10 @@ const getGoModNixToml = (src: string) => {
       ].join("\n")
     );
   }
-  return Deno.readTextFileSync(
-    path.join(getDotGarnProjectDir(src), "gomod2nix.toml")
+  return nixStrLit(
+    Deno.readTextFileSync(
+      path.join(getDotGarnProjectDir(src), "gomod2nix.toml")
+    )
   );
 };
 
@@ -64,8 +66,8 @@ export const mkGoProject = (args: {
     nixRaw`
       let
         gomod2nix = gomod2nix-repo.legacyPackages.\${system};
-        gomod2nix-toml = pkgs.writeText "gomod2nix-toml" ${nixStrLit(
-          getGoModNixToml(args.src)
+        gomod2nix-toml = pkgs.writeText "gomod2nix-toml" ${getGoModNixToml(
+          args.src
         )};
       in
         gomod2nix.buildGoApplication {
