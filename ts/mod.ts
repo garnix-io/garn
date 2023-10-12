@@ -6,4 +6,4 @@ export { mkProject, type Project } from "./project.ts";
 // languages
 export * as go from "./go.ts";
 export * as haskell from "./haskell.ts";
-export * as typescript from "./typescript.ts";
+export * as javascript from "./javascript.ts";

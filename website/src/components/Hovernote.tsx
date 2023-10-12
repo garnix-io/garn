@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import {
   useFloating,
   useInteractions,
@@ -14,7 +14,7 @@ interface TooltipProps {
   item: React.FC
 }
 
-export const Tooltip: React.FC = ({ item, children }) => {
+export const Tooltip: React.FC<{item: ReactNode}> = ({ item, children }) => {
   const [open, setOpen] = useState(false);
   const { x, y, reference, floating, refs, strategy, context } = useFloating({
     placement: "top-start",

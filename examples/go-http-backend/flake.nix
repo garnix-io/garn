@@ -34,6 +34,7 @@
             gomod2nix.buildGoApplication {
               pname = "go-http-backend";
               version = "0.1";
+              go = pkgs.go_1_20;
               src =
                 (
                   let
@@ -93,6 +94,7 @@
                   gomod2nix.buildGoApplication {
                     pname = "go-http-backend";
                     version = "0.1";
+                    go = pkgs.go_1_20;
                     src =
                       (
                         let
@@ -156,6 +158,7 @@
         gomod2nix.buildGoApplication {
           pname = "go-http-backend";
           version = "0.1";
+          go = pkgs.go_1_20;
           src = 
   (let
     lib = pkgs.lib;
@@ -179,15 +182,15 @@
           modules = gomod2nix-toml;
         }
     }/bin/go-http-backend";
+          buildPath = pkgs.runCommand "build-inputs-path" {
+            inherit (dev) buildInputs nativeBuildInputs;
+          } "echo $PATH > $out";
         in
-        pkgs.runCommand "shell-env" {
-          buildInputs = dev.buildInputs;
-          nativeBuildInputs = dev.nativeBuildInputs;
-        } ''
-          echo "export PATH=$PATH:$PATH" > $out
-          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
-          chmod +x $out
+        pkgs.writeScript "shell-env"  ''
+          #!${pkgs.bash}/bin/bash
+          export PATH=$(cat ${buildPath}):$PATH
+          ${dev.shellHook}
+          ${shell} "$@"
         ''
       }";
           };
