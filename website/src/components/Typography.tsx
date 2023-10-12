@@ -5,6 +5,7 @@ export type TypographyVariant = "h1" | "h2" | "body";
 
 interface TypographyProps {
   variant: TypographyVariant;
+  className?: string;
   children: React.ReactNode;
 }
 
