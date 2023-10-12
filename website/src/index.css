@@ -614,3 +614,15 @@ dt::after {
 .display-none {
   display: none;
 }
+
+.bash {
+  font-family: monospace;
+  border: black 1px solid;
+  padding: 5px;
+}
+
+span.copy-button {
+  float: right;
+  margin-right: 10px;
+  cursor: pointer;
+}

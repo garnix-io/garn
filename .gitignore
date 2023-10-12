@@ -2,5 +2,6 @@
 result
 node_modules/
 /website/dist/
+/website/public/install.sh
 /ts/nixpkgs.ts
 /.golden/*/actual

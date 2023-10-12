@@ -15,7 +15,7 @@ fmt: fmt-nix fmt-haskell fmt-typescript
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
 # Deploy the current website
-deploy-website:
+deploy-website: build-install-script
   #!/usr/bin/env bash
   set -eux
   if [[ -z $(git status -s) ]]; then
@@ -137,6 +137,11 @@ check-isolated-garn:
   test/check-isolated-garn.sh
 
 # Start the docs website server
-docs-server:
+docs-server: build-install-script
   cd website && npm install
   cd website && npm run dev
+
+build-install-script:
+  nix build -L .#installScript
+  mkdir -p website/public
+  cat result > website/public/install.sh
