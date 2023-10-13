@@ -6,15 +6,15 @@ export const backend = garn.go.mkGoProject({
   src: "backend",
 });
 
-export const yarnFrontend = garn.javascript.mkYarnFrontend({
+export const yarnFrontend = garn.javascript.mkYarnProject({
   description: "my nice yarn project",
   src: "frontend-yarn",
   nodeVersion: "18",
+  startCommand: "yarn start",
   testCommand: "yarn mocha",
-  serverStartCommand: "yarn start",
 });
 
-export const npmFrontend = garn.javascript.mkNpmFrontend({
+export const npmFrontend = garn.javascript.mkNpmProject({
   description: "frontend test app created by create-react-app",
   src: "frontend-npm",
   nodeVersion: "18",

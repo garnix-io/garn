@@ -76,7 +76,7 @@ checkGarnFileExists = do
 
             import * as garn from "http://localhost:8777/mod.ts";
 
-            export const frontend = garn.typescript.mkNpmFrontend({
+            export const frontend = garn.typescript.mkNpmProject({
               src: "./.",
               description: "An NPM frontend",
             });

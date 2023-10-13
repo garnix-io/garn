@@ -15,7 +15,9 @@ type MkHaskellArgs = {
   src: string;
 };
 
-export const mkHaskell = (args: MkHaskellArgs): Project & { pkg: Package } => {
+export const mkHaskellProject = (
+  args: MkHaskellArgs
+): Project & { pkg: Package } => {
   const pkg: Package = mkPackage(nixRaw`
     (pkgs.haskell.packages.${nixRaw(args.compiler)}.callCabal2nix
       "garn-pkg"
@@ -44,7 +46,7 @@ export const mkHaskell = (args: MkHaskellArgs): Project & { pkg: Package } => {
 // Initializer
 
 // Currently only works if there's a single cabal file, in the current directory
-const mkHaskellInitializer: Initializer = () => {
+const mkHaskellProjectInitializer: Initializer = () => {
   const cabalFiles: fs.WalkEntry[] = [...fs.expandGlobSync("*.cabal")];
   if (cabalFiles.length === 0) {
     return { tag: "ShouldNotRun" };
@@ -72,7 +74,7 @@ const mkHaskellInitializer: Initializer = () => {
     tag: "ShouldRun",
     makeTarget: () =>
       outdent`
-      export const ${parsedCabal.name} = garn.haskell.mkHaskell({
+      export const ${parsedCabal.name} = garn.haskell.mkHaskellProject({
         description: "${parsedCabal.synopsis || parsedCabal.description || ""}",
         executable: "",
         compiler: "ghc94",
@@ -81,14 +83,14 @@ const mkHaskellInitializer: Initializer = () => {
   };
 };
 
-export const initializers = [mkHaskellInitializer];
+export const initializers = [mkHaskellProjectInitializer];
 
 // Tests
 
 Deno.test("Initializer does not run when no cabal file is present", () => {
   const tempDir = Deno.makeTempDirSync();
   Deno.chdir(tempDir);
-  const result = mkHaskellInitializer();
+  const result = mkHaskellProjectInitializer();
   assertEquals(result.tag, "ShouldNotRun");
 });
 
@@ -101,7 +103,7 @@ Deno.test("Initializer errors if the cabal file is unparseable", () => {
     name: foo
   `
   );
-  const result = mkHaskellInitializer();
+  const result = mkHaskellProjectInitializer();
   assertEquals(result.tag, "UnexpectedError");
   if (result.tag === "UnexpectedError") {
     assertEquals(result.reason, "Found but could not parse cabal file");
@@ -118,13 +120,13 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     version: 0.0.1
   `
   );
-  const result = mkHaskellInitializer();
+  const result = mkHaskellProjectInitializer();
   assertEquals(result.tag, "ShouldRun");
   if (result.tag === "ShouldRun") {
     assertEquals(
       result.makeTarget(),
       outdent`
-          export const foo = garn.haskell.mkHaskell({
+          export const foo = garn.haskell.mkHaskellProject({
             description: "",
             executable: "",
             compiler: "ghc94",

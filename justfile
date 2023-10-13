@@ -119,15 +119,13 @@ run-garn example *args="": hpack
   cabal run garn:garn -- {{ args }}
 
 check-examples:
-  just run-garn haskell check helloFromHaskell
+  just run-garn haskell check
   just run-garn haskell run helloFromHaskell
   echo "node --version" | just run-garn npm-frontend enter frontend
-  just run-garn frontend-create-react-app check main
-  just run-garn frontend-yarn-webpack check frontend
-  just run-garn go-http-backend check server
-  just run-garn monorepo check backend
-  just run-garn monorepo check npmFrontend
-  just run-garn monorepo check yarnFrontend
+  just run-garn frontend-create-react-app check
+  just run-garn frontend-yarn-webpack check
+  just run-garn go-http-backend check
+  just run-garn monorepo check
 
 codegen: hpack && typescript-check
   cabal run codegen

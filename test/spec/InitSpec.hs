@@ -37,7 +37,7 @@ spec = do
                   [i|
                     import * as garn from "http://localhost:8777/mod.ts"
 
-                    export const garn = garn.haskell.mkHaskell({
+                    export const garn = garn.haskell.mkHaskellProject({
                       description: "",
                       executable: "",
                       compiler: "ghc94",
