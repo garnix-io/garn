@@ -35,7 +35,6 @@ if (initializedSections.length === 0) {
     // garn.javascript.
     //
     // For example:
-    /*
     export const myGoProject = garn.go.mkGoProject({
       description: "My go project",
       moduleName: "server",
@@ -55,13 +54,11 @@ if (initializedSections.length === 0) {
       src: "./my-node-project",
       nodeVersion: "18",
     });
-    */
 
     // You can also manually create environments and projects. For example
     // uncomment this block and you can run \`garn enter myProject\` to be put into a
     // shell with cowsay installed, and \`garn run myProject\` to execute the default
     // executable for this project.
-    /*
     const myProjectEnvironment = garn.mkEnvironment().withDevTools([pkgs.cowsay]);
 
     export const myProject = garn.mkProject({
@@ -69,7 +66,6 @@ if (initializedSections.length === 0) {
       defaultEnvironment: myProjectEnvironment,
       defaultExecutable: myProjectEnvironment.shell\`cowsay "Hello from garn!"\`,
     }, {});
-    */
   `);
 }
 
