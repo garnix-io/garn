@@ -20,7 +20,7 @@
           };
         in
         {
-          "frontend_node_modules" =
+          "project_node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -69,7 +69,7 @@
           };
         in
         {
-          "frontend_test" =
+          "project_test" =
             let
               dev =
                 (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -151,7 +151,7 @@
       ${"npm run test"}
     "
           ;
-          "frontend_tsc" =
+          "project_tsc" =
             let
               dev =
                 (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -243,7 +243,7 @@
           };
         in
         {
-          "frontend" =
+          "project" =
             (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
@@ -258,7 +258,7 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          "frontend" = {
+          "project" = {
             "type" = "app";
             "program" = "${
       let

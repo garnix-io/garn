@@ -1,6 +1,6 @@
 import * as garn from "http://localhost:8777/mod.ts";
 
-export const frontend = garn.javascript
+export const project = garn.javascript
   .mkNpmProject({
     src: ".",
     description: "An NPM frontend",

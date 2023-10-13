@@ -1,5 +1,5 @@
 {
-  "name": "npm-frontend",
+  "name": "npm-project",
   "version": "0.0.0",
   "scripts": {
     "tsc": "tsc --noEmit",
