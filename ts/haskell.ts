@@ -72,7 +72,6 @@ const mkHaskellProjectInitializer: Initializer = () => {
 
   return {
     tag: "ShouldRun",
-    imports: 'import * as garn from "http://localhost:8777/mod.ts"',
     makeTarget: () =>
       outdent`
       export const ${parsedCabal.name} = garn.haskell.mkHaskellProject({

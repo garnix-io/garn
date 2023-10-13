@@ -128,7 +128,6 @@ const goModuleInitializer: Initializer = () => {
     );
     return {
       tag: "ShouldRun",
-      imports: 'import * as garn from "http://localhost:8777/mod.ts"',
       makeTarget: () =>
         outdent`
           export const ${camelCase(moduleName)} = garn.go.mkGoProject({
