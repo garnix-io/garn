@@ -148,3 +148,18 @@ build-install-script:
   nix build -L .#installScript
   mkdir -p website/public
   cat result > website/public/install.sh
+
+newline := "\n"
+website-dogfooding:
+  #!/usr/bin/env bash
+  set -eux
+
+  cd website
+  cabal run garn:garn -- check default
+  cabal run garn:garn -- run default
+  echo 'tsc{{newline}}exit' | cabal run garn:garn -- enter default
+
+  # should also work twice in a row
+  cabal run garn:garn -- check default
+  cabal run garn:garn -- run default
+  echo 'tsc{{newline}}exit' | cabal run garn:garn -- enter default
