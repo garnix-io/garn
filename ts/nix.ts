@@ -40,7 +40,7 @@ export function nixAttrSet(
     "{" +
       Object.entries(attrSet)
         .filter((x): x is [string, NixExpression] => x[1] != null)
-        .map(([k, v]) => `${k} = ${v.rawNixExpressionString.trim()};`)
+        .map(([k, v]) => nixRaw`${nixStrLit(k)} = ${v};`.rawNixExpressionString)
         .join("\n") +
       "}"
   );
