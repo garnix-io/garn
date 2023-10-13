@@ -71,7 +71,7 @@ spec = do
             stdout output `shouldBe` "tool\n"
             output <- runGarn ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "/nix/store"
-          it "does not destructively update the given package" $ do
+          it "does not destructively update the given package" $ onTestFailureLogger $ \onFailingTestLog -> do
             writeHaskellProject repoDir
             writeFile "garn.ts" $
               unindent
@@ -91,6 +91,7 @@ spec = do
                   export const bar = foo.withDevTools([hello]);
                 |]
             output <- runGarn ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
+            onFailingTestLog output
             stderr output `shouldContain` "hello: command not found"
           it "can safely be used twice" $ do
             writeHaskellProject repoDir

@@ -48,6 +48,7 @@ spec = do
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output
           stderr output `shouldContain` "Warning: Eta reduce"
+
         it "runs checks on source directories that ignore the flake.nix file" $ \onTestFailureLog -> do
           writeHaskellProject repoDir
           writeFile
@@ -69,6 +70,7 @@ spec = do
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output
           stderr output `shouldNotContain` "flake.nix"
+
         it "supports running checks in the default environment" $ \onTestFailureLog -> do
           writeFile
             "garn.ts"
@@ -88,6 +90,7 @@ spec = do
           onTestFailureLog output
           stderr output `shouldContain` "DEF"
           exitCode output `shouldBe` ExitFailure 1
+
         describe "exit-codes" $ do
           let testCases =
                 [ ("passing", "true", ExitSuccess),
@@ -117,3 +120,61 @@ spec = do
               onTestFailureLog output
               stderr output `shouldNotContain` "Invalid argument"
               exitCode output `shouldBe` expectedExitCode
+
+        it "runs *all* checks when no target given" $ \onTestFailureLog -> do
+          writeHaskellProject repoDir
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const haskell = garn.mkProject(
+                {
+                  description: "mkHaskell-test",
+                  defaultEnvironment: garn.emptyEnvironment,
+                },
+                {},
+              )
+                .addCheck("check")`echo first failure ; false`;
+
+              export const other = garn.mkProject(
+                {
+                  description: "other",
+                  defaultEnvironment: garn.emptyEnvironment,
+                },
+                {},
+              )
+                .addCheck("check")`echo second failure ; false`;
+            |]
+          output <- runGarn ["check"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output `shouldContain` "first failure"
+          exitCode output `shouldBe` ExitFailure 1
+
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const haskell = garn.mkProject(
+                {
+                  description: "mkHaskell-test",
+                  defaultEnvironment: garn.emptyEnvironment,
+                },
+                {},
+              )
+                .addCheck("check")`echo first success`;
+
+              export const other = garn.mkProject(
+                {
+                  description: "other",
+                  defaultEnvironment: garn.emptyEnvironment,
+                },
+                {},
+              )
+                .addCheck("check")`echo second failure ; false`;
+            |]
+          output <- runGarn ["check"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output `shouldContain` "second failure"
+          exitCode output `shouldBe` ExitFailure 1
