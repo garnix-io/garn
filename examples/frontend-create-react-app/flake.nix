@@ -25,10 +25,12 @@
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
               };
-              pkgs = import "${nixpkgs}" {
-                config.permittedInsecurePackages = [ ];
-                inherit system;
-              };
+              pkgs =
+                import "${nixpkgs}" {
+                  config.permittedInsecurePackages = [ ];
+                  inherit system;
+                }
+              ;
             in
             npmlock2nix.v2.build
               {
@@ -63,9 +65,9 @@
                 node_modules_attrs = {
                   nodejs = pkgs.nodejs-18_x;
                 };
-              }
-          ;
-        });
+              };
+        }
+      );
       checks = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -73,7 +75,8 @@
             inherit system;
           };
         in
-        { });
+        { }
+      );
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -111,23 +114,23 @@
                     }
                 )
               ;
+              node_modules_mode = "copy";
               node_modules_attrs = {
                 nodejs = pkgs.nodejs-18_x;
               };
-            }
-          ;
-        });
+            };
+        }
+      );
       apps = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-
           main = {
             type = "app";
             program = "${
-        let
-          dev = 
+      let
+        dev = 
       let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
@@ -154,25 +157,26 @@
          fileName != "garn.ts";
     })
 ;
+        node_modules_mode = "copy";
         node_modules_attrs = {
           nodejs = pkgs.nodejs-18_x;
         };
       }
     ;
-          shell = "npm run start \"\$@\"";
-        in
-        pkgs.runCommand "shell-env" {
-          buildInputs = dev.buildInputs;
-          nativeBuildInputs = dev.nativeBuildInputs;
-        } ''
-          echo "export PATH=$PATH:$PATH" > $out
-          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
-          chmod +x $out
-        ''
-      }";
+        shell = "cd . && npm start";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
           };
-
-        });
+        }
+      );
     };
 }

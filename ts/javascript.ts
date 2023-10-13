@@ -45,7 +45,8 @@ export const mkNpmFrontend = (args: {
   description: string;
   src: string;
   nodeVersion: NodeVersion;
-  testCommand: string;
+  startCommand?: string;
+  testCommand?: string;
 }): Project => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   const pkg = mkPackage(nixRaw`
@@ -62,7 +63,9 @@ export const mkNpmFrontend = (args: {
           mkdir fake-home
           HOME=$(pwd)/fake-home
         '';
-        buildCommands = [ ${nixStrLit(args.testCommand)} "mkdir $out" ];
+        buildCommands = [ ${nixStrLit(
+          args.testCommand ?? "npm test"
+        )} "mkdir $out" ];
         installPhase = "true";
         node_modules_attrs = {
           nodejs = ${nodejs};
@@ -78,6 +81,7 @@ export const mkNpmFrontend = (args: {
       in
       npmlock2nix.v2.shell {
         src = ${nixSource(args.src)};
+        node_modules_mode = "copy";
         node_modules_attrs = {
           nodejs = ${nodejs};
         };
@@ -85,7 +89,9 @@ export const mkNpmFrontend = (args: {
     `,
     args.src
   );
-  const startDev: Executable = devShell.shell`npm run start`;
+  const startDev: Executable = devShell.shell`cd ${args.src} && ${
+    args.startCommand ?? "npm start"
+  }`;
   return mkProject(
     {
       description: args.description,
@@ -119,7 +125,7 @@ export const mkYarnFrontend = (args: {
   const pkg = mkPackage(nixRaw`
     let
         pkgs = ${pkgs};
-        packageJson = pkgs.lib.importJSON ./package.json;
+        packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
         yarnPackage = ${yarnPackage};
         nodeModulesPath = ${nixStrLit`${nixRaw("yarnPackage")}/libexec/${nixRaw(
           "packageJson.name"
@@ -140,7 +146,7 @@ export const mkYarnFrontend = (args: {
     nixRaw`
       let
           pkgs = ${pkgs};
-          packageJson = pkgs.lib.importJSON ./package.json;
+          packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
           yarnPackage = ${yarnPackage};
           nodeModulesPath = ${nixStrLit`${nixRaw(
             "yarnPackage"
@@ -156,7 +162,7 @@ export const mkYarnFrontend = (args: {
     `,
     args.src
   );
-  const startDev: Executable = devShell.shell`${args.serverStartCommand}`;
+  const startDev: Executable = devShell.shell`cd ${args.src} && ${args.serverStartCommand}`;
   return mkProject(
     {
       description: args.description,
