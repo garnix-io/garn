@@ -126,7 +126,7 @@
                     nativeBuildInputs =
                       previousAttrs.nativeBuildInputs
                       ++
-                      [ pkgs.cabal-install ];
+                      [ pkgs.haskell.packages.ghc94.cabal-install ];
                   })
                 ).overrideAttrs (finalAttrs: previousAttrs: {
                   nativeBuildInputs =
@@ -198,7 +198,7 @@
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.cabal-install ];
+                  [ pkgs.haskell.packages.ghc94.cabal-install ];
               })
             ).overrideAttrs (finalAttrs: previousAttrs: {
               nativeBuildInputs =
@@ -246,16 +246,16 @@
       // {
         meta.mainProgram = "helloFromHaskell";
       }
-  }/bin/helloFromHaskell \"\$@\"";
+  }/bin/helloFromHaskell";
+          buildPath = pkgs.runCommand "build-inputs-path" {
+            inherit (dev) buildInputs nativeBuildInputs;
+          } "echo $PATH > $out";
         in
-        pkgs.runCommand "shell-env" {
-          buildInputs = dev.buildInputs;
-          nativeBuildInputs = dev.nativeBuildInputs;
-        } ''
-          echo "export PATH=$PATH:$PATH" > $out
-          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
-          chmod +x $out
+        pkgs.writeScript "shell-env"  ''
+          #!${pkgs.bash}/bin/bash
+          export PATH=$(cat ${buildPath}):$PATH
+          ${dev.shellHook}
+          ${shell} "$@"
         ''
       }";
           };
