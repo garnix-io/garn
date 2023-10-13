@@ -19,7 +19,7 @@ need a tool or dependency,
 it's probably here`}
 </Tooltip> &#125; from <String>"https://garn.io/ts/v0.0.1/nixpkgs.ts"</String>;<br />
         <br />
-        <Export>export</Export> <Keyword>const</Keyword> frontend = garn.javascript.mkNpmFrontend(&#123; <br />
+        <Export>export</Export> <Keyword>const</Keyword> frontend = garn.javascript.mkNpmProject(&#123; <br />
   {"  "}description: <String>"My npm app"</String>,<br />
   {"  "}<Tooltip item={<>src: <String>"frontend"</String></>}>
 {`Supports mono-repos and multiple languages.
