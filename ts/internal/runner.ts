@@ -25,7 +25,7 @@ export const toGarnConfig = (
   garnExports: Record<string, unknown>
 ): GarnConfig => ({
   targets: toTargets(garnExports),
-  flakeFile: formatFlake(nixpkgsInput, garnExports).expr,
+  flakeFile: formatFlake(nixpkgsInput, garnExports).rawNixExpressionString,
 });
 
 const toTargets = (garnExports: Record<string, unknown>): Targets => {
@@ -44,17 +44,14 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
   return result;
 };
 
-const getNixExpression = (n: { nixExpression: NixExpression }): NixExpression =>
-  n.nixExpression;
-
 const formatFlake = (
   nixpkgsInput: string,
   garnExports: Record<string, unknown>
 ): NixExpression => {
   const projects = findProjects(garnExports);
 
-  const packages = mapValues(getNixExpression, collectPackages(projects));
-  const checks = mapValues(getNixExpression, collectChecks(projects));
+  const packages = mapValues(p => p.nixExpression, collectPackages(projects));
+  const checks = mapValues(p => p.nixExpression, collectChecks(projects));
   const shells = mapValues(
     (project) => project.defaultEnvironment?.nixExpression,
     projects

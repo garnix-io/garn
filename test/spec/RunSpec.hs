@@ -52,9 +52,9 @@ spec =
             "garn.ts"
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
-              import * as pkgs from "#{repoDir}/ts/nixpkgs.ts";
+              import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-              const myEnv = garn.mkEnvironment().withDevTools([pkgs.hello]);
+              const myEnv = garn.mkEnvironment().withDevTools([garn.mkPackage(nixRaw`pkgs.hello`)]);
               export const main = garn.mkProject(
                 {
                   description: 'Project with an executable',

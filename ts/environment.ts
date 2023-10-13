@@ -92,7 +92,7 @@ export const mkEnvironment = (
     `;
     return {
       tag: "executable",
-      description: `Executes ${cmdToExecute.expr}`,
+      description: `Executes ${cmdToExecute.rawNixExpressionString}`,
       nixExpression: nixStrLit`${shellEnv}`,
     };
   },

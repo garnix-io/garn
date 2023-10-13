@@ -35,7 +35,7 @@ spec = do
             "garn.ts"
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
-              import * as pkgs from "#{repoDir}/ts/nixpkgs.ts";
+              import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
               export const haskell = garn.haskell.mkHaskell({
                 description: "mkHaskell-test",
@@ -43,7 +43,7 @@ spec = do
                 compiler: "ghc94",
                 src: "."
               })
-                .withDevTools([pkgs.hlint])
+                .withDevTools([garn.mkPackge(nixRaw`pkgs.hlint`)])
                 .addCheck("hlint")`hlint *.hs`;
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing

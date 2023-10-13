@@ -1,6 +1,6 @@
-import { nixRaw } from "../nix.ts";
+import { NixExpression, nixRaw } from "../nix.ts";
 
-export const nixSource = (src: string) => nixRaw`
+export const nixSource = (src: string): NixExpression => nixRaw`
   (let
     lib = pkgs.lib;
     lastSafe = list :
@@ -40,6 +40,11 @@ export const mapKeys = <T>(
   return result;
 };
 
+/**
+ * Maps an object's values. Typescript currently does not keep track of the
+ * object structure, but this could easily be accomplished in the future in a
+ * backwards-compatible way.
+ */
 export const mapValues = <T, R>(
   f: (i: T) => R,
   x: Record<string, T>

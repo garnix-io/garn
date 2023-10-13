@@ -7,7 +7,7 @@ export type Interpolatable =
       nixExpression: NixExpression;
     };
 
-export type NixExpression = { expr: string };
+export type NixExpression = { rawNixExpressionString: string };
 
 export function nixRaw(
   s: TemplateStringsArray,
@@ -18,16 +18,16 @@ export function nixRaw(
   s: TemplateStringsArray | string,
   ...interpolations: Array<NixExpression>
 ): NixExpression {
-  if (typeof s === "string") return { expr: s };
-  const expr = s.reduce(
-    (acc, part, i) => acc + part + (interpolations[i]?.expr ?? ""),
+  if (typeof s === "string") return { rawNixExpressionString: s };
+  const rawNixExpressionString = s.reduce(
+    (acc, part, i) => acc + part + (interpolations[i]?.rawNixExpressionString ?? ""),
     ""
   );
-  return { expr };
+  return { rawNixExpressionString };
 }
 
 export function nixList(elements: Array<NixExpression>): NixExpression {
-  return nixRaw("[" + elements.map((p) => p.expr.trim()).join(" ") + "]");
+  return nixRaw("[" + elements.map((p) => p.rawNixExpressionString.trim()).join(" ") + "]");
 }
 
 export function nixAttrSet(
@@ -37,7 +37,7 @@ export function nixAttrSet(
     "{" +
       Object.entries(attrSet)
         .filter((x): x is [string, NixExpression] => x[1] != null)
-        .map(([k, v]) => `${k} = ${v.expr.trim()};`)
+        .map(([k, v]) => `${k} = ${v.rawNixExpressionString.trim()};`)
         .join("\n") +
       "}"
   );
@@ -63,7 +63,7 @@ export function nixStrLit(
       str
     );
   const escapedTemplate = s.map(escape);
-  const expr =
+  const rawNixExpressionString =
     '"' +
     escapedTemplate.reduce((acc, part, i) => {
       const interpolation = interpolations[i];
@@ -71,36 +71,36 @@ export function nixStrLit(
         case "string":
           return acc + part + escape(interpolation);
         case "object":
-          if ("expr" in interpolation) {
-            return acc + part + "${" + interpolation.expr + "}";
+          if ("rawNixExpressionString" in interpolation) {
+            return acc + part + "${" + interpolation.rawNixExpressionString + "}";
           }
-          return acc + part + "${" + interpolation.nixExpression.expr + "}";
+          return acc + part + "${" + interpolation.nixExpression.rawNixExpressionString + "}";
         case "undefined":
           return acc + part;
       }
     }, "") +
     '"';
-  return { expr };
+  return { rawNixExpressionString };
 }
 
 Deno.test("nixStrLit correctly serializes into a nix expression", () => {
-  assertEquals(nixStrLit`foo`.expr, '"foo"');
+  assertEquals(nixStrLit`foo`.rawNixExpressionString, '"foo"');
   assertEquals(
-    nixStrLit`with ${"string"} interpolation`.expr,
+    nixStrLit`with ${"string"} interpolation`.rawNixExpressionString,
     '"with string interpolation"'
   );
   assertEquals(
     nixStrLit`with package ${{
-      expr: "pkgs.hello",
-    }} works`.expr,
+      rawNixExpressionString: "pkgs.hello",
+    }} works`.rawNixExpressionString,
     '"with package ${pkgs.hello} works"'
   );
   assertEquals(
-    nixStrLit`escaped dollars in strings \${should not interpolate}`.expr,
+    nixStrLit`escaped dollars in strings \${should not interpolate}`.rawNixExpressionString,
     '"escaped dollars in strings \\${should not interpolate}"'
   );
   assertEquals(
-    nixStrLit`"double quotes" are correctly escaped`.expr,
+    nixStrLit`"double quotes" are correctly escaped`.rawNixExpressionString,
     '"\\"double quotes\\" are correctly escaped"'
   );
 });
