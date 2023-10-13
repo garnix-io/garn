@@ -123,6 +123,11 @@ const proxyEnvironmentHelpers = () => ({
   },
 
   addCheck<T extends Project, Name extends string>(this: T, name: Name) {
+    if (this.defaultEnvironment == null) {
+      throw new Error(
+        `'.addCheck' can only be called on projects with a default environment`
+      );
+    }
     return (s: TemplateStringsArray, ...args: Array<string>) => {
       const newCheck = this.check(s, ...args);
       return {

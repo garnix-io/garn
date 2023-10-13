@@ -7,6 +7,7 @@ module Garn.Optparse
     WithGarnTsCommand (..),
     WithoutGarnTsCommand (..),
     CommandOptions (..),
+    CheckCommandOptions (..),
   )
 where
 
@@ -62,7 +63,7 @@ data WithGarnTsCommand
   | Build CommandOptions
   | Run CommandOptions [String]
   | Enter CommandOptions
-  | Check CommandOptions
+  | Check CheckCommandOptions
   deriving stock (Eq, Show)
 
 withGarnTsCommandInfo :: [(String, String, Targets -> Parser WithGarnTsCommand)]
@@ -71,13 +72,19 @@ withGarnTsCommandInfo =
     ("run", "Build and run the default executable of a project", withCommandOptionsAndArgv Run),
     ("enter", "Enter the default devshell for a project", withCommandOptions Enter),
     ("gen", "Generate the flake.nix file and exit", const $ pure Gen),
-    ("check", "Run the checks of a project", withCommandOptions Check)
+    ("check", "Run the checks of a project", checkCommand)
   ]
   where
     withCommandOptions constructor targets =
       constructor <$> commandOptionsParser targets
     withCommandOptionsAndArgv constructor targets =
       constructor <$> commandOptionsParser targets <*> argvParser
+    checkCommand :: Targets -> Parser WithGarnTsCommand
+    checkCommand targets =
+      let checkCommandOptions =
+            Qualified <$> commandOptionsParser targets
+              <|> pure Unqualified
+       in Check <$> checkCommandOptions
 
 argvParser :: Parser [String]
 argvParser = many $ strArgument $ metavar "...args"
@@ -123,3 +130,8 @@ commandOptionsParser targets =
         $ Map.assocs targets
     )
     <**> helper
+
+data CheckCommandOptions
+  = Qualified CommandOptions
+  | Unqualified
+  deriving stock (Eq, Show)
