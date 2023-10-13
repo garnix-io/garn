@@ -1,8 +1,11 @@
 import * as haskell from "../haskell.ts";
 import * as go from "../go.ts";
+import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 
-let imports = "";
-let body = "";
+const GARN_VERSION = "v0.0.6";
+
+const imports = [];
+const initializedSections = [];
 
 const initializers = [...go.initializers, ...haskell.initializers];
 
@@ -17,10 +20,66 @@ for (const init of initializers) {
     case "ShouldNotRun":
       break;
     case "ShouldRun":
-      imports += result.imports;
-      body += result.makeTarget();
+      if (result.imports) imports.push(...result.imports);
+      initializedSections.push(result.makeTarget().trim());
       break;
   }
 }
 
-Deno.writeTextFileSync("garn.ts", imports + "\n\n" + body);
+if (initializedSections.length === 0) {
+  initializedSections.push(outdent`
+    // Welcome to garn! \`garn init\` was unable to find any existing supported
+    // projects, but it is easy to get started!
+
+    // Check out the language helper functions under garn.go, garn.haskell, and
+    // garn.javascript.
+    //
+    // For example:
+    /*
+    export const myGoProject = garn.go.mkGoProject({
+      description: "My go project",
+      moduleName: "server",
+      src: "./my-go-project",
+      goVersion: "1.20",
+    });
+
+    export const myHaskellProject = garn.haskell.mkHaskellProject({
+      description: "My haskell project",
+      executable: "server",
+      compiler: "ghc94",
+      src: "./my-haskell-project",
+    });
+
+    export const myNodeProject = garn.javascript.mkNpmProject({
+      description: "My node project",
+      src: "./my-node-project",
+      nodeVersion: "18",
+    });
+    */
+
+    // You can also manually create environments and projects. For example
+    // uncomment this block and you can run \`garn enter myProject\` to be put into a
+    // shell with cowsay installed, and \`garn run myProject\` to execute the default
+    // executable for this project.
+    /*
+    const myProjectEnvironment = garn.mkEnvironment().withDevTools([pkgs.cowsay]);
+
+    export const myProject = garn.mkProject({
+      description: "My project",
+      defaultEnvironment: myProjectEnvironment,
+      defaultExecutable: myProjectEnvironment.shell\`cowsay "Hello from garn!"\`,
+    }, {});
+    */
+  `);
+}
+
+Deno.writeTextFileSync(
+  "garn.ts",
+  `
+import * as garn from "https://garn.io/ts/${GARN_VERSION}/mod.ts";
+import * as pkgs from "https://garn.io/ts/${GARN_VERSION}/nixpkgs.ts";
+${imports.join("\n")}
+
+${initializedSections.join("\n")}
+`.trim() + "\n"
+);
