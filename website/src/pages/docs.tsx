@@ -13,7 +13,7 @@ const docEntries: (readonly [Info, React.ReactElement])[] = Object.values(
     { info: Info; default: React.FC }
   >
 )
-  .sort((a, b) => +b.info.index - +a.info.index)
+  .sort((a, b) => +a.info.index - +b.info.index)
   .map(({ info, default: Component }) => [info, <Component />] as const);
 
 export const docMenuItems: { name: string; url: string }[] = docEntries.map(
