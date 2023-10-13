@@ -23,10 +23,10 @@ writeHaskellProject repoDir = do
   writeFile
     "garn.ts"
     [i|
-      import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+      import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
 
-      export const foo = mkHaskell({
-        description: "mkHaskell-test",
+      export const foo = mkHaskellProject({
+        description: "mkHaskellProject-test",
         executable: "garn-test",
         compiler: "ghc94",
         src: "."

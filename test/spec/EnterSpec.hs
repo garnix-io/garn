@@ -31,12 +31,12 @@ spec = do
             writeFile "garn.ts" $
               unindent
                 [i|
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
@@ -52,11 +52,11 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
@@ -77,11 +77,11 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
@@ -97,11 +97,11 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."

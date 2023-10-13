@@ -37,8 +37,8 @@ spec = do
               import * as garn from "#{repoDir}/ts/mod.ts"
               import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-              export const haskell = garn.haskell.mkHaskell({
-                description: "mkHaskell-test",
+              export const haskell = garn.haskell.mkHaskellProject({
+                description: "mkHaskellProject-test",
                 executable: "garn-test",
                 compiler: "ghc94",
                 src: "."
@@ -56,8 +56,8 @@ spec = do
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const haskell = garn.haskell.mkHaskell({
-                description: "mkHaskell-test",
+              export const haskell = garn.haskell.mkHaskellProject({
+                description: "mkHaskellProject-test",
                 executable: "garn-test",
                 compiler: "ghc94",
                 src: "."
@@ -106,8 +106,8 @@ spec = do
                 [i|
                   import * as garn from "#{repoDir}/ts/mod.ts"
 
-                  export const haskell = garn.haskell.mkHaskell({
-                    description: "mkHaskell-test",
+                  export const haskell = garn.haskell.mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
