@@ -7,3 +7,6 @@ export { mkProject, type Project } from "./project.ts";
 export * as go from "./go.ts";
 export * as haskell from "./haskell.ts";
 export * as javascript from "./javascript.ts";
+
+// tools
+export { processCompose } from "./process_compose.ts";
