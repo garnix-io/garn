@@ -20,7 +20,7 @@
           };
         in
         {
-          backend_pkg =
+          "backend_pkg" =
             let
               gomod2nix = gomod2nix-repo.legacyPackages.${system};
               gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -58,8 +58,9 @@
                 )
               ;
               modules = gomod2nix-toml;
-            };
-          npmFrontend_pkg =
+            }
+          ;
+          "npmFrontend_pkg" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -104,8 +105,9 @@
                 node_modules_attrs = {
                   nodejs = pkgs.nodejs-18_x;
                 };
-              };
-          yarnFrontend_pkg =
+              }
+          ;
+          "yarnFrontend_pkg" =
             let
               pkgs =
                 import "${nixpkgs}" {
@@ -154,7 +156,8 @@
         export PATH=${nodeModulesPath}/.bin:\$PATH
         yarn --version
         yarn start
-      ");
+      ")
+          ;
         }
       );
       checks = forAllSystems (system:
@@ -174,60 +177,63 @@
           };
         in
         {
-          backend = (
-            let
-              expr =
-                let
-                  gomod2nix = gomod2nix-repo.legacyPackages.${system};
-                  gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
+          "backend" =
+            (
+              let
+                expr =
+                  let
+                    gomod2nix = gomod2nix-repo.legacyPackages.${system};
+                    gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
 
 [mod]
   [mod.\"github.com/gorilla/mux\"]
     version = \"v1.8.0\"
     hash = \"sha256-s905hpzMH9bOLue09E2JmzPXfIS4HhAlgT7g13HCwKE=\"
 ";
-                in
-                gomod2nix.buildGoApplication {
-                  pname = "go-http-backend";
-                  version = "0.1";
-                  go = pkgs.go_1_20;
-                  src =
-                    (
-                      let
-                        lib = pkgs.lib;
-                        lastSafe = list:
-                          if lib.lists.length list == 0
-                          then null
-                          else lib.lists.last list;
-                      in
-                      builtins.path
-                        {
-                          path = ./backend;
-                          name = "source";
-                          filter = path: type:
-                            let
-                              fileName = lastSafe (lib.strings.splitString "/" path);
-                            in
-                            fileName != "flake.nix" &&
-                            fileName != "garn.ts";
-                        }
-                    )
-                  ;
-                  modules = gomod2nix-toml;
-                }
-              ;
-            in
-            (if expr ? env
-            then expr.env
-            else pkgs.mkShell { inputsFrom = [ expr ]; }
-            )
-          ).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ pkgs.gopls ];
-          });
-          npmFrontend =
+                  in
+                  gomod2nix.buildGoApplication {
+                    pname = "go-http-backend";
+                    version = "0.1";
+                    go = pkgs.go_1_20;
+                    src =
+                      (
+                        let
+                          lib = pkgs.lib;
+                          lastSafe = list:
+                            if lib.lists.length list == 0
+                            then null
+                            else lib.lists.last list;
+                        in
+                        builtins.path
+                          {
+                            path = ./backend;
+                            name = "source";
+                            filter = path: type:
+                              let
+                                fileName = lastSafe (lib.strings.splitString "/" path);
+                              in
+                              fileName != "flake.nix" &&
+                              fileName != "garn.ts";
+                          }
+                      )
+                    ;
+                    modules = gomod2nix-toml;
+                  }
+                ;
+              in
+              (if expr ? env
+              then expr.env
+              else pkgs.mkShell { inputsFrom = [ expr ]; }
+              )
+            ).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.gopls ];
+            })
+          ;
+          "compose" = pkgs.mkShell { };
+          "npmFrontend" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -260,8 +266,9 @@
               node_modules_attrs = {
                 nodejs = pkgs.nodejs-18_x;
               };
-            };
-          yarnFrontend =
+            }
+          ;
+          "yarnFrontend" =
             let
               pkgs =
                 import "${nixpkgs}" {
@@ -307,7 +314,8 @@
             export PATH=${nodeModulesPath}/.bin:\$PATH
             export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
           ";
-            };
+            }
+          ;
         }
       );
       apps = forAllSystems (system:
@@ -315,9 +323,9 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          backend = {
-            type = "app";
-            program = "${
+          "backend" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = pkgs.mkShell {};
         shell = "${
@@ -370,9 +378,189 @@
       ''
     }";
           };
-          npmFrontend = {
-            type = "app";
-            program = "${
+          "compose" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = pkgs.mkShell {};
+        shell = "${pkgs.process-compose}/bin/process-compose up -f ${pkgs.writeText "process-compose.yml" (builtins.toJSON {"version" = "0.5";
+"processes" = {"backend" = {"command" = "${
+      let
+        dev = pkgs.mkShell {};
+        shell = "${
+      let
+        gomod2nix = gomod2nix-repo.legacyPackages.${system};
+        gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
+
+[mod]
+  [mod.\"github.com/gorilla/mux\"]
+    version = \"v1.8.0\"
+    hash = \"sha256-s905hpzMH9bOLue09E2JmzPXfIS4HhAlgT7g13HCwKE=\"
+";
+      in
+        gomod2nix.buildGoApplication {
+          pname = "go-http-backend";
+          version = "0.1";
+          go = pkgs.go_1_20;
+          src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./backend;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
+          modules = gomod2nix-toml;
+        }
+    }/bin/go-http-backend";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+"environment" = [];};
+"yarn frontend" = {"command" = "${
+      let
+        dev = 
+      let
+          pkgs = 
+      import "${nixpkgs}" {
+        config.permittedInsecurePackages = [];
+        inherit system;
+      }
+    ;
+          packageJson = pkgs.lib.importJSON frontend-yarn/package.json;
+          yarnPackage = 
+    pkgs.yarn2nix-moretea.mkYarnPackage {
+      nodejs = pkgs.nodejs-18_x;
+      yarn = pkgs.yarn;
+      src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./frontend-yarn;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
+      buildPhase = "yarn mocha";
+      dontStrip = true;
+    };
+          nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
+      in
+        pkgs.mkShell {
+          buildInputs = [ pkgs.yarn ];
+          shellHook = "
+            export PATH=${nodeModulesPath}/.bin:\$PATH
+            export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
+          ";
+        }
+    ;
+        shell = "cd frontend-yarn && yarn start";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+"environment" = [];};
+"npm frontend" = {"command" = "${
+      let
+        dev = 
+      let
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+      in
+      npmlock2nix.v2.shell {
+        src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./frontend-npm;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
+        node_modules_mode = "copy";
+        node_modules_attrs = {
+          nodejs = pkgs.nodejs-18_x;
+        };
+      }
+    ;
+        shell = "cd frontend-npm && npm start";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+"environment" = [];};};})}";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+          };
+          "npmFrontend" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = 
       let
@@ -420,9 +608,9 @@
       ''
     }";
           };
-          yarnFrontend = {
-            type = "app";
-            program = "${
+          "yarnFrontend" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = 
       let

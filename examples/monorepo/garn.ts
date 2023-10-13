@@ -20,3 +20,9 @@ export const npmFrontend = garn.javascript.mkNpmFrontend({
   nodeVersion: "18",
   testCommand: "npm run test -- --watchAll=false",
 });
+
+export const compose = garn.processCompose({
+  backend: backend.defaultExecutable!,
+  'yarn frontend': yarnFrontend.defaultExecutable!,
+  'npm frontend': npmFrontend.defaultExecutable!,
+});
