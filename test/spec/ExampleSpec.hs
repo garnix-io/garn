@@ -92,3 +92,8 @@ spec = aroundAll_ withFileServer $ do
           $ do
             body <- (^. responseBody) <$> retryGet "http://localhost:3000"
             pure $ defaultGolden "go-http-backend" (cs body)
+
+  describe "npm-project" $ do
+    it "outputs a string" $ do
+      StdoutTrim output <- cmd (Cwd "examples/npm-project") "cabal run garn:garn --" "run project"
+      output `shouldEndWith` "hello from npm-project: 3"

@@ -1,1 +1,3 @@
-export const add = (a: number, b: number) => a + b;
+import { add } from "./lib";
+
+console.log(`hello from npm-project: ${add(1, 2)}`);

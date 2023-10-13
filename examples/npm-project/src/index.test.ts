@@ -1,4 +1,4 @@
-import { add } from ".";
+import { add } from "./lib";
 
 describe("add", () => {
   it("adds two numbers", () => {

@@ -270,7 +270,7 @@
             [pkgs.nodejs-18_x];
         })
       ;
-        shell = "cd . && npm start";
+        shell = "npm install ; npm run run";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
