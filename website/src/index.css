@@ -450,6 +450,7 @@ details.not-focused {
 
 .dropdown {
   position: relative;
+  cursor: pointer;
 }
 
 .dropdown .dropdown-content {
