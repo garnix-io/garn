@@ -20,17 +20,15 @@
           };
         in
         {
-          frontend_pkg =
+          default_pkg =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
               };
-              pkgs =
-                import "${nixpkgs}" {
-                  config.permittedInsecurePackages = [ ];
-                  inherit system;
-                }
-              ;
+              pkgs = import "${nixpkgs}" {
+                config.permittedInsecurePackages = [ ];
+                inherit system;
+              };
             in
             npmlock2nix.v2.build
               {
@@ -60,14 +58,14 @@
                   mkdir fake-home
                   HOME=$(pwd)/fake-home
                 '';
-                buildCommands = [ "" "mkdir $out" ];
+                buildCommands = [ "npm test" "mkdir $out" ];
                 installPhase = "true";
                 node_modules_attrs = {
                   nodejs = pkgs.nodejs-18_x;
                 };
-              };
-        }
-      );
+              }
+          ;
+        });
       checks = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -75,8 +73,7 @@
             inherit system;
           };
         in
-        { }
-      );
+        { });
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -85,7 +82,7 @@
           };
         in
         {
-          frontend =
+          default =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -118,19 +115,20 @@
               node_modules_attrs = {
                 nodejs = pkgs.nodejs-18_x;
               };
-            };
-        }
-      );
+            }
+          ;
+        });
       apps = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          frontend = {
+
+          default = {
             type = "app";
             program = "${
-      let
-        dev = 
+        let
+          dev = 
       let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
@@ -163,20 +161,20 @@
         };
       }
     ;
-        shell = "cd . && npm start";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
-        #!${pkgs.bash}/bin/bash
-        export PATH=$(cat ${buildPath}):$PATH
-        ${dev.shellHook}
-        ${shell} "$@"
-      ''
-    }";
+          shell = "cd . && npm run dev";
+          buildPath = pkgs.runCommand "build-inputs-path" {
+            inherit (dev) buildInputs nativeBuildInputs;
+          } "echo $PATH > $out";
+        in
+        pkgs.writeScript "shell-env"  ''
+          #!${pkgs.bash}/bin/bash
+          export PATH=$(cat ${buildPath}):$PATH
+          ${dev.shellHook}
+          ${shell} "$@"
+        ''
+      }";
           };
-        }
-      );
+
+        });
     };
 }

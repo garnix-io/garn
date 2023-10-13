@@ -2,11 +2,17 @@ import { Package } from "./package.ts";
 import { hasTag, nixSource } from "./internal/utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
-import { Interpolatable, nixStrLit } from "./nix.ts";
+import {
+  Interpolatable,
+  nixList,
+  NixExpression,
+  nixRaw,
+  nixStrLit,
+} from "./nix.ts";
 
 export type Environment = {
   tag: "environment";
-  nixExpr?: string;
+  nixExpression: NixExpression;
   withDevTools(devTools: Array<Package>): Environment;
   shell(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Executable;
   check(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Check;
@@ -23,11 +29,11 @@ export const check = (
 ) => emptyEnvironment.check(s, ...args);
 
 export const mkEnvironment = (
-  nixExpression = "pkgs.mkShell {}",
+  nixExpression = nixRaw`pkgs.mkShell {}`,
   src?: string
 ): Environment => ({
   tag: "environment",
-  nixExpr: nixExpression,
+  nixExpression,
   check(this, s, ...args): Check {
     const checkScript = nixStrLit(s, ...args);
     if (src == null) {
@@ -37,70 +43,68 @@ export const mkEnvironment = (
       `;
       return {
         tag: "check",
-        nixExpression: `
+        nixExpression: nixRaw`
           let
-              dev = ${this.nixExpr};
+              dev = ${this.nixExpression};
           in
           pkgs.runCommand "check" {
             buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-          } ${wrappedScript.nixExpression}
+          } ${wrappedScript}
         `,
       };
     } else {
       const wrappedScript = nixStrLit`
         touch $out
-        cp -r ${{ nixExpression: "src" }} src
+        cp -r ${nixRaw("src")} src
         cd src
         ${checkScript}
       `;
       return {
         tag: "check",
-        nixExpression: `
+        nixExpression: nixRaw`
           let
               src = ${nixSource(src)};
-              dev = ${this.nixExpr};
+              dev = ${this.nixExpression};
           in
           pkgs.runCommand "check" {
             buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-          } ${wrappedScript.nixExpression}
+          } ${wrappedScript}
         `,
       };
     }
   },
   shell(this, s, ...args) {
     const cmdToExecute = nixStrLit(s, ...args);
-    const shellEnv = {
-      nixExpression: `
-        let
-          dev = ${this.nixExpr};
-          shell = ${cmdToExecute.nixExpression};
-          buildPath = pkgs.runCommand "build-inputs-path" {
-            inherit (dev) buildInputs nativeBuildInputs;
-          } "echo $PATH > $out";
-        in
-        pkgs.writeScript "shell-env"  ''
-          #!\${pkgs.bash}/bin/bash
-          export PATH=$(cat \${buildPath}):$PATH
-          \${dev.shellHook}
-          \${shell} "$@"
-        ''
-      `,
-    };
+    const shellEnv = nixRaw`
+      let
+        dev = ${this.nixExpression};
+        shell = ${cmdToExecute};
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!\${pkgs.bash}/bin/bash
+        export PATH=$(cat \${buildPath}):$PATH
+        \${dev.shellHook}
+        \${shell} "$@"
+      ''
+    `;
     return {
       tag: "executable",
-      description: `Executes ${cmdToExecute.nixExpression}`,
-      nixExpression: nixStrLit`${shellEnv}`.nixExpression,
+      description: `Executes ${cmdToExecute.rawNixExpressionString}`,
+      nixExpression: nixStrLit`${shellEnv}`,
     };
   },
   withDevTools(this, extraDevTools) {
     return {
       ...this,
-      nixExpr: `
-        (${this.nixExpr}).overrideAttrs (finalAttrs: previousAttrs: {
+      nixExpression: nixRaw`
+        (${this.nixExpression}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [ ${extraDevTools.map((p) => p.nixExpression).join(" ")} ];
+            ${nixList(extraDevTools.map((pkg) => pkg.nixExpression))};
         })
       `,
     };
@@ -115,7 +119,7 @@ export const isEnvironment = (e: unknown): e is Environment => {
 
 export const packageToEnvironment = (pkg: Package, src: string): Environment =>
   mkEnvironment(
-    `
+    nixRaw`
     let expr = ${pkg.nixExpression};
     in
       (if expr ? env

@@ -49,6 +49,7 @@ fromToplevelDerivation garnLibRoot varName rootExpr = do
     unindent
       [i|
         import { mkPackage } from "#{garnLibRoot}/package.ts";
+        import { nixRaw } from "#{garnLibRoot}/nix.ts";
 
       |]
       <> pkgsString varName sanitizedPkgs
@@ -102,7 +103,7 @@ formatPkg varName (name, pkgInfo) =
         <> unindent
           [i|
             export const #{name} = mkPackage(
-              `#{varName}.#{attribute pkgInfo}`,
+              nixRaw`#{varName}.#{attribute pkgInfo}`,
               #{escapedDoc},
             );
           |]

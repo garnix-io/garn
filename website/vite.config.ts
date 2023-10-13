@@ -39,6 +39,7 @@ export default defineConfig(async () => {
     return true;
   })();
   return {
+    assetsInclude: ["**/*.cast"],
     plugins: [
       react(),
       mdx.default(mdxOpts),

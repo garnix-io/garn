@@ -6,6 +6,7 @@ import { packageToEnvironment, shell } from "./environment.ts";
 import { mkPackage, Package } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
 import { nixSource } from "./internal/utils.ts";
+import { nixRaw, nixStrLit } from "./nix.ts";
 
 type MkHaskellArgs = {
   description: string;
@@ -14,14 +15,16 @@ type MkHaskellArgs = {
   src: string;
 };
 
-export const mkHaskell = (args: MkHaskellArgs): Project & { pkg: Package } => {
-  const pkg: Package = mkPackage(`
-    (pkgs.haskell.packages.${args.compiler}.callCabal2nix
+export const mkHaskellProject = (
+  args: MkHaskellArgs
+): Project & { pkg: Package } => {
+  const pkg: Package = mkPackage(nixRaw`
+    (pkgs.haskell.packages.${nixRaw(args.compiler)}.callCabal2nix
       "garn-pkg"
       ${nixSource(args.src)}
       { })
       // {
-        meta.mainProgram = "${args.executable}";
+        meta.mainProgram = ${nixStrLit(args.executable)};
       }
   `);
   return mkProject(
@@ -34,14 +37,16 @@ export const mkHaskell = (args: MkHaskellArgs): Project & { pkg: Package } => {
       pkg,
     }
   ).withDevTools([
-    mkPackage(`pkgs.haskell.packages.${args.compiler}.cabal-install`),
+    mkPackage(
+      nixRaw`pkgs.haskell.packages.${nixRaw(args.compiler)}.cabal-install`
+    ),
   ]);
 };
 
 // Initializer
 
 // Currently only works if there's a single cabal file, in the current directory
-const mkHaskellInitializer: Initializer = () => {
+const mkHaskellProjectInitializer: Initializer = () => {
   const cabalFiles: fs.WalkEntry[] = [...fs.expandGlobSync("*.cabal")];
   if (cabalFiles.length === 0) {
     return { tag: "ShouldNotRun" };
@@ -70,7 +75,7 @@ const mkHaskellInitializer: Initializer = () => {
     imports: 'import * as garn from "http://localhost:8777/mod.ts"',
     makeTarget: () =>
       outdent`
-      export const ${parsedCabal.name} = garn.haskell.mkHaskell({
+      export const ${parsedCabal.name} = garn.haskell.mkHaskellProject({
         description: "${parsedCabal.synopsis || parsedCabal.description || ""}",
         executable: "",
         compiler: "ghc94",
@@ -79,14 +84,14 @@ const mkHaskellInitializer: Initializer = () => {
   };
 };
 
-export const initializers = [mkHaskellInitializer];
+export const initializers = [mkHaskellProjectInitializer];
 
 // Tests
 
 Deno.test("Initializer does not run when no cabal file is present", () => {
   const tempDir = Deno.makeTempDirSync();
   Deno.chdir(tempDir);
-  const result = mkHaskellInitializer();
+  const result = mkHaskellProjectInitializer();
   assertEquals(result.tag, "ShouldNotRun");
 });
 
@@ -99,7 +104,7 @@ Deno.test("Initializer errors if the cabal file is unparseable", () => {
     name: foo
   `
   );
-  const result = mkHaskellInitializer();
+  const result = mkHaskellProjectInitializer();
   assertEquals(result.tag, "UnexpectedError");
   if (result.tag === "UnexpectedError") {
     assertEquals(result.reason, "Found but could not parse cabal file");
@@ -116,13 +121,13 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     version: 0.0.1
   `
   );
-  const result = mkHaskellInitializer();
+  const result = mkHaskellProjectInitializer();
   assertEquals(result.tag, "ShouldRun");
   if (result.tag === "ShouldRun") {
     assertEquals(
       result.makeTarget(),
       outdent`
-          export const foo = garn.haskell.mkHaskell({
+          export const foo = garn.haskell.mkHaskellProject({
             description: "",
             executable: "",
             compiler: "ghc94",

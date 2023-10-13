@@ -35,14 +35,15 @@ spec = do
             "garn.ts"
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
+              import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-              export const haskell = garn.haskell.mkHaskell({
-                description: "mkHaskell-test",
+              export const haskell = garn.haskell.mkHaskellProject({
+                description: "mkHaskellProject-test",
                 executable: "garn-test",
                 compiler: "ghc94",
                 src: "."
               })
-                .withDevTools([garn.mkPackage(`pkgs.hlint`)])
+                .withDevTools([garn.mkPackage(nixRaw`pkgs.hlint`)])
                 .addCheck("hlint")`hlint *.hs`;
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
@@ -56,8 +57,8 @@ spec = do
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const haskell = garn.haskell.mkHaskell({
-                description: "mkHaskell-test",
+              export const haskell = garn.haskell.mkHaskellProject({
+                description: "mkHaskellProject-test",
                 executable: "garn-test",
                 compiler: "ghc94",
                 src: "."
@@ -108,8 +109,8 @@ spec = do
                 [i|
                   import * as garn from "#{repoDir}/ts/mod.ts"
 
-                  export const haskell = garn.haskell.mkHaskell({
-                    description: "mkHaskell-test",
+                  export const haskell = garn.haskell.mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
