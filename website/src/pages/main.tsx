@@ -5,6 +5,8 @@ import { Typography } from "../components/Typography";
 import { Asciinema } from "../components/Asciinema";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { docMenuItems } from "./docs";
+import envDemoCastUrl from "../casts/env-demo.cast";
+import placeHolderCastUrl from "../casts/placeholder.cast";
 
 const Keyword: React.FC = props => <span className="keyword">{props.children}</span>;
 const String: React.FC = props => <span className="string">{props.children}</span>;
@@ -119,7 +121,7 @@ export const Info: React.FC = () => {
               <li>Unlike containers, combines well with your personal dev environment</li>
               <li>Works on Linux and Macs</li>
             </ul>
-            <Asciinema src="src/casts/env-demo.cast" />
+            <Asciinema src={envDemoCastUrl} />
           </div>
 
           <div className="feature">
@@ -129,7 +131,7 @@ export const Info: React.FC = () => {
               <li>No more Heisenbugs</li>
               <li>Because builds are deterministic, they are cacheable, speeding up development and CI</li>
             </ul>
-            <Asciinema src="src/casts/placeholder.cast" />
+            <Asciinema src={placeHolderCastUrl} />
           </div>
 
 
@@ -140,7 +142,7 @@ export const Info: React.FC = () => {
               <li>The same commands can run any test in any repo</li>
               <li>Discoverability exactly where you need it</li>
             </ul>
-            <Asciinema src="src/casts/placeholder.cast" />
+            <Asciinema src="/src/casts/placeholder.cast" />
           </div>
 
 
