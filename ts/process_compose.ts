@@ -5,6 +5,10 @@ import { nixAttrSet, nixList, nixRaw, nixStrLit } from "./nix.ts";
 import { mkPackage } from "./package.ts";
 import { mkProject } from "./project.ts";
 
+/**
+ * processCompose creates an executable project that runs all specified
+ * executables simultaneously using `process-compose`.
+ */
 export const processCompose = (executables: Record<string, Executable>) => {
   const processes = nixAttrSet(
     mapValues(
