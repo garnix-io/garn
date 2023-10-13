@@ -21,7 +21,7 @@ export const npmFrontend = garn.javascript.mkNpmFrontend({
   testCommand: "npm run test -- --watchAll=false",
 });
 
-export const compose = garn.processCompose({
+export const startAll = garn.processCompose({
   backend: backend.defaultExecutable!,
   'yarn frontend': yarnFrontend.defaultExecutable!,
   'npm frontend': npmFrontend.defaultExecutable!,
