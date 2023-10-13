@@ -30,7 +30,8 @@ export const check = (
 
 export const mkEnvironment = (
   nixExpression = nixRaw`pkgs.mkShell {}`,
-  src?: string
+  src?: string,
+  prefix?: NixExpression
 ): Environment => ({
   tag: "environment",
   nixExpression,
@@ -55,8 +56,11 @@ export const mkEnvironment = (
     } else {
       const wrappedScript = nixStrLit`
         touch $out
+        echo copying source
         cp -r ${nixRaw("src")} src
+        chmod -R u+rwX src
         cd src
+        ${prefix || ""}
         ${checkScript}
       `;
       return {

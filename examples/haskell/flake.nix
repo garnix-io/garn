@@ -142,8 +142,11 @@
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
         touch \$out
+        echo copying source
         cp -r ${src} src
+        chmod -R u+rwX src
         cd src
+        
         ${"hlint *.hs"}
       "
           ;

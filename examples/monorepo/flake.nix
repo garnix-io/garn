@@ -60,7 +60,7 @@
               modules = gomod2nix-toml;
             }
           ;
-          "npmFrontend_pkg" =
+          "npmFrontend_node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -72,7 +72,7 @@
                 }
               ;
             in
-            npmlock2nix.v2.build
+            npmlock2nix.v2.node_modules
               {
                 src =
                   (
@@ -96,15 +96,7 @@
                       }
                   )
                 ;
-                preBuild = ''
-                  mkdir fake-home
-                  HOME=$(pwd)/fake-home
-                '';
-                buildCommands = [ "npm run test -- --watchAll=false" "mkdir $out" ];
-                installPhase = "true";
-                node_modules_attrs = {
-                  nodejs = pkgs.nodejs-18_x;
-                };
+                nodejs = pkgs.nodejs-18_x;
               }
           ;
           "yarnFrontend_pkg" =
@@ -233,39 +225,12 @@
             })
           ;
           "npmFrontend" =
-            let
-              npmlock2nix = import npmlock2nix-repo {
-                inherit pkgs;
-              };
-            in
-            npmlock2nix.v2.shell {
-              src =
-                (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./frontend-npm;
-                      name = "source";
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix" &&
-                        fileName != "garn.ts";
-                    }
-                )
-              ;
-              node_modules_mode = "copy";
-              node_modules_attrs = {
-                nodejs = pkgs.nodejs-18_x;
-              };
-            }
+            (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.nodejs-18_x ];
+            })
           ;
           "startAll" = pkgs.mkShell { };
           "yarnFrontend" =
@@ -383,38 +348,13 @@
             "program" = "${
       let
         dev = 
-      let
-        npmlock2nix = import npmlock2nix-repo {
-          inherit pkgs;
-        };
-      in
-      npmlock2nix.v2.shell {
-        src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./frontend-npm;
-      name = "source";
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix" &&
-         fileName != "garn.ts";
-    })
-;
-        node_modules_mode = "copy";
-        node_modules_attrs = {
-          nodejs = pkgs.nodejs-18_x;
-        };
-      }
-    ;
+        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodejs-18_x];
+        })
+      ;
         shell = "cd frontend-npm && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
@@ -551,38 +491,13 @@
 "npm frontend" = {"command" = "${
       let
         dev = 
-      let
-        npmlock2nix = import npmlock2nix-repo {
-          inherit pkgs;
-        };
-      in
-      npmlock2nix.v2.shell {
-        src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./frontend-npm;
-      name = "source";
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix" &&
-         fileName != "garn.ts";
-    })
-;
-        node_modules_mode = "copy";
-        node_modules_attrs = {
-          nodejs = pkgs.nodejs-18_x;
-        };
-      }
-    ;
+        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodejs-18_x];
+        })
+      ;
         shell = "cd frontend-npm && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;

@@ -20,7 +20,7 @@
           };
         in
         {
-          "frontend_pkg" =
+          "frontend_node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -32,7 +32,7 @@
                 }
               ;
             in
-            npmlock2nix.v2.build
+            npmlock2nix.v2.node_modules
               {
                 src =
                   (
@@ -56,15 +56,7 @@
                       }
                   )
                 ;
-                preBuild = ''
-                  mkdir fake-home
-                  HOME=$(pwd)/fake-home
-                '';
-                buildCommands = [ "" "mkdir $out" ];
-                installPhase = "true";
-                node_modules_attrs = {
-                  nodejs = pkgs.nodejs-18_x;
-                };
+                nodejs = pkgs.nodejs-18_x;
               }
           ;
         }
@@ -76,23 +68,9 @@
             inherit system;
           };
         in
-        { }
-      );
-      devShells = forAllSystems (system:
-        let
-          pkgs = import "${nixpkgs}" {
-            config.allowUnfree = true;
-            inherit system;
-          };
-        in
         {
-          "frontend" =
+          "frontend_test" =
             let
-              npmlock2nix = import npmlock2nix-repo {
-                inherit pkgs;
-              };
-            in
-            npmlock2nix.v2.shell {
               src =
                 (
                   let
@@ -115,30 +93,40 @@
                     }
                 )
               ;
-              node_modules_mode = "copy";
-              node_modules_attrs = {
-                nodejs = pkgs.nodejs-18_x;
-              };
-            }
-          ;
-        }
-      );
-      apps = forAllSystems (system:
-        let
-          pkgs = import "${nixpkgs}" { inherit system; };
-        in
-        {
-          "frontend" = {
-            "type" = "app";
-            "program" = "${
-      let
-        dev = 
-      let
-        npmlock2nix = import npmlock2nix-repo {
-          inherit pkgs;
-        };
-      in
-      npmlock2nix.v2.shell {
+              dev =
+                (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+                  nativeBuildInputs =
+                    previousAttrs.nativeBuildInputs
+                    ++
+                    [ pkgs.nodejs-18_x ];
+                })
+              ;
+            in
+            pkgs.runCommand "check"
+              {
+                buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+              } "
+        touch \$out
+        echo copying source
+        cp -r ${src} src
+        chmod -R u+rwX src
+        cd src
+        ${"
+      echo copying node_modules
+      cp -r ${
+    let
+      npmlock2nix = import npmlock2nix-repo {
+        inherit pkgs;
+      };
+      pkgs = 
+      import "${nixpkgs}" {
+        config.permittedInsecurePackages = [];
+        inherit system;
+      }
+    ;
+    in
+    npmlock2nix.v2.node_modules
+      {
         src = 
   (let
     lib = pkgs.lib;
@@ -159,12 +147,135 @@
          fileName != "garn.ts";
     })
 ;
-        node_modules_mode = "copy";
-        node_modules_attrs = {
-          nodejs = pkgs.nodejs-18_x;
-        };
+        nodejs = pkgs.nodejs-18_x;
+      }
+  }/node_modules .
+    "}
+        ${"npm run test"}
+      "
+          ;
+          "frontend_tsc" =
+            let
+              src =
+                (
+                  let
+                    lib = pkgs.lib;
+                    lastSafe = list:
+                      if lib.lists.length list == 0
+                      then null
+                      else lib.lists.last list;
+                  in
+                  builtins.path
+                    {
+                      path = ./.;
+                      name = "source";
+                      filter = path: type:
+                        let
+                          fileName = lastSafe (lib.strings.splitString "/" path);
+                        in
+                        fileName != "flake.nix" &&
+                        fileName != "garn.ts";
+                    }
+                )
+              ;
+              dev =
+                (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+                  nativeBuildInputs =
+                    previousAttrs.nativeBuildInputs
+                    ++
+                    [ pkgs.nodejs-18_x ];
+                })
+              ;
+            in
+            pkgs.runCommand "check"
+              {
+                buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+              } "
+        touch \$out
+        echo copying source
+        cp -r ${src} src
+        chmod -R u+rwX src
+        cd src
+        ${"
+      echo copying node_modules
+      cp -r ${
+    let
+      npmlock2nix = import npmlock2nix-repo {
+        inherit pkgs;
+      };
+      pkgs = 
+      import "${nixpkgs}" {
+        config.permittedInsecurePackages = [];
+        inherit system;
       }
     ;
+    in
+    npmlock2nix.v2.node_modules
+      {
+        src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
+        nodejs = pkgs.nodejs-18_x;
+      }
+  }/node_modules .
+    "}
+        ${"npm run tsc"}
+      "
+          ;
+        }
+      );
+      devShells = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+        {
+          "frontend" =
+            (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.nodejs-18_x ];
+            })
+          ;
+        }
+      );
+      apps = forAllSystems (system:
+        let
+          pkgs = import "${nixpkgs}" { inherit system; };
+        in
+        {
+          "frontend" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = 
+        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodejs-18_x];
+        })
+      ;
         shell = "cd . && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;

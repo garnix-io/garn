@@ -18,7 +18,6 @@ export const npmFrontend = garn.javascript.mkNpmProject({
   description: "frontend test app created by create-react-app",
   src: "frontend-npm",
   nodeVersion: "18",
-  testCommand: "npm run test -- --watchAll=false",
 });
 
 export const startAll = garn.processCompose({
