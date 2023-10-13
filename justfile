@@ -125,6 +125,9 @@ check-examples:
   just run-garn frontend-create-react-app check main
   just run-garn frontend-yarn-webpack check frontend
   just run-garn go-http-backend check server
+  just run-garn monorepo check backend
+  just run-garn monorepo check npmFrontend
+  just run-garn monorepo check yarnFrontend
 
 codegen: hpack && typescript-check
   cabal run codegen

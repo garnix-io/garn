@@ -184,7 +184,7 @@
           '';
         }
     ;
-          shell = "yarn start";
+          shell = "cd . && yarn start";
           buildPath = pkgs.runCommand "build-inputs-path" {
             inherit (dev) buildInputs nativeBuildInputs;
           } "echo $PATH > $out";
