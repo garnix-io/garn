@@ -30,52 +30,28 @@ export const check = (
 
 export const mkEnvironment = (
   nixExpression = nixRaw`pkgs.mkShell {}`,
-  src?: string,
-  prefix?: NixExpression
+  setup?: NixExpression
 ): Environment => ({
   tag: "environment",
   nixExpression,
   check(this, s, ...args): Check {
     const checkScript = nixStrLit(s, ...args);
-    if (src == null) {
-      const wrappedScript = nixStrLit`
-        touch $out
-        ${checkScript}
-      `;
-      return {
-        tag: "check",
-        nixExpression: nixRaw`
-          let
-              dev = ${this.nixExpression};
-          in
-          pkgs.runCommand "check" {
-            buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-          } ${wrappedScript}
-        `,
-      };
-    } else {
-      const wrappedScript = nixStrLit`
-        touch $out
-        echo copying source
-        cp -r ${nixRaw("src")} src
-        chmod -R u+rwX src
-        cd src
-        ${prefix || ""}
-        ${checkScript}
-      `;
-      return {
-        tag: "check",
-        nixExpression: nixRaw`
-          let
-              src = ${nixSource(src)};
-              dev = ${this.nixExpression};
-          in
-          pkgs.runCommand "check" {
-            buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-          } ${wrappedScript}
-        `,
-      };
-    }
+    const wrappedScript = nixStrLit`
+      touch $out
+      ${setup || ""}
+      ${checkScript}
+    `;
+    return {
+      tag: "check",
+      nixExpression: nixRaw`
+        let
+            dev = ${this.nixExpression};
+        in
+        pkgs.runCommand "check" {
+          buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+        } ${wrappedScript}
+      `,
+    };
   },
   shell(this, s, ...args) {
     const cmdToExecute = nixStrLit(s, ...args);
@@ -131,5 +107,10 @@ export const packageToEnvironment = (pkg: Package, src: string): Environment =>
         else pkgs.mkShell { inputsFrom = [ expr ]; }
       )
     `,
-    src
+    nixStrLit`
+      echo copying source
+      cp -r ${nixSource(src)} src
+      chmod -R u+rwX src
+      cd src
+    `
   );

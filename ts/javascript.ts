@@ -69,8 +69,11 @@ export const mkNpmProject = (args: {
   `);
   const devShell: Environment = mkEnvironment(
     undefined,
-    args.src,
     nixStrLit`
+      echo copying source
+      cp -r ${nixSource(args.src)} src
+      chmod -R u+rwX src
+      cd src
       echo copying node_modules
       cp -r ${node_modules}/node_modules .
     `
@@ -148,7 +151,12 @@ export const mkYarnProject = (args: {
           `};
         }
     `,
-    args.src
+    nixStrLit`
+      echo copying source
+      cp -r ${nixSource(args.src)} src
+      chmod -R u+rwX src
+      cd src
+    `
   );
   const startDev: Executable = devShell.shell`cd ${args.src} && ${startCommand}`;
   return mkProject(

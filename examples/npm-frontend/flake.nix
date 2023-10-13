@@ -71,28 +71,6 @@
         {
           "frontend_test" =
             let
-              src =
-                (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./.;
-                      name = "source";
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix" &&
-                        fileName != "garn.ts";
-                    }
-                )
-              ;
               dev =
                 (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                   nativeBuildInputs =
@@ -106,12 +84,31 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-        touch \$out
-        echo copying source
-        cp -r ${src} src
-        chmod -R u+rwX src
-        cd src
-        ${"
+      touch \$out
+      ${"
+      echo copying source
+      cp -r ${
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+} src
+      chmod -R u+rwX src
+      cd src
       echo copying node_modules
       cp -r ${
     let
@@ -151,33 +148,11 @@
       }
   }/node_modules .
     "}
-        ${"npm run test"}
-      "
+      ${"npm run test"}
+    "
           ;
           "frontend_tsc" =
             let
-              src =
-                (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./.;
-                      name = "source";
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix" &&
-                        fileName != "garn.ts";
-                    }
-                )
-              ;
               dev =
                 (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                   nativeBuildInputs =
@@ -191,12 +166,31 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-        touch \$out
-        echo copying source
-        cp -r ${src} src
-        chmod -R u+rwX src
-        cd src
-        ${"
+      touch \$out
+      ${"
+      echo copying source
+      cp -r ${
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+} src
+      chmod -R u+rwX src
+      cd src
       echo copying node_modules
       cp -r ${
     let
@@ -236,8 +230,8 @@
       }
   }/node_modules .
     "}
-        ${"npm run tsc"}
-      "
+      ${"npm run tsc"}
+    "
           ;
         }
       );
