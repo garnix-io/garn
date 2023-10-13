@@ -50,8 +50,8 @@ const formatFlake = (
 ): NixExpression => {
   const projects = findProjects(garnExports);
 
-  const packages = mapValues(p => p.nixExpression, collectPackages(projects));
-  const checks = mapValues(p => p.nixExpression, collectChecks(projects));
+  const packages = mapValues((p) => p.nixExpression, collectPackages(projects));
+  const checks = mapValues((p) => p.nixExpression, collectChecks(projects));
   const shells = mapValues(
     (project) => project.defaultEnvironment?.nixExpression,
     projects

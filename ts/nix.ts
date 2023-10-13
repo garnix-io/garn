@@ -20,14 +20,17 @@ export function nixRaw(
 ): NixExpression {
   if (typeof s === "string") return { rawNixExpressionString: s };
   const rawNixExpressionString = s.reduce(
-    (acc, part, i) => acc + part + (interpolations[i]?.rawNixExpressionString ?? ""),
+    (acc, part, i) =>
+      acc + part + (interpolations[i]?.rawNixExpressionString ?? ""),
     ""
   );
   return { rawNixExpressionString };
 }
 
 export function nixList(elements: Array<NixExpression>): NixExpression {
-  return nixRaw("[" + elements.map((p) => p.rawNixExpressionString.trim()).join(" ") + "]");
+  return nixRaw(
+    "[" + elements.map((p) => p.rawNixExpressionString.trim()).join(" ") + "]"
+  );
 }
 
 export function nixAttrSet(
@@ -72,9 +75,17 @@ export function nixStrLit(
           return acc + part + escape(interpolation);
         case "object":
           if ("rawNixExpressionString" in interpolation) {
-            return acc + part + "${" + interpolation.rawNixExpressionString + "}";
+            return (
+              acc + part + "${" + interpolation.rawNixExpressionString + "}"
+            );
           }
-          return acc + part + "${" + interpolation.nixExpression.rawNixExpressionString + "}";
+          return (
+            acc +
+            part +
+            "${" +
+            interpolation.nixExpression.rawNixExpressionString +
+            "}"
+          );
         case "undefined":
           return acc + part;
       }
@@ -96,7 +107,8 @@ Deno.test("nixStrLit correctly serializes into a nix expression", () => {
     '"with package ${pkgs.hello} works"'
   );
   assertEquals(
-    nixStrLit`escaped dollars in strings \${should not interpolate}`.rawNixExpressionString,
+    nixStrLit`escaped dollars in strings \${should not interpolate}`
+      .rawNixExpressionString,
     '"escaped dollars in strings \\${should not interpolate}"'
   );
   assertEquals(

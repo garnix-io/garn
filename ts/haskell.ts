@@ -35,7 +35,9 @@ export const mkHaskell = (args: MkHaskellArgs): Project & { pkg: Package } => {
       pkg,
     }
   ).withDevTools([
-    mkPackage(`pkgs.haskell.packages.${args.compiler}.cabal-install`),
+    mkPackage(
+      nixRaw`pkgs.haskell.packages.${nixRaw(args.compiler)}.cabal-install`
+    ),
   ]);
 };
 
