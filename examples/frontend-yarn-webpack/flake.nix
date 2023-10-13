@@ -22,10 +22,12 @@
         {
           frontend_pkg =
             let
-              pkgs = import "${nixpkgs}" {
-                config.permittedInsecurePackages = [ ];
-                inherit system;
-              };
+              pkgs =
+                import "${nixpkgs}" {
+                  config.permittedInsecurePackages = [ ];
+                  inherit system;
+                }
+              ;
               packageJson = pkgs.lib.importJSON ./package.json;
               yarnPackage =
                 pkgs.yarn2nix-moretea.mkYarnPackage {
@@ -56,19 +58,20 @@
                   buildPhase = "yarn mocha";
                   dontStrip = true;
                 };
+              nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
             in
-            (pkgs.writeScriptBin "start-server" ''
-              #!/usr/bin/env bash
+            (pkgs.writeScriptBin "start-server" "
+        #!/usr/bin/env bash
 
-              set -eu
+        set -eu
 
-              export PATH=${pkgs.yarn}/bin:$PATH
-              export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
-              yarn --version
-              yarn start
-            '')
-          ;
-        });
+        export PATH=${pkgs.yarn}/bin:\$PATH
+        export PATH=${nodeModulesPath}/.bin:\$PATH
+        yarn --version
+        yarn start
+      ");
+        }
+      );
       checks = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -76,7 +79,8 @@
             inherit system;
           };
         in
-        { });
+        { }
+      );
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -87,10 +91,12 @@
         {
           frontend =
             let
-              pkgs = import "${nixpkgs}" {
-                config.permittedInsecurePackages = [ ];
-                inherit system;
-              };
+              pkgs =
+                import "${nixpkgs}" {
+                  config.permittedInsecurePackages = [ ];
+                  inherit system;
+                }
+              ;
               packageJson = pkgs.lib.importJSON ./package.json;
               yarnPackage =
                 pkgs.yarn2nix-moretea.mkYarnPackage {
@@ -121,32 +127,34 @@
                   buildPhase = "yarn mocha";
                   dontStrip = true;
                 };
+              nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
             in
             pkgs.mkShell {
               buildInputs = [ pkgs.yarn ];
-              shellHook = ''
-                export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
-                export NODE_PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules:$NODE_PATH
-              '';
-            }
-          ;
-        });
+              shellHook = "
+            export PATH=${nodeModulesPath}/.bin:\$PATH
+            export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
+          ";
+            };
+        }
+      );
       apps = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-
           frontend = {
             type = "app";
             program = "${
-        let
-          dev = 
       let
-          pkgs = import "${nixpkgs}" {
+        dev = 
+      let
+          pkgs = 
+      import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
         inherit system;
-      };
+      }
+    ;
           packageJson = pkgs.lib.importJSON ./package.json;
           yarnPackage = 
     pkgs.yarn2nix-moretea.mkYarnPackage {
@@ -175,29 +183,30 @@
       buildPhase = "yarn mocha";
       dontStrip = true;
     };
+          nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
       in
         pkgs.mkShell {
           buildInputs = [ pkgs.yarn ];
-          shellHook = ''
-            export PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules/.bin:$PATH
-            export NODE_PATH=${yarnPackage}/libexec/${packageJson.name}/node_modules:$NODE_PATH
-          '';
+          shellHook = "
+            export PATH=${nodeModulesPath}/.bin:\$PATH
+            export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
+          ";
         }
     ;
-          shell = "cd . && yarn start";
-          buildPath = pkgs.runCommand "build-inputs-path" {
-            inherit (dev) buildInputs nativeBuildInputs;
-          } "echo $PATH > $out";
-        in
-        pkgs.writeScript "shell-env"  ''
-          #!${pkgs.bash}/bin/bash
-          export PATH=$(cat ${buildPath}):$PATH
-          ${dev.shellHook}
-          ${shell} "$@"
-        ''
-      }";
+        shell = "cd . && yarn start";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
           };
-
-        });
+        }
+      );
     };
 }

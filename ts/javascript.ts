@@ -1,25 +1,29 @@
 import { Environment, mkEnvironment } from "./environment.ts";
 import { Executable } from "./executable.ts";
 import { mkPackage } from "./package.ts";
-import { Project, mkProject } from "./project.ts";
+import { mkProject, Project } from "./project.ts";
 import { nixSource } from "./internal/utils.ts";
+import { nixList, NixExpression, nixRaw, nixStrLit } from "./nix.ts";
 
 const nodeVersions = {
   "14": {
-    pkg: "nodejs-14_x",
-    permittedInsecurePackages: ["nodejs-14.21.3", "openssl-1.1.1v"],
+    pkg: nixRaw`pkgs.nodejs-14_x`,
+    permittedInsecurePackages: nixList([
+      nixStrLit`nodejs-14.21.3`,
+      nixStrLit`openssl-1.1.1v`,
+    ]),
   },
   "16": {
-    pkg: "nodejs-16_x",
-    permittedInsecurePackages: ["nodejs-16.20.2"],
+    pkg: nixRaw`pkgs.nodejs-16_x`,
+    permittedInsecurePackages: nixList([nixStrLit`nodejs-16.20.2`]),
   },
   "18": {
-    pkg: "nodejs-18_x",
-    permittedInsecurePackages: [],
+    pkg: nixRaw`pkgs.nodejs-18_x`,
+    permittedInsecurePackages: nixList([]),
   },
 } satisfies Record<
   string,
-  { pkg: string; permittedInsecurePackages: Array<string> }
+  { pkg: NixExpression; permittedInsecurePackages: NixExpression }
 >;
 
 type NodeVersion = keyof typeof nodeVersions;
@@ -27,15 +31,13 @@ type NodeVersion = keyof typeof nodeVersions;
 const fromNodeVersion = (version: NodeVersion) => {
   const { pkg, permittedInsecurePackages } = nodeVersions[version];
   return {
-    pkgs: `
+    pkgs: nixRaw`
       import "\${nixpkgs}" {
-        config.permittedInsecurePackages = [${permittedInsecurePackages
-          .map((x) => JSON.stringify(x))
-          .join(" ")}];
+        config.permittedInsecurePackages = ${permittedInsecurePackages};
         inherit system;
       }
-    `.trim(),
-    nodejs: `pkgs.${pkg}`,
+    `,
+    nodejs: pkg,
   };
 };
 
@@ -47,7 +49,7 @@ export const mkNpmFrontend = (args: {
   testCommand?: string;
 }): Project => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
-  const pkg = mkPackage(`
+  const pkg = mkPackage(nixRaw`
     let
       npmlock2nix = import npmlock2nix-repo {
         inherit pkgs;
@@ -61,7 +63,7 @@ export const mkNpmFrontend = (args: {
           mkdir fake-home
           HOME=$(pwd)/fake-home
         '';
-        buildCommands = [ ${JSON.stringify(
+        buildCommands = [ ${nixStrLit(
           args.testCommand ?? "npm test"
         )} "mkdir $out" ];
         installPhase = "true";
@@ -71,7 +73,7 @@ export const mkNpmFrontend = (args: {
       }
   `);
   const devShell: Environment = mkEnvironment(
-    `
+    nixRaw`
       let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
@@ -112,44 +114,50 @@ export const mkYarnFrontend = (args: {
   serverStartCommand: string;
 }): Project => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
-  const yarnPackage = `
+  const yarnPackage = nixRaw`
     pkgs.yarn2nix-moretea.mkYarnPackage {
       nodejs = ${nodejs};
       yarn = pkgs.yarn;
       src = ${nixSource(args.src)};
-      buildPhase = ${JSON.stringify(args.testCommand)};
+      buildPhase = ${nixStrLit(args.testCommand)};
       dontStrip = true;
     }`;
-  const pkg = mkPackage(`
+  const pkg = mkPackage(nixRaw`
     let
         pkgs = ${pkgs};
-        packageJson = pkgs.lib.importJSON ${args.src}/package.json;
+        packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
         yarnPackage = ${yarnPackage};
+        nodeModulesPath = ${nixStrLit`${nixRaw("yarnPackage")}/libexec/${nixRaw(
+          "packageJson.name"
+        )}/node_modules`};
     in
-      (pkgs.writeScriptBin "start-server" ''
+      (pkgs.writeScriptBin "start-server" ${nixStrLit`
         #!/usr/bin/env bash
 
         set -eu
 
-        export PATH=\${pkgs.yarn}/bin:$PATH
-        export PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules/.bin:$PATH
+        export PATH=${nixRaw("pkgs.yarn")}/bin:$PATH
+        export PATH=${nixRaw("nodeModulesPath")}/.bin:$PATH
         yarn --version
         ${args.serverStartCommand}
-      '')
+      `})
   `);
   const devShell: Environment = mkEnvironment(
-    `
+    nixRaw`
       let
           pkgs = ${pkgs};
-          packageJson = pkgs.lib.importJSON ${args.src}/package.json;
+          packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
           yarnPackage = ${yarnPackage};
+          nodeModulesPath = ${nixStrLit`${nixRaw(
+            "yarnPackage"
+          )}/libexec/${nixRaw("packageJson.name")}/node_modules`};
       in
         pkgs.mkShell {
           buildInputs = [ pkgs.yarn ];
-          shellHook = ''
-            export PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules/.bin:$PATH
-            export NODE_PATH=\${yarnPackage}/libexec/\${packageJson.name}/node_modules:$NODE_PATH
-          '';
+          shellHook = ${nixStrLit`
+            export PATH=${nixRaw("nodeModulesPath")}/.bin:$PATH
+            export NODE_PATH=${nixRaw("nodeModulesPath")}:$NODE_PATH
+          `};
         }
     `,
     args.src
