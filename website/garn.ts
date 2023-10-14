@@ -1,6 +1,6 @@
 import * as garn from "../ts/mod.ts";
 
-const base = garn.javascript
+export const website = garn.javascript
   .mkNpmProject({
     description: "The garn.io website",
     nodeVersion: "18",
@@ -8,7 +8,18 @@ const base = garn.javascript
   })
   .addCheck("tsc")`npm run tsc`;
 
-export default {
-  ...base,
-  defaultExecutable: base.shell`npm install ; npm run dev`,
-};
+const topLevelExecutable = (
+  description: string,
+  executable: garn.Executable
+): garn.Project =>
+  garn.mkProject({ description, defaultExecutable: executable }, {});
+
+export const dev = topLevelExecutable(
+  "run the website in development mode",
+  website.shell`npm install ; npm run dev`
+);
+
+export const build = topLevelExecutable(
+  "build the website",
+  website.shell`npm install ; npm run build`
+);

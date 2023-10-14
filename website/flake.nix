@@ -19,7 +19,46 @@
             inherit system;
           };
         in
-        { }
+        {
+          website_node_modules =
+            let
+              npmlock2nix = import npmlock2nix-repo {
+                inherit pkgs;
+              };
+              pkgs =
+                import "${nixpkgs}" {
+                  config.permittedInsecurePackages = [ ];
+                  inherit system;
+                }
+              ;
+            in
+            npmlock2nix.v2.node_modules
+              {
+                src =
+                  (
+                    let
+                      lib = pkgs.lib;
+                      lastSafe = list:
+                        if lib.lists.length list == 0
+                        then null
+                        else lib.lists.last list;
+                    in
+                    builtins.path
+                      {
+                        path = ./.;
+                        name = "source";
+                        filter = path: type:
+                          let
+                            fileName = lastSafe (lib.strings.splitString "/" path);
+                          in
+                          fileName != "flake.nix" &&
+                          fileName != "garn.ts";
+                      }
+                  )
+                ;
+                nodejs = pkgs.nodejs-18_x;
+              };
+        }
       );
       checks = forAllSystems (system:
         let
@@ -29,30 +68,8 @@
           };
         in
         {
-          default_tsc =
+          website_tsc =
             let
-              src =
-                (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./.;
-                      name = "source";
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix" &&
-                        fileName != "garn.ts";
-                    }
-                )
-              ;
               dev =
                 (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                   nativeBuildInputs =
@@ -66,87 +83,32 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-        touch \$out
-        cp -r ${src} src
-        chmod -R u+rwX src
-        cd src
-        ${"
-      echo pwd: \$(pwd)
+      touch \$out
+      ${"
+      echo copying source
+      cp -r ${
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+} src
+      chmod -R u+rwX src
+      cd src
       echo copying node_modules
-      echo ${
-    let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = 
-      import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      }
-    ;
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./.;
-      name = "source";
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix" &&
-         fileName != "garn.ts";
-    })
-;
-        nodejs = pkgs.nodejs-18_x;
-      }
-  }
-      ls -la ${
-    let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = 
-      import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      }
-    ;
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./.;
-      name = "source";
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix" &&
-         fileName != "garn.ts";
-    })
-;
-        nodejs = pkgs.nodejs-18_x;
-      }
-  }
       cp -r ${
     let
       npmlock2nix = import npmlock2nix-repo {
@@ -185,12 +147,8 @@
       }
   }/node_modules .
     "}
-        ${"
-    ls -la
-    pwd
-    npm run tsc
-  "}
-      ";
+      ${"npm run tsc"}
+    ";
         }
       );
       devShells = forAllSystems (system:
@@ -201,7 +159,7 @@
           };
         in
         {
-          default = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+          website = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
@@ -214,7 +172,32 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          default = {
+          build = {
+            type = "app";
+            program = "${
+      let
+        dev = 
+        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodejs-18_x];
+        })
+      ;
+        shell = "npm install ; npm run build";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+          };
+          dev = {
             type = "app";
             program = "${
       let
