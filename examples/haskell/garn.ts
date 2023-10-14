@@ -2,7 +2,7 @@ import * as garn from "http://localhost:8777/mod.ts";
 import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
 
 export const helloFromHaskell = garn.haskell
-  .mkHaskell({
+  .mkHaskellProject({
     description: "My haskell executable",
     executable: "helloFromHaskell",
     compiler: "ghc94",

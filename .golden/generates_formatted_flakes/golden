@@ -20,7 +20,7 @@
           };
         in
         {
-          foo_pkg =
+          "foo_pkg" =
             (pkgs.haskell.packages.ghc94.callCabal2nix
               "garn-pkg"
 
@@ -50,7 +50,8 @@
               meta.mainProgram = "garn-test";
             }
           ;
-        });
+        }
+      );
       checks = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -58,7 +59,8 @@
             inherit system;
           };
         in
-        { });
+        { }
+      );
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -67,57 +69,64 @@
           };
         in
         {
-          foo =
-            let
-              expr =
-                (pkgs.haskell.packages.ghc94.callCabal2nix
-                  "garn-pkg"
+          "foo" =
+            (
+              let
+                expr =
+                  (pkgs.haskell.packages.ghc94.callCabal2nix
+                    "garn-pkg"
 
-                  (
-                    let
-                      lib = pkgs.lib;
-                      lastSafe = list:
-                        if lib.lists.length list == 0
-                        then null
-                        else lib.lists.last list;
-                    in
-                    builtins.path
-                      {
-                        path = ./.;
-                        name = "source";
-                        filter = path: type:
-                          let
-                            fileName = lastSafe (lib.strings.splitString "/" path);
-                          in
-                          fileName != "flake.nix" &&
-                          fileName != "garn.ts";
-                      }
-                  )
+                    (
+                      let
+                        lib = pkgs.lib;
+                        lastSafe = list:
+                          if lib.lists.length list == 0
+                          then null
+                          else lib.lists.last list;
+                      in
+                      builtins.path
+                        {
+                          path = ./.;
+                          name = "source";
+                          filter = path: type:
+                            let
+                              fileName = lastSafe (lib.strings.splitString "/" path);
+                            in
+                            fileName != "flake.nix" &&
+                            fileName != "garn.ts";
+                        }
+                    )
 
-                  { })
-                // {
-                  meta.mainProgram = "garn-test";
-                }
-              ;
-            in
-            (if expr ? env
-            then expr.env
-            else pkgs.mkShell { inputsFrom = [ expr ]; }
-            )
+                    { })
+                  // {
+                    meta.mainProgram = "garn-test";
+                  }
+                ;
+              in
+              (if expr ? env
+              then expr.env
+              else pkgs.mkShell { inputsFrom = [ expr ]; }
+              )
+            ).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.haskell.packages.ghc94.cabal-install ];
+            })
           ;
-        });
+        }
+      );
       apps = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-
-          foo = {
-            type = "app";
-            program = "${
-        let
-          dev = pkgs.mkShell {};
-          shell = "${
+          "foo" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = pkgs.mkShell {};
+        shell = "${
     (pkgs.haskell.packages.ghc94.callCabal2nix
       "garn-pkg"
       
@@ -145,19 +154,19 @@
         meta.mainProgram = "garn-test";
       }
   }/bin/garn-test";
-        in
-        pkgs.runCommand "shell-env" {
-          buildInputs = dev.buildInputs;
-          nativeBuildInputs = dev.nativeBuildInputs;
-        } ''
-          echo "export PATH=$PATH:$PATH" > $out
-          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
-          chmod +x $out
-        ''
-      }";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
           };
-
-        });
+        }
+      );
     };
 }

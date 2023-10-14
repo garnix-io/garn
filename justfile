@@ -15,7 +15,7 @@ fmt: fmt-nix fmt-haskell fmt-typescript
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
 # Deploy the current website
-deploy-website:
+deploy-website: build-install-script
   #!/usr/bin/env bash
   set -eux
   if [[ -z $(git status -s) ]]; then
@@ -119,12 +119,13 @@ run-garn example *args="": hpack
   cabal run garn:garn -- {{ args }}
 
 check-examples:
-  just run-garn haskell check helloFromHaskell
+  just run-garn haskell check
   just run-garn haskell run helloFromHaskell
   echo "node --version" | just run-garn npm-frontend enter frontend
-  just run-garn frontend-create-react-app check main
-  just run-garn frontend-yarn-webpack check frontend
-  just run-garn go-http-backend check server
+  just run-garn frontend-create-react-app check
+  just run-garn frontend-yarn-webpack check
+  just run-garn go-http-backend check
+  just run-garn monorepo check
 
 codegen: hpack && typescript-check
   cabal run codegen
@@ -137,6 +138,11 @@ check-isolated-garn:
   test/check-isolated-garn.sh
 
 # Start the docs website server
-docs-server:
+docs-server: build-install-script
   cd website && npm install
   cd website && npm run dev
+
+build-install-script:
+  nix build -L .#installScript
+  mkdir -p website/public
+  cat result > website/public/install.sh

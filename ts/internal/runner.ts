@@ -1,10 +1,9 @@
 import { isProject, Project } from "../project.ts";
-import { Package, isPackage } from "../package.ts";
-import { Executable } from "../executable.ts";
+import { isPackage, Package } from "../package.ts";
 import { Check, isCheck } from "../check.ts";
-import { mapKeys } from "./utils.ts";
+import { mapKeys, mapValues } from "./utils.ts";
 import { GOMOD2NIX_REPO } from "../go.ts";
-import { Environment } from "../environment.ts";
+import { nixAttrSet, NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 
 // This needs to be in sync with `GarnConfig` in GarnConfig.hs
 export type GarnConfig = {
@@ -26,7 +25,7 @@ export const toGarnConfig = (
   garnExports: Record<string, unknown>
 ): GarnConfig => ({
   targets: toTargets(garnExports),
-  flakeFile: formatFlake(nixpkgsInput, garnExports),
+  flakeFile: formatFlake(nixpkgsInput, garnExports).rawNixExpressionString,
 });
 
 const toTargets = (garnExports: Record<string, unknown>): Targets => {
@@ -48,41 +47,29 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
 const formatFlake = (
   nixpkgsInput: string,
   garnExports: Record<string, unknown>
-): string => {
+): NixExpression => {
   const projects = findProjects(garnExports);
-  const packages = collectPackages(projects);
-  const packagesString = Object.entries(packages)
-    .map(([name, pkg]) => `${name} = ${pkg.nixExpression};`)
-    .join("\n");
-  const checks = collectChecks(projects);
-  const checksString = Object.entries(checks)
-    .map(([name, check]) => `${name} = ${check.nixExpression};`)
-    .join("\n");
-  const shellsString = Object.entries(projects)
-    .map(([name, project]) => [name, project.defaultEnvironment] as const)
-    .filter((x): x is [string, Environment] => x[1] != null)
-    .map(
-      ([name, defaultEnvironment]) =>
-        `${name} = ${defaultEnvironment.nixExpr || "pkgs.mkShell {}"};`
-    )
-    .join("\n");
-  const appsString = Object.entries(projects)
-    .map(([name, project]) => [name, project.defaultExecutable] as const)
-    .filter((x): x is [string, Executable] => x[1] != null)
-    .map(
-      ([name, executable]) =>
-        `
-        ${name} = {
-          type = "app";
-          program = ${executable.nixExpression};
-        };
-      `
-    )
-    .join("\n");
-  return `{
-    inputs.nixpkgs.url = "${nixpkgsInput}";
+
+  const packages = mapValues((p) => p.nixExpression, collectPackages(projects));
+  const checks = mapValues((p) => p.nixExpression, collectChecks(projects));
+  const shells = mapValues(
+    (project) => project.defaultEnvironment?.nixExpression,
+    projects
+  );
+  const apps = mapValues(
+    ({ defaultExecutable }) =>
+      defaultExecutable
+        ? nixAttrSet({
+            type: nixStrLit`app`,
+            program: defaultExecutable.nixExpression,
+          })
+        : undefined,
+    projects
+  );
+  return nixRaw`{
+    inputs.nixpkgs.url = ${nixStrLit(nixpkgsInput)};
     inputs.flake-utils.url = "github:numtide/flake-utils";
-    inputs.gomod2nix-repo.url = "${GOMOD2NIX_REPO}";
+    inputs.gomod2nix-repo.url = ${nixStrLit(GOMOD2NIX_REPO)};
     inputs.npmlock2nix-repo = {
       url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81";
       flake = false;
@@ -100,9 +87,8 @@ const formatFlake = (
               inherit system;
             };
           in
-          {
-            ${packagesString}
-          });
+            ${nixAttrSet(packages)}
+          );
         checks = forAllSystems (system:
           let
             pkgs = import "\${nixpkgs}" {
@@ -110,9 +96,8 @@ const formatFlake = (
               inherit system;
             };
           in
-          {
-            ${checksString}
-          });
+            ${nixAttrSet(checks)}
+          );
         devShells = forAllSystems (system:
           let
             pkgs = import "\${nixpkgs}" {
@@ -120,15 +105,13 @@ const formatFlake = (
               inherit system;
             };
           in
-          {
-            ${shellsString}
-          });
+            ${nixAttrSet(shells)}
+          );
         apps = forAllSystems (system: let
             pkgs = import "\${nixpkgs}" { inherit system; };
         in
-        {
-          ${appsString}
-        });
+          ${nixAttrSet(apps)}
+        );
       };
   }`;
 };

@@ -20,7 +20,7 @@
           };
         in
         {
-          server_pkg =
+          "server_pkg" =
             let
               gomod2nix = gomod2nix-repo.legacyPackages.${system};
               gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -34,7 +34,7 @@
             gomod2nix.buildGoApplication {
               pname = "go-http-backend";
               version = "0.1";
-              go = pkgs.go_1_18;
+              go = pkgs.go_1_20;
               src =
                 (
                   let
@@ -60,7 +60,8 @@
               modules = gomod2nix-toml;
             }
           ;
-        });
+        }
+      );
       checks = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -68,7 +69,8 @@
             inherit system;
           };
         in
-        { });
+        { }
+      );
       devShells = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" {
@@ -77,7 +79,7 @@
           };
         in
         {
-          server =
+          "server" =
             (
               let
                 expr =
@@ -94,7 +96,7 @@
                   gomod2nix.buildGoApplication {
                     pname = "go-http-backend";
                     version = "0.1";
-                    go = pkgs.go_1_18;
+                    go = pkgs.go_1_20;
                     src =
                       (
                         let
@@ -132,19 +134,19 @@
                 [ pkgs.gopls ];
             })
           ;
-        });
+        }
+      );
       apps = forAllSystems (system:
         let
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-
-          server = {
-            type = "app";
-            program = "${
-        let
-          dev = pkgs.mkShell {};
-          shell = "${
+          "server" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = pkgs.mkShell {};
+        shell = "${
       let
         gomod2nix = gomod2nix-repo.legacyPackages.${system};
         gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -158,7 +160,7 @@
         gomod2nix.buildGoApplication {
           pname = "go-http-backend";
           version = "0.1";
-          go = pkgs.go_1_18;
+          go = pkgs.go_1_20;
           src = 
   (let
     lib = pkgs.lib;
@@ -182,19 +184,19 @@
           modules = gomod2nix-toml;
         }
     }/bin/go-http-backend";
-        in
-        pkgs.runCommand "shell-env" {
-          buildInputs = dev.buildInputs;
-          nativeBuildInputs = dev.nativeBuildInputs;
-        } ''
-          echo "export PATH=$PATH:$PATH" > $out
-          echo ${pkgs.lib.strings.escapeShellArg dev.shellHook} >> $out
-          echo ${pkgs.lib.strings.escapeShellArg shell} >> $out
-          chmod +x $out
-        ''
-      }";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
           };
-
-        });
+        }
+      );
     };
 }

@@ -1,8 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Garn
-  ( Options (..),
-    Env (..),
+  ( Env (..),
     run,
     readOptionsAndConfig,
     runWith,
@@ -10,7 +9,7 @@ module Garn
 where
 
 import Control.Monad (forM_, when)
-import Development.Shake (Exit (Exit), cmd, cmd_)
+import Development.Shake (Exit (Exit), cmd)
 import Garn.Common (currentSystem, nixArgs)
 import Garn.GarnConfig
 import Garn.Init
@@ -50,8 +49,8 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
   writeGarnConfig garnConfig
   case opts of
     Gen -> pure ()
-    Run (CommandOptions {..}) -> do
-      cmd_ "nix run" nixArgs (".#" <> target)
+    Run (CommandOptions {..}) argv -> do
+      callProcess "nix" $ ["run"] <> nixArgs <> [".#" <> target, "--"] <> argv
     Enter (CommandOptions {..}) -> do
       hPutStrLn stderr $ "[garn] Entering " <> target <> " shell. Type 'exit' to exit."
       let devProc =
@@ -70,16 +69,23 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       pure ()
     Build (CommandOptions {targetConfig}) -> do
       forM_ (packages targetConfig) $ \package -> do
-        Exit c <- cmd "nix build" nixArgs (".#" <> package)
+        Exit c <- cmd "nix build" nixArgs [".#" <> package]
         when (c /= ExitSuccess) $ exitWith c
-    Check (CommandOptions {targetConfig}) -> do
-      forM_ (packages targetConfig) $ \package -> do
-        Exit c <- cmd "nix build" nixArgs (".#" <> package)
-        when (c /= ExitSuccess) $ exitWith c
-      system <- currentSystem
-      forM_ (checks targetConfig) $ \check -> do
-        Exit c <- cmd "nix build" nixArgs (".#checks." <> system <> "." <> check)
-        when (c /= ExitSuccess) $ exitWith c
+    Check checkOptions -> case checkOptions of
+      (Qualified (CommandOptions {targetConfig})) -> do
+        checkTarget targetConfig
+      Unqualified -> do
+        forM_ (targets garnConfig) checkTarget
+
+checkTarget :: TargetConfig -> IO ()
+checkTarget targetConfig = do
+  forM_ (packages targetConfig) $ \package -> do
+    Exit c <- cmd "nix build" nixArgs [".#" <> package]
+    when (c /= ExitSuccess) $ exitWith c
+  system <- currentSystem
+  forM_ (checks targetConfig) $ \check -> do
+    Exit c <- cmd "nix build" nixArgs [".#checks." <> system <> "." <> check]
+    when (c /= ExitSuccess) $ exitWith c
 
 productionEnv :: IO Env
 productionEnv = do

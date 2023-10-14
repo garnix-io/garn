@@ -1,8 +1,18 @@
+import { BashSnippetToCopy } from "../components/BashSnippetToCopy";
+
 export const info = {
   name: "installing",
   url: "installing",
-  index: 1
-}
+  index: 1,
+};
 
 # Installing garn
 
+Install `garn` with:
+
+<BashSnippetToCopy snippet="curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh | sh" />
+
+You can look at the script [here](../install.sh).
+
+`garn` needs [`nix`](https://nixos.org/) to be installed, so -- if you don't have nix already -- the above installer
+will install nix first, after asking for confirmation.

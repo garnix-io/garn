@@ -52,11 +52,9 @@ spec =
             "garn.ts"
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
+              import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-              const myEnv = garn.mkEnvironment(
-                'pkgs.mkShell { nativeBuildInputs = [pkgs.hello]; }',
-                '.'
-              );
+              const myEnv = garn.mkEnvironment().withDevTools([garn.mkPackage(nixRaw`pkgs.hello`)]);
               export const main = garn.mkProject(
                 {
                   description: 'Project with an executable',
@@ -67,6 +65,21 @@ spec =
             |]
           output <- runGarn ["run", "main"] "" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
+          exitCode output `shouldBe` ExitSuccess
+
+        it "allows specifying argv to the executable" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const main = garn.mkProject({
+                description: 'Project with an executable',
+                defaultExecutable: garn.shell`printf "%s,%s,%s"`,
+              }, {});
+            |]
+          output <- runGarn ["run", "main", "foo bar", "baz"] "" repoDir Nothing
+          stdout output `shouldBe` "foo bar,baz,"
           exitCode output `shouldBe` ExitSuccess
 
         it "doesn’t format other Nix files" $ do
@@ -83,3 +96,17 @@ spec =
           writeHaskellProject repoDir
           _ <- runGarn ["run", "foo"] "" repoDir Nothing
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
+        it "forwards the user's tty" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const printTty = garn.mkProject({
+                description: "tty",
+                defaultExecutable: garn.shell`tty`,
+              }, {});
+            |]
+          output <- runGarn ["run", "printTty"] "" repoDir Nothing
+          stdout output `shouldStartWith` "/dev/"
+          exitCode output `shouldBe` ExitSuccess

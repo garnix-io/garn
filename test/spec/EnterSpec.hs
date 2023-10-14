@@ -31,18 +31,18 @@ spec = do
             writeFile "garn.ts" $
               unindent
                 [i|
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
+                  import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   })
-                  const hello = mkPackage(`pkgs.hello`)
 
-                  export const bar = foo.withDevTools([hello]);
+                  export const bar = foo.withDevTools([mkPackage(nixRaw`pkgs.hello`)]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -52,45 +52,45 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
+                  import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   })
 
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  const cowsay = mkPackage(`pkgs.cowsay`);
-
-                  export const bar = foo.withDevTools([hello, cowsay]);
+                  export const bar = foo.withDevTools([
+                    mkPackage(nixRaw`pkgs.hello`),
+                    mkPackage(nixRaw`pkgs.cowsay`),
+                  ]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
             output <- runGarn ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "/nix/store"
-          it "does not destructively update the given package" $ do
+          it "does not destructively update the given package" $ onTestFailureLogger $ \onFailingTestLog -> do
             writeHaskellProject repoDir
             writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
+                  import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   })
 
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  export const bar = foo.withDevTools([hello]);
+                  export const bar = foo.withDevTools([mkPackage(nixRaw`pkgs.hello`)]);
                 |]
             output <- runGarn ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
+            onFailingTestLog output
             stderr output `shouldContain` "hello: command not found"
           it "can safely be used twice" $ do
             writeHaskellProject repoDir
@@ -98,20 +98,19 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
+                  import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
                   })
 
-                  const hello = mkPackage(`pkgs.hello`);
-
-                  const cowsay = mkPackage(`pkgs.cowsay`);
-
-                  export const bar = foo.withDevTools([hello]).withDevTools([cowsay]);
+                  export const bar = foo
+                    .withDevTools([mkPackage(nixRaw`pkgs.hello`)])
+                    .withDevTools([mkPackage(nixRaw`pkgs.cowsay`)]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -139,8 +138,9 @@ spec = do
               import { mkPackage } from "#{repoDir}/ts/package.ts"
               import { packageToEnvironment } from "#{repoDir}/ts/environment.ts"
               import { mkProject } from "#{repoDir}/ts/project.ts"
+              import { nixRaw } from "#{repoDir}/ts/nix.ts"
 
-              const pkg = mkPackage(`
+              const pkg = mkPackage(nixRaw`
                 pkgs.stdenv.mkDerivation({
                   name = "blah";
                   src = ./.;
