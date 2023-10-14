@@ -4,7 +4,10 @@ import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 
 const GARN_VERSION = "v0.0.6";
 
-const imports = [];
+const imports = [
+  `import * as garn from "https://garn.io/ts/${GARN_VERSION}/mod.ts";`,
+  `import * as pkgs from "https://garn.io/ts/${GARN_VERSION}/nixpkgs.ts";`,
+];
 const initializedSections = [];
 
 const initializers = [...go.initializers, ...haskell.initializers];
@@ -72,8 +75,6 @@ if (initializedSections.length === 0) {
 Deno.writeTextFileSync(
   "garn.ts",
   `
-import * as garn from "https://garn.io/ts/${GARN_VERSION}/mod.ts";
-import * as pkgs from "https://garn.io/ts/${GARN_VERSION}/nixpkgs.ts";
 ${imports.join("\n")}
 
 ${initializedSections.join("\n")}
