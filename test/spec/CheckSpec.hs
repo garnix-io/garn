@@ -92,6 +92,23 @@ spec = do
           stderr output `shouldContain` "DEF"
           exitCode output `shouldBe` ExitFailure 1
 
+        it "does not error if there are spaces in the check key name" $ \onTestFailureLog -> do
+          writeHaskellProject repoDir
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const myProject = garn.mkProject({
+                description: "",
+                defaultEnvironment: garn.mkEnvironment(),
+              }, {}).addCheck("my check")`echo hello world && false`;
+            |]
+          output <- runGarn ["check", "myProject"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output `shouldContain` "hello world"
+          exitCode output `shouldBe` ExitFailure 1
+
         describe "exit-codes" $ do
           let testCases =
                 [ ("passing", "true", ExitSuccess),
