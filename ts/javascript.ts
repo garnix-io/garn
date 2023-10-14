@@ -47,11 +47,9 @@ export const mkNpmProject = (args: {
   description: string;
   src: string;
   nodeVersion: NodeVersion;
-  startCommand?: string;
 }): Project & {
   devShell: Environment;
   node_modules: Package;
-  startDev: Executable;
 } => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   const node_modules = mkPackage(nixRaw`
@@ -78,18 +76,13 @@ export const mkNpmProject = (args: {
       cp -r ${node_modules}/node_modules .
     `
   ).withDevTools([mkPackage(nodejs)]);
-  const startDev: Executable = devShell.shell`cd ${args.src} && ${
-    args.startCommand ?? "npm start"
-  }`;
   return mkProject(
     {
       description: args.description,
       defaultEnvironment: devShell,
-      defaultExecutable: startDev,
     },
     {
       devShell,
-      startDev,
       node_modules,
     }
   );
