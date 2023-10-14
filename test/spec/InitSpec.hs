@@ -31,20 +31,18 @@ spec = do
           output <- runGarn ["init"] "" repoDir Nothing
           stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
           readFile "garn.ts"
-            `shouldReturn` dropWhileEnd
-              isSpace
-              ( unindent
-                  [i|
-                    import * as garn from "http://localhost:8777/mod.ts"
+            `shouldReturn` unindent
+              [i|
+                import * as garn from "https://garn.io/ts/v0.0.6/mod.ts";
+                import * as pkgs from "https://garn.io/ts/v0.0.6/nixpkgs.ts";
 
-                    export const garn = garn.haskell.mkHaskell({
-                      description: "",
-                      executable: "",
-                      compiler: "ghc94",
-                      src: "."
-                    })
-                  |]
-              )
+                export const garn = garn.haskell.mkHaskellProject({
+                  description: "",
+                  executable: "",
+                  compiler: "ghc94",
+                  src: "."
+                })
+              |]
         it "can initialize go projects" $ do
           writeFile
             "go.mod"
@@ -57,20 +55,18 @@ spec = do
           output <- runGarn ["init"] "" repoDir Nothing
           stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
           readFile "garn.ts"
-            `shouldReturn` dropWhileEnd
-              isSpace
-              ( unindent
-                  [i|
-                    import * as garn from "http://localhost:8777/mod.ts"
+            `shouldReturn` unindent
+              [i|
+                import * as garn from "https://garn.io/ts/v0.0.6/mod.ts";
+                import * as pkgs from "https://garn.io/ts/v0.0.6/nixpkgs.ts";
 
-                    export const someGoProject = garn.go.mkGoProject({
-                      description: "My go project",
-                      moduleName: "some-go-project",
-                      src: ".",
-                      goVersion: "1.20",
-                    });
-                  |]
-              )
+                export const someGoProject = garn.go.mkGoProject({
+                  description: "My go project",
+                  moduleName: "some-go-project",
+                  src: ".",
+                  goVersion: "1.20",
+                });
+              |]
         it "logs unexpected errors" $ do
           writeFile "garn.cabal" [i| badCabalfile |]
           output <- runGarn ["init"] "" repoDir Nothing

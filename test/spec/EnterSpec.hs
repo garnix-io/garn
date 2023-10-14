@@ -31,12 +31,12 @@ spec = do
             writeFile "garn.ts" $
               unindent
                 [i|
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
@@ -52,11 +52,11 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
@@ -71,17 +71,17 @@ spec = do
             stdout output `shouldBe` "tool\n"
             output <- runGarn ["enter", "bar"] "which cowsay\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "/nix/store"
-          it "does not destructively update the given package" $ do
+          it "does not destructively update the given package" $ onTestFailureLogger $ \onFailingTestLog -> do
             writeHaskellProject repoDir
             writeFile "garn.ts" $
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."
@@ -90,6 +90,7 @@ spec = do
                   export const bar = foo.withDevTools([mkPackage(nixRaw`pkgs.hello`)]);
                 |]
             output <- runGarn ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
+            onFailingTestLog output
             stderr output `shouldContain` "hello: command not found"
           it "can safely be used twice" $ do
             writeHaskellProject repoDir
@@ -97,11 +98,11 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskell } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-                  export const foo = mkHaskell({
-                    description: "mkHaskell-test",
+                  export const foo = mkHaskellProject({
+                    description: "mkHaskellProject-test",
                     executable: "garn-test",
                     compiler: "ghc94",
                     src: "."

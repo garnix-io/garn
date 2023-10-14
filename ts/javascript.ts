@@ -41,7 +41,7 @@ const fromNodeVersion = (version: NodeVersion) => {
   };
 };
 
-export const mkNpmFrontend = (args: {
+export const mkNpmProject = (args: {
   description: string;
   src: string;
   nodeVersion: NodeVersion;
@@ -106,20 +106,22 @@ export const mkNpmFrontend = (args: {
   );
 };
 
-export const mkYarnFrontend = (args: {
+export const mkYarnProject = (args: {
   description: string;
   src: string;
   nodeVersion: keyof typeof nodeVersions;
-  testCommand: string;
-  serverStartCommand: string;
+  startCommand?: string;
+  testCommand?: string;
 }): Project => {
+  const startCommand = args.startCommand ?? "yarn start";
+  const testCommand = args.testCommand ?? "yarn test";
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   const yarnPackage = nixRaw`
     pkgs.yarn2nix-moretea.mkYarnPackage {
       nodejs = ${nodejs};
       yarn = pkgs.yarn;
       src = ${nixSource(args.src)};
-      buildPhase = ${nixStrLit(args.testCommand)};
+      buildPhase = ${nixStrLit(testCommand)};
       dontStrip = true;
     }`;
   const pkg = mkPackage(nixRaw`
@@ -139,7 +141,7 @@ export const mkYarnFrontend = (args: {
         export PATH=${nixRaw("pkgs.yarn")}/bin:$PATH
         export PATH=${nixRaw("nodeModulesPath")}/.bin:$PATH
         yarn --version
-        ${args.serverStartCommand}
+        ${startCommand}
       `})
   `);
   const devShell: Environment = mkEnvironment(
@@ -162,7 +164,7 @@ export const mkYarnFrontend = (args: {
     `,
     args.src
   );
-  const startDev: Executable = devShell.shell`cd ${args.src} && ${args.serverStartCommand}`;
+  const startDev: Executable = devShell.shell`cd ${args.src} && ${startCommand}`;
   return mkProject(
     {
       description: args.description,

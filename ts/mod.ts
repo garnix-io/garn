@@ -1,5 +1,11 @@
 export { type Check } from "./check.ts";
-export { check, mkEnvironment, shell } from "./environment.ts";
+export {
+  check,
+  emptyEnvironment,
+  mkEnvironment,
+  shell,
+  type Environment,
+} from "./environment.ts";
 export { mkPackage, type Package } from "./package.ts";
 export { mkProject, type Project } from "./project.ts";
 

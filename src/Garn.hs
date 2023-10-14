@@ -1,8 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Garn
-  ( Options (..),
-    Env (..),
+  ( Env (..),
     run,
     readOptionsAndConfig,
     runWith,
@@ -70,16 +69,23 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       pure ()
     Build (CommandOptions {targetConfig}) -> do
       forM_ (packages targetConfig) $ \package -> do
-        Exit c <- cmd "nix build" nixArgs (".#" <> package)
+        Exit c <- cmd "nix build" nixArgs [".#" <> package]
         when (c /= ExitSuccess) $ exitWith c
-    Check (CommandOptions {targetConfig}) -> do
-      forM_ (packages targetConfig) $ \package -> do
-        Exit c <- cmd "nix build" nixArgs (".#" <> package)
-        when (c /= ExitSuccess) $ exitWith c
-      system <- currentSystem
-      forM_ (checks targetConfig) $ \check -> do
-        Exit c <- cmd "nix build" nixArgs (".#checks." <> system <> "." <> check)
-        when (c /= ExitSuccess) $ exitWith c
+    Check checkOptions -> case checkOptions of
+      (Qualified (CommandOptions {targetConfig})) -> do
+        checkTarget targetConfig
+      Unqualified -> do
+        forM_ (targets garnConfig) checkTarget
+
+checkTarget :: TargetConfig -> IO ()
+checkTarget targetConfig = do
+  forM_ (packages targetConfig) $ \package -> do
+    Exit c <- cmd "nix build" nixArgs [".#" <> package]
+    when (c /= ExitSuccess) $ exitWith c
+  system <- currentSystem
+  forM_ (checks targetConfig) $ \check -> do
+    Exit c <- cmd "nix build" nixArgs [".#checks." <> system <> "." <> check]
+    when (c /= ExitSuccess) $ exitWith c
 
 productionEnv :: IO Env
 productionEnv = do
