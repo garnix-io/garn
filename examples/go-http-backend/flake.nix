@@ -20,7 +20,7 @@
           };
         in
         {
-          server_pkg =
+          "server_pkg" =
             let
               gomod2nix = gomod2nix-repo.legacyPackages.${system};
               gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -58,7 +58,8 @@
                 )
               ;
               modules = gomod2nix-toml;
-            };
+            }
+          ;
         }
       );
       checks = forAllSystems (system:
@@ -78,59 +79,61 @@
           };
         in
         {
-          server = (
-            let
-              expr =
-                let
-                  gomod2nix = gomod2nix-repo.legacyPackages.${system};
-                  gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
+          "server" =
+            (
+              let
+                expr =
+                  let
+                    gomod2nix = gomod2nix-repo.legacyPackages.${system};
+                    gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
 
 [mod]
   [mod.\"github.com/gorilla/mux\"]
     version = \"v1.8.0\"
     hash = \"sha256-s905hpzMH9bOLue09E2JmzPXfIS4HhAlgT7g13HCwKE=\"
 ";
-                in
-                gomod2nix.buildGoApplication {
-                  pname = "go-http-backend";
-                  version = "0.1";
-                  go = pkgs.go_1_20;
-                  src =
-                    (
-                      let
-                        lib = pkgs.lib;
-                        lastSafe = list:
-                          if lib.lists.length list == 0
-                          then null
-                          else lib.lists.last list;
-                      in
-                      builtins.path
-                        {
-                          path = ./.;
-                          name = "source";
-                          filter = path: type:
-                            let
-                              fileName = lastSafe (lib.strings.splitString "/" path);
-                            in
-                            fileName != "flake.nix" &&
-                            fileName != "garn.ts";
-                        }
-                    )
-                  ;
-                  modules = gomod2nix-toml;
-                }
-              ;
-            in
-            (if expr ? env
-            then expr.env
-            else pkgs.mkShell { inputsFrom = [ expr ]; }
-            )
-          ).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ pkgs.gopls ];
-          });
+                  in
+                  gomod2nix.buildGoApplication {
+                    pname = "go-http-backend";
+                    version = "0.1";
+                    go = pkgs.go_1_20;
+                    src =
+                      (
+                        let
+                          lib = pkgs.lib;
+                          lastSafe = list:
+                            if lib.lists.length list == 0
+                            then null
+                            else lib.lists.last list;
+                        in
+                        builtins.path
+                          {
+                            path = ./.;
+                            name = "source";
+                            filter = path: type:
+                              let
+                                fileName = lastSafe (lib.strings.splitString "/" path);
+                              in
+                              fileName != "flake.nix" &&
+                              fileName != "garn.ts";
+                          }
+                      )
+                    ;
+                    modules = gomod2nix-toml;
+                  }
+                ;
+              in
+              (if expr ? env
+              then expr.env
+              else pkgs.mkShell { inputsFrom = [ expr ]; }
+              )
+            ).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.gopls ];
+            })
+          ;
         }
       );
       apps = forAllSystems (system:
@@ -138,9 +141,9 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          server = {
-            type = "app";
-            program = "${
+          "server" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = pkgs.mkShell {};
         shell = "${

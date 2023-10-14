@@ -20,7 +20,7 @@
           };
         in
         {
-          frontend_pkg =
+          "frontend_pkg" =
             let
               pkgs =
                 import "${nixpkgs}" {
@@ -69,7 +69,8 @@
         export PATH=${nodeModulesPath}/.bin:\$PATH
         yarn --version
         yarn start
-      ");
+      ")
+          ;
         }
       );
       checks = forAllSystems (system:
@@ -89,7 +90,7 @@
           };
         in
         {
-          frontend =
+          "frontend" =
             let
               pkgs =
                 import "${nixpkgs}" {
@@ -135,7 +136,8 @@
             export PATH=${nodeModulesPath}/.bin:\$PATH
             export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
           ";
-            };
+            }
+          ;
         }
       );
       apps = forAllSystems (system:
@@ -143,9 +145,9 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          frontend = {
-            type = "app";
-            program = "${
+          "frontend" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = 
       let
