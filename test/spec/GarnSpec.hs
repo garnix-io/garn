@@ -39,7 +39,7 @@ spec = do
                   build.*
                   run.*
                   enter.*
-                  gen.*
+                  generate.*
                   check.*
               |]
         it "lists unavailable commands" $ do
@@ -51,7 +51,7 @@ spec = do
                   build
                   run
                   enter
-                  gen
+                  generate
                   check
               |]
           writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]

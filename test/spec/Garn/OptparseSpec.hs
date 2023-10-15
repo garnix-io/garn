@@ -13,8 +13,8 @@ spec :: Spec
 spec = around_ (hSilence [stderr]) $ do
   describe "Garn.Optparse" $ do
     describe "check subcommand" $ do
-      it "parses gen commands" $ do
-        command <- testWithGarnTs ["gen"] mempty
+      it "parses generate commands" $ do
+        command <- testWithGarnTs ["generate"] mempty
         command `shouldBe` Gen
 
       it "parses qualified check commands" $ do

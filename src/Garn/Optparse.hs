@@ -71,7 +71,7 @@ withGarnTsCommandInfo =
   [ ("build", "Build the default executable of a project", withCommandOptions Build),
     ("run", "Build and run the default executable of a project", withCommandOptionsAndArgv Run),
     ("enter", "Enter the default devshell for a project", withCommandOptions Enter),
-    ("gen", "Generate the flake.nix file and exit", const $ pure Gen),
+    ("generate", "Generate the flake.nix file and exit", const $ pure Gen),
     ("check", "Run the checks of a project", checkCommand)
   ]
   where
