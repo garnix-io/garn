@@ -4,5 +4,119 @@ export const info = {
   index: 1
 }
 
+import { Hovernote } from "/src/components/Hovernote.tsx"
+
 # Basic concepts
 
+There are only a few concepts that are needed to understand <b>garn</b>.
+The concepts are tied to the capabilities provided by the <b>garn</b> CLI.
+
+|               | Environment  |  Package   |  Check      | Executable |  Project
+|---------------|--------------|------------|-------------|------------|---------
+| command       | enter        | build      | check       | run        | --help
+| is sandboxed  | can be       | yes        | yes         | no         | --help
+
+
+## Environment
+
+An *environment* is the context in which a program runs. That includes things
+like environment variables, current working directory, state of the filesystem,
+networking stack, etc. It's what makes running the exact same program not always
+result in the exact same thing.
+
+`garn` makes creating new environments quite easy. You can easily create an
+environment where some files (for instance, executables and packages) are
+available, and variables such as PATH are set.
+
+Importantly, environments can be combined! When you run `garn enter foo`, you are
+combining your *current environment* with the environment `foo`.
+
+Two environments are particularly worth note. One we just mentioned - your
+*current environment* - i.e., the environment in which a `garn` command is run.
+The other is the *empty* one with no networking, no files, no environment
+variables. Sandboxes tend to approximate this environment. Checks and builds
+run in a combination of this empty environment and the environment you specify
+in the check.
+
+If `myEnv` has type `Environment`, you get two methods on `myEnv` that relate
+to these aforementioned environments:
+
+- `myEnv.shell`: This is a template literal that runs the provided command in
+  the combination of `myEnv` and the current environment. This is useful for
+  development commands.
+- `myEnv.check`: This is a template literal that runs the provided command in
+  the combination of `myEnv` and the empty environment. Because it doesn't allow
+  access to the current environment, it is reproducible: if you run it twice,
+  the result will be the same<Hovernote>So much so that, as an optimization,
+  `garn` and `nix` store the result of the first run to avoid rerunning a second
+  time.</Hovernote>. And if you run it on different computers, then, with some
+  caveats, the result will be the same<Hovernote>So much so that, as an optimization,
+  if you run it a CI like <a href="https://garnix.io">garnix</a> and set it up
+  as a cache, and then run it locally, the result obtained by **garnix** will
+  be downloaded and reused, rather than run locally</Hovernote>
+
+
+
+## Package
+
+If you run an executable, it may create new files. If you run the executable
+in an environment without access to the current environment - in a sandbox, if
+you will - *and* you designate a particular set of files as "worth keeping" by
+moving them into a special directory, we say that you are *building* a *package*.
+The package then contains all those files moved into the special directory.
+
+That's very abstract, so let's make it more concrete. If you have some **go**
+source code, you could compile that source code into an executable. You now
+want to keep that executable, so you can use it in various ways. So you create
+a package; the build process of that package is compiling that executable, and
+marking it as special by moving it into an `$out` directory. The *contents* of
+the package are then just the executable.
+
+You build all packages in a project with "`garn build <PROJECT>`"
+
+## Check
+
+A *check* is quite similar to a package, in that it also runs a command in a
+sandbox-like environment. But here we *do not* care about built files, but *only*
+the exit code<Hovernote>And the stdout and stderr of the process for debugging the check.</Hovernote>.
+
+You can run all checks in a project with "`garn check <PROJECT>`"
+
+## Executable
+
+An executable is a thing that can be run, without reference to the context in
+which it is run. In practice, they are run in the current environment via the
+"garn run" command. This provides a very easy way of making tools available
+to collaborators in your project.
+
+Usually executables will be a particular file in a package.
+
+## Project
+
+A *project* is a collection of environments, packages, checks, and executables.
+The sole purpose of a project is to organize functionality in a coherent way.
+
+In the Typescript libraries, this is represented as an object with string keys
+and values of type `Environment | Check | Package | Executable`. You'll
+generally want to use language-specific helper functions (or, at a lower level,
+`mkProject`) in order to create a project.
+
+Projects can have *default* environments and executables. What this mean is
+that, when doing operations that expect an environment or an executable, a
+project can be provided instead.
+
+
+## Relationships
+
+The table below represents the relationships between different concepts. It should
+be read left-to-top. So, reading the first column of the second row, for example,
+tells us that a package has an environment. So from a Package we should be
+able to retrieve an environment.
+
+|               | Environment  |  Package   |  Check      | Executable |  Project
+|---------------|--------------|------------|-------------|------------|---------
+| Environmemt   | is           | context of | context of  | command of | part of
+| Package       | has a        | is         | yes         | has a      | part of
+| Check         | has a        | yes        | is          | no         | part of
+| Executable    | has no       | yes        | yes         | is         | part of
+| Project       | contains     | contains   | contains    | contains   | is
