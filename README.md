@@ -1,7 +1,8 @@
 # garn
 
-garn is a build tool and environment manager. You configure your project with a
-`garn.ts` file that declaratively describes your project and its dependencies.
+garn is a build tool and development environment manager. You configure your
+project with a `garn.ts` file that declaratively describes your project and its
+dependencies.
 
 For example, with this `garn.ts` file:
 
@@ -29,11 +30,12 @@ export const startAll = garn.processCompose({
 
 Anyone can run your frontend with `garn run frontend`, backend with `garn run
 backend`, or both with `garn run startAll`. All without needing to worry about
-having the correct version of go, node, or anything else installed.
+having the correct version of `go`, `nodejs`, or anything else installed.
 
-garn is powered by [Nix](https://nixos.org/), so you get portability without
-the performance penalties and other pain points from doing your local
-development in docker.
+garn is powered by [Nix](https://nixos.org/), so you get portable and
+reproducible builds and development environments -- all this while running
+natively on your developer machines without the hassle and performance penalty
+of using e.g. docker.
 
 ## Getting started
 
@@ -72,4 +74,6 @@ named `result` which links to the resulting build artifacts.
 ### `garn check`
 
 `garn check [check]` will run all checks for the specified project. These
-checks run in a sandbox.
+checks run in a sandbox. The downside of sandboxing is that these checks won't
+have access to the internet. The upside is that they'll be (almost) perfectly
+reproducible.
