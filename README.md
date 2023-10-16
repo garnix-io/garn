@@ -6,25 +6,29 @@ garn is a build tool and environment manager. You configure your project with a
 For example, with this `garn.ts` file:
 
 ```typescript
-import * as garn from "https://garn.io/ts/v0.0.5/mod.ts";
+import * as garn from "https://garn.io/ts/v0.0.7/mod.ts";
 
-export const frontend = garn.mkNpmFrontend({
+export const frontend = garn.javascript.mkNpmProject({
   description: "My project frontend",
   src: "frontend",
   nodeVersion: "18",
 });
 
-export const backend = garn.mkGoProject({
+export const backend = garn.go.mkGoProject({
   description: "My project backend",
   src: "backend",
+  moduleName: "backend",
   goVersion: "1.20",
 });
 
-export const compose = garn.processCompose([frontend, backend]);
+export const startAll = garn.processCompose({
+  frontend: frontend.defaultExecutable!,
+  backend: backend.defaultExecutable!,
+});
 ```
 
 Anyone can run your frontend with `garn run frontend`, backend with `garn run
-backend`, or both with `garn run compose`. All without needing to worry about
+backend`, or both with `garn run startAll`. All without needing to worry about
 having the correct version of go, node, or anything else installed.
 
 garn is powered by [Nix](https://nixos.org/), so you get portability without
@@ -35,7 +39,13 @@ development in docker.
 
 ### Install garn
 
-TODO
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh | sh
+```
+
+`garn` needs [`nix`](https://nixos.org/) to be installed, so -- if you don't
+have nix already -- the above installer will install nix first, after asking
+for confirmation.
 
 ### `garn init`
 
@@ -47,8 +57,8 @@ file for you.
 
 ### `garn enter`
 
-`garn enter [project]` will put you in a development shell with all
-needed dependencies available in your `$PATH`.
+`garn enter [project]` will put you in a development shell with all needed
+dependencies available in your `$PATH`.
 
 ### `garn build`
 
@@ -57,24 +67,9 @@ named `result` which links to the resulting build artifacts.
 
 ### `garn run`
 
-`garn run [project|executable]` will run the specified executable or default
-executable for a project. You can create custom executables within the scope of
-a project using `shell`. For example:
-
-```typescript
-export const migrate = backend.shell`go run migrate.go`;
-```
-
-will run your migrations when running `garn run migrate`.
+`garn run [project]` will run the default executable for the specified project.
 
 ### `garn check`
 
-`garn run [project|check]` will run the specified check, or all checks for the
-specified project. These checks run in a sandbox. You can create custom checks
-within the scope of a project using `check`. For example:
-
-```typescript
-export const featureTests = frontend.check`npm run cypress`;
-```
-
-will run your feature tests when running `garn check featureTests`.
+`garn check [check]` will run all checks for the specified project. These
+checks run in a sandbox.
