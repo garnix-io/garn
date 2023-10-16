@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": ".",
+    "rootDir": "..",
+    "allowImportingTsExtensions": true,
+    "paths": {
+      "http://localhost:8777/*": ["./ts-declarations/*"],
+      "https://garn.io/ts/*": ["./ts-declarations/*"]
+    }
+  },
+  "include": [
+    "../garn.ts",
+    "./ts-declarations/**/*.ts"
+  ]
+}
