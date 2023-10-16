@@ -2,7 +2,7 @@
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
   inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
-  inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer";
+  inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer/sh/tweaks";
 
   outputs = { self, nixpkgs, flake-utils, fhi, nix-tool-installer }:
     flake-utils.lib.eachDefaultSystem (system:
