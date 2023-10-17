@@ -20,7 +20,7 @@
           };
         in
         {
-          frontend_pkg =
+          "frontend_pkg" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -65,7 +65,8 @@
                 node_modules_attrs = {
                   nodejs = pkgs.nodejs-18_x;
                 };
-              };
+              }
+          ;
         }
       );
       checks = forAllSystems (system:
@@ -85,7 +86,7 @@
           };
         in
         {
-          frontend =
+          "frontend" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -118,7 +119,8 @@
               node_modules_attrs = {
                 nodejs = pkgs.nodejs-18_x;
               };
-            };
+            }
+          ;
         }
       );
       apps = forAllSystems (system:
@@ -126,9 +128,9 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          frontend = {
-            type = "app";
-            program = "${
+          "frontend" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = 
       let

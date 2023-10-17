@@ -232,7 +232,6 @@
                 [ pkgs.gopls ];
             })
           ;
-          "compose" = pkgs.mkShell { };
           "npmFrontend" =
             let
               npmlock2nix = import npmlock2nix-repo {
@@ -268,6 +267,7 @@
               };
             }
           ;
+          "startAll" = pkgs.mkShell { };
           "yarnFrontend" =
             let
               pkgs =
@@ -378,7 +378,57 @@
       ''
     }";
           };
-          "compose" = {
+          "npmFrontend" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = 
+      let
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+      in
+      npmlock2nix.v2.shell {
+        src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./frontend-npm;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
+        node_modules_mode = "copy";
+        node_modules_attrs = {
+          nodejs = pkgs.nodejs-18_x;
+        };
+      }
+    ;
+        shell = "cd frontend-npm && npm start";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+          };
+          "startAll" = {
             "type" = "app";
             "program" = "${
       let
@@ -546,56 +596,6 @@
       ''
     }";
 "environment" = [];};};})}";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
-        #!${pkgs.bash}/bin/bash
-        export PATH=$(cat ${buildPath}):$PATH
-        ${dev.shellHook}
-        ${shell} "$@"
-      ''
-    }";
-          };
-          "npmFrontend" = {
-            "type" = "app";
-            "program" = "${
-      let
-        dev = 
-      let
-        npmlock2nix = import npmlock2nix-repo {
-          inherit pkgs;
-        };
-      in
-      npmlock2nix.v2.shell {
-        src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./frontend-npm;
-      name = "source";
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix" &&
-         fileName != "garn.ts";
-    })
-;
-        node_modules_mode = "copy";
-        node_modules_attrs = {
-          nodejs = pkgs.nodejs-18_x;
-        };
-      }
-    ;
-        shell = "cd frontend-npm && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
