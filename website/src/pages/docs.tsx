@@ -30,5 +30,5 @@ export const Docs: React.FC<{ is_index?: boolean }> = () => {
       <div>Could not find what you're looking for. Please check the URL.</div>
     );
   }
-  return el[1];
+  return <div className="docs">{el[1]}</div>;
 };

@@ -6,28 +6,110 @@ export const info = {
 
 # Getting Started
 
-Welcome to `garn`!
-
-todo: initial blurb
-
 ## Installation
 
 Please checkout our [installation instructions](/docs/installing).
 
 ## Your first `garn.ts` config
 
-- example with one language
-- adding checks
-- adding runnables
+All examples in this getting started guide are also available
+[here](https://github.com/garnix-io/garn/tree/main/examples/getting-started).
+
+`garn` projects are configured with a single `garn.ts` file. Your `garn.ts`
+exports a collection of `Project`s. A `Project` contains all the information
+needed to build, run, and develop your software.
+
+The `garn` library exports a lot of helpers that make it easy to quickly
+construct projects for common stacks, but you can also define these yourself.
+
+Here is an example `garn.ts` file for a single node-based project:
+
+```typescript
+import * as garn from "https://garn.io/ts/v0.0.7/mod.ts";
+import * as pkgs from "https://garn.io/ts/v0.0.7/nixpkgs.ts";
+
+export const frontend = garn.javascript.mkNpmProject({
+  description: "my frontend",
+  nodeVersion: "18",
+  src: "./frontend",
+})
+```
+
+In the same directory you can now run `garn enter frontend` to drop you in
+a new shell with `node` version 18 available.
+
+Note that -- if you do this in a `git` repo -- `garn` requires that your source
+files must be tracked by git. You have to at least add them with
+`git add --intent-to-add`.
+
+```bash
+> git add --intent-to-add frontend
+> garn enter frontend
+[garn] Entering frontend shell. Type 'exit' to exit.
+[...]
+> node --version
+v18.17.1
+```
+
+`Projects` can contain `Check`s, which can be used to run automated tests for
+your project. You can add them with `addCheck`.
+
+```typescript
+export const frontend = garn.javascript.mkNpmProject({
+  description: "my frontend",
+  nodeVersion: "18",
+  src: "./frontend",
+}).addCheck("test")`npm test`;
+```
+
+Now running `garn check frontend` will run `npm test` in the frontend project
+environment. These `Check`s are run in a build sandbox. The downside of
+sandboxing is that these checks won't have access to the internet. The upside
+is that they'll be (almost) perfectly reproducible.
 
 ## Language agnostic
 
-- example with multiple languages
+You can have multiple sub-projects with different tech stacks in a single
+`garn.ts` file. Let's try to add a go backend.
 
-## mention CI
+```typescript
+export const backend = garn.go.mkGoProject({
+  description: "my backend",
+  moduleName: "backend",
+  src: "./backend",
+  goVersion: "1.20",
+});
+```
+
+This means that you can use `garn` to configure bigger multi-language projects.
+This enables anyone on your team to run, test, and develop any part of your
+codebase, without having to install any language-specific tools and learn how
+to use them.
+
+## Deno LSP
+
+`garn.ts` files are powered by [deno](https://deno.com/). 
+A lot of the convenience and power for editing your `garn.ts` files comes
+from having a working Deno LSP. Installing `deno` is easy with `garn` itself:
+
+```typescript
+export const deno = garn.mkProject({
+  description: "garn configuration environment",
+  defaultEnvironment: garn.emptyEnvironment.withDevTools([pkgs.deno]),
+}, {});
+```
+
+`garn enter deno` will then drop you in a shell where `deno` is available.
+
+For configuring your editor to use Deno's LSP refer to [Deno's environment setup
+documentation](https://docs.deno.com/runtime/manual/getting_started/setup_your_environment)
+
+## CI
+
+Since the checks of your `garn` projects are sandboxed, it's easy to run them on
+CI on [garnix.io](https://garnix.io). See [the docs](https://garnix.io/docs)
+for more info.
 
 ## Further reading
 
-- concepts
-- asciidocs
-- examples?
+[garn concepts](/docs/concepts)
