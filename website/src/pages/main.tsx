@@ -139,7 +139,7 @@ export const Info: React.FC = () => {
               <li>The same commands can run any test in any repo</li>
               <li>Discoverability exactly where you need it</li>
             </ul>
-            <Asciinema src={runDemoCastUrl} />
+            <Asciinema src={runDemoCastUrl} rows={25}/>
           </div>
 
 
