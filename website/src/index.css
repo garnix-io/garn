@@ -278,6 +278,11 @@ button {
 code {
   font-family: "Space Mono", monospace;
   font-variant-ligatures: none;
+  background: #f4f6f8;
+}
+
+pre code {
+  background: transparent;
 }
 
 aside {

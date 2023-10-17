@@ -35,12 +35,12 @@ export const frontend = garn.javascript.mkNpmProject({
 })
 ```
 
-In the same directory you can now run `garn enter frontend` to drop you in
-a new shell with `node` version 18 available.
+In the same directory you can now run `garn enter frontend` to enter a shell
+with `node` version 18 available.
 
-Note that -- if you do this in a `git` repo -- `garn` requires that your source
-files must be tracked by git. You have to at least add them with
-`git add --intent-to-add`.
+Note that -- if you do this in a git repo -- `garn` requires that your source
+files must be tracked by git. You have to add them to your index, or at least
+mark them as intended additions with `git add --intent-to-add`.
 
 ```bash
 > git add --intent-to-add frontend
@@ -63,14 +63,14 @@ export const frontend = garn.javascript.mkNpmProject({
 ```
 
 Now running `garn check frontend` will run `npm test` in the frontend project
-environment. These `Check`s are run in a build sandbox. The downside of
-sandboxing is that these checks won't have access to the internet. The upside
-is that they'll be (almost) perfectly reproducible.
+environment. These `Check`s are pure, i.e. they are run in a build sandbox. The
+downside of sandboxing is that these checks won't have access to the internet.
+The upside is that they'll be (almost) perfectly reproducible.
 
-## Language agnostic
+## Multi-language support
 
-You can have multiple sub-projects with different tech stacks in a single
-`garn.ts` file. Let's try to add a go backend.
+You can configure multiple sub-projects with different tech stacks in a single
+`garn.ts` file. Let's try to add a go backend:
 
 ```typescript
 export const backend = garn.go.mkGoProject({
@@ -82,9 +82,8 @@ export const backend = garn.go.mkGoProject({
 ```
 
 This means that you can use `garn` to configure bigger multi-language projects.
-This enables anyone on your team to run, test, and develop any part of your
-codebase, without having to install any language-specific tools and learn how
-to use them.
+This enables anyone to run, test, and develop any part of your codebase,
+without having to install any language-specific tools or learn how to use them.
 
 ## Deno LSP
 
@@ -95,21 +94,23 @@ from having a working Deno LSP. Installing `deno` is easy with `garn` itself:
 ```typescript
 export const deno = garn.mkProject({
   description: "garn configuration environment",
-  defaultEnvironment: garn.emptyEnvironment.withDevTools([pkgs.deno]),
+  defaultEnvironment: garn.emptyEnvironment.withDevTools([
+    pkgs.deno,
+  ]),
 }, {});
 ```
 
 `garn enter deno` will then drop you in a shell where `deno` is available.
 
 For configuring your editor to use Deno's LSP refer to [Deno's environment setup
-documentation](https://docs.deno.com/runtime/manual/getting_started/setup_your_environment)
+documentation](https://docs.deno.com/runtime/manual/getting_started/setup_your_environment).
 
 ## CI
 
 Since the checks of your `garn` projects are sandboxed, it's easy to run them on
-CI on [garnix.io](https://garnix.io). See [the docs](https://garnix.io/docs)
+[garnix.io CI](https://garnix.io). See [the docs](https://garnix.io/docs)
 for more info.
 
 ## Further reading
 
-[garn concepts](/docs/concepts)
+- [garn concepts](/docs/concepts)
