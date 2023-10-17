@@ -3,9 +3,10 @@ import * as AsciinemaPlayer from "asciinema-player";
 
 type AsciinemaProps = {
   src: string
+  rows?: number
 }
 
-export const Asciinema: React.FC<AsciinemaProps> = ({ src }) => {
+export const Asciinema: React.FC<AsciinemaProps> = ({ src, rows }) => {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     AsciinemaPlayer.create(
@@ -17,7 +18,7 @@ export const Asciinema: React.FC<AsciinemaProps> = ({ src }) => {
         theme: "garn",
         terminalFontFamily: "Space Mono",
         controls: false,
-        rows: 10,
+        rows: rows || 10,
         cols: 80,
       }
     );
