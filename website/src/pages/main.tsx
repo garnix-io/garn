@@ -6,26 +6,27 @@ import { Asciinema } from "../components/Asciinema";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { docMenuItems } from "./docs";
 import envDemoCastUrl from "../casts/env-demo.cast";
-import placeHolderCastUrl from "../casts/placeholder.cast";
+import buildDemoCastUrl from "../casts/build-demo.cast";
+import runDemoCastUrl from "../casts/run-demo.cast";
+import lspDemoCastUrl from "../casts/lsp-demo.cast";
 
 const Keyword: React.FC = props => <span className="keyword">{props.children}</span>;
 const String: React.FC = props => <span className="string">{props.children}</span>;
 const Export: React.FC = props => <span className="export">{props.children}</span>;
 
 const garnTs = <pre>
-        <Keyword>import</Keyword> * as garn from <String>"https://garn.io/ts/v0.0.1/mod.ts"</String>;<br />
-        <Keyword>import</Keyword> &#123; <Tooltip item="pkgs">
+        <Keyword>import</Keyword> * as garn from <String>"https://garn.io/ts/v0.0.7/mod.ts"</String>;<br />
+        <Keyword>import</Keyword> * as <Tooltip item="pkgs">
 {`This is a gigantic collection
 of packages, nixpkgs. If you
 need a tool or dependency,
 it's probably here`}
-</Tooltip> &#125; from <String>"https://garn.io/ts/v0.0.1/nixpkgs.ts"</String>;<br />
+</Tooltip> from <String>"https://garn.io/ts/v0.0.7/nixpkgs.ts"</String>;<br />
         <br />
         <Export>export</Export> <Keyword>const</Keyword> frontend = garn.javascript.mkNpmProject(&#123; <br />
   {"  "}description: <String>"My npm app"</String>,<br />
   {"  "}<Tooltip item={<>src: <String>"frontend"</String></>}>
-{`Supports mono-repos and multiple languages.
-`}
+{`Supports mono-repos and multiple languages.`}
   </Tooltip>,<br />
   {"  "}nodeVersion: <String>"18"</String>,<br />
   {"  "}testCommand: <String>"npm run test -- --watchAll=false"</String>,<br />
@@ -35,12 +36,7 @@ to add a dev tool to your shell.
 `}</Tooltip>([pkgs.cowsay]);<br />
         <br />
         <Export>export</Export> <Keyword>const</Keyword> <Tooltip item="backend">
-{`const backend: garn.Project<{
-  pkg: garn.Package;
-  devShell: garn.Environment;
-  main: garn.Executable;
-}>
-A Project is a collection of
+{`A Project is a collection of
 packages, environments, and
 executables.
 `}
@@ -48,6 +44,7 @@ executables.
 {"  "}description: <String>"A go server"</String>,<br />
 {"  "}moduleName: <String>"server"</String>,<br />
 {"  "}src: <String>"backend"</String>,<br />
+{"  "}goVersion: <String>"1.20"</String>,<br />
 &#125;);<br />
         </pre>
 
@@ -131,7 +128,7 @@ export const Info: React.FC = () => {
               <li>No more Heisenbugs</li>
               <li>Because builds are deterministic, they are cacheable, speeding up development and CI</li>
             </ul>
-            <Asciinema src={placeHolderCastUrl} />
+            <Asciinema src={buildDemoCastUrl} />
           </div>
 
 
@@ -142,7 +139,18 @@ export const Info: React.FC = () => {
               <li>The same commands can run any test in any repo</li>
               <li>Discoverability exactly where you need it</li>
             </ul>
-            <Asciinema src="/src/casts/placeholder.cast" />
+            <Asciinema src={runDemoCastUrl} />
+          </div>
+
+
+          <div className="feature">
+            <h2>Discoverable Typescript API</h2>
+            <ul>
+              <li>Fully configured with a single garn.ts file</li>
+              <li>Compose shared project configurations as Deno libraries</li>
+              <li>Use LSP integration with your favorite editor to quickly autocomplete your configuration</li>
+            </ul>
+            <Asciinema src={lspDemoCastUrl} />
           </div>
 
 
