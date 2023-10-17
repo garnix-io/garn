@@ -1,6 +1,6 @@
 # garn
 
-**Please note: garn is still in active development and experimental**
+**Please note: `garn` is still in active development and experimental. Use at your own risk!**
 
 garn is a build tool and development environment manager. You configure your
 project with a `garn.ts` file that declaratively describes your project and its
