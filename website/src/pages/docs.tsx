@@ -13,7 +13,7 @@ const docEntries: (readonly [Info, React.ReactElement])[] = Object.values(
     { info: Info; default: React.FC }
   >
 )
-  .sort((a, b) => +b.info.index - +a.info.index)
+  .sort((a, b) => +a.info.index - +b.info.index)
   .map(({ info, default: Component }) => [info, <Component />] as const);
 
 export const docMenuItems: { name: string; url: string }[] = docEntries.map(
@@ -30,5 +30,5 @@ export const Docs: React.FC<{ is_index?: boolean }> = () => {
       <div>Could not find what you're looking for. Please check the URL.</div>
     );
   }
-  return el[1];
+  return <div className="docs">{el[1]}</div>;
 };

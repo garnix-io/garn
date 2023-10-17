@@ -278,6 +278,11 @@ button {
 code {
   font-family: "Space Mono", monospace;
   font-variant-ligatures: none;
+  background: #f4f6f8;
+}
+
+pre code {
+  background: transparent;
 }
 
 aside {
@@ -450,6 +455,7 @@ details.not-focused {
 
 .dropdown {
   position: relative;
+  cursor: pointer;
 }
 
 .dropdown .dropdown-content {
@@ -617,6 +623,7 @@ dt::after {
 
 .bash {
   font-family: monospace;
+  font-size: 15px;
   border: black 1px solid;
   padding: 5px;
 }
