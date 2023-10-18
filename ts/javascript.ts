@@ -3,7 +3,7 @@ import { Executable } from "./executable.ts";
 import { Package, mkPackage } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
 import { nixSource } from "./internal/utils.ts";
-import { nixList, nixRaw, nixStrLit } from "./nix.ts";
+import { NixExpression, nixList, nixRaw, nixStrLit } from "./nix.ts";
 
 const nodeVersions = {
   "14": {
