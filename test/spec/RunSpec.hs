@@ -134,7 +134,7 @@ spec =
             let commands = ["build", "enter", "check"]
             forM_ commands $ \command -> do
               describe command $ do
-                fit "does not show top-level executables in the help" $
+                it "does not show top-level executables in the help" $
                   onTestFailureLogger $ \onTestFailureLog -> do
                     writeFile "garn.ts" $
                       unindent
