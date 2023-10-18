@@ -21,7 +21,7 @@ export const DropdownMenu: React.FC<{
           <li className="menu-item" key={item.name}>
             {item.url.match(/^(?:https?:)?\/\//)
               ? <a href={item.url} target="_blank" rel="noopener noreferrer">{item.name}</a>
-              : <Link to={item.url}>{item.name}</Link>
+              : <Link to={item.url} onClick={e => { e.stopPropagation(); setOpen(false) }}>{item.name}</Link>
             }
           </li>
         ))}

@@ -1,4 +1,5 @@
 import * as garn from "../ts/mod.ts";
+import { nixRaw } from "../ts/nix.ts";
 
 export const website = garn.javascript
   .mkNpmProject({
@@ -6,7 +7,11 @@ export const website = garn.javascript
     nodeVersion: "18",
     src: ".",
   })
-  .addCheck("tsc")`npm run tsc`;
+  .addCheck("tsc")`npm run tsc`
+  .withDevTools([
+    garn.mkPackage(nixRaw('pkgs.nodePackages.typescript-language-server')),
+  ]);
+
 
 const topLevelExecutable = (
   description: string,
