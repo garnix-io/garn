@@ -74,43 +74,33 @@ withGarnTsCommandInfo =
     ("generate", "Generate the flake.nix file and exit", const $ pure Gen),
     ("check", "Run the checks of a project", checkCommand)
   ]
+
+buildCommand :: Targets -> Parser WithGarnTsCommand
+buildCommand targets =
+  Build <$> commandOptionsParser (Map.filter isProject targets)
+
+runCommand :: Targets -> Parser WithGarnTsCommand
+runCommand targets =
+  Run <$> commandOptionsParser targets <*> argvParser
   where
-    buildCommand :: Targets -> Parser WithGarnTsCommand
-    buildCommand targets =
-      Build <$> commandOptionsParser (Map.filter isBuildable targets)
+    argvParser :: Parser [String]
+    argvParser = many $ strArgument $ metavar "...args"
 
-    runCommand :: Targets -> Parser WithGarnTsCommand
-    runCommand targets =
-      Run <$> commandOptionsParser targets <*> argvParser
+enterCommand :: Targets -> Parser WithGarnTsCommand
+enterCommand targets =
+  Enter <$> commandOptionsParser (Map.filter isProject targets)
 
-    enterCommand :: Targets -> Parser WithGarnTsCommand
-    enterCommand targets =
-      Enter <$> commandOptionsParser (Map.filter isEnterable targets)
+checkCommand :: Targets -> Parser WithGarnTsCommand
+checkCommand targets =
+  let checkCommandOptions =
+        Qualified <$> commandOptionsParser (Map.filter isProject targets)
+          <|> pure Unqualified
+   in Check <$> checkCommandOptions
 
-    checkCommand :: Targets -> Parser WithGarnTsCommand
-    checkCommand targets =
-      let checkCommandOptions =
-            Qualified <$> commandOptionsParser (Map.filter isCheckable targets)
-              <|> pure Unqualified
-       in Check <$> checkCommandOptions
-
-isBuildable :: TargetConfig -> Bool
-isBuildable = \case
+isProject :: TargetConfig -> Bool
+isProject = \case
   TargetConfigProject _ -> True
   TargetConfigExecutable _ -> False
-
-isEnterable :: TargetConfig -> Bool
-isEnterable = \case
-  TargetConfigProject _ -> True
-  TargetConfigExecutable _ -> False
-
-isCheckable :: TargetConfig -> Bool
-isCheckable = \case
-  TargetConfigProject _ -> True
-  TargetConfigExecutable _ -> False
-
-argvParser :: Parser [String]
-argvParser = many $ strArgument $ metavar "...args"
 
 withGarnTsParser :: Targets -> Parser WithGarnTsCommand
 withGarnTsParser targets =
