@@ -2,8 +2,10 @@
 
 module RunSpec where
 
+import Control.Monad (forM_)
 import Data.List (sort)
 import Data.String.Interpolate (i)
+import Data.String.Interpolate.Util (unindent)
 import System.Directory
 import System.Exit (ExitCode (..))
 import Test.Hspec
@@ -110,3 +112,37 @@ spec =
           output <- runGarn ["run", "printTty"] "" repoDir Nothing
           stdout output `shouldStartWith` "/dev/"
           exitCode output `shouldBe` ExitSuccess
+
+        describe "top-level executables" $ do
+          it "shows top-level executables in the help" $ do
+            writeFile "garn.ts" $
+              unindent
+                [i|
+                  import * as garn from "#{repoDir}/ts/mod.ts"
+
+                  export const topLevelExecutable: garn.Executable = garn.shell`true`;
+                |]
+            output <- runGarn ["run", "--help"] "" repoDir Nothing
+            stdout output
+              `shouldMatch` unindent
+                [i|
+                  Available commands:
+                    topLevelExecutable.*
+                |]
+
+          describe "help of other subcommands" $ do
+            let commands = ["build", "enter", "check"]
+            forM_ commands $ \command -> do
+              describe command $ do
+                fit "does not show top-level executables in the help" $
+                  onTestFailureLogger $ \onTestFailureLog -> do
+                    writeFile "garn.ts" $
+                      unindent
+                        [i|
+                          import * as garn from "#{repoDir}/ts/mod.ts"
+
+                          export const topLevelExecutable: garn.Executable = garn.shell`true`;
+                        |]
+                    output <- runGarn [command, "--help"] "" repoDir Nothing
+                    onTestFailureLog output
+                    stdout output `shouldNotContain` "topLevelExecutable"

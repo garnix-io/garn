@@ -68,23 +68,45 @@ data WithGarnTsCommand
 
 withGarnTsCommandInfo :: [(String, String, Targets -> Parser WithGarnTsCommand)]
 withGarnTsCommandInfo =
-  [ ("build", "Build the default executable of a project", withCommandOptions Build),
+  [ ("build", "Build the default executable of a project", buildCommand),
     ("run", "Build and run the default executable of a project", withCommandOptionsAndArgv Run),
-    ("enter", "Enter the default devshell for a project", withCommandOptions Enter),
+    ("enter", "Enter the default devshell for a project", enterCommand),
     ("generate", "Generate the flake.nix file and exit", const $ pure Gen),
     ("check", "Run the checks of a project", checkCommand)
   ]
   where
-    withCommandOptions constructor targets =
-      constructor <$> commandOptionsParser targets
     withCommandOptionsAndArgv constructor targets =
       constructor <$> commandOptionsParser targets <*> argvParser
+
+    buildCommand :: Targets -> Parser WithGarnTsCommand
+    buildCommand targets =
+      Build <$> commandOptionsParser (Map.filter isBuildable targets)
+
+    enterCommand :: Targets -> Parser WithGarnTsCommand
+    enterCommand targets =
+      Enter <$> commandOptionsParser (Map.filter isEnterable targets)
+
     checkCommand :: Targets -> Parser WithGarnTsCommand
     checkCommand targets =
       let checkCommandOptions =
-            Qualified <$> commandOptionsParser targets
+            Qualified <$> commandOptionsParser (Map.filter isCheckable targets)
               <|> pure Unqualified
        in Check <$> checkCommandOptions
+
+isBuildable :: TargetConfig -> Bool
+isBuildable = \case
+  TargetConfigProject _ -> True
+  TargetConfigExecutable _ -> False
+
+isEnterable :: TargetConfig -> Bool
+isEnterable = \case
+  TargetConfigProject _ -> True
+  TargetConfigExecutable _ -> False
+
+isCheckable :: TargetConfig -> Bool
+isCheckable = \case
+  TargetConfigProject _ -> True
+  TargetConfigExecutable _ -> False
 
 argvParser :: Parser [String]
 argvParser = many $ strArgument $ metavar "...args"
