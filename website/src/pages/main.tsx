@@ -77,7 +77,7 @@ export const Main: React.FC = () => {
       </article>
       <footer>
         <p>
-          Built by <b>garnix</b>.
+          Built by <a href="https://garnix.io">garnix</a>.
         </p>
       </footer>
     </>
