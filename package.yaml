@@ -76,6 +76,7 @@ tests:
       - -fdefer-typed-holes
     dependencies:
       - async
+      - filepath
       - hspec
       - hspec-discover
       - hspec-discover

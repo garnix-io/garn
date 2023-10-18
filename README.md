@@ -25,7 +25,7 @@ export const backend = garn.go.mkGoProject({
 });
 
 export const startAll = garn.processCompose({
-  frontend: frontend.defaultExecutable!,
+  frontend: frontend.devShell.shell`cd frontend && npm install && npm start`,
   backend: backend.defaultExecutable!,
 });
 ```
