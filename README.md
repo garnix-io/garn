@@ -9,7 +9,7 @@ dependencies.
 For example, with this `garn.ts` file:
 
 ```typescript
-import * as garn from "https://garn.io/ts/v0.0.7/mod.ts";
+import * as garn from "https://garn.io/ts/v0.0.8/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "My project frontend",
