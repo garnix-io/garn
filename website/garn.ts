@@ -7,24 +7,10 @@ export const website = garn.javascript
     nodeVersion: "18",
     src: ".",
   })
-  .addCheck("tsc")`npm run tsc`
-  .withDevTools([
-    garn.mkPackage(nixRaw('pkgs.nodePackages.typescript-language-server')),
-  ]);
+  .addCheck("tsc")`npm run tsc`.withDevTools([
+  garn.mkPackage(nixRaw("pkgs.nodePackages.typescript-language-server")),
+]);
 
+export const dev = website.shell`npm install ; npm run dev`;
 
-const topLevelExecutable = (
-  description: string,
-  executable: garn.Executable
-): garn.Project =>
-  garn.mkProject({ description, defaultExecutable: executable }, {});
-
-export const dev = topLevelExecutable(
-  "run the website in development mode",
-  website.shell`npm install ; npm run dev`
-);
-
-export const build = topLevelExecutable(
-  "build the website",
-  website.shell`npm install ; npm run build`
-);
+export const build = website.shell`npm install ; npm run build`;
