@@ -35,7 +35,6 @@ export const Tooltip: React.FC<{item: ReactNode}> = ({ item, children }) => {
         ref={reference}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
-        onClick={() => setOpen(!open)}
         className="tooltip"
       >
       {item}</span>
