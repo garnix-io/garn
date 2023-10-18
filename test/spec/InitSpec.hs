@@ -2,8 +2,6 @@
 
 module InitSpec where
 
-import Data.Char (isSpace)
-import Data.List (dropWhileEnd)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import System.Directory

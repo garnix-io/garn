@@ -75,6 +75,8 @@ withFileServer action = do
 
 spec :: Spec
 spec = aroundAll_ withFileServer $ do
+  repoDir <- runIO getCurrentDirectory
+
   describe "frontend-yarn-webpack" $ do
     describe "run" $ do
       it "starts the frontend" $ do
@@ -101,28 +103,36 @@ spec = aroundAll_ withFileServer $ do
             body <- (^. responseBody) <$> retryGet "http://localhost:3000"
             pure $ defaultGolden "go-http-backend" (cs body)
 
-  describe "npm-project" $ do
-    repoDir <- runIO getCurrentDirectory
+      it "allows to run a migrations executable" $
+        onTestFailureLogger $ \onTestFailureLog -> do
+          withCurrentDirectory "examples/go-http-backend" $ do
+            output <- runGarn ["run", "migrate"] "" repoDir Nothing
+            onTestFailureLog output
+            stdout output `shouldBe` "running migrations...\n"
 
+  describe "npm-project" $ around onTestFailureLogger $ do
     let runGarn' args stdin =
           withCurrentDirectory "examples/npm-project" $ do
             runGarn args stdin repoDir Nothing
 
-    it "run the main executable" $ do
+    it "run the main executable" $ \onTestFailureLog -> do
       output <- runGarn' ["run", "project"] ""
+      onTestFailureLog output
       stdout output `shouldEndWith` "hello from npm-project: 3\n"
       exitCode output `shouldBe` ExitSuccess
 
-    it "allows to run tests manually with enter" $ do
+    it "allows to run tests manually with enter" $ \onTestFailureLog -> do
       output <- runGarn' ["enter", "project"] "npm test"
+      onTestFailureLog output
       stdout output `shouldContain` "> jest"
       exitCode output `shouldBe` ExitSuccess
 
-    it "allows to run passing checks" $ do
+    it "allows to run passing checks" $ \onTestFailureLog -> do
       output <- runGarn' ["check"] ""
+      onTestFailureLog output
       exitCode output `shouldBe` ExitSuccess
 
-    it "catches failing checks" $ onTestFailureLogger $ \onTestFailureLog -> do
+    it "catches failing checks" $ \onTestFailureLog -> do
       Stdout (words -> files) <- cmd (Cwd "examples/npm-project") "git ls-files"
       inTempDirectory $ do
         forM_ files $ \file -> do

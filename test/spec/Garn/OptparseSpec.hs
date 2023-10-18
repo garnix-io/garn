@@ -19,31 +19,34 @@ spec = around_ (hSilence [stderr]) $ do
 
       it "parses qualified check commands" $ do
         let targetConfig =
-              TargetConfig
-                { description = "test project",
-                  packages = [],
-                  checks = []
-                }
+              TargetConfigProject $
+                ProjectTarget
+                  { description = "test project",
+                    packages = [],
+                    checks = []
+                  }
         command <- testWithGarnTs ["check", "project"] ("project" ~> targetConfig)
         command `shouldBe` Check (Qualified (CommandOptions "project" targetConfig))
 
       it "parses unqualified check commands" $ do
         let targetConfig =
-              TargetConfig
-                { description = "test project",
-                  packages = [],
-                  checks = []
-                }
+              TargetConfigProject $
+                ProjectTarget
+                  { description = "test project",
+                    packages = [],
+                    checks = []
+                  }
         command <- testWithGarnTs ["check"] ("project" ~> targetConfig)
         command `shouldBe` Check Unqualified
 
       it "errors on non-existing targets" $ do
         let targetConfig =
-              TargetConfig
-                { description = "test project",
-                  packages = [],
-                  checks = []
-                }
+              TargetConfigProject $
+                ProjectTarget
+                  { description = "test project",
+                    packages = [],
+                    checks = []
+                  }
         testWithGarnTs ["check", "does-not-exist"] ("project" ~> targetConfig)
           `shouldThrow` (== ExitFailure 1)
 

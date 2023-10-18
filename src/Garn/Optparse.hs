@@ -124,7 +124,7 @@ commandOptionsParser targets =
               target
               ( info
                   (pure (CommandOptions target targetConfig))
-                  (progDesc $ description targetConfig)
+                  (progDesc $ getDescription targetConfig)
               )
         )
         $ Map.assocs targets

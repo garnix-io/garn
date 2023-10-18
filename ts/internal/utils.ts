@@ -55,3 +55,7 @@ export const mapValues = <T, R>(
   }
   return result;
 };
+
+export const checkExhaustiveness = (x: never): never => {
+  throw new Error(`Exhaustiveness check failed: ${x}`);
+};

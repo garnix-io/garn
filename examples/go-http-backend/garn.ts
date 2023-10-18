@@ -6,3 +6,5 @@ export const server: garn.Project = garn.go.mkGoProject({
   src: ".",
   goVersion: "1.20",
 });
+
+export const migrate: garn.Executable = server.shell`go run ./scripts/migrate.go`;

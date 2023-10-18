@@ -68,9 +68,12 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       hPutStrLn stderr $ "[garn] Exiting " <> target <> " shell."
       pure ()
     Build (CommandOptions {targetConfig}) -> do
-      forM_ (packages targetConfig) $ \package -> do
-        Exit c <- cmd "nix build" nixArgs [".#" <> package]
-        when (c /= ExitSuccess) $ exitWith c
+      case targetConfig of
+        TargetConfigProject (ProjectTarget {packages}) -> do
+          forM_ packages $ \package -> do
+            Exit c <- cmd "nix build" nixArgs [".#" <> package]
+            when (c /= ExitSuccess) $ exitWith c
+        TargetConfigExecutable _ -> pure ()
     Check checkOptions -> case checkOptions of
       (Qualified (CommandOptions {targetConfig})) -> do
         checkTarget targetConfig
@@ -78,14 +81,16 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
         forM_ (targets garnConfig) checkTarget
 
 checkTarget :: TargetConfig -> IO ()
-checkTarget targetConfig = do
-  forM_ (packages targetConfig) $ \package -> do
-    Exit c <- cmd "nix build" nixArgs [".#" <> package]
-    when (c /= ExitSuccess) $ exitWith c
-  system <- currentSystem
-  forM_ (checks targetConfig) $ \check -> do
-    Exit c <- cmd "nix build" nixArgs [".#checks." <> system <> "." <> check]
-    when (c /= ExitSuccess) $ exitWith c
+checkTarget targetConfig = case targetConfig of
+  TargetConfigProject (ProjectTarget {packages, checks}) -> do
+    forM_ packages $ \package -> do
+      Exit c <- cmd "nix build" nixArgs [".#" <> package]
+      when (c /= ExitSuccess) $ exitWith c
+    system <- currentSystem
+    forM_ checks $ \check -> do
+      Exit c <- cmd "nix build" nixArgs [".#checks." <> system <> "." <> check]
+      when (c /= ExitSuccess) $ exitWith c
+  TargetConfigExecutable _ -> pure ()
 
 productionEnv :: IO Env
 productionEnv = do
