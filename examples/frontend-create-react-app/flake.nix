@@ -93,7 +93,7 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          "main" = {
+          "start" = {
             "type" = "app";
             "program" = "${
       let
@@ -105,7 +105,7 @@
             [pkgs.nodejs-18_x];
         })
       ;
-        shell = "cd . && npm start";
+        shell = "npm install && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
