@@ -256,7 +256,6 @@
                 [ pkgs.nodejs-18_x ];
             })
           ;
-          "startAll" = pkgs.mkShell { };
         }
       );
       apps = forAllSystems (system:
