@@ -5,3 +5,108 @@ export const info = {
 };
 
 # Basic concepts
+
+There's 4 underlying entities that play a role in `garn`:
+
+- `Environment`s
+- `Check`s
+- `Executable`s
+- `Package`s
+
+There's another basic concept called `Project` that is used to bundle instances
+of the above entities and give them structure. `Project`s are described at the
+bottom in the [Projects](#projects) section.
+
+All of these concepts are implemented as typescript types. Feel free to browse
+the [API documentation](todo).
+
+## Environments
+
+`Environment`s define what is available to a computation. For example they can
+contain compilers and developer tools that you want to use on a project, but
+they may also define other things like environment variables that need to be
+set. You can enter an `Environment` with `garn enter`.
+
+{/* TODO: maybe have an example of that? Or maybe that's too much duplication with the getting started guide? */}
+
+Running `garn enter` in a shell will add whatever the `Enviroment` provides to
+the shell environment that you're in. That means you can still use your local
+developer tools, like your editor, etc., but will also have access to everything
+provided by the `Environment` you entered.
+
+The `garn` library provides a special environment called `emptyEnvironment`. As
+you might have guessed it's an `Environment` that doesn't provide anything.
+
+`Environment`s can also be used to create other things that then make use of
+what the `Environment`s provide. For example `Check`s:
+
+## Checks
+
+`Check`s are commands (usually shell commands) that are used to define
+reproducible automated tests or other checks. They are being run in a sandbox,
+which means they don't have access to your locally installed tools, nor to your
+local file system. Instead they are always based on an underlying `Environment`,
+and through that will have access to the tools that the environment provides. In
+addition they will have access to a _copy_ of your source files, that is
+provided in the sandbox they are run in. That gives you the ability to define
+automated `Check`s on your source files.
+
+{/* TODO: maybe inline or link to a small example for a check? */}
+
+You can run `Check`s with `garn check`.
+
+Running `Check`s in a sandbox has its downsides, for example some tests require
+internet access. The big advantage is that these `Check`s are almost perfectly
+reproducible, since the sandbox they run in is very controlled. So a `Check`
+that fails or passes on one machine will behave the same on any other machine.
+
+This also means that running this checks on a CI system (for example
+[garnix.io](https://garnix.io)) is very easy and requires no additional
+configuration.
+
+## Executables
+
+`Executable`s are commands (usually shell snippets) that are being run on your
+local machine (not in a sandbox). They are based on an underlying `Environment`,
+and can make use of e.g. the executables that that `Environment` provides. You
+can use `Executables` for a variety of purposes:
+
+- Running your projects main executable during development,
+- Running a code formatter,
+- Run a code generator,
+- Spin up a database for development,
+- etc.
+
+{/* TODO: Link to or inline a small example of this? */}
+
+You can run `Executable`s with `garn run`.
+
+## Packages
+
+`Package`s are instructons to `garn` about how to _build_ a set of files. For
+example for a go backend a package would define how to compile it into
+executables. For an npm project it may define how the project can be bundled
+into a set of files that can be served by a webserver.
+
+{/* TODO: Link to or inline a small example of this? */}
+
+You can build `Package`s with `garn build`.
+
+## Projects
+
+`Project`s are used to combine `Environment`s, `Check`s, `Executable`s and
+`Package`s into a single entity. A `Project` can contain any number of these
+entities. So for example it can contain multiple `Check`s, which you can all run
+at once with `garn check <projectName>`. It can contain multiple `Packages` that
+you can all build with `garn build <projectName>`.
+
+Here's an example of a `Project` that contains a few `Check`s and `Package`s:
+
+```typescript
+TODO;
+```
+
+`Project`s can have a default `Enviroment` (aptly called `defaultEnvironment`),
+which allows you to call `garn enter` on a project. Similarly they can also have
+a default `Executable` (called `defaultExecutable`), which allows you to call
+`garn run` on a project.
