@@ -29,11 +29,12 @@ it's probably here`}
 {`Supports mono-repos and multiple languages.`}
   </Tooltip>,<br />
   {"  "}nodeVersion: <String>"18"</String>,<br />
-  {"  "}testCommand: <String>"npm run test -- --watchAll=false"</String>,<br />
-&#125;).<Tooltip item="withDevTools">
+&#125;)<br/>
+  {"  "}.<Tooltip item="withDevTools">
 {`withDevTools is all you need
 to add a dev tool to your shell.
-`}</Tooltip>([pkgs.cowsay]);<br />
+`}</Tooltip>([pkgs.cowsay])<br/>
+  {"  "}.<Tooltip item="addCheck">addCheck adds a *pure* check that you can run locally or on CI.</Tooltip>(<String>"run-tests"</String>)<String>`npm run test -- --watchAll=false`</String>;<br />
         <br />
         <Export>export</Export> <Keyword>const</Keyword> <Tooltip item="backend">
 {`A Project is a collection of

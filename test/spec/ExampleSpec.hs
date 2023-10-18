@@ -1,19 +1,27 @@
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE ViewPatterns #-}
+
 module ExampleSpec where
 
 import Control.Concurrent (threadDelay)
 import Control.Concurrent.Async (waitEitherCatch, withAsync)
 import Control.Exception (SomeException, bracket, catch, throwIO)
 import Control.Lens ((^.))
-import Control.Monad (when)
+import Control.Monad (forM_, when)
 import Data.String.Conversions (cs)
+import Data.String.Interpolate (i)
 import Data.Text (Text)
 import Development.Shake
 import Network.HTTP.Client (HttpException)
 import Network.Wreq (Response, get, responseBody)
+import System.Directory (copyFile, createDirectoryIfMissing, getCurrentDirectory, withCurrentDirectory)
 import System.Exit (ExitCode (..))
+import System.FilePath (takeDirectory, (</>))
 import System.Process (ProcessHandle, interruptProcessGroupOf, waitForProcess)
 import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)
+import Test.Mockery.Directory (inTempDirectory)
+import TestUtils
 
 raceCatch :: IO a -> IO b -> IO (Either (Either SomeException a) (Either SomeException b))
 raceCatch left right =
@@ -92,3 +100,41 @@ spec = aroundAll_ withFileServer $ do
           $ do
             body <- (^. responseBody) <$> retryGet "http://localhost:3000"
             pure $ defaultGolden "go-http-backend" (cs body)
+
+  describe "npm-project" $ do
+    repoDir <- runIO getCurrentDirectory
+
+    let runGarn' args stdin =
+          withCurrentDirectory "examples/npm-project" $ do
+            runGarn args stdin repoDir Nothing
+
+    it "run the main executable" $ do
+      output <- runGarn' ["run", "project"] ""
+      stdout output `shouldEndWith` "hello from npm-project: 3\n"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "allows to run tests manually with enter" $ do
+      output <- runGarn' ["enter", "project"] "npm test"
+      stdout output `shouldContain` "> jest"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "allows to run passing checks" $ do
+      output <- runGarn' ["check"] ""
+      exitCode output `shouldBe` ExitSuccess
+
+    it "catches failing checks" $ onTestFailureLogger $ \onTestFailureLog -> do
+      Stdout (words -> files) <- cmd (Cwd "examples/npm-project") "git ls-files"
+      inTempDirectory $ do
+        forM_ files $ \file -> do
+          createDirectoryIfMissing True $ takeDirectory file
+          copyFile (repoDir </> "examples/npm-project" </> file) file
+        writeFile
+          "src/index.test.ts"
+          [i|
+            it("fails", () => {
+              throw new Error("fail");
+            });
+          |]
+        output <- runGarn ["check"] "" repoDir Nothing
+        onTestFailureLog output
+        stderr output `shouldContain` "1 failed"

@@ -1,9 +1,9 @@
 import { Environment, mkEnvironment } from "./environment.ts";
 import { Executable } from "./executable.ts";
-import { mkPackage } from "./package.ts";
+import { Package, mkPackage } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
 import { nixSource } from "./internal/utils.ts";
-import { nixList, nixRaw, nixStrLit } from "./nix.ts";
+import { NixExpression, nixList, nixRaw, nixStrLit } from "./nix.ts";
 
 const nodeVersions = {
   "14": {
@@ -25,7 +25,9 @@ const nodeVersions = {
 
 type NodeVersion = keyof typeof nodeVersions;
 
-const fromNodeVersion = (version: NodeVersion) => {
+const fromNodeVersion = (
+  version: NodeVersion
+): { pkgs: NixExpression; nodejs: NixExpression } => {
   const { pkg, permittedInsecurePackages } = nodeVersions[version];
   return {
     pkgs: nixRaw`
@@ -42,63 +44,43 @@ export const mkNpmProject = (args: {
   description: string;
   src: string;
   nodeVersion: NodeVersion;
-  startCommand?: string;
-  testCommand?: string;
-}): Project => {
+}): Project & {
+  devShell: Environment;
+  node_modules: Package;
+} => {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
-  const pkg = mkPackage(nixRaw`
+  const node_modules = mkPackage(nixRaw`
     let
       npmlock2nix = import npmlock2nix-repo {
         inherit pkgs;
       };
       pkgs = ${pkgs};
     in
-    npmlock2nix.v2.build
+    npmlock2nix.v2.node_modules
       {
         src = ${nixSource(args.src)};
-        preBuild = ''
-          mkdir fake-home
-          HOME=$(pwd)/fake-home
-        '';
-        buildCommands = [ ${nixStrLit(
-          args.testCommand ?? "npm test"
-        )} "mkdir $out" ];
-        installPhase = "true";
-        node_modules_attrs = {
-          nodejs = ${nodejs};
-        };
+        nodejs = ${nodejs};
       }
   `);
   const devShell: Environment = mkEnvironment(
-    nixRaw`
-      let
-        npmlock2nix = import npmlock2nix-repo {
-          inherit pkgs;
-        };
-      in
-      npmlock2nix.v2.shell {
-        src = ${nixSource(args.src)};
-        node_modules_mode = "copy";
-        node_modules_attrs = {
-          nodejs = ${nodejs};
-        };
-      }
-    `,
-    args.src
-  );
-  const startDev: Executable = devShell.shell`cd ${args.src} && ${
-    args.startCommand ?? "npm start"
-  }`;
+    undefined,
+    nixStrLit`
+      echo copying source
+      cp -r ${nixSource(args.src)} src
+      chmod -R u+rwX src
+      cd src
+      echo copying node_modules
+      cp -r ${node_modules}/node_modules .
+    `
+  ).withDevTools([mkPackage(nodejs)]);
   return mkProject(
     {
       description: args.description,
       defaultEnvironment: devShell,
-      defaultExecutable: startDev,
     },
     {
-      pkg,
       devShell,
-      startDev,
+      node_modules,
     }
   );
 };
@@ -159,7 +141,12 @@ export const mkYarnProject = (args: {
           `};
         }
     `,
-    args.src
+    nixStrLit`
+      echo copying source
+      cp -r ${nixSource(args.src)} src
+      chmod -R u+rwX src
+      cd src
+    `
   );
   const startDev: Executable = devShell.shell`cd ${args.src} && ${startCommand}`;
   return mkProject(
