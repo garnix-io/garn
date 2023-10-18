@@ -19,7 +19,7 @@ export const DropdownMenu: React.FC<{
       <ul className={open ? "dropdown-content show" : "dropdown"} onMouseDown={e => e.stopPropagation()}>
         {items.map((item) => (
           <li className="menu-item" key={item.name}>
-            <Link className="black" to={`docs/${item.url}`}>
+            <Link className="black" to={`docs/${item.url}`} onClick={e => { e.stopPropagation(); setOpen(false) }}>
               {item.name}
             </Link>
           </li>
