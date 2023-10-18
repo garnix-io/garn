@@ -1,5 +1,6 @@
 import React from "react";
 import { DropdownMenu } from "../components/Dropdown";
+import { GithubLink } from "../components/GithubLink";
 import { Tooltip } from "../components/Hovernote";
 import { Typography } from "../components/Typography";
 import { Asciinema } from "../components/Asciinema";
@@ -60,6 +61,7 @@ export const Main: React.FC = () => {
             </Link>
           </Typography>
         </div>
+        <GithubLink />
       </header>
 
       <article>
