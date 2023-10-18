@@ -121,7 +121,6 @@ run-garn example *args="": hpack
 check-examples:
   just run-garn haskell check
   just run-garn haskell run helloFromHaskell
-  echo "node --version" | just run-garn npm-frontend enter frontend
   just run-garn frontend-create-react-app check
   just run-garn frontend-yarn-webpack check
   just run-garn go-http-backend check

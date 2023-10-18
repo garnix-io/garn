@@ -59,7 +59,6 @@ writeNpmFrontendProject repoDir = do
         description: "mkNpmProject-test",
         src: ".",
         nodeVersion: "18",
-        testCommand: "",
       })
     |]
   writeFile
