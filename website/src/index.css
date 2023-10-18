@@ -464,6 +464,10 @@ details.not-focused {
   z-index: 5;
 }
 
+.menu-item a {
+  color: #000;
+}
+
 .dropdown {
   position: relative;
   cursor: pointer;

@@ -16,11 +16,10 @@ const docEntries: (readonly [Info, React.ReactElement])[] = Object.values(
   .sort((a, b) => +a.info.index - +b.info.index)
   .map(({ info, default: Component }) => [info, <Component />] as const);
 
-export const docMenuItems: { name: string; url: string }[] = docEntries.map(
-  (x) => {
-    return { name: x[0].name, url: x[0].url };
-  }
-);
+export const docMenuItems: { name: string; url: string }[] = [
+  ...docEntries.map(([{ name, url }]) => ({ name, url: `/docs/${url}` })),
+  { name: 'typescript api', url: '//doc.deno.land/https://garn.io/ts/v0.0.8/mod.ts' },
+];
 
 export const Docs: React.FC<{ is_index?: boolean }> = () => {
   const params = useParams();
