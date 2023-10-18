@@ -18,7 +18,10 @@ const docEntries: (readonly [Info, React.ReactElement])[] = Object.values(
 
 export const docMenuItems: { name: string; url: string }[] = [
   ...docEntries.map(([{ name, url }]) => ({ name, url: `/docs/${url}` })),
-  { name: 'typescript api', url: '//doc.deno.land/https://garn.io/ts/v0.0.8/mod.ts' },
+  {
+    name: "typescript api",
+    url: "https://doc.deno.land/https://garn.io/ts/v0.0.8/mod.ts",
+  },
 ];
 
 export const Docs: React.FC<{ is_index?: boolean }> = () => {
