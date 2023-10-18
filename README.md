@@ -51,13 +51,20 @@ curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh | sh
 have nix already -- the above installer will install nix first, after asking
 for confirmation.
 
+### Create your first `garn.ts` file
+
+You can use `garn init` to template out an initial configuration.
+
+Check out the [getting started guide](https://garn.io/docs/getting_started) for
+more information on how to write and modify your `garn.ts` file.
+
+## Commands
+
 ### `garn init`
 
 Running `garn init` in a directory without a `garn.ts` file will try to
 automatically detect what kind of project you have and generate a `garn.ts`
 file for you.
-
-## Commands
 
 ### `garn enter`
 
@@ -79,3 +86,8 @@ named `result` which links to the resulting build artifacts.
 checks run in a sandbox. The downside of sandboxing is that these checks won't
 have access to the internet. The upside is that they'll be (almost) perfectly
 reproducible.
+
+## Typescript API
+
+Documentation for the `garn` Deno library is documented
+[here](https://doc.deno.land/https://garn.io/ts/v0.0.8/mod.ts).
