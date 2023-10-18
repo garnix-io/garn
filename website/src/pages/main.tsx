@@ -52,13 +52,9 @@ export const Main: React.FC = () => {
   return (
     <>
       <header>
-        <div className="header-title">
-          <Typography variant="h1">
-            <Link style={{ color: "black" }} to="/">
-              garn
-            </Link>
-          </Typography>
-        </div>
+        <Typography variant="h1">
+          <Link to="/">garn</Link>
+        </Typography>
       </header>
 
       <article>

@@ -2,6 +2,13 @@
 
 :root {
   --very-light-gray: #fafbfc;
+  --page-padding: 20px;
+}
+
+@media (max-width: 480px) {
+  :root {
+    --page-padding: 5px;
+  }
 }
 
 h1 {
@@ -9,18 +16,26 @@ h1 {
 }
 
 header {
+  --width: min(calc(100% - var(--page-padding)*2), 700px);;
   background-color: white;
   grid-area: header;
-  display: grid;
-  z-index: 1;
-  position: -webkit-sticky;
-  position: sticky;
-  top: 0px;
-  grid-template-columns: auto auto 200px;
-  grid-template-areas: ". title signin";
-
+  position: fixed;
+  top: 0;
+  left: 50%;
+  width: var(--width);
+  margin-left: calc(var(--width) / -2);
+  text-align: center;
   border-bottom: 1px solid;
-  padding-bottom: 50px;
+  z-index: 2;
+}
+
+header h1 {
+  margin-bottom: 0;
+  font-size: 32px;
+}
+
+header h1 a {
+  color: black;
 }
 
 nav {
@@ -116,18 +131,6 @@ blockquote p {
 
 .docs {
   font-size: 16px;
-}
-
-.header-title {
-  margin: auto;
-
-  /* background-color: red; */
-  grid-area: title;
-}
-
-.header-title h1 {
-  margin-bottom: 0;
-  font-size: 32px;
 }
 
 .sign-in {
@@ -243,6 +246,11 @@ footer {
   border-top: 1px solid;
 }
 
+footer a {
+  color: inherit;
+  font-weight: 800;
+}
+
 body {
   background-color: white;
   margin: 0;
@@ -259,10 +267,7 @@ a {
   display: grid;
   min-height: 100vh;
   grid-template-rows: 70px 1fr auto;
-  grid-template-columns: minmax(20px, auto) minmax(100px, 700px) minmax(
-      20px,
-      auto
-    );
+  grid-template-columns: minmax(var(--page-padding), auto) minmax(100px, 700px) minmax(var(--page-padding), auto);
   grid-template-areas:
     ". header ."
     ". article . "
