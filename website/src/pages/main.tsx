@@ -54,13 +54,9 @@ export const Main: React.FC = () => {
   return (
     <>
       <header>
-        <div className="header-title">
-          <Typography variant="h1">
-            <Link style={{ color: "black" }} to="/">
-              garn
-            </Link>
-          </Typography>
-        </div>
+        <Typography variant="h1">
+          <Link to="/">garn</Link>
+        </Typography>
         <GithubLink />
       </header>
 
@@ -80,7 +76,7 @@ export const Main: React.FC = () => {
       </article>
       <footer>
         <p>
-          Built by <b>garnix</b>.
+          Built by <a href="https://garnix.io">garnix</a>.
         </p>
       </footer>
     </>
@@ -91,22 +87,19 @@ export const Info: React.FC = () => {
   return (
     <>
       <section className="say">
-      <Typography variant="h1">what you say...</Typography>
+        <Typography variant="h1">what you say...</Typography>
 
-      <figure>
-        <div className="filename">garn.ts</div>
-        <div className="garn-ts">
-          <code className="garn-ts">{garnTs} </code>
-        </div>
-        <figcaption className="garn-ts">
-        <b>garn</b> is configured in Typescript.
-        You probably already know it. And anyhow, types
-        and tab-completion will guide the way.
-            </figcaption>
-      </figure>
-
-      <br />
-      <br />
+        <figure>
+          <div className="filename">garn.ts</div>
+          <div className="garn-ts">
+            <code className="garn-ts">{garnTs} </code>
+          </div>
+          <figcaption className="garn-ts">
+          <b>garn</b> is configured in Typescript.
+          You probably already know it. And anyhow, types
+          and tab-completion will guide the way.
+              </figcaption>
+        </figure>
       </section>
       <section className="get">
         <Typography variant="h1" className="align-right">...is what you get</Typography>

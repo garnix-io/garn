@@ -20,7 +20,7 @@
           };
         in
         {
-          website_node_modules =
+          "website_node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -57,7 +57,8 @@
                   )
                 ;
                 nodejs = pkgs.nodejs-18_x;
-              };
+              }
+          ;
         }
       );
       checks = forAllSystems (system:
@@ -68,7 +69,7 @@
           };
         in
         {
-          website_tsc =
+          "website_tsc" =
             let
               dev =
                 (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -148,7 +149,8 @@
   }/node_modules .
     "}
       ${"npm run tsc"}
-    ";
+    "
+          ;
         }
       );
       devShells = forAllSystems (system:
@@ -159,12 +161,21 @@
           };
         in
         {
-          website = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ pkgs.nodejs-18_x ];
-          });
+          "website" =
+            (
+              (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+                nativeBuildInputs =
+                  previousAttrs.nativeBuildInputs
+                  ++
+                  [ pkgs.nodejs-18_x ];
+              })
+            ).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.nodePackages.typescript-language-server ];
+            })
+          ;
         }
       );
       apps = forAllSystems (system:
@@ -172,16 +183,23 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          build = {
-            type = "app";
-            program = "${
+          "build" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = 
+        (
         (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
             [pkgs.nodejs-18_x];
+        })
+      ).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodePackages.typescript-language-server];
         })
       ;
         shell = "npm install ; npm run build";
@@ -197,16 +215,23 @@
       ''
     }";
           };
-          dev = {
-            type = "app";
-            program = "${
+          "dev" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = 
+        (
         (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
             [pkgs.nodejs-18_x];
+        })
+      ).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodePackages.typescript-language-server];
         })
       ;
         shell = "npm install ; npm run dev";
