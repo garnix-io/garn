@@ -262,6 +262,7 @@ test-suite spec
     , base >=4.7 && <5
     , containers
     , directory
+    , filepath
     , getopt-generics
     , hspec
     , hspec-discover

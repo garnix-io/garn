@@ -20,7 +20,7 @@
           };
         in
         {
-          "website_node_modules" =
+          "project_node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -69,7 +69,89 @@
           };
         in
         {
-          "website_tsc" =
+          "project_test" =
+            let
+              dev =
+                (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+                  nativeBuildInputs =
+                    previousAttrs.nativeBuildInputs
+                    ++
+                    [ pkgs.nodejs-18_x ];
+                })
+              ;
+            in
+            pkgs.runCommand "check"
+              {
+                buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+              } "
+      touch \$out
+      ${"
+      echo copying source
+      cp -r ${
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+} src
+      chmod -R u+rwX src
+      cd src
+      echo copying node_modules
+      cp -r ${
+    let
+      npmlock2nix = import npmlock2nix-repo {
+        inherit pkgs;
+      };
+      pkgs = 
+      import "${nixpkgs}" {
+        config.permittedInsecurePackages = [];
+        inherit system;
+      }
+    ;
+    in
+    npmlock2nix.v2.node_modules
+      {
+        src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
+        nodejs = pkgs.nodejs-18_x;
+      }
+  }/node_modules .
+    "}
+      ${"npm run test"}
+    "
+          ;
+          "project_tsc" =
             let
               dev =
                 (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -161,19 +243,12 @@
           };
         in
         {
-          "website" =
-            (
-              (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
-                nativeBuildInputs =
-                  previousAttrs.nativeBuildInputs
-                  ++
-                  [ pkgs.nodejs-18_x ];
-              })
-            ).overrideAttrs (finalAttrs: previousAttrs: {
+          "project" =
+            (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
                 ++
-                [ pkgs.nodePackages.typescript-language-server ];
+                [ pkgs.nodejs-18_x ];
             })
           ;
         }
@@ -183,58 +258,19 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          "build" = {
+          "project" = {
             "type" = "app";
             "program" = "${
       let
         dev = 
-        (
         (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
             [pkgs.nodejs-18_x];
         })
-      ).overrideAttrs (finalAttrs: previousAttrs: {
-          nativeBuildInputs =
-            previousAttrs.nativeBuildInputs
-            ++
-            [pkgs.nodePackages.typescript-language-server];
-        })
       ;
-        shell = "npm install ; npm run build";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
-        #!${pkgs.bash}/bin/bash
-        export PATH=$(cat ${buildPath}):$PATH
-        ${dev.shellHook}
-        ${shell} "$@"
-      ''
-    }";
-          };
-          "dev" = {
-            "type" = "app";
-            "program" = "${
-      let
-        dev = 
-        (
-        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
-          nativeBuildInputs =
-            previousAttrs.nativeBuildInputs
-            ++
-            [pkgs.nodejs-18_x];
-        })
-      ).overrideAttrs (finalAttrs: previousAttrs: {
-          nativeBuildInputs =
-            previousAttrs.nativeBuildInputs
-            ++
-            [pkgs.nodePackages.typescript-language-server];
-        })
-      ;
-        shell = "npm install ; npm run dev";
+        shell = "npm install ; npm run run";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
