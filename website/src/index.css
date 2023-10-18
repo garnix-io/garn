@@ -23,6 +23,17 @@ header {
   padding-bottom: 50px;
 }
 
+.github-link {
+  position: absolute;
+  top: 20px;
+  right: 10px;
+}
+
+.github-link svg {
+  width: 25px;
+  height: 25px;
+}
+
 nav {
   border-bottom: 1px solid;
   /* background-color: #f5f8fa; */
