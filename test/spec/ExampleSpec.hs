@@ -116,7 +116,7 @@ spec = aroundAll_ withFileServer $ do
             runGarn args stdin repoDir Nothing
 
     it "run the main executable" $ \onTestFailureLog -> do
-      output <- runGarn' ["run", "project"] ""
+      output <- runGarn' ["run", "run"] ""
       onTestFailureLog output
       stdout output `shouldEndWith` "hello from npm-project: 3\n"
       exitCode output `shouldBe` ExitSuccess

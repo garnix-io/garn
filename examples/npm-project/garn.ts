@@ -1,6 +1,6 @@
 import * as garn from "http://localhost:8777/mod.ts";
 
-const base = garn.javascript
+export const project = garn.javascript
   .mkNpmProject({
     src: ".",
     description: "An NPM frontend",
@@ -8,7 +8,4 @@ const base = garn.javascript
   })
   .addCheck("test")`npm run test`.addCheck("tsc")`npm run tsc`;
 
-export const project = {
-  ...base,
-  defaultExecutable: base.shell`npm install ; npm run run`,
-};
+export const run = project.shell`npm install ; npm run run`;
