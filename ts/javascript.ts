@@ -3,7 +3,7 @@ import { Executable } from "./executable.ts";
 import { Package, mkPackage } from "./package.ts";
 import { mkProject, Project } from "./project.ts";
 import { nixSource } from "./internal/utils.ts";
-import { nixList, NixExpression, nixRaw, nixStrLit } from "./nix.ts";
+import { nixList, nixRaw, nixStrLit } from "./nix.ts";
 
 const nodeVersions = {
   "14": {
@@ -21,10 +21,7 @@ const nodeVersions = {
     pkg: nixRaw`pkgs.nodejs-18_x`,
     permittedInsecurePackages: nixList([]),
   },
-} satisfies Record<
-  string,
-  { pkg: NixExpression; permittedInsecurePackages: NixExpression }
->;
+};
 
 type NodeVersion = keyof typeof nodeVersions;
 
