@@ -16,13 +16,13 @@ const String: React.FC = props => <span className="string">{props.children}</spa
 const Export: React.FC = props => <span className="export">{props.children}</span>;
 
 const garnTs = <pre>
-        <Keyword>import</Keyword> * as garn from <String>"https://garn.io/ts/v0.0.7/mod.ts"</String>;<br />
+        <Keyword>import</Keyword> * as garn from <String>"https://garn.io/ts/v0.0.8/mod.ts"</String>;<br />
         <Keyword>import</Keyword> * as <Tooltip item="pkgs">
 {`This is a gigantic collection
 of packages, nixpkgs. If you
 need a tool or dependency,
 it's probably here`}
-</Tooltip> from <String>"https://garn.io/ts/v0.0.7/nixpkgs.ts"</String>;<br />
+</Tooltip> from <String>"https://garn.io/ts/v0.0.8/nixpkgs.ts"</String>;<br />
         <br />
         <Export>export</Export> <Keyword>const</Keyword> frontend = garn.javascript.mkNpmProject(&#123; <br />
   {"  "}description: <String>"My npm app"</String>,<br />
