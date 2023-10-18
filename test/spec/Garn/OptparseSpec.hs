@@ -12,11 +12,12 @@ import Test.Hspec
 spec :: Spec
 spec = around_ (hSilence [stderr]) $ do
   describe "Garn.Optparse" $ do
-    describe "check subcommand" $ do
+    describe "generate subcommand" $ do
       it "parses generate commands" $ do
         command <- testWithGarnTs ["generate"] mempty
         command `shouldBe` Gen
 
+    describe "check subcommand" $ do
       it "parses qualified check commands" $ do
         let targetConfig =
               TargetConfigProject $
@@ -49,6 +50,29 @@ spec = around_ (hSilence [stderr]) $ do
                   }
         testWithGarnTs ["check", "does-not-exist"] ("project" ~> targetConfig)
           `shouldThrow` (== ExitFailure 1)
+
+    describe "run subcommand" $ do
+      it "parses run commands" $ do
+        let targetConfig =
+              TargetConfigProject $
+                ProjectTarget
+                  { description = "test project",
+                    packages = [],
+                    checks = []
+                  }
+        command <- testWithGarnTs ["run", "project"] ("project" ~> targetConfig)
+        command `shouldBe` Run (CommandOptions "project" targetConfig) []
+
+      it "parses run commands with additional arguments" $ do
+        let targetConfig =
+              TargetConfigProject $
+                ProjectTarget
+                  { description = "test project",
+                    packages = [],
+                    checks = []
+                  }
+        command <- testWithGarnTs ["run", "project", "more", "args"] ("project" ~> targetConfig)
+        command `shouldBe` Run (CommandOptions "project" targetConfig) ["more", "args"]
 
 testWithGarnTs :: [String] -> Targets -> IO WithGarnTsCommand
 testWithGarnTs args targets = do
