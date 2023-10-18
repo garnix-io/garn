@@ -38,13 +38,7 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.mkProject(
-                {
-                  description: 'Project with an executable',
-                  defaultExecutable: garn.shell`echo foobarbaz`,
-                },
-                {},
-              );
+              export const main = garn.shell`echo foobarbaz`;
             |]
           output <- runGarn ["run", "main"] "" repoDir Nothing
           stdout output `shouldBe` "foobarbaz\n"
@@ -57,13 +51,7 @@ spec =
               import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
               const myEnv = garn.mkEnvironment().withDevTools([garn.mkPackage(nixRaw`pkgs.hello`)]);
-              export const main = garn.mkProject(
-                {
-                  description: 'Project with an executable',
-                  defaultExecutable: myEnv.shell`hello`,
-                },
-                {},
-              );
+              export const main = myEnv.shell`hello`;
             |]
           output <- runGarn ["run", "main"] "" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
@@ -75,10 +63,7 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.mkProject({
-                description: 'Project with an executable',
-                defaultExecutable: garn.shell`printf "%s,%s,%s"`,
-              }, {});
+              export const main = garn.shell`printf "%s,%s,%s"`;
             |]
           output <- runGarn ["run", "main", "foo bar", "baz"] "" repoDir Nothing
           stdout output `shouldBe` "foo bar,baz,"
@@ -104,10 +89,7 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const printTty = garn.mkProject({
-                description: "tty",
-                defaultExecutable: garn.shell`tty`,
-              }, {});
+              export const printTty = garn.shell`tty`;
             |]
           output <- runGarn ["run", "printTty"] "" repoDir Nothing
           stdout output `shouldStartWith` "/dev/"
