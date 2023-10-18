@@ -317,8 +317,18 @@ figcaption {
 }
 
 section.say {
-  padding-top: 50px;
-  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  min-height: calc(100vh - 300px);
+}
+
+section.hero h1 {
+  margin: 0;
+}
+
+figure {
+  margin: 0;
 }
 
 .docs pre {
