@@ -22,6 +22,5 @@ export const npmFrontend = garn.javascript.mkNpmProject({
 
 export const startAll = garn.processCompose({
   backend: backend.defaultExecutable!,
-  'yarn frontend': yarnFrontend.defaultExecutable!,
-  'npm frontend': npmFrontend.defaultExecutable!,
+  frontend: npmFrontend.devShell.shell`cd frontend-npm && npm install && npm start`,
 });

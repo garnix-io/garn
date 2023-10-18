@@ -343,31 +343,6 @@
       ''
     }";
           };
-          "npmFrontend" = {
-            "type" = "app";
-            "program" = "${
-      let
-        dev = 
-        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
-          nativeBuildInputs =
-            previousAttrs.nativeBuildInputs
-            ++
-            [pkgs.nodejs-18_x];
-        })
-      ;
-        shell = "cd frontend-npm && npm start";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
-        #!${pkgs.bash}/bin/bash
-        export PATH=$(cat ${buildPath}):$PATH
-        ${dev.shellHook}
-        ${shell} "$@"
-      ''
-    }";
-          };
           "startAll" = {
             "type" = "app";
             "program" = "${
@@ -427,68 +402,7 @@
       ''
     }";
 "environment" = [];};
-"yarn frontend" = {"command" = "${
-      let
-        dev = 
-      let
-          pkgs = 
-      import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      }
-    ;
-          packageJson = pkgs.lib.importJSON frontend-yarn/package.json;
-          yarnPackage = 
-    pkgs.yarn2nix-moretea.mkYarnPackage {
-      nodejs = pkgs.nodejs-18_x;
-      yarn = pkgs.yarn;
-      src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./frontend-yarn;
-      name = "source";
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix" &&
-         fileName != "garn.ts";
-    })
-;
-      buildPhase = "yarn mocha";
-      dontStrip = true;
-    };
-          nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
-      in
-        pkgs.mkShell {
-          buildInputs = [ pkgs.yarn ];
-          shellHook = "
-            export PATH=${nodeModulesPath}/.bin:\$PATH
-            export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
-          ";
-        }
-    ;
-        shell = "cd frontend-yarn && yarn start";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
-        #!${pkgs.bash}/bin/bash
-        export PATH=$(cat ${buildPath}):$PATH
-        ${dev.shellHook}
-        ${shell} "$@"
-      ''
-    }";
-"environment" = [];};
-"npm frontend" = {"command" = "${
+"frontend" = {"command" = "${
       let
         dev = 
         (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
@@ -498,7 +412,7 @@
             [pkgs.nodejs-18_x];
         })
       ;
-        shell = "cd frontend-npm && npm start";
+        shell = "cd frontend-npm && npm install && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
