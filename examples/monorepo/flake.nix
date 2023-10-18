@@ -60,6 +60,36 @@
               modules = gomod2nix-toml;
             }
           ;
+          "haskell_pkg" =
+            (pkgs.haskell.packages.ghc94.callCabal2nix
+              "garn-pkg"
+
+              (
+                let
+                  lib = pkgs.lib;
+                  lastSafe = list:
+                    if lib.lists.length list == 0
+                    then null
+                    else lib.lists.last list;
+                in
+                builtins.path
+                  {
+                    path = ./haskell;
+                    name = "source";
+                    filter = path: type:
+                      let
+                        fileName = lastSafe (lib.strings.splitString "/" path);
+                      in
+                      fileName != "flake.nix" &&
+                      fileName != "garn.ts";
+                  }
+              )
+
+              { })
+            // {
+              meta.mainProgram = "helloFromHaskell";
+            }
+          ;
           "npmFrontend_node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
@@ -98,57 +128,6 @@
                 ;
                 nodejs = pkgs.nodejs-18_x;
               }
-          ;
-          "yarnFrontend_pkg" =
-            let
-              pkgs =
-                import "${nixpkgs}" {
-                  config.permittedInsecurePackages = [ ];
-                  inherit system;
-                }
-              ;
-              packageJson = pkgs.lib.importJSON frontend-yarn/package.json;
-              yarnPackage =
-                pkgs.yarn2nix-moretea.mkYarnPackage {
-                  nodejs = pkgs.nodejs-18_x;
-                  yarn = pkgs.yarn;
-                  src =
-                    (
-                      let
-                        lib = pkgs.lib;
-                        lastSafe = list:
-                          if lib.lists.length list == 0
-                          then null
-                          else lib.lists.last list;
-                      in
-                      builtins.path
-                        {
-                          path = ./frontend-yarn;
-                          name = "source";
-                          filter = path: type:
-                            let
-                              fileName = lastSafe (lib.strings.splitString "/" path);
-                            in
-                            fileName != "flake.nix" &&
-                            fileName != "garn.ts";
-                        }
-                    )
-                  ;
-                  buildPhase = "yarn mocha";
-                  dontStrip = true;
-                };
-              nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
-            in
-            (pkgs.writeScriptBin "start-server" "
-        #!/usr/bin/env bash
-
-        set -eu
-
-        export PATH=${pkgs.yarn}/bin:\$PATH
-        export PATH=${nodeModulesPath}/.bin:\$PATH
-        yarn --version
-        yarn start
-      ")
           ;
         }
       );
@@ -224,29 +203,13 @@
                 [ pkgs.gopls ];
             })
           ;
-          "npmFrontend" =
-            (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
-              nativeBuildInputs =
-                previousAttrs.nativeBuildInputs
-                ++
-                [ pkgs.nodejs-18_x ];
-            })
-          ;
-          "startAll" = pkgs.mkShell { };
-          "yarnFrontend" =
-            let
-              pkgs =
-                import "${nixpkgs}" {
-                  config.permittedInsecurePackages = [ ];
-                  inherit system;
-                }
-              ;
-              packageJson = pkgs.lib.importJSON frontend-yarn/package.json;
-              yarnPackage =
-                pkgs.yarn2nix-moretea.mkYarnPackage {
-                  nodejs = pkgs.nodejs-18_x;
-                  yarn = pkgs.yarn;
-                  src =
+          "haskell" =
+            (
+              let
+                expr =
+                  (pkgs.haskell.packages.ghc94.callCabal2nix
+                    "garn-pkg"
+
                     (
                       let
                         lib = pkgs.lib;
@@ -257,7 +220,7 @@
                       in
                       builtins.path
                         {
-                          path = ./frontend-yarn;
+                          path = ./haskell;
                           name = "source";
                           filter = path: type:
                             let
@@ -267,20 +230,33 @@
                             fileName != "garn.ts";
                         }
                     )
-                  ;
-                  buildPhase = "yarn mocha";
-                  dontStrip = true;
-                };
-              nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
-            in
-            pkgs.mkShell {
-              buildInputs = [ pkgs.yarn ];
-              shellHook = "
-            export PATH=${nodeModulesPath}/.bin:\$PATH
-            export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
-          ";
-            }
+
+                    { })
+                  // {
+                    meta.mainProgram = "helloFromHaskell";
+                  }
+                ;
+              in
+              (if expr ? env
+              then expr.env
+              else pkgs.mkShell { inputsFrom = [ expr ]; }
+              )
+            ).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.haskell.packages.ghc94.cabal-install ];
+            })
           ;
+          "npmFrontend" =
+            (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+              nativeBuildInputs =
+                previousAttrs.nativeBuildInputs
+                ++
+                [ pkgs.nodejs-18_x ];
+            })
+          ;
+          "startAll" = pkgs.mkShell { };
         }
       );
       apps = forAllSystems (system:
@@ -331,6 +307,51 @@
           modules = gomod2nix-toml;
         }
     }/bin/go-http-backend";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+          };
+          "haskell" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = pkgs.mkShell {};
+        shell = "${
+    (pkgs.haskell.packages.ghc94.callCabal2nix
+      "garn-pkg"
+      
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./haskell;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+
+      { })
+      // {
+        meta.mainProgram = "helloFromHaskell";
+      }
+  }/bin/helloFromHaskell";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -402,6 +423,49 @@
       ''
     }";
 "environment" = [];};
+"haskell" = {"command" = "${
+      let
+        dev = pkgs.mkShell {};
+        shell = "${
+    (pkgs.haskell.packages.ghc94.callCabal2nix
+      "garn-pkg"
+      
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./haskell;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+
+      { })
+      // {
+        meta.mainProgram = "helloFromHaskell";
+      }
+  }/bin/helloFromHaskell";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+"environment" = [];};
 "frontend" = {"command" = "${
       let
         dev = 
@@ -425,69 +489,6 @@
       ''
     }";
 "environment" = [];};};})}";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
-        #!${pkgs.bash}/bin/bash
-        export PATH=$(cat ${buildPath}):$PATH
-        ${dev.shellHook}
-        ${shell} "$@"
-      ''
-    }";
-          };
-          "yarnFrontend" = {
-            "type" = "app";
-            "program" = "${
-      let
-        dev = 
-      let
-          pkgs = 
-      import "${nixpkgs}" {
-        config.permittedInsecurePackages = [];
-        inherit system;
-      }
-    ;
-          packageJson = pkgs.lib.importJSON frontend-yarn/package.json;
-          yarnPackage = 
-    pkgs.yarn2nix-moretea.mkYarnPackage {
-      nodejs = pkgs.nodejs-18_x;
-      yarn = pkgs.yarn;
-      src = 
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./frontend-yarn;
-      name = "source";
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix" &&
-         fileName != "garn.ts";
-    })
-;
-      buildPhase = "yarn mocha";
-      dontStrip = true;
-    };
-          nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
-      in
-        pkgs.mkShell {
-          buildInputs = [ pkgs.yarn ];
-          shellHook = "
-            export PATH=${nodeModulesPath}/.bin:\$PATH
-            export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
-          ";
-        }
-    ;
-        shell = "cd frontend-yarn && yarn start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";

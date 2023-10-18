@@ -6,13 +6,13 @@ export const backend = garn.go.mkGoProject({
   src: "backend",
 });
 
-export const yarnFrontend = garn.javascript.mkYarnProject({
-  description: "my nice yarn project",
-  src: "frontend-yarn",
-  nodeVersion: "18",
-  startCommand: "yarn start",
-  testCommand: "yarn mocha",
-});
+export const haskell = garn.haskell
+  .mkHaskellProject({
+    description: "My haskell executable",
+    executable: "helloFromHaskell",
+    compiler: "ghc94",
+    src: "haskell",
+  });
 
 export const npmFrontend = garn.javascript.mkNpmProject({
   description: "frontend test app created by create-react-app",
@@ -22,5 +22,6 @@ export const npmFrontend = garn.javascript.mkNpmProject({
 
 export const startAll = garn.processCompose({
   backend: backend.defaultExecutable!,
+  haskell: haskell.defaultExecutable!,
   frontend: npmFrontend.devShell.shell`cd frontend-npm && npm install && npm start`,
 });
