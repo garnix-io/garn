@@ -15,9 +15,11 @@
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
         ourHaskell = pkgs.haskell.packages.ghc945;
-        websitePackages = pkgs.lib.attrsets.mapAttrs'
-          (name: value: { name = "website_${name}"; inherit value; })
-          (call-flake ./website).packages.${system};
+        websitePackages =
+          if system == "x86_64-linux" then
+            pkgs.lib.attrsets.mapAttrs'
+              (name: value: { name = "website_${name}"; inherit value; })
+              (call-flake ./website).packages.${system} else { };
       in
       {
         lib = pkgs.lib;
@@ -155,9 +157,11 @@
                   --replace !/usr/bin/env !${pkgs.coreutils}/bin/env
                 just ${recipe}
               '';
-            websiteChecks = pkgs.lib.attrsets.mapAttrs'
-              (name: check: { name = "website_${name}"; value = check; })
-              (call-flake ./website).checks.${system};
+            websiteChecks =
+              if system == "x86_64-linux" then
+                pkgs.lib.attrsets.mapAttrs'
+                  (name: check: { name = "website_${name}"; value = check; })
+                  (call-flake ./website).checks.${system} else { };
           in
           {
             nix-fmt = justRecipe "fmt-nix-check" [ self.formatter.${system} ];
