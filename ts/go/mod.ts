@@ -1,13 +1,13 @@
-import { packageToEnvironment, shell } from "./environment.ts";
-import { NixExpression, nixRaw, nixStrLit } from "./nix.ts";
-import { mkPackage, Package } from "./package.ts";
-import { mkProject, Project } from "./project.ts";
+import { packageToEnvironment, shell } from "../environment.ts";
+import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
+import { mkPackage, Package } from "../package.ts";
+import { mkProject, Project } from "../project.ts";
 import * as path from "https://deno.land/std@0.202.0/path/mod.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
-import { getDotGarnProjectDir } from "./internal/garn_dir.ts";
-import { nixSource } from "./internal/utils.ts";
+import { getDotGarnProjectDir } from "../internal/garn_dir.ts";
+import { nixSource } from "../internal/utils.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-import { Initializer } from "./base.ts";
+import { Initializer } from "../base.ts";
 import { camelCase } from "https://deno.land/x/case@2.2.0/mod.ts";
 
 export const GOMOD2NIX_REPO =

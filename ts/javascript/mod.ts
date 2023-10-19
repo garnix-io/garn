@@ -1,9 +1,9 @@
-import { Environment, mkEnvironment } from "./environment.ts";
-import { Executable } from "./executable.ts";
-import { Package, mkPackage } from "./package.ts";
-import { mkProject, Project } from "./project.ts";
-import { nixSource } from "./internal/utils.ts";
-import { NixExpression, nixList, nixRaw, nixStrLit } from "./nix.ts";
+import { Environment, mkEnvironment } from "../environment.ts";
+import { Executable } from "../executable.ts";
+import { Package, mkPackage } from "../package.ts";
+import { mkProject, Project } from "../project.ts";
+import { nixSource } from "../internal/utils.ts";
+import { NixExpression, nixList, nixRaw, nixStrLit } from "../nix.ts";
 
 const nodeVersions = {
   "14": {

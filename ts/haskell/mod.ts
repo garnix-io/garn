@@ -1,12 +1,12 @@
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-import { Initializer } from "./base.ts";
-import { packageToEnvironment, shell } from "./environment.ts";
-import { mkPackage, Package } from "./package.ts";
-import { mkProject, Project } from "./project.ts";
-import { nixSource } from "./internal/utils.ts";
-import { nixRaw, nixStrLit } from "./nix.ts";
+import { Initializer } from "../base.ts";
+import { packageToEnvironment, shell } from "../environment.ts";
+import { mkPackage, Package } from "../package.ts";
+import { mkProject, Project } from "../project.ts";
+import { nixSource } from "../internal/utils.ts";
+import { nixRaw, nixStrLit } from "../nix.ts";
 
 type MkHaskellArgs = {
   description: string;

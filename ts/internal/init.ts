@@ -1,5 +1,5 @@
-import * as haskell from "../haskell.ts";
-import * as go from "../go.ts";
+import * as haskell from "../haskell/mod.ts";
+import * as go from "../go/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 
 const GARN_VERSION = "v0.0.9";

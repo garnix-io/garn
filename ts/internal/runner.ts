@@ -2,7 +2,7 @@ import { isProject, Project } from "../project.ts";
 import { isPackage, Package } from "../package.ts";
 import { Check, isCheck } from "../check.ts";
 import { checkExhaustiveness, mapKeys, mapValues } from "./utils.ts";
-import { GOMOD2NIX_REPO } from "../go.ts";
+import { GOMOD2NIX_REPO } from "../go/mod.ts";
 import { nixAttrSet, NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 import { Executable } from "../mod.ts";
 import { isExecutable } from "../executable.ts";
