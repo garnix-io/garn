@@ -44,7 +44,6 @@ executables.
 `}
         </Tooltip> = garn.go.mkGoProject(&#123; <br />
 {"  "}description: <String>"A go server"</String>,<br />
-{"  "}moduleName: <String>"server"</String>,<br />
 {"  "}src: <String>"backend"</String>,<br />
 {"  "}goVersion: <String>"1.20"</String>,<br />
 &#125;);<br />

@@ -50,7 +50,6 @@ const GO_VERSION_TO_NIXPKG_NAME = {
  */
 export function mkGoProject(args: {
   description: string;
-  moduleName: string;
   src: string;
   goVersion?: keyof typeof GO_VERSION_TO_NIXPKG_NAME;
 }): Project & {
@@ -65,7 +64,7 @@ export function mkGoProject(args: {
         )};
       in
         gomod2nix.buildGoApplication {
-          pname = ${nixStrLit(args.moduleName)};
+          pname = "go-package";
           version = "0.1";
           go = pkgs.${nixRaw(
             GO_VERSION_TO_NIXPKG_NAME[args.goVersion ?? "1.20"]
@@ -82,7 +81,6 @@ export function mkGoProject(args: {
       defaultEnvironment: packageToEnvironment(pkg, args.src).withDevTools([
         mkPackage(nixRaw`pkgs.gopls`),
       ]),
-      defaultExecutable: shell`${pkg}/bin/${args.moduleName}`,
     },
     {
       pkg,

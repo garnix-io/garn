@@ -60,7 +60,6 @@ spec = do
 
                 export const someGoProject = garn.go.mkGoProject({
                   description: "My go project",
-                  moduleName: "some-go-project",
                   src: ".",
                   goVersion: "1.20",
                 });

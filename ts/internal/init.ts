@@ -40,7 +40,6 @@ if (initializedSections.length === 0) {
     // For example:
     export const myGoProject = garn.go.mkGoProject({
       description: "My go project",
-      moduleName: "server",
       src: "./my-go-project",
       goVersion: "1.20",
     });

@@ -20,7 +20,6 @@ export const frontend = garn.javascript.mkNpmProject({
 export const backend = garn.go.mkGoProject({
   description: "My project backend",
   src: "backend",
-  moduleName: "backend",
   goVersion: "1.20",
 });
 
