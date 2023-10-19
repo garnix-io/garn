@@ -1,0 +1,107 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    
+    
+    <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAABy1BMVEX////++/W9tKuQkZOSk5SSkpSRk5jI0Nz9+O6QgXNHR0pJSk1KSk1JSkxHSlOjscT//v3z8fDq6enk4+Ph4eLm5+jq6+z09vjg2dKel5Jua2pgYWV7gorCzNby7eWpo5+2vcX8/v///vzIu65NRD4kJitAREpRUVM8OTg3QEyZmJVDNy5gcIH5/f/g1MdPQTkuNkKSn6zg5eny8vHc1tCGenA+OjkoJiZjc4P//vmbiHYhJS2LnrL8///38el/b2AbGx9kc4T47uFnVEQ4R1rX5vHJuKktJiNjc4Tu39FSQDFOYHTv9v3n1cRBNSxicoNOYXTn1cP37eBmU0M5SVvY5/LKuakuJiOYhXQhJS+OobWAcGIbHB/d0cRMPzcvOESWo6/e4ubu7u3a1M+JfXM9OTgnJSbGuaxORkAkJSo7QEZLS003NTU3P0yWlZJEOTD///3g2dGXkItta2tjZWh3fYW/ytXn2chFOC/8/Pz7+/v9/v7r2sj+/v36+fn5+fn6+/zh0cBBNS1hcYL5/P/u5duGeXRnaGtpaWtpamxbVVIiICJtfY/7/v/s4tZ0ZmBRUlVSU1ZiaXLAzNn+/fz29fTz8/T09PT3+PnborlJAAAAAWJLR0QAiAUdSAAAAAd0SU1FB+ULCxUpGolFkYsAAADwSURBVDjLY2AYboCRiZmFhZWNHacCDk4ubh5ePn6cCgQEhYRFRMXEcSuQkJSSlpGVk1dQxCqvpKyiqqauoamlraOLVYGevoGhkbGJqZm5BVYFllbWNrZA2s7ewRGrAidnF1cww83dA6sCTy9vHzDD188fh4IAiIJAHAqCgkNCwYywcOxWWEZERoEdGR2D3ZEMsXHxCYlJySmpadi9yaCUnpGZlZ2Tm5eP3Q0MDAWFRcUlpWXlFbgUAEFlVTVDDU4FtXX1QNDQ2NTcgl1Ba1t7R0dHZ1d3Ty92BX39EyaCwKTJOBwwZeq06UAwbQbDsAMATNE7FGHC7vwAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjEtMTEtMTFUMjE6NDE6MTgrMDA6MDAcWaiTAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIxLTExLTExVDIxOjQxOjE4KzAwOjAwbQQQLwAAACB0RVh0c29mdHdhcmUAaHR0cHM6Ly9pbWFnZW1hZ2ljay5vcme8zx2dAAAAGHRFWHRUaHVtYjo6RG9jdW1lbnQ6OlBhZ2VzADGn/7svAAAAGHRFWHRUaHVtYjo6SW1hZ2U6OkhlaWdodAAxOTJAXXFVAAAAF3RFWHRUaHVtYjo6SW1hZ2U6OldpZHRoADE5MtOsIQgAAAAZdEVYdFRodW1iOjpNaW1ldHlwZQBpbWFnZS9wbmc/slZOAAAAF3RFWHRUaHVtYjo6TVRpbWUAMTYzNjY2Njg3ONyrS5YAAAAPdEVYdFRodW1iOjpTaXplADBCQpSiPuwAAABWdEVYdFRodW1iOjpVUkkAZmlsZTovLy9tbnRsb2cvZmF2aWNvbnMvMjAyMS0xMS0xMS82ZTU1OGNmNjEzNTk2NGM1MmZhNTdjZjkxZjUwY2NhMC5pY28ucG5n7S39vAAAAABJRU5ErkJggg==">
+    <link rel="icon" type="image/png" sizes="96x96" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAGAAAABgCAYAAADimHc4AAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAABmJLR0QA/wD/AP+gvaeTAAAAB3RJTUUH5QsLFSkaiUWRiwAAC0RJREFUeNrtnPtzU8e9wD97jp6WbPlt2caGmDcYcAokmNA8aEmYkDQw7TRN0zv3f7tJSDuT6U1cJoH0pgm5MYRncLABG4xfIL8kP/SwpPPa/iDxanvTYMTsmZvz+UVjjSXtfj97vrt7ds8KKaXEQxma6gL81PEEKMYToBhPgGI8AYrxBCjGE6AYT4BiPAGK8QQoxhOgGE+AYjwBivEEKMYToBhPgGI8AYrxqS7Ao0ik42DZNk+2TicQQqD7dDQhVFfqB3GXAGuJye/PcOqvA0znLeSqgieR+Ik0d3PwjQPs7KgjoLpeP4C7BNgZZkfO8skHf2ZoqYCjCR5fgYNDFfWb3qBt7y62egIeEwGaVkohQqxGgIbg3udVV+bf4z4BCBACTSu9ru4bRDn3u9+AuwRoERrX9fDKEYtNKyZylfGTBIjGe+hqqHJZBf8Z4ap9QdKimFsmtZDFcCSra8ES0NADVdQ21BIN+lx9HbhLwMPIUigRP17D/Zo8xmdU414BjyAfmReUivxQJ7uqztoduDpFSsekmF1g5m6C6Zl5kotpMrk8hmUjdT/BUISa2gaa29bQ0dFGU3UQ3yNze4l0bCzLxnm4mQkdn09H19Rrc6UAaa6wOH2bG9euc314hJGbY0xMJZiZX2Aps0LBsJB6gFCkmvrGOG1ru9i8rZtdPT08u3MjbbEQPgE4Jvk7A3x5dojx+RUQIIWPUNsOXty3k03xiOqquk2ASS45xbWLZznzTT/9Fwa4MblAzrCRUiIfSUUGxXyOdGqGiZGrXPjmK77csoeXXj3M4UMH2NVZR9gpkp04R9/7x/liKAU6SD1E7Gfv0tzZxcZ4RHnqco8Ae4XU+ACnPztB32enuXRrnpzp4NyLuBDlCVb5/yX3h6mOY2HkUox99zfm7kwyNbvEH94+Qu9aP0gH27KxLBMcgeNYWLb94HsV4w4BVpbZkbP85Y9/5KOT57mVymM5lIIuRKn1Ow4SgeYPEAoG0LEwikUMs/S+EAIck9zsCP0fH0fqYaLvHKAd7f6sGk08mGWrrnMZ9QJkgdTtC5w4/h4fnLjIRNrAKbd0KR2kFqCqPs6aNe20tzbT1FBLTSSMX5isZNMsJeeYSdzlzp0Es0t5TGlTWBzn/MmPaW+v51iThebim+6KBTiszNzgm798xEcnLzG5bOAIgUAipUagupWu7mfZs/c59v5sB9s2dtISC+PXBSCRtkl+aYax4SEGLl3g3IXLXLk2QTJnkJsd4m99n6B1ZUmkjVXf1njaKBUg87MMf/s5fZ+e5dZCEfte8PETaV7P7oNHOHb0NQ5sa6O2KoBP1/4hdYSpqqqmrmUd23fv58C+r/n0kz4+/eo7xhYyJAY+58NBcGwbNMETLjI8FRQKMFkcG6D/f77i0p0spryXdnxUNW1g/1vv8p+/e43dnbWEfT/QeoVA8wUIx1rYtO91GuJN1Eff44MT5xhN5Sna7sr5/4gyATI/zfCVs5y+OEHGcChHH191K92vHOP3bx9mz7paQo+Rv4U/QmPX8xx5xySXWeb9U1dJ5BzXBh+UrQlLcnduMXTxEiOLJjal1ONoEeJb9nH4V6+ypzP2WMG/jx6m4Zm9vH70NXo3NRPRHNyXeB6gRoDMkpi4yeDgFCuWU7pzJiWBurVs23eQl7qbifpX325FIEZr98u8un8rHXUBpKOklj8KNQIKcySmRhmZLmLLUvwdGaSxYyO79+0gHgk8YdoQBKvj7HjhOTa3NxDGvVeBEgHOUorknTvMGg6lximR/npaOrewY30NwUr0TL4wNV272PlMM3UhVw6AACUCJPnlZVLzKfL3Fl2kRKuuo6HjGToi/gqNDHwEq9rZuL6ZuhqfJ+Bh8isrpJfT2PeiIsEfiVLb3ERUr1yRfL4Qra1NVEfKl4ALh0NKBJimQaFQ5F7fKIFAMES0OoJewfsGQteJxmKEAk/apzw91PQBto1l26U/ypHRdA2/31/ZOwZCoAf85Rm0O3OQonnA/zEzfRoxcmfc76NEgK5r+HzlrrYcINt2ME2zsp2llFhGsbTX1KVJSIkAfyBAKBy8/+MCMIsFspkstlO5WZO0bTJLaQpFY9V7jJ42SgSEI1XUxKof7FwWYOayLM3Pk7MrJ8AyC0wn5sjkCqUfcWE6UiBAEKqJUd/USFjTAAlCIDOLpKbGmcyZWBX5HYviyhQ3b8+xmLbduhyg5grQahtpbFtDPCjKBRBgLjA7dYOroxmKlTBg5lkevcLV8XkWiq5dj1E0Cgo20daxno3xYGmdBNBEkeTUTS6fu8pMznjCbCEppBNc6b/AjbsLFNBc2gWrEiCitHZuoHv7Gqp8ZQNCYCxMMHT2C04PzZIxV69AFpe4O/Aln/dfZ2rJQLh4TVjZPCDasZ7te3azqTaAjizteHByzFz/ls8+PsXFiQXyq+mP7Rxzo99y4r9Pcf5Wkrzj3tYPCh/SE+E2Nvf08uKeTqKBB1eBlU1w9auP+eDDk1y8nST7o68EiWOkmR4+Q9/7H9LXP8zsilXazKWqkj8ChWvCfuq7ejhw6CADw7P871gaA4EQNoXkLc70vU9hOcXRo6/xwvZ26qNhAn79n1uMtLFMg5V0ksmrX3Piz32c7B9kaskEf5ioH0zDxKzg8LaSKN0VIcItbO09xNHxCWaOn+ZGMl/eGWGRT45y/tSHzNz+nm+f62X/c8+yfUMbjdEgvvKmWsc2KCzPMnZjkO8unufcxe+5dusuC3kTGYjR3v1zftmV4/K5ywxOpl35UK7ifUEa4eatHHjztyymV/ivvvOMLxawpEAIiZmdY/TKIonxYS6d/pTmxgbq62qJRQJoTpGVTJrlpUWSyXnmZudJZQqlHXVagJr4dn7x1q84UjdA4togg3K1D3w8XdTvjNOC1D2zh9ffkWj+EH86cZaRuSxFW4LQENjkFxOMpe5yGw1fIEDAryOkjWkYmFZ5a2L5iUqh+ahqXE/vG7/h6EvdtE5cd2HYH6BeAIBeReP653nzP2I0tq2h78QXnLs+w3LBwCqvmglNK80ZLIPCvYmaEGiaVu5kBcIXpLplMy+8+Tbv/vpluuMayxOOa1fDwC0CAPQQsY4dvHysiY4NO9jb/zWnz1xmcGyOTNHCtm0cR5YWcaREljdbCd2HrvkIRurp7H6eg4cPc+jFvWxtqyHgZFw9AgI3CQBAJxRrZ1tvAx0btrH756PcHBnhxvAtbk9MkZhNsbicJW9YOFqAUCRGY0sbazdsZmv3DnZ1b2XLxk6aqgPoAO4c+DyCywSUEHqImvh6drasY2vPHvbPJUmmFlnO5MjlC6W8r+n4A2GiNbXUNzXT0tJEbZUf3c0J/1/gSgH3ETr+qnpa19XTuk51YZ4OLhwZ/7TwBCjGE6CY//8CJK6+IeeuTlhKHFmhiZMQSKPIYnKBXKFYmi2rrt+/wEUCTNJz4wx/P8J0zqrAEF5ipBMMnb7E2Hwe8dAjSkLT0TR3rBO4SECRhcnvOPnecfqnV7CeZB+JAKSDVUiTSi2TKzqlNWEJQmhEYzWEQkHVFQZcJcDGyC0xMzHG6GQWsyLt89FTsyQCX7CJTZvXEm9Sf0wBuLgTrkynKcsnq5Rehb+Gjp6X+EXvNjrr3NH23FGKhykHDFmpQ38Emj9MrKmDjbt6OfTWMV7Z3k5MV13Rcuncc15QgfnRAb756xluLhnYFYl+6fQsXzBCbXwtW3b20N0Vpy7skujjKgGlowkc26n8QRrlsyI0TccFRwQ9WjQ3Cfgp4tpO+KeCJ0AxngDFeAIU4wlQjCdAMZ4AxXgCFOMJUIwnQDGeAMV4AhTjCVCMJ0AxngDFeAIU4wlQjCdAMZ4Axfwdzhp/zhxsmBUAAAAldEVYdGRhdGU6Y3JlYXRlADIwMjEtMTEtMTFUMjE6NDE6MTgrMDA6MDAcWaiTAAAAJXRFWHRkYXRlOm1vZGlmeQAyMDIxLTExLTExVDIxOjQxOjE4KzAwOjAwbQQQLwAAACB0RVh0c29mdHdhcmUAaHR0cHM6Ly9pbWFnZW1hZ2ljay5vcme8zx2dAAAAGHRFWHRUaHVtYjo6RG9jdW1lbnQ6OlBhZ2VzADGn/7svAAAAGHRFWHRUaHVtYjo6SW1hZ2U6OkhlaWdodAAxOTJAXXFVAAAAF3RFWHRUaHVtYjo6SW1hZ2U6OldpZHRoADE5MtOsIQgAAAAZdEVYdFRodW1iOjpNaW1ldHlwZQBpbWFnZS9wbmc/slZOAAAAF3RFWHRUaHVtYjo6TVRpbWUAMTYzNjY2Njg3ONyrS5YAAAAPdEVYdFRodW1iOjpTaXplADBCQpSiPuwAAABWdEVYdFRodW1iOjpVUkkAZmlsZTovLy9tbnRsb2cvZmF2aWNvbnMvMjAyMS0xMS0xMS82ZTU1OGNmNjEzNTk2NGM1MmZhNTdjZjkxZjUwY2NhMC5pY28ucG5n7S39vAAAAABJRU5ErkJggg==">
+    <link rel="icon" type="image/png" sizes="16x16" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAMAAAAoLQ9TAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAAsVBMVEX//////v75+Pj39/f9/f349vKdmJZ/gIKEh4vc4eb7+vi8t7SKiouprbLU1dXm6Ou1rqdkZ2uWmJqGhYRVVFWosrz07+pqZ2bHz9f28u5qZGCjrrno4dtmaGvn7fORiYOkrbjGz9f18u5pY1+2rqdkZmqSlJaEgoJSUVKmsLv9/PzW09Ctra7MztGSjIb18/C2s7Kqqqyrq6tnY2Krtb/08u+sqaidnp+enp+lqKzp7fBkD2nvAAAAAWJLR0QAiAUdSAAAAAd0SU1FB+ULCxUpGolFkYsAAABlSURBVBjTY2AgDjAyMTOzIAuwsrFzcCILcHHz8PLxIwkICAoJi4gi+GLiEgySUtIIARlZOQYGeQVkFYoMSspIKhhUVNXUNTSRBLS0dXT1kLQw6BsYGhmbIAmYmplbWFoR6S0MAAAfEwcbzcREmwAAACV0RVh0ZGF0ZTpjcmVhdGUAMjAyMS0xMS0xMVQyMTo0MToxOCswMDowMBxZqJMAAAAldEVYdGRhdGU6bW9kaWZ5ADIwMjEtMTEtMTFUMjE6NDE6MTgrMDA6MDBtBBAvAAAAIHRFWHRzb2Z0d2FyZQBodHRwczovL2ltYWdlbWFnaWNrLm9yZ7zPHZ0AAAAYdEVYdFRodW1iOjpEb2N1bWVudDo6UGFnZXMAMaf/uy8AAAAYdEVYdFRodW1iOjpJbWFnZTo6SGVpZ2h0ADE5MkBdcVUAAAAXdEVYdFRodW1iOjpJbWFnZTo6V2lkdGgAMTky06whCAAAABl0RVh0VGh1bWI6Ok1pbWV0eXBlAGltYWdlL3BuZz+yVk4AAAAXdEVYdFRodW1iOjpNVGltZQAxNjM2NjY2ODc43KtLlgAAAA90RVh0VGh1bWI6OlNpemUAMEJClKI+7AAAAFZ0RVh0VGh1bWI6OlVSSQBmaWxlOi8vL21udGxvZy9mYXZpY29ucy8yMDIxLTExLTExLzZlNTU4Y2Y2MTM1OTY0YzUyZmE1N2NmOTFmNTBjY2EwLmljby5wbmftLf28AAAAAElFTkSuQmCC">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300&amp;family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&amp;family=Spectral:ital,wght@0,200;0,300;0,400;0,600;1,300;1,400&amp;display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Simple, fast, and green CI and caching for nix projects">
+    <title>garn</title>
+    <script type="module" crossorigin="" src="/assets/index.cec39996.js"></script>
+    <link rel="stylesheet" href="/assets/index.ccb67f5d.css">
+  </head>
+  <body>
+    <div id="root"><header><h1><a href="/">garn</a></h1><a href="https://github.com/garnix-io/garn" class="github-link" title="View on Github"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 96"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="#000000"></path></svg></a></header><article><nav><a class="gray" href="/">home</a><div class="dropdown">docs<ul class="dropdown"><li class="menu-item"><a href="/docs/getting_started">getting started</a></li><li class="menu-item"><a href="/docs/installing">installing</a></li><li class="menu-item"><a href="/docs/concepts">concepts</a></li><li class="menu-item"><a href="https://doc.deno.land/https://garn.io/ts/v0.0.8/mod.ts" target="_blank" rel="noopener noreferrer">typescript api</a></li></ul></div></nav><div class="main-content"><div class="docs"><h1 id="getting-started">Getting Started</h1>
+<h2 id="installation">Installation</h2>
+<p>Please check out our <a href="/docs/installing">installation instructions</a>.</p>
+<h2 id="your-first-garnts-config">Your first <code>garn.ts</code> config</h2>
+<p>All examples in this getting started guide are also available
+<a href="https://github.com/garnix-io/garn/tree/main/examples/getting-started">here</a>.</p>
+<p><code>garn</code> projects are configured with a single <code>garn.ts</code> file. Your <code>garn.ts</code>
+exports a collection of <code>Project</code>s. A <code>Project</code> contains all the information
+needed to build, run, and develop your software.</p>
+<p>The <code>garn</code> library exports a lot of helpers that make it easy to quickly
+construct projects for common stacks, but you can also define these yourself.</p>
+<p>Here is an example <code>garn.ts</code> file for a single node-based project:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> garn</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.8/mod.ts"</span><span class="token punctuation">;</span>
+<span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> pkgs</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.8/nixpkgs.ts"</span><span class="token punctuation">;</span>
+
+<span class="token keyword module">export</span> <span class="token keyword">const</span> frontend <span class="token operator">=</span> garn<span class="token punctuation">.</span><span class="token property-access">javascript</span><span class="token punctuation">.</span><span class="token method function property-access">mkNpmProject</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  description<span class="token operator">:</span> <span class="token string">"my frontend"</span><span class="token punctuation">,</span>
+  nodeVersion<span class="token operator">:</span> <span class="token string">"18"</span><span class="token punctuation">,</span>
+  src<span class="token operator">:</span> <span class="token string">"./frontend"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>In the same directory you can now run <code>garn enter frontend</code> to enter a shell
+with <code>node</code> version 18 available.</p>
+<p>Note that -- if you do this in a git repo -- <code>garn</code> requires that your source
+files must be tracked by git. You have to add them to your index, or at least
+mark them as intended additions with <code>git add --intent-to-add</code>.</p>
+<pre class="language-bash"><code class="language-bash"><span class="token operator">&gt;</span> <span class="token function">git</span> <span class="token function">add</span> --intent-to-add frontend
+<span class="token operator">&gt;</span> garn enter frontend
+<span class="token punctuation">[</span>garn<span class="token punctuation">]</span> Entering frontend shell. Type <span class="token string">'exit'</span> to exit.
+<span class="token punctuation">[</span><span class="token punctuation">..</span>.<span class="token punctuation">]</span>
+<span class="token operator">&gt;</span> <span class="token function">node</span> --version
+v18.17.1
+</code></pre>
+<p><code>Projects</code> can contain <code>Check</code>s, which can be used to run automated tests for
+your project. You can add them with <code>addCheck</code>.</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword module">export</span> <span class="token keyword">const</span> frontend <span class="token operator">=</span> garn<span class="token punctuation">.</span><span class="token property-access">javascript</span>
+  <span class="token punctuation">.</span><span class="token method function property-access">mkNpmProject</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    description<span class="token operator">:</span> <span class="token string">"my frontend"</span><span class="token punctuation">,</span>
+    nodeVersion<span class="token operator">:</span> <span class="token string">"18"</span><span class="token punctuation">,</span>
+    src<span class="token operator">:</span> <span class="token string">"./frontend"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token method function property-access">addCheck</span><span class="token punctuation">(</span><span class="token string">"test"</span><span class="token punctuation">)</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">npm test</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+</code></pre>
+<p>Now running <code>garn check frontend</code> will run <code>npm test</code> in the frontend project
+environment. These <code>Check</code>s are pure, i.e. they are run in a build sandbox. The
+downside of sandboxing is that these checks won't have access to the internet.
+The upside is that they'll be (almost) perfectly reproducible.</p>
+<h2 id="multi-language-support">Multi-language support</h2>
+<p>You can configure multiple sub-projects with different tech stacks in a single
+<code>garn.ts</code> file. Let's try to add a go backend:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword module">export</span> <span class="token keyword">const</span> backend <span class="token operator">=</span> garn<span class="token punctuation">.</span><span class="token property-access">go</span><span class="token punctuation">.</span><span class="token method function property-access">mkGoProject</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+  description<span class="token operator">:</span> <span class="token string">"my backend"</span><span class="token punctuation">,</span>
+  moduleName<span class="token operator">:</span> <span class="token string">"backend"</span><span class="token punctuation">,</span>
+  src<span class="token operator">:</span> <span class="token string">"./backend"</span><span class="token punctuation">,</span>
+  goVersion<span class="token operator">:</span> <span class="token string">"1.20"</span><span class="token punctuation">,</span>
+<span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p>This means that you can use <code>garn</code> to configure bigger multi-language projects.
+This enables anyone to run, test, and develop any part of your codebase,
+without having to install any language-specific tools or learn how to use them.</p>
+<h2 id="deno-lsp">Deno LSP</h2>
+<p><code>garn.ts</code> files are powered by <a href="https://deno.com/">deno</a>.
+A lot of the convenience and power for editing your <code>garn.ts</code> files comes
+from having a working Deno LSP. Installing <code>deno</code> is easy with <code>garn</code> itself:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword module">export</span> <span class="token keyword">const</span> deno <span class="token operator">=</span> garn<span class="token punctuation">.</span><span class="token method function property-access">mkProject</span><span class="token punctuation">(</span>
+  <span class="token punctuation">{</span>
+    description<span class="token operator">:</span> <span class="token string">"garn configuration environment"</span><span class="token punctuation">,</span>
+    defaultEnvironment<span class="token operator">:</span> garn<span class="token punctuation">.</span><span class="token property-access">emptyEnvironment</span><span class="token punctuation">.</span><span class="token method function property-access">withDevTools</span><span class="token punctuation">(</span><span class="token punctuation">[</span>pkgs<span class="token punctuation">.</span><span class="token property-access">deno</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span>
+  <span class="token punctuation">{</span><span class="token punctuation">}</span>
+<span class="token punctuation">)</span><span class="token punctuation">;</span>
+</code></pre>
+<p><code>garn enter deno</code> will then drop you in a shell where <code>deno</code> is available.</p>
+<p>For configuring your editor to use Deno's LSP refer to <a href="https://docs.deno.com/runtime/manual/getting_started/setup_your_environment">Deno's environment setup
+documentation</a>.</p>
+<h2 id="ci">CI</h2>
+<p>Since the checks of your <code>garn</code> projects are sandboxed, it's easy to run them on
+<a href="https://garnix.io">garnix.io CI</a>. See <a href="https://garnix.io/docs">the docs</a>
+for more info.</p>
+<h2 id="further-reading">Further reading</h2>
+<ul>
+<li><a href="/docs/concepts">garn concepts</a></li>
+<li><a href="https://doc.deno.land/https://garn.io/ts/v0.0.8/mod.ts">typescript api</a></li>
+</ul></div></div></article><footer><p>Built by <a href="https://garnix.io">garnix</a>.</p></footer></div>
+    
+  
+
+</body></html>
