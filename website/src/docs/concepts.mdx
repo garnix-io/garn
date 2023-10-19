@@ -8,26 +8,26 @@ export const info = {
 
 There's 4 underlying entities that play a role in `garn`:
 
-- `Environment`s
-- `Check`s
-- `Executable`s
-- `Package`s
+- [`Environment`](#environments)
+- [`Check`](#checks)
+- [`Executable`](#executables)
+- [`Package`](#packages)
 
 There's another basic concept called `Project` that is used to bundle instances
 of the above entities and give them structure. `Project`s are described at the
 bottom in the [Projects](#projects) section.
 
 All of these concepts are implemented as typescript types. Feel free to browse
-the [API documentation](todo).
+the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts).
 
 ## Environments
+
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Environment).)
 
 `Environment`s define what is available to a computation. For example they can
 contain compilers and developer tools that you want to use on a project, but
 they may also define other things like environment variables that need to be
 set. You can enter an `Environment` with `garn enter`.
-
-{/* TODO: maybe have an example of that? Or maybe that's too much duplication with the getting started guide? */}
 
 Running `garn enter` in a shell will add whatever the `Enviroment` provides to
 the shell environment that you're in. That means you can still use your local
@@ -42,6 +42,8 @@ what the `Environment`s provide. For example `Check`s:
 
 ## Checks
 
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Check).)
+
 `Check`s are commands (usually shell commands) that are used to define
 reproducible automated tests or other checks. They run in a sandbox,
 which means they don't have access to your locally installed tools, nor to your
@@ -51,8 +53,6 @@ addition, a _copy_ of your source files are
 provided in the sandbox. That gives you the ability to define
 automated `Check`s on your source files.
 
-{/* TODO: maybe inline or link to a small example for a check? */}
-
 You can run `Check`s with `garn check`.
 
 Running `Check`s in a sandbox has its downsides, for example some tests require
@@ -60,15 +60,17 @@ internet access. The big advantage is that these `Check`s are almost perfectly
 reproducible, since the sandbox they run in is very controlled. So a `Check`
 that fails or passes on one machine will behave the same on any other machine.
 
-This also means that running this checks on a CI system (for example
+This also means that running these checks on a CI system (for example
 [garnix.io](https://garnix.io)) is very easy and requires no additional
 configuration.
 
 ## Executables
 
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Executable).)
+
 `Executable`s are commands (usually shell snippets) that are being run on your
 local machine (not in a sandbox). They are based on an underlying `Environment`,
-and can make use of e.g. the executables that that `Environment` provides. You
+and can make use of e.g. the executables that `Environment`s provide. You
 can use `Executables` for a variety of purposes:
 
 - Running your projects main executable during development,
@@ -77,11 +79,20 @@ can use `Executables` for a variety of purposes:
 - Spin up a database for development,
 - etc.
 
-{/* TODO: Link to or inline a small example of this? */}
+Here's a small example:
+
+```typescript
+import * as garn from "https://garn.io/ts/v0.0.9/mod.ts";
+
+export const hello =
+  garn.emptyEnvironment.shell`echo Hello, world!`;
+```
 
 You can run `Executable`s with `garn run`.
 
 ## Packages
+
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Package).)
 
 `Package`s are instructions to `garn` about how to _build_ a set of files. For
 example for a go backend a package would define how to compile it into
@@ -96,6 +107,8 @@ reproducible.
 You can build `Package`s with `garn build`.
 
 ## Projects
+
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Project).)
 
 `Project`s are used to combine `Environment`s, `Check`s, `Executable`s and
 `Package`s into a single entity. A `Project` can contain any number of these
@@ -114,7 +127,7 @@ import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
 // - `garn check frontend` will
 //   - run the tests,
 //   - typecheck the project (with `tsc`).
-//   - search for `TODO`s (with `ripgrep`) and fail if there are any.
+//   - search for `todo`s (with `ripgrep`) and fail if there are any.
 export const project = garn.javascript
   .mkNpmProject({
     src: ".",
