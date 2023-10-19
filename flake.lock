@@ -1,5 +1,20 @@
 {
   "nodes": {
+    "call-flake": {
+      "locked": {
+        "lastModified": 1697332845,
+        "narHash": "sha256-bmhE1TmrJG4ba93l9WQTLuYM53kwGQAjYHRvHOeuxWU=",
+        "owner": "divnix",
+        "repo": "call-flake",
+        "rev": "088f8589c7f3ee59bea1858a89f5125d284c3c4a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "divnix",
+        "repo": "call-flake",
+        "type": "github"
+      }
+    },
     "fhi": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -139,6 +154,7 @@
     },
     "root": {
       "inputs": {
+        "call-flake": "call-flake",
         "fhi": "fhi",
         "flake-utils": "flake-utils_2",
         "nix-tool-installer": "nix-tool-installer",

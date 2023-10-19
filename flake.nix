@@ -3,8 +3,9 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
   inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
   inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer";
+  inputs.call-flake.url = "github:divnix/call-flake";
 
-  outputs = { self, nixpkgs, flake-utils, fhi, nix-tool-installer }:
+  outputs = { self, nixpkgs, flake-utils, fhi, nix-tool-installer, call-flake }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import "${nixpkgs}" {
@@ -151,6 +152,9 @@
                   --replace !/usr/bin/env !${pkgs.coreutils}/bin/env
                 just ${recipe}
               '';
+            websiteChecks = pkgs.lib.attrsets.mapAttrs'
+              (name: check: { name = "website_${name}"; value = check; })
+              (call-flake ./website).checks.${system};
           in
           {
             nix-fmt = justRecipe "fmt-nix-check" [ self.formatter.${system} ];
@@ -170,7 +174,7 @@
               fileserver --help
               touch $out
             '';
-          };
+          } // websiteChecks;
         formatter = pkgs.nixpkgs-fmt;
         apps = {
           fileserver = flake-utils.lib.mkApp
