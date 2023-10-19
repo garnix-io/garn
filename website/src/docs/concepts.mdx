@@ -88,7 +88,10 @@ example for a go backend a package would define how to compile it into
 executables. For an npm project it may define how the project can be bundled
 into a set of files that can be served by a webserver.
 
-{/* TODO: Link to or inline a small example of this? */}
+The build scripts of `Package`s are being run in a sandbox (same as `Check`s).
+That means they have access to a _copy_ of your source files, but not to the
+internet or your local file system. This makes your builds almost perfectly
+reproducible.
 
 You can build `Package`s with `garn build`.
 
