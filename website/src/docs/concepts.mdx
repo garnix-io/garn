@@ -145,8 +145,8 @@ export const dev = project.shell`npm install ; npm run dev`;
 
 With this `garn.ts` file:
 
-- `garn enter frontend` will enter a shell with `node`, `npm` and `ripgrep` installed.
-- `garn check frontend` will
+- `garn enter project` will enter a shell with `node`, `npm` and `ripgrep` installed.
+- `garn check project` will
   - run the tests,
   - typecheck the project (with `tsc`).
   - search for `todo`s (with `ripgrep`) and fail if there are any.
