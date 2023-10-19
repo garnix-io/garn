@@ -31,5 +31,7 @@ export const processCompose = (
     nixRaw`pkgs.writeText "process-compose.yml" (builtins.toJSON ${processComposeConfig})`
   );
 
-  return emptyEnvironment.shell`${nixRaw`pkgs.process-compose`}/bin/process-compose up -f ${configYml}`;
+  const result = emptyEnvironment.shell`${nixRaw`pkgs.process-compose`}/bin/process-compose up -f ${configYml}`;
+  result.description = `processCompose(${Object.keys(executables).join(", ")})`;
+  return result;
 };
