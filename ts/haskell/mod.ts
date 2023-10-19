@@ -4,16 +4,12 @@ import { mkProject, Project } from "../project.ts";
 import { nixSource } from "../internal/utils.ts";
 import { nixRaw, nixStrLit } from "../nix.ts";
 
-type MkHaskellArgs = {
+export const mkHaskellProject = (args: {
   description: string;
   executable: string;
   compiler: string;
   src: string;
-};
-
-export const mkHaskellProject = (
-  args: MkHaskellArgs
-): Project & { pkg: Package } => {
+}): Project & { pkg: Package } => {
   const pkg: Package = mkPackage(nixRaw`
     (pkgs.haskell.packages.${nixRaw(args.compiler)}.callCabal2nix
       "garn-pkg"
