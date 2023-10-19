@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 
-export type Interpolatable =
+export type NixStrLitInterpolatable =
   | string
   | NixExpression
   | {
@@ -52,12 +52,12 @@ export function nixAttrSet(
  */
 export function nixStrLit(
   s: TemplateStringsArray,
-  ...interpolations: Array<Interpolatable>
+  ...interpolations: Array<NixStrLitInterpolatable>
 ): NixExpression;
 export function nixStrLit(s: string): NixExpression;
 export function nixStrLit(
   s: TemplateStringsArray | string,
-  ...interpolations: Array<Interpolatable>
+  ...interpolations: Array<NixStrLitInterpolatable>
 ): NixExpression {
   if (typeof s === "string") return nixStrLit`${s}`;
   const escape = (str: string) =>

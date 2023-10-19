@@ -4,7 +4,7 @@ import { Check } from "./check.ts";
 import { Environment } from "./environment.ts";
 import { Executable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
-import { Interpolatable } from "./nix.ts";
+import { NixStrLitInterpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
 
 /**
@@ -99,7 +99,7 @@ const proxyEnvironmentHelpers = () => ({
   shell(
     this: Project,
     s: TemplateStringsArray,
-    ...args: Array<Interpolatable>
+    ...args: Array<NixStrLitInterpolatable>
   ) {
     if (this.defaultEnvironment == null) {
       throw new Error(
@@ -112,7 +112,7 @@ const proxyEnvironmentHelpers = () => ({
   check(
     this: Project,
     s: TemplateStringsArray,
-    ...args: Array<Interpolatable>
+    ...args: Array<NixStrLitInterpolatable>
   ) {
     if (this.defaultEnvironment == null) {
       throw new Error(

@@ -3,7 +3,7 @@ import { hasTag, nixSource } from "./internal/utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
 import {
-  Interpolatable,
+  NixStrLitInterpolatable,
   NixExpression,
   nixList,
   nixRaw,
@@ -14,15 +14,15 @@ export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
   withDevTools(devTools: Array<Package>): Environment;
-  shell(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Executable;
-  check(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Check;
+  shell(_s: TemplateStringsArray, ..._args: Array<NixStrLitInterpolatable>): Executable;
+  check(_s: TemplateStringsArray, ..._args: Array<NixStrLitInterpolatable>): Check;
 };
 
-export function shell(s: TemplateStringsArray, ...args: Array<Interpolatable>) {
+export function shell(s: TemplateStringsArray, ...args: Array<NixStrLitInterpolatable>) {
   return emptyEnvironment.shell(s, ...args);
 }
 
-export function check(s: TemplateStringsArray, ...args: Array<Interpolatable>) {
+export function check(s: TemplateStringsArray, ...args: Array<NixStrLitInterpolatable>) {
   return emptyEnvironment.check(s, ...args);
 }
 
