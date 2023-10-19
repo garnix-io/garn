@@ -4,12 +4,13 @@ import { Check } from "./check.ts";
 import { Environment } from "./environment.ts";
 import { Executable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
-import { Interpolatable } from "./nix.ts";
+import { NixStrLitInterpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
 
 /**
- * A Project is a logical grouping of Packages and Environments. For example,
- * you may have a 'frontend' Project, a 'backend' Project, a 'cli' Project, etc.
+ * A Project is a logical grouping of `Package`s and `Environment`s. For
+ * example, you may have a 'frontend' Project, a 'backend' Project, a 'cli'
+ * Project, etc.
  */
 export type Project = {
   tag: "project";
@@ -67,21 +68,18 @@ export function isProject(p: unknown): p is Project {
 
 type Nestable = Environment | Package | Executable | Check;
 
-type ProjectSettings = {
-  description: string;
-  defaultEnvironment?: Environment;
-  defaultExecutable?: Executable;
-};
-
 /**
- * Create a new Project.
+ * Creates a new `Project`.
  *
- * @param description A human-readable description of the Project.
- * @param deps A record of Environments, Packages and Executables,
- * @param settings Settings such as defaults for Environments and Executables.
+ * @param settings description and defaults for this `Project`.
+ * @param deps A record of Environments, Packages and Executables to include in this `Project`.
  */
 export function mkProject<Deps extends Record<string, Nestable>>(
-  args: ProjectSettings,
+  settings: {
+    description: string;
+    defaultEnvironment?: Environment;
+    defaultExecutable?: Executable;
+  },
   deps: Deps
 ): Deps & Project {
   const helpers = proxyEnvironmentHelpers();
@@ -89,9 +87,9 @@ export function mkProject<Deps extends Record<string, Nestable>>(
     ...deps,
     ...helpers,
     tag: "project",
-    description: args.description,
-    defaultEnvironment: args.defaultEnvironment,
-    defaultExecutable: args.defaultExecutable,
+    description: settings.description,
+    defaultEnvironment: settings.defaultEnvironment,
+    defaultExecutable: settings.defaultExecutable,
   };
 }
 
@@ -99,7 +97,7 @@ const proxyEnvironmentHelpers = () => ({
   shell(
     this: Project,
     s: TemplateStringsArray,
-    ...args: Array<Interpolatable>
+    ...args: Array<NixStrLitInterpolatable>
   ) {
     if (this.defaultEnvironment == null) {
       throw new Error(
@@ -112,7 +110,7 @@ const proxyEnvironmentHelpers = () => ({
   check(
     this: Project,
     s: TemplateStringsArray,
-    ...args: Array<Interpolatable>
+    ...args: Array<NixStrLitInterpolatable>
   ) {
     if (this.defaultEnvironment == null) {
       throw new Error(

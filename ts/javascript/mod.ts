@@ -1,9 +1,9 @@
-import { Environment, mkEnvironment } from "./environment.ts";
-import { Executable } from "./executable.ts";
-import { Package, mkPackage } from "./package.ts";
-import { mkProject, Project } from "./project.ts";
-import { nixSource } from "./internal/utils.ts";
-import { NixExpression, nixList, nixRaw, nixStrLit } from "./nix.ts";
+import { Environment, mkEnvironment } from "../environment.ts";
+import { Executable } from "../executable.ts";
+import { Package, mkPackage } from "../package.ts";
+import { mkProject, Project } from "../project.ts";
+import { nixSource } from "../internal/utils.ts";
+import { NixExpression, nixList, nixRaw, nixStrLit } from "../nix.ts";
 
 const nodeVersions = {
   "14": {
@@ -40,14 +40,17 @@ const fromNodeVersion = (
   };
 };
 
-export const mkNpmProject = (args: {
+/**
+ * Creates a npm-based garn Project.
+ */
+export function mkNpmProject(args: {
   description: string;
   src: string;
   nodeVersion: NodeVersion;
 }): Project & {
   devShell: Environment;
   node_modules: Package;
-} => {
+} {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   const node_modules = mkPackage(nixRaw`
     let
@@ -83,15 +86,18 @@ export const mkNpmProject = (args: {
       node_modules,
     }
   );
-};
+}
 
-export const mkYarnProject = (args: {
+/**
+ * Creates a yarn-based garn Project.
+ */
+export function mkYarnProject(args: {
   description: string;
   src: string;
   nodeVersion: keyof typeof nodeVersions;
   startCommand?: string;
   testCommand?: string;
-}): Project => {
+}): Project {
   const startCommand = args.startCommand ?? "yarn start";
   const testCommand = args.testCommand ?? "yarn test";
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
@@ -161,4 +167,4 @@ export const mkYarnProject = (args: {
       startDev,
     }
   );
-};
+}

@@ -34,7 +34,7 @@ writeHaskellProject repoDir = do
   writeFile
     "garn.ts"
     [i|
-      import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
+      import { mkHaskellProject } from "#{repoDir}/ts/haskell/mod.ts"
 
       export const foo = mkHaskellProject({
         description: "mkHaskellProject-test",
@@ -64,7 +64,7 @@ writeNpmFrontendProject repoDir = do
   writeFile
     "garn.ts"
     [i|
-      import { mkNpmProject } from "#{repoDir}/ts/javascript.ts"
+      import { mkNpmProject } from "#{repoDir}/ts/javascript/mod.ts"
 
       export const frontend = mkNpmProject({
         description: "mkNpmProject-test",

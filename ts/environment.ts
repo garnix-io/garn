@@ -3,47 +3,113 @@ import { hasTag, nixSource } from "./internal/utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
 import {
-  Interpolatable,
-  nixList,
+  NixStrLitInterpolatable,
   NixExpression,
+  nixList,
   nixRaw,
   nixStrLit,
 } from "./nix.ts";
 
+/**
+ * `Environment`s define what files and tools are available to `Executables`,
+ * `Check`s and development shells.
+ *
+ * For example they can contain compilers and developer tools that you want to
+ * use on a project, but they may also define other things like environment
+ * variables that need to be set.
+ *
+ * You can enter an `Environment` with `garn enter`.
+ */
 export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
+  /**
+   * Creates a new environment based on this one that includes the specified nix packages.
+   */
   withDevTools(devTools: Array<Package>): Environment;
-  shell(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Executable;
-  check(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Check;
+  /**
+   * Creates a new shell script `Executable`, run inside this `Environment`
+   */
+  shell(
+    _s: TemplateStringsArray,
+    ..._args: Array<NixStrLitInterpolatable>
+  ): Executable;
+  /**
+   * Creates a new shell script `Check`, run inside this `Environment`
+   */
+  check(
+    _s: TemplateStringsArray,
+    ..._args: Array<NixStrLitInterpolatable>
+  ): Check;
 };
 
-export const shell = (
+/**
+ * Creates a new shell script `Executable`, run in the `emptyEnvironment`.
+ */
+export function shell(
   s: TemplateStringsArray,
-  ...args: Array<Interpolatable>
-) => emptyEnvironment.shell(s, ...args);
+  ...args: Array<NixStrLitInterpolatable>
+) {
+  return emptyEnvironment.shell(s, ...args);
+}
 
-export const check = (
+/**
+ * Creates a new shell script `Check`, run in the `emptyEnvironment`.
+ *
+ * Example:
+ * ```typescript
+ * // Will fail if any `TODO`s are found in the build artifacts of myPkg:
+ * garn.check`! grep -r TODO ${myPkg}`;
+ * ```
+ */
+export function check(
   s: TemplateStringsArray,
-  ...args: Array<Interpolatable>
-) => emptyEnvironment.check(s, ...args);
+  ...args: Array<NixStrLitInterpolatable>
+) {
+  return emptyEnvironment.check(s, ...args);
+}
 
-export const mkEnvironment = (
+/**
+ * A low-level helper to create new `Environment`s from `NixExpression`s.
+ *
+ * @param nixExpression - A nix expression to use for this environment, defaults to `pkgs.mkShell {}`
+ * @param setup - An optional shell script to set up the environment. This script will be run for
+ *                every `Check` before the snippet given to `Environment.check` is executed.
+ *
+ * ```typescript
+ * // Create a new environment where the current working directory is available under `src`:
+ * const myEnv = mkEnvironment(
+ *   nixRaw`pkgs.mkShell {}`,
+ *   nixStrLit`
+ *     cp -r ${nixRaw`./.`} src
+ *     cd src
+ *   `,
+ * );
+ * ```
+ *
+ * Any `Check`s created from this environment will first copy the source files
+ * into the `Check`'s sandbox and then run the check script snippet:
+ * ```typescript
+ * const check = myEnv.check`! grep -ir TODO .`;
+ * ```
+ */
+export function mkEnvironment(
   nixExpression = nixRaw`pkgs.mkShell {}`,
   setup?: NixExpression
-): Environment => ({
-  tag: "environment",
-  nixExpression,
-  check(this, s, ...args): Check {
-    const checkScript = nixStrLit(s, ...args);
-    const wrappedScript = nixStrLit`
+): Environment {
+  return {
+    tag: "environment",
+    nixExpression,
+    check(this, s, ...args): Check {
+      const checkScript = nixStrLit(s, ...args);
+      const wrappedScript = nixStrLit`
       touch $out
       ${setup || ""}
       ${checkScript}
     `;
-    return {
-      tag: "check",
-      nixExpression: nixRaw`
+      return {
+        tag: "check",
+        nixExpression: nixRaw`
         let
             dev = ${this.nixExpression};
         in
@@ -51,11 +117,11 @@ export const mkEnvironment = (
           buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
         } ${wrappedScript}
       `,
-    };
-  },
-  shell(this, s, ...args) {
-    const cmdToExecute = nixStrLit(s, ...args);
-    const shellEnv = nixRaw`
+      };
+    },
+    shell(this, s, ...args) {
+      const cmdToExecute = nixStrLit(s, ...args);
+      const shellEnv = nixRaw`
       let
         dev = ${this.nixExpression};
         shell = ${cmdToExecute};
@@ -70,16 +136,16 @@ export const mkEnvironment = (
         \${shell} "$@"
       ''
     `;
-    return {
-      tag: "executable",
-      description: `Executes ${cmdToExecute.rawNixExpressionString}`,
-      nixExpression: nixStrLit`${shellEnv}`,
-    };
-  },
-  withDevTools(this, extraDevTools) {
-    return {
-      ...this,
-      nixExpression: nixRaw`
+      return {
+        tag: "executable",
+        description: `Executes ${cmdToExecute.rawNixExpressionString}`,
+        nixExpression: nixStrLit`${shellEnv}`,
+      };
+    },
+    withDevTools(this, extraDevTools) {
+      return {
+        ...this,
+        nixExpression: nixRaw`
         (${this.nixExpression}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
@@ -87,10 +153,23 @@ export const mkEnvironment = (
             ${nixList(extraDevTools.map((pkg) => pkg.nixExpression))};
         })
       `,
-    };
-  },
-});
+      };
+    },
+  };
+}
 
+/**
+ * The empty environment - this `Environment` has nothing installed in it. It
+ * can be easily extended using `withDevTools`.
+ *
+ * For example:
+ * ```typescript
+ * import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
+ *
+ * // Create an environment with nothing but go and gopls installed:
+ * emptyEnvironment.withDevTools([pkgs.go, pkgs.gopls])
+ * ```
+ */
 export const emptyEnvironment: Environment = mkEnvironment();
 
 export const isEnvironment = (e: unknown): e is Environment => {

@@ -11,9 +11,10 @@ export { mkPackage, type Package } from "./package.ts";
 export { mkProject, type Project } from "./project.ts";
 
 // languages
-export * as go from "./go.ts";
-export * as haskell from "./haskell.ts";
-export * as javascript from "./javascript.ts";
+export * as go from "./go/mod.ts";
+export * as haskell from "./haskell/mod.ts";
+export * as javascript from "./javascript/mod.ts";
 
 // tools
 export { processCompose } from "./process_compose.ts";
+export * as nix from "./nix.ts";

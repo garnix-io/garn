@@ -5,12 +5,15 @@ import { nixAttrSet, nixList, nixRaw, nixStrLit } from "./nix.ts";
 import { mkPackage } from "./package.ts";
 
 /**
- * processCompose creates an executable project that runs all specified
- * executables simultaneously using `process-compose`.
+ * Creates an executable project that runs all specified executables
+ * simultaneously using `process-compose`.
+ *
+ * This can be useful for starting multiple long-running processes during
+ * development, e.g. a backend server and a database.
  */
-export const processCompose = (
+export function processCompose(
   executables: Record<string, Executable>
-): Executable => {
+): Executable {
   const processes = nixAttrSet(
     mapValues(
       (executable) =>
@@ -34,4 +37,4 @@ export const processCompose = (
   const result = emptyEnvironment.shell`${nixRaw`pkgs.process-compose`}/bin/process-compose up -f ${configYml}`;
   result.description = `processCompose(${Object.keys(executables).join(", ")})`;
   return result;
-};
+}
