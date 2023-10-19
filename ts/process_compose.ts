@@ -7,6 +7,9 @@ import { mkPackage } from "./package.ts";
 /**
  * Creates an executable project that runs all specified executables
  * simultaneously using `process-compose`.
+ *
+ * This can be useful for starting multiple long-running processes during
+ * development, e.g. a backend server and a database.
  */
 export function processCompose(
   executables: Record<string, Executable>

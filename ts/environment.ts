@@ -72,18 +72,25 @@ export function check(
 /**
  * A low-level helper to create new `Environment`s from `NixExpression`s.
  *
- * @param nixExpression - A nix expression to use for this environment defaults to `pkgs.mkShell {}`
- * @param setup - An optional shell script to set up the environment.
+ * @param nixExpression - A nix expression to use for this environment, defaults to `pkgs.mkShell {}`
+ * @param setup - An optional shell script to set up the environment. This script will be run for
+ *                every `Check` before the snippet given to `Environment.check` is executed.
  *
- * Example:
  * ```typescript
  * // Create a new environment where the current working directory is available under `src`:
  * const myEnv = mkEnvironment(
  *   nixRaw`pkgs.mkShell {}`,
  *   nixStrLit`
  *     cp -r ${nixRaw`./.`} src
+ *     cd src
  *   `,
  * );
+ * ```
+ *
+ * Any `Check`s created from this environment will first copy the source files
+ * into the `Check`'s sandbox and then run the check script snippet:
+ * ```typescript
+ * const check = myEnv.check`! grep -ir TODO .`;
  * ```
  */
 export function mkEnvironment(
@@ -157,6 +164,8 @@ export function mkEnvironment(
  *
  * For example:
  * ```typescript
+ * import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
+ *
  * // Create an environment with nothing but go and gopls installed:
  * emptyEnvironment.withDevTools([pkgs.go, pkgs.gopls])
  * ```

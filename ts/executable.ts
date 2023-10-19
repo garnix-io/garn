@@ -11,8 +11,8 @@ import { NixExpression } from "./nix.ts";
  * You can use `Executables` for a variety of purposes:
  *   - Running your projects main executable during development,
  *   - Running a code formatter,
- *   - Run a code generator,
- *   - Spin up a database for development,
+ *   - Running a code generator,
+ *   - Spinning up a database for development,
  *   - etc.
  *
  * You can run `Executable`s with `garn run`.
@@ -22,7 +22,7 @@ export type Executable = {
   nixExpression: NixExpression;
 
   /**
-   * The executable description is rendered in the executable list when running `garn run`
+   * The executable description is rendered in the executable list when running `garn run`.
    */
   description: string;
 };

@@ -2,18 +2,18 @@ import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 
 /**
  * A union of types that are allowed to be interpolated into the `nixStrLit`
- * template literal function which may higher level functions use, such as
+ * template literal function. This is also used in some higher level functions, such as
  * `Environment.shell`.
  *
  * `string`s are treated as raw string data to be escaped and concatenated with
- * the rest of the Nix string literal
+ * the rest of the Nix string literal.
  *
- * `NixExpression`s compile into Nix interpolations
+ * `NixExpression`s compile into Nix interpolations.
  *
  * `{ nixExpression: NixExpression }` works the same as `NixExpression` - It is
  * added to this union purely as a convenience since it is a super type of many
  * higher level types such as `Package`. This allows interpolating these higher
- * level types, the `nixStrLit`
+ * level types directly in `nixStrLit`.
  */
 export type NixStrLitInterpolatable =
   | string
@@ -23,7 +23,7 @@ export type NixStrLitInterpolatable =
     };
 
 /**
- * NixExpression acts as an opaque type representing a Nix expression.
+ * An opaque type representing a Nix expression.
  *
  * It is not advised to construct this type but instead use `nixRaw` or `nixStrLit`.
  *
@@ -48,7 +48,7 @@ export type NixExpression = { rawNixExpressionString: string };
  * ```
  *
  * It explicitly does not allow interpolating strings since it is not clear
- * what the correct behavior should be:
+ * what the correct behavior should be. Instead:
  *
  * If the string you want to interpolate is a Nix expression, wrap the string
  * in `nixRaw` before interpolating, or consider using a `NixExpression` type
@@ -123,15 +123,7 @@ export function nixAttrSet(
  * Returns a `NixExpression` which represents a Nix string literal, but with
  * all typescript interpolations properly escaped and interpolated.
  *
- * `string`s are treated as raw string data to be escaped and concatenated with
- * the rest of the Nix string literal
- *
- * `NixExpression`s compile into Nix interpolations
- *
- * `{ nixExpression: NixExpression }` works the same as `NixExpression` - It is
- * added to this union purely as a convenience since it is a super type of many
- * higher level types such as `Package`. This allows interpolating these higher
- * level types, the `nixStrLit`
+ * See also `NixStrLitInterpolatable`.
  */
 export function nixStrLit(
   s: TemplateStringsArray,

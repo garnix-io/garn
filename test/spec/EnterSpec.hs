@@ -31,7 +31,7 @@ spec = do
             writeFile "garn.ts" $
               unindent
                 [i|
-                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell/mod.ts"
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
@@ -52,7 +52,7 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell/mod.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
                   export const foo = mkHaskellProject({
@@ -77,7 +77,7 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell/mod.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
                   export const foo = mkHaskellProject({
@@ -98,7 +98,7 @@ spec = do
               unindent
                 [i|
                   import { mkPackage } from "#{repoDir}/ts/package.ts"
-                  import { mkHaskellProject } from "#{repoDir}/ts/haskell.ts"
+                  import { mkHaskellProject } from "#{repoDir}/ts/haskell/mod.ts"
                   import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
                   export const foo = mkHaskellProject({
