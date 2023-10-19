@@ -31,8 +31,8 @@ spec = do
           readFile "garn.ts"
             `shouldReturn` unindent
               [i|
-                import * as garn from "https://garn.io/ts/v0.0.8/mod.ts";
-                import * as pkgs from "https://garn.io/ts/v0.0.8/nixpkgs.ts";
+                import * as garn from "https://garn.io/ts/v0.0.9/mod.ts";
+                import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
 
                 export const garn = garn.haskell.mkHaskellProject({
                   description: "",
@@ -55,8 +55,8 @@ spec = do
           readFile "garn.ts"
             `shouldReturn` unindent
               [i|
-                import * as garn from "https://garn.io/ts/v0.0.8/mod.ts";
-                import * as pkgs from "https://garn.io/ts/v0.0.8/nixpkgs.ts";
+                import * as garn from "https://garn.io/ts/v0.0.9/mod.ts";
+                import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
 
                 export const someGoProject = garn.go.mkGoProject({
                   description: "My go project",
