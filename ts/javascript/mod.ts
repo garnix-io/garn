@@ -74,6 +74,7 @@ export function mkNpmProject(args: {
       cd src
       echo copying node_modules
       cp -r ${node_modules}/node_modules .
+      chmod -R u+rwX node_modules
     `
   ).withDevTools([mkPackage(nodejs)]);
   return mkProject(

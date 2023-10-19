@@ -1,7 +1,6 @@
-import { Package } from "./package.ts";
-import { hasTag, nixSource } from "./internal/utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
+import { hasTag, nixSource } from "./internal/utils.ts";
 import {
   NixStrLitInterpolatable,
   NixExpression,
@@ -9,6 +8,7 @@ import {
   nixRaw,
   nixStrLit,
 } from "./nix.ts";
+import { Package, mkPackage } from "./package.ts";
 
 /**
  * `Environment`s define what files and tools are available to `Executables`,
@@ -41,6 +41,13 @@ export type Environment = {
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
   ): Check;
+  /**
+   * Creates a new `Package` built with the given shell script, run inside this `Environment`
+   */
+  build(
+    _s: TemplateStringsArray,
+    ..._args: Array<NixStrLitInterpolatable>
+  ): Package;
 };
 
 /**
@@ -68,6 +75,11 @@ export function check(
 ) {
   return emptyEnvironment.check(s, ...args);
 }
+
+export const build = (
+  s: TemplateStringsArray,
+  ...args: Array<NixStrLitInterpolatable>
+) => emptyEnvironment.build(s, ...args);
 
 /**
  * A low-level helper to create new `Environment`s from `NixExpression`s.
@@ -141,6 +153,22 @@ export function mkEnvironment(
         description: `Executes ${cmdToExecute.rawNixExpressionString}`,
         nixExpression: nixStrLit`${shellEnv}`,
       };
+    },
+    build(this, s, ...args) {
+      const cmdToExecute = nixStrLit(s, ...args);
+      const wrappedScript = nixStrLit`
+      #!\${pkgs.bash}/bin/bash
+      mkdir $out
+      ${setup || ""}
+      ${cmdToExecute}
+    `;
+      const pkg = nixRaw`
+      let dev = ${this.nixExpression}; in
+      pkgs.runCommand "garn-pkg" {
+        buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+      } ${wrappedScript}
+    `;
+      return mkPackage(pkg);
     },
     withDevTools(this, extraDevTools) {
       return {
