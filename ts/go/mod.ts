@@ -48,14 +48,14 @@ const GO_VERSION_TO_NIXPKG_NAME = {
 /**
  * Create a go-based garn Project.
  */
-export const mkGoProject = (args: {
+export function mkGoProject(args: {
   description: string;
   moduleName: string;
   src: string;
   goVersion?: keyof typeof GO_VERSION_TO_NIXPKG_NAME;
 }): Project & {
   pkg: Package;
-} => {
+} {
   const pkg = mkPackage(
     nixRaw`
       let
@@ -88,4 +88,4 @@ export const mkGoProject = (args: {
       pkg,
     }
   );
-};
+}

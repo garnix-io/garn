@@ -6,4 +6,6 @@ export type Check = {
   nixExpression: NixExpression;
 };
 
-export const isCheck = (x: unknown): x is Check => hasTag(x, "check");
+export function isCheck(x: unknown): x is Check {
+  return hasTag(x, "check");
+}

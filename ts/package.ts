@@ -9,13 +9,17 @@ export type Package = {
   // disableCheck(this: Package): Package;
 };
 
-export const isPackage = (x: unknown): x is Package => hasTag(x, "package");
+export function isPackage(x: unknown): x is Package {
+  return hasTag(x, "package");
+}
 
-export const mkPackage = (
+export function mkPackage(
   nixExpression: NixExpression,
   description?: string
-): Package => ({
-  tag: "package",
-  nixExpression,
-  description,
-});
+): Package {
+  return {
+    tag: "package",
+    nixExpression,
+    description,
+  };
+}

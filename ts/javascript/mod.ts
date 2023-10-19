@@ -40,14 +40,14 @@ const fromNodeVersion = (
   };
 };
 
-export const mkNpmProject = (args: {
+export function mkNpmProject(args: {
   description: string;
   src: string;
   nodeVersion: NodeVersion;
 }): Project & {
   devShell: Environment;
   node_modules: Package;
-} => {
+} {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
   const node_modules = mkPackage(nixRaw`
     let
@@ -83,15 +83,15 @@ export const mkNpmProject = (args: {
       node_modules,
     }
   );
-};
+}
 
-export const mkYarnProject = (args: {
+export function mkYarnProject(args: {
   description: string;
   src: string;
   nodeVersion: keyof typeof nodeVersions;
   startCommand?: string;
   testCommand?: string;
-}): Project => {
+}): Project {
   const startCommand = args.startCommand ?? "yarn start";
   const testCommand = args.testCommand ?? "yarn test";
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
@@ -161,4 +161,4 @@ export const mkYarnProject = (args: {
       startDev,
     }
   );
-};
+}

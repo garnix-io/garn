@@ -4,8 +4,8 @@ import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
 import {
   Interpolatable,
-  nixList,
   NixExpression,
+  nixList,
   nixRaw,
   nixStrLit,
 } from "./nix.ts";
@@ -18,32 +18,31 @@ export type Environment = {
   check(_s: TemplateStringsArray, ..._args: Array<Interpolatable>): Check;
 };
 
-export const shell = (
-  s: TemplateStringsArray,
-  ...args: Array<Interpolatable>
-) => emptyEnvironment.shell(s, ...args);
+export function shell(s: TemplateStringsArray, ...args: Array<Interpolatable>) {
+  return emptyEnvironment.shell(s, ...args);
+}
 
-export const check = (
-  s: TemplateStringsArray,
-  ...args: Array<Interpolatable>
-) => emptyEnvironment.check(s, ...args);
+export function check(s: TemplateStringsArray, ...args: Array<Interpolatable>) {
+  return emptyEnvironment.check(s, ...args);
+}
 
-export const mkEnvironment = (
+export function mkEnvironment(
   nixExpression = nixRaw`pkgs.mkShell {}`,
   setup?: NixExpression
-): Environment => ({
-  tag: "environment",
-  nixExpression,
-  check(this, s, ...args): Check {
-    const checkScript = nixStrLit(s, ...args);
-    const wrappedScript = nixStrLit`
+): Environment {
+  return {
+    tag: "environment",
+    nixExpression,
+    check(this, s, ...args): Check {
+      const checkScript = nixStrLit(s, ...args);
+      const wrappedScript = nixStrLit`
       touch $out
       ${setup || ""}
       ${checkScript}
     `;
-    return {
-      tag: "check",
-      nixExpression: nixRaw`
+      return {
+        tag: "check",
+        nixExpression: nixRaw`
         let
             dev = ${this.nixExpression};
         in
@@ -51,11 +50,11 @@ export const mkEnvironment = (
           buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
         } ${wrappedScript}
       `,
-    };
-  },
-  shell(this, s, ...args) {
-    const cmdToExecute = nixStrLit(s, ...args);
-    const shellEnv = nixRaw`
+      };
+    },
+    shell(this, s, ...args) {
+      const cmdToExecute = nixStrLit(s, ...args);
+      const shellEnv = nixRaw`
       let
         dev = ${this.nixExpression};
         shell = ${cmdToExecute};
@@ -70,16 +69,16 @@ export const mkEnvironment = (
         \${shell} "$@"
       ''
     `;
-    return {
-      tag: "executable",
-      description: `Executes ${cmdToExecute.rawNixExpressionString}`,
-      nixExpression: nixStrLit`${shellEnv}`,
-    };
-  },
-  withDevTools(this, extraDevTools) {
-    return {
-      ...this,
-      nixExpression: nixRaw`
+      return {
+        tag: "executable",
+        description: `Executes ${cmdToExecute.rawNixExpressionString}`,
+        nixExpression: nixStrLit`${shellEnv}`,
+      };
+    },
+    withDevTools(this, extraDevTools) {
+      return {
+        ...this,
+        nixExpression: nixRaw`
         (${this.nixExpression}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
@@ -87,9 +86,10 @@ export const mkEnvironment = (
             ${nixList(extraDevTools.map((pkg) => pkg.nixExpression))};
         })
       `,
-    };
-  },
-});
+      };
+    },
+  };
+}
 
 export const emptyEnvironment: Environment = mkEnvironment();
 

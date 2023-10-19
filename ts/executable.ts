@@ -7,6 +7,6 @@ export type Executable = {
   nixExpression: NixExpression;
 };
 
-export const isExecutable = (e: unknown): e is Executable => {
+export function isExecutable(e: unknown): e is Executable {
   return hasTag(e, "executable");
-};
+}
