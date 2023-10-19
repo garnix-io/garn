@@ -76,10 +76,28 @@ export function check(
   return emptyEnvironment.check(s, ...args);
 }
 
-export const build = (
+/**
+ * Creates a new `Package`, which will be built using the given shell script.
+ * It's run in the `emptyEnvironment`.
+ *
+ * The build script should copy any artifacts that you want to keep in the `Package`
+ * into `$out`.
+ *
+ * Example:
+ * ```typescript
+ * import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
+ *
+ * garn.build`
+ *   ${pkgs.cowsay}/bin/cowsay moo > $out/moo
+ * `;
+ * ```
+ */
+export function build(
   s: TemplateStringsArray,
   ...args: Array<NixStrLitInterpolatable>
-) => emptyEnvironment.build(s, ...args);
+) {
+  return emptyEnvironment.build(s, ...args);
+}
 
 /**
  * A low-level helper to create new `Environment`s from `NixExpression`s.
