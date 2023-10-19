@@ -43,12 +43,12 @@ what the `Environment`s provide. For example `Check`s:
 ## Checks
 
 `Check`s are commands (usually shell commands) that are used to define
-reproducible automated tests or other checks. They are being run in a sandbox,
+reproducible automated tests or other checks. They run in a sandbox,
 which means they don't have access to your locally installed tools, nor to your
 local file system. Instead they are always based on an underlying `Environment`,
 and through that will have access to the tools that the environment provides. In
-addition they will have access to a _copy_ of your source files, that is
-provided in the sandbox they are run in. That gives you the ability to define
+addition, a _copy_ of your source files are
+provided in the sandbox. That gives you the ability to define
 automated `Check`s on your source files.
 
 {/* TODO: maybe inline or link to a small example for a check? */}
