@@ -103,10 +103,31 @@ entities. So for example it can contain multiple `Check`s, which you can all run
 at once with `garn check <projectName>`. It can contain multiple `Packages` that
 you can all build with `garn build <projectName>`.
 
-Here's an example of a `Project` that contains a few `Check`s and `Package`s:
+Here's an example of a `Project` that contains a few `Check`s and adds a
+developer tool to its default environment:
 
 ```typescript
-TODO;
+import * as garn from "https://garn.io/ts/v0.0.9/mod.ts";
+import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
+
+// - `garn enter frontend` will enter a shell with node, npm and ripgrep installed.
+// - `garn check frontend` will
+//   - run the tests,
+//   - typecheck the project (with `tsc`).
+//   - search for `TODO`s (with `ripgrep`) and fail if there are any.
+export const project = garn.javascript
+  .mkNpmProject({
+    src: ".",
+    description: "An NPM frontend",
+    nodeVersion: "18",
+  })
+  .addCheck("test")`npm run test`
+  .addCheck("tsc")`npm run tsc`
+  .withDevTools([pkgs.ripgrep])
+  .addCheck("no todos allowed")`! rg --glob !node_modules -i todo .`;
+
+// - `garn run dev` will run the server locally in dev mode.
+export const dev = project.shell`npm install ; npm run dev`;
 ```
 
 `Project`s can have a default `Enviroment` (aptly called `defaultEnvironment`),
