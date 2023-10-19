@@ -4,6 +4,9 @@ import { mkProject, Project } from "../project.ts";
 import { nixSource } from "../internal/utils.ts";
 import { nixRaw, nixStrLit } from "../nix.ts";
 
+/**
+ * Creates a haskell-based garn Project.
+ */
 export function mkHaskellProject(args: {
   description: string;
   executable: string;

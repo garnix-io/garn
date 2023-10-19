@@ -17,3 +17,4 @@ export * as javascript from "./javascript/mod.ts";
 
 // tools
 export { processCompose } from "./process_compose.ts";
+export * as nix from "./nix.ts";

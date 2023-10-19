@@ -5,8 +5,8 @@ import { nixAttrSet, nixList, nixRaw, nixStrLit } from "./nix.ts";
 import { mkPackage } from "./package.ts";
 
 /**
- * processCompose creates an executable project that runs all specified
- * executables simultaneously using `process-compose`.
+ * Creates an executable project that runs all specified executables
+ * simultaneously using `process-compose`.
  */
 export function processCompose(
   executables: Record<string, Executable>

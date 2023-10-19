@@ -46,7 +46,7 @@ const GO_VERSION_TO_NIXPKG_NAME = {
 };
 
 /**
- * Create a go-based garn Project.
+ * Creates a go-based garn Project.
  */
 export function mkGoProject(args: {
   description: string;

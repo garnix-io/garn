@@ -40,6 +40,9 @@ const fromNodeVersion = (
   };
 };
 
+/**
+ * Creates a npm-based garn Project.
+ */
 export function mkNpmProject(args: {
   description: string;
   src: string;
@@ -85,6 +88,9 @@ export function mkNpmProject(args: {
   );
 }
 
+/**
+ * Creates a yarn-based garn Project.
+ */
 export function mkYarnProject(args: {
   description: string;
   src: string;
