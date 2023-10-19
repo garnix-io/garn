@@ -384,6 +384,7 @@ color: black;
 
 .asciinema-theme-garn .bg-fg { /* inverse for terminal background color */
 background-color: black;
+color: #fff;
 }
 
 .asciinema-theme-garn .fg-0 {
@@ -447,7 +448,7 @@ color: black;
 }
 
 .asciinema-theme-garn .bg-7 {
-background-color: black;
+background-color: #888;
 }
 
 .asciinema-theme-garn .fg-8 {

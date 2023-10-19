@@ -4,5 +4,12 @@ export const main = garn.javascript.mkNpmProject({
   description: "frontend test app created by create-react-app",
   src: ".",
   nodeVersion: "18",
-  testCommand: "npm run test -- --watchAll=false",
 });
+
+export const start = garn.mkProject(
+  {
+    description: "start the dev server",
+    defaultExecutable: main.shell`npm install && npm start`,
+  },
+  {}
+);

@@ -19,9 +19,10 @@ export const DropdownMenu: React.FC<{
       <ul className={open ? "dropdown-content show" : "dropdown"} onMouseDown={e => e.stopPropagation()}>
         {items.map((item) => (
           <li className="menu-item" key={item.name}>
-            <Link className="black" to={`docs/${item.url}`}>
-              {item.name}
-            </Link>
+            {item.url.match(/^(?:https?:)?\/\//)
+              ? <a href={item.url} target="_blank" rel="noopener noreferrer">{item.name}</a>
+              : <Link to={item.url} onClick={e => { e.stopPropagation(); setOpen(false) }}>{item.name}</Link>
+            }
           </li>
         ))}
       </ul>

@@ -20,34 +20,36 @@
           };
         in
         {
-          helloFromHaskell_pkg = (pkgs.haskell.packages.ghc94.callCabal2nix
-            "garn-pkg"
+          "helloFromHaskell_pkg" =
+            (pkgs.haskell.packages.ghc94.callCabal2nix
+              "garn-pkg"
 
-            (
-              let
-                lib = pkgs.lib;
-                lastSafe = list:
-                  if lib.lists.length list == 0
-                  then null
-                  else lib.lists.last list;
-              in
-              builtins.path
-                {
-                  path = ./.;
-                  name = "source";
-                  filter = path: type:
-                    let
-                      fileName = lastSafe (lib.strings.splitString "/" path);
-                    in
-                    fileName != "flake.nix" &&
+              (
+                let
+                  lib = pkgs.lib;
+                  lastSafe = list:
+                    if lib.lists.length list == 0
+                    then null
+                    else lib.lists.last list;
+                in
+                builtins.path
+                  {
+                    path = ./.;
+                    name = "source";
+                    filter = path: type:
+                      let
+                        fileName = lastSafe (lib.strings.splitString "/" path);
+                      in
+                      fileName != "flake.nix" &&
                       fileName != "garn.ts";
-                }
-            )
+                  }
+              )
 
-            { })
-          // {
-            meta.mainProgram = "helloFromHaskell";
-          };
+              { })
+            // {
+              meta.mainProgram = "helloFromHaskell";
+            }
+          ;
         }
       );
       checks = forAllSystems (system:
@@ -58,30 +60,8 @@
           };
         in
         {
-          helloFromHaskell_hlint =
+          "helloFromHaskell_hlint" =
             let
-              src =
-                (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./.;
-                      name = "source";
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix" &&
-                        fileName != "garn.ts";
-                    }
-                )
-              ;
               dev =
                 (
                   (
@@ -139,11 +119,35 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-        touch \$out
-        cp -r ${src} src
-        cd src
-        ${"hlint *.hs"}
-      ";
+      touch \$out
+      ${"
+      echo copying source
+      cp -r ${
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+} src
+      chmod -R u+rwX src
+      cd src
+    "}
+      ${"hlint *.hs"}
+    "
+          ;
         }
       );
       devShells = forAllSystems (system:
@@ -154,56 +158,58 @@
           };
         in
         {
-          helloFromHaskell = (
+          "helloFromHaskell" =
             (
-              let
-                expr =
-                  (pkgs.haskell.packages.ghc94.callCabal2nix
-                    "garn-pkg"
+              (
+                let
+                  expr =
+                    (pkgs.haskell.packages.ghc94.callCabal2nix
+                      "garn-pkg"
 
-                    (
-                      let
-                        lib = pkgs.lib;
-                        lastSafe = list:
-                          if lib.lists.length list == 0
-                          then null
-                          else lib.lists.last list;
-                      in
-                      builtins.path
-                        {
-                          path = ./.;
-                          name = "source";
-                          filter = path: type:
-                            let
-                              fileName = lastSafe (lib.strings.splitString "/" path);
-                            in
-                            fileName != "flake.nix" &&
-                            fileName != "garn.ts";
-                        }
-                    )
+                      (
+                        let
+                          lib = pkgs.lib;
+                          lastSafe = list:
+                            if lib.lists.length list == 0
+                            then null
+                            else lib.lists.last list;
+                        in
+                        builtins.path
+                          {
+                            path = ./.;
+                            name = "source";
+                            filter = path: type:
+                              let
+                                fileName = lastSafe (lib.strings.splitString "/" path);
+                              in
+                              fileName != "flake.nix" &&
+                              fileName != "garn.ts";
+                          }
+                      )
 
-                    { })
-                  // {
-                    meta.mainProgram = "helloFromHaskell";
-                  }
-                ;
-              in
-              (if expr ? env
-              then expr.env
-              else pkgs.mkShell { inputsFrom = [ expr ]; }
-              )
+                      { })
+                    // {
+                      meta.mainProgram = "helloFromHaskell";
+                    }
+                  ;
+                in
+                (if expr ? env
+                then expr.env
+                else pkgs.mkShell { inputsFrom = [ expr ]; }
+                )
+              ).overrideAttrs (finalAttrs: previousAttrs: {
+                nativeBuildInputs =
+                  previousAttrs.nativeBuildInputs
+                  ++
+                  [ pkgs.haskell.packages.ghc94.cabal-install ];
+              })
             ).overrideAttrs (finalAttrs: previousAttrs: {
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
                 ++
-                [ pkgs.haskell.packages.ghc94.cabal-install ];
+                [ pkgs.hlint ];
             })
-          ).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ pkgs.hlint ];
-          });
+          ;
         }
       );
       apps = forAllSystems (system:
@@ -211,9 +217,9 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          helloFromHaskell = {
-            type = "app";
-            program = "${
+          "helloFromHaskell" = {
+            "type" = "app";
+            "program" = "${
       let
         dev = pkgs.mkShell {};
         shell = "${

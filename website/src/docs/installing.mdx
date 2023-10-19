@@ -3,14 +3,14 @@ import { BashSnippetToCopy } from "../components/BashSnippetToCopy";
 export const info = {
   name: "installing",
   url: "installing",
-  index: 1,
+  index: 2,
 };
 
 # Installing garn
 
 Install `garn` with:
 
-<BashSnippetToCopy snippet="curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh | sh" />
+<BashSnippetToCopy snippet="sh <(curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh)" />
 
 You can look at the script [here](../install.sh).
 
