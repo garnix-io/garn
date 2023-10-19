@@ -15,6 +15,9 @@
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
         ourHaskell = pkgs.haskell.packages.ghc945;
+        websitePackages = pkgs.lib.attrsets.mapAttrs'
+          (name: value: { name = "website_${name}"; inherit value; })
+          (call-flake ./website).packages.${system};
       in
       {
         lib = pkgs.lib;
@@ -112,7 +115,7 @@
             flakeLocation = "github:garnix-io/garn";
             testCommand = "garn --help";
           };
-        };
+        } // websitePackages;
         devShells = {
           default = pkgs.mkShell {
             shellHook =
