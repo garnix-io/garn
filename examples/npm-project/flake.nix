@@ -258,7 +258,7 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          "project" = {
+          "run" = {
             "type" = "app";
             "program" = "${
       let

@@ -1,9 +1,11 @@
 import { isProject, Project } from "../project.ts";
 import { isPackage, Package } from "../package.ts";
 import { Check, isCheck } from "../check.ts";
-import { mapKeys, mapValues } from "./utils.ts";
+import { checkExhaustiveness, mapKeys, mapValues } from "./utils.ts";
 import { GOMOD2NIX_REPO } from "../go.ts";
 import { nixAttrSet, NixExpression, nixRaw, nixStrLit } from "../nix.ts";
+import { Executable } from "../mod.ts";
+import { isExecutable } from "../executable.ts";
 
 // This needs to be in sync with `GarnConfig` in GarnConfig.hs
 export type GarnConfig = {
@@ -11,14 +13,21 @@ export type GarnConfig = {
   flakeFile: string;
 };
 
-type Targets = Record<
-  string,
-  {
-    description: string;
-    packages: Array<string>;
-    checks: Array<string>;
-  }
->;
+type Targets = Record<string, TargetConfig>;
+
+type TargetConfig = ProjectTarget | ExecutableTarget;
+
+type ProjectTarget = {
+  tag: "project";
+  description: string;
+  packages: Array<string>;
+  checks: Array<string>;
+};
+
+type ExecutableTarget = {
+  tag: "executable";
+  description: string;
+};
 
 export const toGarnConfig = (
   nixpkgsInput: string,
@@ -30,16 +39,26 @@ export const toGarnConfig = (
 
 const toTargets = (garnExports: Record<string, unknown>): Targets => {
   const result: Targets = {};
-  for (const [projectName, project] of Object.entries(
-    findProjects(garnExports)
+  for (const [name, exportable] of Object.entries(
+    findExportables(garnExports)
   )) {
-    const packages = collectProjectPackages(projectName, project);
-    const checks = collectProjectChecks(projectName, project);
-    result[projectName] = {
-      description: project.description,
-      packages: Object.keys(packages),
-      checks: Object.keys(checks),
-    };
+    if (isProject(exportable)) {
+      const packages = collectProjectPackages(name, exportable);
+      const checks = collectProjectChecks(name, exportable);
+      result[name] = {
+        tag: "project",
+        description: exportable.description,
+        packages: Object.keys(packages),
+        checks: Object.keys(checks),
+      };
+    } else if (isExecutable(exportable)) {
+      result[name] = {
+        tag: "executable",
+        description: exportable.description,
+      };
+    } else {
+      checkExhaustiveness(exportable);
+    }
   }
   return result;
 };
@@ -48,24 +67,35 @@ const formatFlake = (
   nixpkgsInput: string,
   garnExports: Record<string, unknown>
 ): NixExpression => {
-  const projects = findProjects(garnExports);
+  const exportables = findExportables(garnExports);
 
-  const packages = mapValues((p) => p.nixExpression, collectPackages(projects));
-  const checks = mapValues((p) => p.nixExpression, collectChecks(projects));
+  const packages = mapValues(
+    (p) => p.nixExpression,
+    collectPackages(exportables)
+  );
+  const checks = mapValues((p) => p.nixExpression, collectChecks(exportables));
   const shells = mapValues(
-    (project) => project.defaultEnvironment?.nixExpression,
-    projects
-  );
-  const apps = mapValues(
-    ({ defaultExecutable }) =>
-      defaultExecutable
-        ? nixAttrSet({
-            type: nixStrLit`app`,
-            program: defaultExecutable.nixExpression,
-          })
+    (exportable) =>
+      isProject(exportable) && exportable.defaultEnvironment
+        ? exportable.defaultEnvironment.nixExpression
         : undefined,
-    projects
+    exportables
   );
+  const apps = mapValues((exportable) => {
+    if (isProject(exportable) && exportable.defaultExecutable) {
+      return nixAttrSet({
+        type: nixStrLit`app`,
+        program: exportable.defaultExecutable.nixExpression,
+      });
+    } else if (isExecutable(exportable)) {
+      return nixAttrSet({
+        type: nixStrLit`app`,
+        program: exportable.nixExpression,
+      });
+    } else {
+      return undefined;
+    }
+  }, exportables);
   return nixRaw`{
     inputs.nixpkgs.url = ${nixStrLit(nixpkgsInput)};
     inputs.flake-utils.url = "github:numtide/flake-utils";
@@ -116,12 +146,16 @@ const formatFlake = (
   }`;
 };
 
-const findProjects = (
+type Exportable = Project | Executable;
+
+const findExportables = (
   config: Record<string, unknown>
-): Record<string, Project> => {
-  const result: Record<string, Project> = {};
+): Record<string, Exportable> => {
+  const result: Record<string, Exportable> = {};
   for (const [name, value] of Object.entries(config)) {
     if (isProject(value)) {
+      result[name] = value;
+    } else if (isExecutable(value)) {
       result[name] = value;
     }
   }
@@ -129,14 +163,16 @@ const findProjects = (
 };
 
 const collectPackages = (
-  config: Record<string, Project>
+  config: Record<string, Exportable>
 ): Record<string, Package> => {
   let result: Record<string, Package> = {};
-  for (const [projectName, project] of Object.entries(config)) {
-    result = {
-      ...result,
-      ...collectProjectPackages(projectName, project),
-    };
+  for (const [name, exportable] of Object.entries(config)) {
+    if (isProject(exportable)) {
+      result = {
+        ...result,
+        ...collectProjectPackages(name, exportable),
+      };
+    }
   }
   return result;
 };
@@ -151,14 +187,16 @@ const collectProjectPackages = (
   );
 
 const collectChecks = (
-  config: Record<string, Project>
+  config: Record<string, Exportable>
 ): Record<string, Check> => {
   let result: Record<string, Check> = {};
-  for (const [projectName, project] of Object.entries(config)) {
-    result = {
-      ...result,
-      ...collectProjectChecks(projectName, project),
-    };
+  for (const [name, exportable] of Object.entries(config)) {
+    if (isProject(exportable)) {
+      result = {
+        ...result,
+        ...collectProjectChecks(name, exportable),
+      };
+    }
   }
   return result;
 };

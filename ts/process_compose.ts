@@ -3,13 +3,14 @@ import { Executable } from "./executable.ts";
 import { mapValues } from "./internal/utils.ts";
 import { nixAttrSet, nixList, nixRaw, nixStrLit } from "./nix.ts";
 import { mkPackage } from "./package.ts";
-import { mkProject } from "./project.ts";
 
 /**
  * processCompose creates an executable project that runs all specified
  * executables simultaneously using `process-compose`.
  */
-export const processCompose = (executables: Record<string, Executable>) => {
+export const processCompose = (
+  executables: Record<string, Executable>
+): Executable => {
   const processes = nixAttrSet(
     mapValues(
       (executable) =>
@@ -30,12 +31,7 @@ export const processCompose = (executables: Record<string, Executable>) => {
     nixRaw`pkgs.writeText "process-compose.yml" (builtins.toJSON ${processComposeConfig})`
   );
 
-  return mkProject(
-    {
-      description: "",
-      defaultEnvironment: emptyEnvironment,
-      defaultExecutable: emptyEnvironment.shell`${nixRaw`pkgs.process-compose`}/bin/process-compose up -f ${configYml}`,
-    },
-    {}
-  );
+  const result = emptyEnvironment.shell`${nixRaw`pkgs.process-compose`}/bin/process-compose up -f ${configYml}`;
+  result.description = `processCompose(${Object.keys(executables).join(", ")})`;
+  return result;
 };

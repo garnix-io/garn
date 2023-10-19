@@ -9,7 +9,7 @@ dependencies.
 For example, with this `garn.ts` file:
 
 ```typescript
-import * as garn from "https://garn.io/ts/v0.0.8/mod.ts";
+import * as garn from "https://garn.io/ts/v0.0.9/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "My project frontend",
@@ -90,4 +90,4 @@ reproducible.
 ## Typescript API
 
 Documentation for the `garn` Deno library is documented
-[here](https://doc.deno.land/https://garn.io/ts/v0.0.8/mod.ts).
+[here](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts).

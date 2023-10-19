@@ -2,8 +2,10 @@
 
 module RunSpec where
 
+import Control.Monad (forM_)
 import Data.List (sort)
 import Data.String.Interpolate (i)
+import Data.String.Interpolate.Util (unindent)
 import System.Directory
 import System.Exit (ExitCode (..))
 import Test.Hspec
@@ -36,13 +38,7 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.mkProject(
-                {
-                  description: 'Project with an executable',
-                  defaultExecutable: garn.shell`echo foobarbaz`,
-                },
-                {},
-              );
+              export const main = garn.shell`echo foobarbaz`;
             |]
           output <- runGarn ["run", "main"] "" repoDir Nothing
           stdout output `shouldBe` "foobarbaz\n"
@@ -55,13 +51,7 @@ spec =
               import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
               const myEnv = garn.mkEnvironment().withDevTools([garn.mkPackage(nixRaw`pkgs.hello`)]);
-              export const main = garn.mkProject(
-                {
-                  description: 'Project with an executable',
-                  defaultExecutable: myEnv.shell`hello`,
-                },
-                {},
-              );
+              export const main = myEnv.shell`hello`;
             |]
           output <- runGarn ["run", "main"] "" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
@@ -73,10 +63,7 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.mkProject({
-                description: 'Project with an executable',
-                defaultExecutable: garn.shell`printf "%s,%s,%s"`,
-              }, {});
+              export const main = garn.shell`printf "%s,%s,%s"`;
             |]
           output <- runGarn ["run", "main", "foo bar", "baz"] "" repoDir Nothing
           stdout output `shouldBe` "foo bar,baz,"
@@ -102,11 +89,42 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const printTty = garn.mkProject({
-                description: "tty",
-                defaultExecutable: garn.shell`tty`,
-              }, {});
+              export const printTty = garn.shell`tty`;
             |]
           output <- runGarn ["run", "printTty"] "" repoDir Nothing
           stdout output `shouldStartWith` "/dev/"
           exitCode output `shouldBe` ExitSuccess
+
+        describe "top-level executables" $ do
+          it "shows top-level executables in the help" $ do
+            writeFile "garn.ts" $
+              unindent
+                [i|
+                  import * as garn from "#{repoDir}/ts/mod.ts"
+
+                  export const topLevelExecutable: garn.Executable = garn.shell`true`;
+                |]
+            output <- runGarn ["run", "--help"] "" repoDir Nothing
+            stdout output
+              `shouldMatch` unindent
+                [i|
+                  Available commands:
+                    topLevelExecutable.*
+                |]
+
+          describe "help of other subcommands" $ do
+            let commands = ["build", "enter", "check"]
+            forM_ commands $ \command -> do
+              describe command $ do
+                it "does not show top-level executables in the help" $
+                  onTestFailureLogger $ \onTestFailureLog -> do
+                    writeFile "garn.ts" $
+                      unindent
+                        [i|
+                          import * as garn from "#{repoDir}/ts/mod.ts"
+
+                          export const topLevelExecutable: garn.Executable = garn.shell`true`;
+                        |]
+                    output <- runGarn [command, "--help"] "" repoDir Nothing
+                    onTestFailureLog output
+                    stdout output `shouldNotContain` "topLevelExecutable"

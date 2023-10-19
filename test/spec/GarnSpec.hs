@@ -3,8 +3,6 @@
 
 module GarnSpec (spec) where
 
-import Control.Monad (unless)
-import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import System.Directory
@@ -13,7 +11,6 @@ import Test.Hspec.Golden (defaultGolden)
 import Test.Mockery.Directory (inTempDirectory)
 import Test.Mockery.Environment (withModifiedEnvironment)
 import TestUtils
-import Text.Regex.PCRE.Heavy (compileM, (=~))
 
 spec :: Spec
 spec = do
@@ -74,11 +71,3 @@ spec = do
             _ <- runGarn ["run", "foo"] "" repoDir Nothing
             flake <- readFile "./flake.nix"
             pure $ defaultGolden "generates_formatted_flakes" flake
-
-shouldMatch :: (HasCallStack) => String -> String -> Expectation
-shouldMatch actual expected = case compileM (cs expected) [] of
-  Left err -> expectationFailure $ "invalid regex: " <> show err
-  Right regex ->
-    unless (actual =~ regex) $
-      expectationFailure $
-        "expected " <> actual <> " to match regex " <> show expected

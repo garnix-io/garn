@@ -4,7 +4,9 @@ module TestUtils where
 
 import Control.Concurrent
 import Control.Exception (SomeException, bracket, catch, throwIO)
+import Control.Monad (unless)
 import qualified Data.Aeson as Aeson
+import Data.String.Conversions (cs)
 import Data.String.Interpolate
 import qualified Data.Yaml as Yaml
 import Development.Shake (StdoutTrim (..), cmd)
@@ -17,6 +19,15 @@ import qualified System.IO as Sys
 import System.IO.Silently (hCapture)
 import System.IO.Temp
 import Test.Hspec
+import Text.Regex.PCRE.Heavy (compileM, (=~))
+
+shouldMatch :: (HasCallStack) => String -> String -> Expectation
+shouldMatch actual expected = case compileM (cs expected) [] of
+  Left err -> expectationFailure $ "invalid regex: " <> show err
+  Right regex ->
+    unless (actual =~ regex) $
+      expectationFailure $
+        "expected " <> actual <> " to match regex " <> show expected
 
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do

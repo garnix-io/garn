@@ -68,26 +68,39 @@ data WithGarnTsCommand
 
 withGarnTsCommandInfo :: [(String, String, Targets -> Parser WithGarnTsCommand)]
 withGarnTsCommandInfo =
-  [ ("build", "Build the default executable of a project", withCommandOptions Build),
-    ("run", "Build and run the default executable of a project", withCommandOptionsAndArgv Run),
-    ("enter", "Enter the default devshell for a project", withCommandOptions Enter),
+  [ ("build", "Build the default executable of a project", buildCommand),
+    ("run", "Build and run the default executable of a project", runCommand),
+    ("enter", "Enter the default devshell for a project", enterCommand),
     ("generate", "Generate the flake.nix file and exit", const $ pure Gen),
     ("check", "Run the checks of a project", checkCommand)
   ]
-  where
-    withCommandOptions constructor targets =
-      constructor <$> commandOptionsParser targets
-    withCommandOptionsAndArgv constructor targets =
-      constructor <$> commandOptionsParser targets <*> argvParser
-    checkCommand :: Targets -> Parser WithGarnTsCommand
-    checkCommand targets =
-      let checkCommandOptions =
-            Qualified <$> commandOptionsParser targets
-              <|> pure Unqualified
-       in Check <$> checkCommandOptions
 
-argvParser :: Parser [String]
-argvParser = many $ strArgument $ metavar "...args"
+buildCommand :: Targets -> Parser WithGarnTsCommand
+buildCommand targets =
+  Build <$> commandOptionsParser (Map.filter isProject targets)
+
+runCommand :: Targets -> Parser WithGarnTsCommand
+runCommand targets =
+  Run <$> commandOptionsParser targets <*> argvParser
+  where
+    argvParser :: Parser [String]
+    argvParser = many $ strArgument $ metavar "...args"
+
+enterCommand :: Targets -> Parser WithGarnTsCommand
+enterCommand targets =
+  Enter <$> commandOptionsParser (Map.filter isProject targets)
+
+checkCommand :: Targets -> Parser WithGarnTsCommand
+checkCommand targets =
+  let checkCommandOptions =
+        Qualified <$> commandOptionsParser (Map.filter isProject targets)
+          <|> pure Unqualified
+   in Check <$> checkCommandOptions
+
+isProject :: TargetConfig -> Bool
+isProject = \case
+  TargetConfigProject _ -> True
+  TargetConfigExecutable _ -> False
 
 withGarnTsParser :: Targets -> Parser WithGarnTsCommand
 withGarnTsParser targets =
@@ -124,7 +137,7 @@ commandOptionsParser targets =
               target
               ( info
                   (pure (CommandOptions target targetConfig))
-                  (progDesc $ description targetConfig)
+                  (progDesc $ getDescription targetConfig)
               )
         )
         $ Map.assocs targets

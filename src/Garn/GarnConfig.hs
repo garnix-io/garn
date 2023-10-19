@@ -1,13 +1,23 @@
+{-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE QuasiQuotes #-}
 
 module Garn.GarnConfig where
 
 import Control.Exception (IOException, catch)
 import Control.Monad
-import Data.Aeson (FromJSON, eitherDecode)
+import Data.Aeson
+  ( FromJSON (parseJSON),
+    Value (Object),
+    defaultOptions,
+    eitherDecode,
+    genericParseJSON,
+    withObject,
+    (.:),
+  )
 import Data.Map (Map)
+import Data.String (IsString (fromString))
 import Data.String.Interpolate (i)
-import Data.String.Interpolate.Util
+import Data.String.Interpolate.Util (unindent)
 import Development.Shake (CmdOption (EchoStderr, EchoStdout), Stdout (Stdout), cmd, cmd_)
 import GHC.Generics (Generic)
 import Garn.Common (nixArgs, nixpkgsInput)
@@ -25,12 +35,35 @@ data GarnConfig = GarnConfig
 
 type Targets = Map String TargetConfig
 
-data TargetConfig = TargetConfig
+data TargetConfig
+  = TargetConfigProject ProjectTarget
+  | TargetConfigExecutable ExecutableTarget
+  deriving (Generic, Eq, Show)
+
+data ProjectTarget = ProjectTarget
   { description :: String,
     packages :: [String],
     checks :: [String]
   }
   deriving (Generic, FromJSON, Eq, Show)
+
+data ExecutableTarget = ExecutableTarget
+  { description :: String
+  }
+  deriving (Generic, Eq, Show, FromJSON)
+
+instance FromJSON TargetConfig where
+  parseJSON = withObject "TargetConfig" $ \o -> do
+    tag <- o .: fromString "tag"
+    case tag of
+      "project" -> TargetConfigProject <$> genericParseJSON defaultOptions (Object o)
+      "executable" -> TargetConfigExecutable <$> genericParseJSON defaultOptions (Object o)
+      _ -> fail $ "Unknown target tag: " <> tag
+
+getDescription :: TargetConfig -> String
+getDescription = \case
+  TargetConfigProject (ProjectTarget {description}) -> description
+  TargetConfigExecutable (ExecutableTarget {description}) -> description
 
 readGarnConfig :: IO GarnConfig
 readGarnConfig = do
