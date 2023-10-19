@@ -18,7 +18,7 @@ of the above entities and give them structure. `Project`s are described at the
 bottom in the [Projects](#projects) section.
 
 All of these concepts are implemented as typescript types. Feel free to browse
-the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts).
+the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts) as well.
 
 ## Environments
 
@@ -27,7 +27,7 @@ the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts).
 `Environment`s define what is available to a computation. For example they can
 contain compilers and developer tools that you want to use on a project, but
 they may also define other things like environment variables that need to be
-set. You can enter an `Environment` with `garn enter`.
+set.
 
 Running `garn enter` in a shell will add whatever the `Enviroment` provides to
 the shell environment that you're in. That means you can still use your local
@@ -45,13 +45,12 @@ what the `Environment`s provide. For example `Check`s:
 (See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Check).)
 
 `Check`s are commands (usually shell commands) that are used to define
-reproducible automated tests or other checks. They run in a sandbox,
-which means they don't have access to your locally installed tools, nor to your
-local file system. Instead they are always based on an underlying `Environment`,
-and through that will have access to the tools that the environment provides. In
-addition, a _copy_ of your source files are
-provided in the sandbox. That gives you the ability to define
-automated `Check`s on your source files.
+reproducible, automated tests or other checks. They run in a sandbox, which
+means they don't have access to your locally installed tools, nor to your local
+file system. Instead they are always based on an underlying `Environment`, and
+through that will have access to exactly the tools that the environment
+provides. In addition, a _copy_ of your source files is provided in the sandbox.
+That gives you the ability to define automated `Check`s on your source files.
 
 You can run `Check`s with `garn check`.
 
@@ -70,13 +69,13 @@ configuration.
 
 `Executable`s are commands (usually shell snippets) that are being run on your
 local machine (not in a sandbox). They are based on an underlying `Environment`,
-and can make use of e.g. the executables that `Environment`s provide. You
-can use `Executables` for a variety of purposes:
+and can make use of e.g. the tools that `Environment`s provide. You can use
+`Executables` for a variety of purposes:
 
 - Running your projects main executable during development,
 - Running a code formatter,
-- Run a code generator,
-- Spin up a database for development,
+- Running a code generator,
+- Spinning up a database for development,
 - etc.
 
 Here's a small example:
@@ -116,18 +115,20 @@ entities. So for example it can contain multiple `Check`s, which you can all run
 at once with `garn check <projectName>`. It can contain multiple `Packages` that
 you can all build with `garn build <projectName>`.
 
-Here's an example of a `Project` that contains a few `Check`s and adds a
-developer tool to its default environment:
+`Project`s can have a default `Enviroment` (aptly called `defaultEnvironment`),
+which allows you to call `garn enter` on a project. Similarly they can also have
+a default `Executable` (called `defaultExecutable`), which allows you to call
+`garn run` on a project.
+
+Usually you create `Project`s through language specific helper functions, for
+example `garn.javascript.mkNpmProject`. Here's an example of an npm `Project`
+that contains a few `Check`s and adds a developer tool to its default
+environment:
 
 ```typescript
 import * as garn from "https://garn.io/ts/v0.0.9/mod.ts";
 import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
 
-// - `garn enter frontend` will enter a shell with node, npm and ripgrep installed.
-// - `garn check frontend` will
-//   - run the tests,
-//   - typecheck the project (with `tsc`).
-//   - search for `todo`s (with `ripgrep`) and fail if there are any.
 export const project = garn.javascript
   .mkNpmProject({
     src: ".",
@@ -139,11 +140,14 @@ export const project = garn.javascript
   .withDevTools([pkgs.ripgrep])
   .addCheck("no todos allowed")`! rg --glob !node_modules -i todo .`;
 
-// - `garn run dev` will run the server locally in dev mode.
 export const dev = project.shell`npm install ; npm run dev`;
 ```
 
-`Project`s can have a default `Enviroment` (aptly called `defaultEnvironment`),
-which allows you to call `garn enter` on a project. Similarly they can also have
-a default `Executable` (called `defaultExecutable`), which allows you to call
-`garn run` on a project.
+With this `garn.ts` file:
+
+- `garn enter frontend` will enter a shell with `node`, `npm` and `ripgrep` installed.
+- `garn check frontend` will
+  - run the tests,
+  - typecheck the project (with `tsc`).
+  - search for `todo`s (with `ripgrep`) and fail if there are any.
+- `garn run dev` will run the server locally in dev mode.
