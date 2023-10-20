@@ -2,8 +2,6 @@
 
 module Garn
   ( Env (..),
-    readOptionsAndConfig,
-    runWith,
     run,
   )
 where
@@ -31,7 +29,7 @@ run :: Env -> IO ()
 run env =
   (readOptionsAndConfig >>= runWith env)
     `catch` \(Garn.Errors.UserError err) -> do
-      hPutStrLn stderr $ "[garn] " <> err
+      hPutStrLn stderr $ "[garn] Error: " <> err
       exitWith $ ExitFailure 1
 
 readOptionsAndConfig :: IO Options

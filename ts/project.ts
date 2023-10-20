@@ -6,7 +6,7 @@ import { Executable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
 import { NixStrLitInterpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
-import { markAsMayNotExprt } from "./internal/may_not_export.ts";
+import { markAsMayNotExport } from "./internal/may_not_export.ts";
 
 /**
  * A Project is a logical grouping of `Package`s and `Environment`s. For
@@ -160,7 +160,7 @@ const proxyEnvironmentHelpers = () => ({
         [name]: newCheck,
       };
     };
-    markAsMayNotExprt(templateLiteralFn, (exportName: string) =>
+    markAsMayNotExport(templateLiteralFn, (exportName: string) =>
       [
         `${exportName} exports the return type of "addCheck", but this is not the proper usage of addCheck.`,
         'Did you forget the template literal? Example usage: project.addCheck("check-name")`shell script to run`',
