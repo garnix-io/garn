@@ -178,6 +178,11 @@ const findExportables = (
     assertMayExport(name, value);
     if (isProject(value)) {
       result[name] = value;
+      const nested = findExportables(value);
+      for (const key in nested) {
+        if (key === "defaultExecutable") continue;
+        result[`${name}/${key}`] = nested[key];
+      }
     } else if (isExecutable(value)) {
       result[name] = value;
     }

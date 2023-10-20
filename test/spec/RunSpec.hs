@@ -60,6 +60,20 @@ spec =
           stdout output `shouldBe` "Hello, world!\n"
           exitCode output `shouldBe` ExitSuccess
 
+        it "runs manually specified exeutables" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+              export const myEnv = garn.mkProject({
+                description: "my project",
+                defaultEnvironment: garn.emptyEnvironment,
+              }, {}).addExecutable("hello")`echo Hello, world!`;
+            |]
+          output <- runGarn ["run", "myEnv/hello"] "" repoDir Nothing
+          stdout output `shouldBe` "Hello, world!\n"
+          exitCode output `shouldBe` ExitSuccess
+
         it "allows specifying argv to the executable" $ do
           writeFile
             "garn.ts"

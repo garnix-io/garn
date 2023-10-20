@@ -13,12 +13,14 @@ import { markAsMayNotExport } from "./internal/may_not_export.ts";
  * example, you may have a 'frontend' Project, a 'backend' Project, a 'cli'
  * Project, etc.
  */
-export type Project = {
+export type Project = ProjectHelpers & {
   tag: "project";
   description: string;
   defaultEnvironment?: Environment;
   defaultExecutable?: Executable;
+};
 
+type ProjectHelpers = {
   /**
    * Returns a new Project with the provided devtools added to the default
    * Environment.
@@ -57,6 +59,22 @@ export type Project = {
   ): Package;
 
   /**
+   * Adds an `Executable` with the given name to the Project
+   *
+   * Example:
+   * ```typescript
+   * myProject.addExecutable("run-dev")`python run-dev.py`
+   * ```
+   */
+  addExecutable<T extends Project, Name extends string>(
+    this: T,
+    name: Name
+  ): (
+    _s: TemplateStringsArray,
+    ..._args: Array<string>
+  ) => T & { [n in Name]: Executable };
+
+  /**
    * Adds a Check with the given name to the Project that runs in a *pure*
    * version of the Project's default Environment.
    *
@@ -66,11 +84,12 @@ export type Project = {
    * ```
    */
   addCheck<T extends Project, Name extends string>(
+    this: T,
     name: Name
   ): (
     _s: TemplateStringsArray,
     ..._args: Array<string>
-  ) => T & Record<Name, Check>;
+  ) => T & { [n in Name]: Check };
 };
 
 export function isProject(p: unknown): p is Project {
@@ -104,7 +123,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
   };
 }
 
-const proxyEnvironmentHelpers = () => ({
+const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   shell(
     this: Project,
     s: TemplateStringsArray,
@@ -144,6 +163,23 @@ const proxyEnvironmentHelpers = () => ({
     return this.defaultEnvironment.build(s, ...args);
   },
 
+  addExecutable<T extends Project, Name extends string>(this: T, name: Name) {
+    if (this.defaultEnvironment == null) {
+      throw new Error(
+        `'.addExecutable' can only be called on projects with a default environment`
+      );
+    }
+    return (s: TemplateStringsArray, ...args: Array<string>) => {
+      const newExecutable = { [name]: this.shell(s, ...args) } as {
+        [n in Name]: Executable;
+      };
+      return {
+        ...this,
+        ...newExecutable,
+      };
+    };
+  },
+
   addCheck<T extends Project, Name extends string>(this: T, name: Name) {
     if (this.defaultEnvironment == null) {
       throw new Error(
@@ -154,10 +190,12 @@ const proxyEnvironmentHelpers = () => ({
       s: TemplateStringsArray,
       ...args: Array<string>
     ) => {
-      const newCheck = this.check(s, ...args);
+      const newCheck = { [name]: this.check(s, ...args) } as {
+        [n in Name]: Check;
+      };
       return {
         ...this,
-        [name]: newCheck,
+        ...newCheck,
       };
     };
     markAsMayNotExport(templateLiteralFn, (exportName: string) =>
