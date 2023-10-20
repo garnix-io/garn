@@ -1,3 +1,5 @@
+import { UserError } from "./errors.ts";
+
 const MAY_NOT_EXPORT = Symbol();
 
 /**
@@ -35,6 +37,6 @@ export function assertMayExport(exportName: string, value: unknown) {
     MAY_NOT_EXPORT in value
   ) {
     const getReason = value[MAY_NOT_EXPORT] as (exportName: string) => string;
-    throw new Error(getReason(exportName));
+    throw new UserError(getReason(exportName));
   }
 }

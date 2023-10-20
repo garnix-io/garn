@@ -7,8 +7,13 @@ import { nixAttrSet, NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 import { Executable } from "../mod.ts";
 import { isExecutable } from "../executable.ts";
 import { assertMayExport } from "./may_not_export.ts";
+import { UserError } from "./errors.ts";
 
-// This needs to be in sync with `GarnConfig` in GarnConfig.hs
+// This needs to be in sync with `DenoOutput` in GarnConfig.hs
+export type DenoOutput =
+  | { tag: "Success"; contents: GarnConfig }
+  | { tag: "UserError"; contents: string };
+
 export type GarnConfig = {
   targets: Targets;
   flakeFile: string;
@@ -30,13 +35,29 @@ type ExecutableTarget = {
   description: string;
 };
 
-export const toGarnConfig = (
+export const toDenoOutput = (
   nixpkgsInput: string,
   garnExports: Record<string, unknown>
-): GarnConfig => ({
-  targets: toTargets(garnExports),
-  flakeFile: formatFlake(nixpkgsInput, garnExports).rawNixExpressionString,
-});
+): DenoOutput => {
+  try {
+    return {
+      tag: "Success",
+      contents: {
+        targets: toTargets(garnExports),
+        flakeFile: formatFlake(nixpkgsInput, garnExports)
+          .rawNixExpressionString,
+      },
+    };
+  } catch (err: unknown) {
+    if (err instanceof UserError) {
+      return {
+        tag: "UserError",
+        contents: err.message,
+      };
+    }
+    throw err;
+  }
+};
 
 const toTargets = (garnExports: Record<string, unknown>): Targets => {
   const result: Targets = {};

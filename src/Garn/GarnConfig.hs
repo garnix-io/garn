@@ -3,7 +3,7 @@
 
 module Garn.GarnConfig where
 
-import Control.Exception (IOException, catch)
+import Control.Exception (IOException, catch, throwIO)
 import Control.Monad
 import Data.Aeson
   ( FromJSON (parseJSON),
@@ -21,12 +21,18 @@ import Data.String.Interpolate.Util (unindent)
 import Development.Shake (CmdOption (EchoStderr, EchoStdout), Stdout (Stdout), cmd, cmd_)
 import GHC.Generics (Generic)
 import Garn.Common (nixArgs, nixpkgsInput)
+import qualified Garn.Errors
 import System.Directory (doesFileExist, getCurrentDirectory)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)
 import System.IO.Temp (withSystemTempFile)
 
--- This needs to be in sync with `GarnConfig` in runner.ts
+-- This needs to be in sync with `DenoOutput` in runner.ts
+data DenoOutput
+  = Success GarnConfig
+  | UserError String
+  deriving (Eq, Show, Generic, FromJSON)
+
 data GarnConfig = GarnConfig
   { targets :: Targets,
     flakeFile :: String
@@ -79,16 +85,17 @@ readGarnConfig = do
           console.log("null");
         } else {
           const internalLib = window.__garnGetInternalLib();
-          const { toGarnConfig } = internalLib;
-          console.log(JSON.stringify(toGarnConfig("#{nixpkgsInput}", garnExports)));
+          const { toDenoOutput } = internalLib;
+          console.log(JSON.stringify(toDenoOutput("#{nixpkgsInput}", garnExports)));
         }
       |]
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write --allow-run --allow-read" mainPath
-    case eitherDecode out :: Either String (Maybe GarnConfig) of
+    case eitherDecode out :: Either String (Maybe DenoOutput) of
       Left err -> error $ "Unexpected package export from garn.ts:\n" <> err
       Right Nothing -> error $ "No garn library imported in garn.ts"
-      Right (Just writtenConfig) -> return writtenConfig
+      Right (Just (UserError err)) -> throwIO $ Garn.Errors.UserError err
+      Right (Just (Success writtenConfig)) -> return writtenConfig
 
 writeGarnConfig :: GarnConfig -> IO ()
 writeGarnConfig garnConfig = do

@@ -25,6 +25,7 @@ library
       Garn
       Garn.CodeGen
       Garn.Common
+      Garn.Errors
       Garn.GarnConfig
       Garn.Init
       Garn.Optparse
@@ -213,6 +214,7 @@ test-suite spec
       Garn
       Garn.CodeGen
       Garn.Common
+      Garn.Errors
       Garn.GarnConfig
       Garn.Init
       Garn.Optparse
