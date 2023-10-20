@@ -14,11 +14,128 @@
     <meta name="description" content="Simple, fast, and green CI and caching for nix projects">
     <script defer="" data-domain="garn.io" src="https://plausible.io/js/script.js"></script>
     <title>garn</title>
-    <script type="module" crossorigin="" src="/assets/index.a6da8e1e.js"></script>
+    <script type="module" crossorigin="" src="/assets/index.95513bfd.js"></script>
     <link rel="stylesheet" href="/assets/index.ccb67f5d.css">
   </head>
   <body>
-    <div id="root"><header><h1><a href="/">garn</a></h1><a href="https://github.com/garnix-io/garn" class="github-link" title="View on Github"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 96"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="#000000"></path></svg></a></header><article><nav><a class="gray" href="/">home</a><div class="dropdown">docs<ul class="dropdown"><li class="menu-item"><a href="/docs/getting_started">getting started</a></li><li class="menu-item"><a href="/docs/installing">installing</a></li><li class="menu-item"><a href="/docs/concepts">concepts</a></li><li class="menu-item"><a href="https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts" target="_blank" rel="noopener noreferrer">typescript api</a></li></ul></div></nav><div class="main-content"><div class="docs"><h1 id="basic-concepts">Basic concepts</h1></div></div></article><footer><p>Built by <a href="https://garnix.io">garnix</a>.</p></footer></div>
+    <div id="root"><header><h1><a href="/">garn</a></h1><a href="https://github.com/garnix-io/garn" class="github-link" title="View on Github"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 96"><path fill-rule="evenodd" clip-rule="evenodd" d="M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z" fill="#000000"></path></svg></a></header><article><nav><a class="gray" href="/">home</a><div class="dropdown">docs<ul class="dropdown"><li class="menu-item"><a href="/docs/getting_started">getting started</a></li><li class="menu-item"><a href="/docs/installing">installing</a></li><li class="menu-item"><a href="/docs/concepts">concepts</a></li><li class="menu-item"><a href="https://doc.deno.land/https://garn.io/ts/v0.0.10/mod.ts" target="_blank" rel="noopener noreferrer">typescript api</a></li></ul></div></nav><div class="main-content"><div class="docs"><h1 id="basic-concepts">Basic concepts</h1>
+<p>There's 4 underlying entities that play a role in <code>garn</code>:</p>
+<ul>
+<li><a href="#environments"><code>Environment</code></a></li>
+<li><a href="#checks"><code>Check</code></a></li>
+<li><a href="#executables"><code>Executable</code></a></li>
+<li><a href="#packages"><code>Package</code></a></li>
+</ul>
+<p>There's another basic concept called <code>Project</code> that is used to bundle instances
+of the above entities and give them structure. <code>Project</code>s are described at the
+bottom in the <a href="#projects">Projects</a> section.</p>
+<p>All of these concepts are implemented as typescript types. Feel free to browse
+the <a href="https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts">API docs</a> as well.</p>
+<h2 id="environments">Environments</h2>
+<p>(See also the <a href="https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Environment">API docs</a>.)</p>
+<p><code>Environment</code>s define what is available to a computation. For example they can
+contain compilers and developer tools that you want to use on a project, but
+they may also define other things like environment variables that need to be
+set.</p>
+<p>Running <code>garn enter</code> in a shell will add whatever the <code>Enviroment</code> provides to
+the shell environment that you're in. That means you can still use your local
+developer tools, like your editor, etc., but will also have access to everything
+provided by the <code>Environment</code> you entered.</p>
+<p>The <code>garn</code> library provides a special environment called <code>emptyEnvironment</code>. As
+you might have guessed it's an <code>Environment</code> that doesn't provide anything.</p>
+<p><code>Environment</code>s can also be used to create other things that then make use of
+what the <code>Environment</code>s provide. For example <code>Check</code>s:</p>
+<h2 id="checks">Checks</h2>
+<p>(See also the <a href="https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Check">API docs</a>.)</p>
+<p><code>Check</code>s are commands (usually shell commands) that are used to define
+reproducible, automated tests or other checks. They run in a sandbox, which
+means they don't have access to your locally installed tools, nor to your local
+file system. Instead they are always based on an underlying <code>Environment</code>, and
+through that will have access to exactly the tools that the environment
+provides. In addition, a <em>copy</em> of your source files is provided in the sandbox.
+That gives you the ability to define automated <code>Check</code>s on your source files.</p>
+<p>You can run <code>Check</code>s with <code>garn check</code>.</p>
+<p>Running <code>Check</code>s in a sandbox has its downsides, for example some tests require
+internet access. The big advantage is that these <code>Check</code>s are almost perfectly
+reproducible, since the sandbox they run in is very controlled. So a <code>Check</code>
+that fails or passes on one machine will behave the same on any other machine.</p>
+<p>This also means that running these checks on a CI system (for example
+<a href="https://garnix.io">garnix.io</a>) is very easy and requires no additional
+configuration.</p>
+<h2 id="executables">Executables</h2>
+<p>(See also the <a href="https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Executable">API docs</a>.)</p>
+<p><code>Executable</code>s are commands (usually shell snippets) that are being run on your
+local machine (not in a sandbox). They are based on an underlying <code>Environment</code>,
+and can make use of e.g. the tools that <code>Environment</code>s provide. You can use
+<code>Executables</code> for a variety of purposes:</p>
+<ul>
+<li>Running your projects main executable during development,</li>
+<li>Running a code formatter,</li>
+<li>Running a code generator,</li>
+<li>Spinning up a database for development,</li>
+<li>etc.</li>
+</ul>
+<p>Here's a small example:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> garn</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.9/mod.ts"</span><span class="token punctuation">;</span>
+
+<span class="token keyword module">export</span> <span class="token keyword">const</span> hello <span class="token operator">=</span>
+  garn<span class="token punctuation">.</span><span class="token property-access">emptyEnvironment</span><span class="token punctuation">.</span><span class="token property-access">shell</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">echo Hello, world!</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+</code></pre>
+<p>You can run <code>Executable</code>s with <code>garn run</code>.</p>
+<h2 id="packages">Packages</h2>
+<p>(See also the <a href="https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Package">API docs</a>.)</p>
+<p><code>Package</code>s are instructions to <code>garn</code> about how to <em>build</em> a set of files. For
+example for a go backend a package would define how to compile it into
+executables. For an npm project it may define how the project can be bundled
+into a set of files that can be served by a webserver.</p>
+<p>The build scripts of <code>Package</code>s are being run in a sandbox (same as <code>Check</code>s).
+That means they have access to a <em>copy</em> of your source files, but not to the
+internet or your local file system. This makes your builds almost perfectly
+reproducible.</p>
+<p>You can build <code>Package</code>s with <code>garn build</code>.</p>
+<h2 id="projects">Projects</h2>
+<p>(See also the <a href="https://doc.deno.land/https://garn.io/ts/v0.0.9/mod.ts/~/Project">API docs</a>.)</p>
+<p><code>Project</code>s are used to combine <code>Environment</code>s, <code>Check</code>s, <code>Executable</code>s and
+<code>Package</code>s into a single entity. A <code>Project</code> can contain any number of these
+entities. So for example it can contain multiple <code>Check</code>s, which you can all run
+at once with <code>garn check &lt;projectName&gt;</code>. It can contain multiple <code>Packages</code> that
+you can all build with <code>garn build &lt;projectName&gt;</code>.</p>
+<p><code>Project</code>s can have a default <code>Enviroment</code> (aptly called <code>defaultEnvironment</code>),
+which allows you to call <code>garn enter</code> on a project. Similarly they can also have
+a default <code>Executable</code> (called <code>defaultExecutable</code>), which allows you to call
+<code>garn run</code> on a project.</p>
+<p>Usually you create <code>Project</code>s through language specific helper functions, for
+example <code>garn.javascript.mkNpmProject</code>. Here's an example of an npm <code>Project</code>
+that contains a few <code>Check</code>s and adds a developer tool to its default
+environment:</p>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> garn</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.9/mod.ts"</span><span class="token punctuation">;</span>
+<span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> pkgs</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.9/nixpkgs.ts"</span><span class="token punctuation">;</span>
+
+<span class="token keyword module">export</span> <span class="token keyword">const</span> project <span class="token operator">=</span> garn<span class="token punctuation">.</span><span class="token property-access">javascript</span>
+  <span class="token punctuation">.</span><span class="token method function property-access">mkNpmProject</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
+    src<span class="token operator">:</span> <span class="token string">"."</span><span class="token punctuation">,</span>
+    description<span class="token operator">:</span> <span class="token string">"An NPM frontend"</span><span class="token punctuation">,</span>
+    nodeVersion<span class="token operator">:</span> <span class="token string">"18"</span><span class="token punctuation">,</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token method function property-access">addCheck</span><span class="token punctuation">(</span><span class="token string">"test"</span><span class="token punctuation">)</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">npm run test</span><span class="token template-punctuation string">`</span></span>
+  <span class="token punctuation">.</span><span class="token method function property-access">addCheck</span><span class="token punctuation">(</span><span class="token string">"tsc"</span><span class="token punctuation">)</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">npm run tsc</span><span class="token template-punctuation string">`</span></span>
+  <span class="token punctuation">.</span><span class="token method function property-access">withDevTools</span><span class="token punctuation">(</span><span class="token punctuation">[</span>pkgs<span class="token punctuation">.</span><span class="token property-access">ripgrep</span><span class="token punctuation">]</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span><span class="token method function property-access">addCheck</span><span class="token punctuation">(</span><span class="token string">"no todos allowed"</span><span class="token punctuation">)</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">! rg --glob !node_modules -i todo .</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+
+<span class="token keyword module">export</span> <span class="token keyword">const</span> dev <span class="token operator">=</span> project<span class="token punctuation">.</span><span class="token property-access">shell</span><span class="token template-string"><span class="token template-punctuation string">`</span><span class="token string">npm install ; npm run dev</span><span class="token template-punctuation string">`</span></span><span class="token punctuation">;</span>
+</code></pre>
+<p>With this <code>garn.ts</code> file:</p>
+<ul>
+<li><code>garn enter project</code> will enter a shell with <code>node</code>, <code>npm</code> and <code>ripgrep</code> installed.</li>
+<li><code>garn check project</code> will
+<ul>
+<li>run the tests,</li>
+<li>typecheck the project (with <code>tsc</code>).</li>
+<li>search for <code>todo</code>s (with <code>ripgrep</code>) and fail if there are any.</li>
+</ul>
+</li>
+<li><code>garn run dev</code> will run the server locally in dev mode.</li>
+</ul></div></div></article><footer><p>Built by <a href="https://garnix.io">garnix</a>.</p></footer></div>
     
   
 
