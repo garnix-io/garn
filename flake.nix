@@ -3,8 +3,9 @@
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
   inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
   inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer";
+  inputs.call-flake.url = "github:divnix/call-flake";
 
-  outputs = { self, nixpkgs, flake-utils, fhi, nix-tool-installer }:
+  outputs = { self, nixpkgs, flake-utils, fhi, nix-tool-installer, call-flake }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import "${nixpkgs}" {
@@ -14,6 +15,11 @@
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
         ourHaskell = pkgs.haskell.packages.ghc945;
+        websitePackages =
+          if system == "x86_64-linux" then
+            pkgs.lib.attrsets.mapAttrs'
+              (name: value: { name = "website_${name}"; inherit value; })
+              (call-flake ./website).packages.${system} else { };
       in
       {
         lib = pkgs.lib;
@@ -111,7 +117,7 @@
             flakeLocation = "github:garnix-io/garn";
             testCommand = "garn --help";
           };
-        };
+        } // websitePackages;
         devShells = {
           default = pkgs.mkShell {
             shellHook =
@@ -151,6 +157,11 @@
                   --replace !/usr/bin/env !${pkgs.coreutils}/bin/env
                 just ${recipe}
               '';
+            websiteChecks =
+              if system == "x86_64-linux" then
+                pkgs.lib.attrsets.mapAttrs'
+                  (name: check: { name = "website_${name}"; value = check; })
+                  (call-flake ./website).checks.${system} else { };
           in
           {
             nix-fmt = justRecipe "fmt-nix-check" [ self.formatter.${system} ];
@@ -170,7 +181,7 @@
               fileserver --help
               touch $out
             '';
-          };
+          } // websiteChecks;
         formatter = pkgs.nixpkgs-fmt;
         apps = {
           fileserver = flake-utils.lib.mkApp
