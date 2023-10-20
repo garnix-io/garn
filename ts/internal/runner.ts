@@ -15,7 +15,7 @@ export type GarnConfig = {
 
 type Targets = Record<string, TargetConfig>;
 
-type TargetConfig = ProjectTarget | ExecutableTarget;
+type TargetConfig = ProjectTarget | ExecutableTarget | PackageTarget;
 
 type ProjectTarget = {
   tag: "project";
@@ -26,6 +26,11 @@ type ProjectTarget = {
 
 type ExecutableTarget = {
   tag: "executable";
+  description: string;
+};
+
+type PackageTarget = {
+  tag: "package";
   description: string;
 };
 
@@ -55,6 +60,11 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
       result[name] = {
         tag: "executable",
         description: exportable.description,
+      };
+    } else if (isPackage(exportable)) {
+      result[name] = {
+        tag: "package",
+        description: exportable.description || "todo",
       };
     } else {
       checkExhaustiveness(exportable);
@@ -146,16 +156,14 @@ const formatFlake = (
   }`;
 };
 
-type Exportable = Project | Executable;
+type Exportable = Executable | Package | Project;
 
 const findExportables = (
   config: Record<string, unknown>
 ): Record<string, Exportable> => {
   const result: Record<string, Exportable> = {};
   for (const [name, value] of Object.entries(config)) {
-    if (isProject(value)) {
-      result[name] = value;
-    } else if (isExecutable(value)) {
+    if (isProject(value) || isExecutable(value) || isPackage(value)) {
       result[name] = value;
     }
   }

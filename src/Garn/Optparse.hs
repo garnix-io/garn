@@ -77,7 +77,13 @@ withGarnTsCommandInfo =
 
 buildCommand :: Targets -> Parser WithGarnTsCommand
 buildCommand targets =
-  Build <$> commandOptionsParser (Map.filter isProject targets)
+  Build <$> commandOptionsParser (Map.filter isBuildable targets)
+
+isBuildable :: TargetConfig -> Bool
+isBuildable = \case
+  TargetConfigProject _ -> True
+  TargetConfigExecutable _ -> False
+  TargetConfigPackage _ -> True
 
 runCommand :: Targets -> Parser WithGarnTsCommand
 runCommand targets =
@@ -100,7 +106,7 @@ checkCommand targets =
 isProject :: TargetConfig -> Bool
 isProject = \case
   TargetConfigProject _ -> True
-  TargetConfigExecutable _ -> False
+  _ -> False
 
 withGarnTsParser :: Targets -> Parser WithGarnTsCommand
 withGarnTsParser targets =

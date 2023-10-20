@@ -42,6 +42,21 @@ spec = do
           stderr output `shouldContain` "Couldn't match type"
           exitCode output `shouldBe` ExitFailure 1
 
+        fit "allows to build top-level packages" $ \onTestFailureLog -> do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const topLevelPackage = garn.build`
+                echo contents > $out/file
+              `;
+            |]
+          output <- runGarn ["build", "topLevelPackage"] "" repoDir Nothing
+          onTestFailureLog output
+          exitCode output `shouldBe` ExitSuccess
+          readFile "result/file" `shouldReturn` "contents\n"
+
         describe ".build" $ do
           it "builds manually specified packages" $ \onTestFailureLog -> do
             writeFile

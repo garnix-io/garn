@@ -67,13 +67,16 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       when (c /= ExitSuccess) $ exitWith c
       hPutStrLn stderr $ "[garn] Exiting " <> target <> " shell."
       pure ()
-    Build (CommandOptions {targetConfig}) -> do
+    Build (CommandOptions {target, targetConfig}) -> do
       case targetConfig of
         TargetConfigProject (ProjectTarget {packages}) -> do
           forM_ packages $ \package -> do
             Exit c <- cmd "nix build" nixArgs [".#" <> package]
             when (c /= ExitSuccess) $ exitWith c
         TargetConfigExecutable _ -> pure ()
+        TargetConfigPackage (PackageTarget {}) -> do
+          Exit c <- cmd "nix build" nixArgs [".#" <> target]
+          when (c /= ExitSuccess) $ exitWith c
     Check checkOptions -> case checkOptions of
       (Qualified (CommandOptions {targetConfig})) -> do
         checkTarget targetConfig

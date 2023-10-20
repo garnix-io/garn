@@ -38,6 +38,7 @@ type Targets = Map String TargetConfig
 data TargetConfig
   = TargetConfigProject ProjectTarget
   | TargetConfigExecutable ExecutableTarget
+  | TargetConfigPackage PackageTarget
   deriving (Generic, Eq, Show)
 
 data ProjectTarget = ProjectTarget
@@ -52,12 +53,18 @@ data ExecutableTarget = ExecutableTarget
   }
   deriving (Generic, Eq, Show, FromJSON)
 
+data PackageTarget = PackageTarget
+  { description :: Maybe String
+  }
+  deriving (Generic, Eq, Show, FromJSON)
+
 instance FromJSON TargetConfig where
   parseJSON = withObject "TargetConfig" $ \o -> do
     tag <- o .: fromString "tag"
     case tag of
       "project" -> TargetConfigProject <$> genericParseJSON defaultOptions (Object o)
       "executable" -> TargetConfigExecutable <$> genericParseJSON defaultOptions (Object o)
+      "package" -> TargetConfigPackage <$> genericParseJSON defaultOptions (Object o)
       _ -> fail $ "Unknown target tag: " <> tag
 
 getDescription :: TargetConfig -> String
