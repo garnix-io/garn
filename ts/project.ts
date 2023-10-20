@@ -17,11 +17,13 @@ export type Project = {
   description: string;
   defaultEnvironment?: Environment;
   defaultExecutable?: Executable;
+
   /**
    * Returns a new Project with the provided devtools added to the default
    * Environment.
    */
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T;
+
   /**
    * A tagged template literal that runs the given command inside the Project's
    * default Environment.
@@ -36,6 +38,7 @@ export type Project = {
     _s: TemplateStringsArray,
     ..._args: Array<string>
   ): Executable;
+
   /**
    * Returns a check that runs in a *pure* version of the Project's default
    * Environment.
@@ -45,6 +48,13 @@ export type Project = {
     _s: TemplateStringsArray,
     ..._args: Array<string>
   ): Check;
+
+  build(
+    this: Project,
+    _s: TemplateStringsArray,
+    ..._args: Array<string>
+  ): Package;
+
   /**
    * Adds a Check with the given name to the Project that runs in a *pure*
    * version of the Project's default Environment.
@@ -118,6 +128,19 @@ const proxyEnvironmentHelpers = () => ({
       );
     }
     return this.defaultEnvironment.check(s, ...args);
+  },
+
+  build(
+    this: Project,
+    s: TemplateStringsArray,
+    ...args: Array<NixStrLitInterpolatable>
+  ) {
+    if (this.defaultEnvironment == null) {
+      throw new Error(
+        `'.build' can only be called on projects with a default environment`
+      );
+    }
+    return this.defaultEnvironment.build(s, ...args);
   },
 
   addCheck<T extends Project, Name extends string>(this: T, name: Name) {

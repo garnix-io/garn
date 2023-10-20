@@ -7,3 +7,15 @@ export const main = garn.javascript.mkNpmProject({
 });
 
 export const start = main.shell`npm install && npm start`;
+
+export const bundle: garn.Project = garn.mkProject(
+  {
+    description: "website bundle",
+  },
+  {
+    package: main.build`
+      npm run build
+      cp -rv build/* $out
+    `,
+  }
+);

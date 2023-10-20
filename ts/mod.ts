@@ -4,6 +4,7 @@ export {
   emptyEnvironment,
   mkEnvironment,
   shell,
+  build,
   type Environment,
 } from "./environment.ts";
 export { type Executable } from "./executable.ts";
