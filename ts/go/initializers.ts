@@ -24,7 +24,6 @@ function parseGoMod(goModContents: string): {
   throw new Error("go.mod missing module name or go version");
 }
 
-// Initializers
 const goModuleInitializer: Initializer = () => {
   if (!fs.existsSync("go.mod")) {
     return { tag: "ShouldNotRun" };
