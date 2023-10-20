@@ -133,7 +133,7 @@ const proxyEnvironmentHelpers = () => ({
   build(
     this: Project,
     s: TemplateStringsArray,
-    ...args: Array<Interpolatable>
+    ...args: Array<NixStrLitInterpolatable>
   ) {
     if (this.defaultEnvironment == null) {
       throw new Error(
