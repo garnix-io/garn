@@ -6,6 +6,7 @@ import { GOMOD2NIX_REPO } from "../go/consts.ts";
 import { nixAttrSet, NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 import { Executable } from "../mod.ts";
 import { isExecutable } from "../executable.ts";
+import { assertMayExport } from "./may_not_export.ts";
 
 // This needs to be in sync with `GarnConfig` in GarnConfig.hs
 export type GarnConfig = {
@@ -153,6 +154,7 @@ const findExportables = (
 ): Record<string, Exportable> => {
   const result: Record<string, Exportable> = {};
   for (const [name, value] of Object.entries(config)) {
+    assertMayExport(name, value);
     if (isProject(value)) {
       result[name] = value;
     } else if (isExecutable(value)) {

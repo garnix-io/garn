@@ -6,6 +6,7 @@ import { Executable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
 import { NixStrLitInterpolatable } from "./nix.ts";
 import { Package } from "./package.ts";
+import { markAsMayNotExprt } from "./internal/may_not_export.ts";
 
 /**
  * A Project is a logical grouping of `Package`s and `Environment`s. For
@@ -149,13 +150,23 @@ const proxyEnvironmentHelpers = () => ({
         `'.addCheck' can only be called on projects with a default environment`
       );
     }
-    return (s: TemplateStringsArray, ...args: Array<string>) => {
+    const templateLiteralFn = (
+      s: TemplateStringsArray,
+      ...args: Array<string>
+    ) => {
       const newCheck = this.check(s, ...args);
       return {
         ...this,
         [name]: newCheck,
       };
     };
+    markAsMayNotExprt(templateLiteralFn, (exportName: string) =>
+      [
+        `${exportName} exports the return type of "addCheck", but this is not the proper usage of addCheck.`,
+        'Did you forget the template literal? Example usage: project.addCheck("check-name")`shell script to run`',
+      ].join(" ")
+    );
+    return templateLiteralFn;
   },
 
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {
