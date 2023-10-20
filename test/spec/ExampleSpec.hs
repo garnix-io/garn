@@ -97,7 +97,7 @@ spec = aroundAll_ withFileServer $ do
           ( cmd
               (Cwd "examples/go-http-backend")
               "cabal run garn:garn --"
-              "run server"
+              "run dev"
           )
           $ do
             body <- (^. responseBody) <$> retryGet "http://localhost:3000"

@@ -39,7 +39,6 @@ const goModuleInitializer: Initializer = () => {
         outdent`
           export const ${camelCase(moduleName)} = garn.go.mkGoProject({
             description: "My go project",
-            moduleName: ${JSON.stringify(moduleName)},
             src: ".",
             goVersion: ${JSON.stringify(goVersion)},
           });
