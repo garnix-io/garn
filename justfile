@@ -122,6 +122,9 @@ check-examples:
   just run-garn haskell check
   just run-garn haskell run helloFromHaskell
   just run-garn frontend-create-react-app check
+  rm examples/frontend-create-react-app/result
+  just run-garn frontend-create-react-app build bundle
+  ls examples/frontend-create-react-app/result/index.html
   just run-garn frontend-yarn-webpack check
   just run-garn go-http-backend check
   just run-garn monorepo check

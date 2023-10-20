@@ -1,7 +1,6 @@
-import { Package } from "./package.ts";
-import { hasTag, nixSource } from "./internal/utils.ts";
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
+import { hasTag, nixSource } from "./internal/utils.ts";
 import {
   NixStrLitInterpolatable,
   NixExpression,
@@ -9,6 +8,7 @@ import {
   nixRaw,
   nixStrLit,
 } from "./nix.ts";
+import { Package, mkPackage } from "./package.ts";
 
 /**
  * `Environment`s define what files and tools are available to `Executables`,
@@ -41,6 +41,13 @@ export type Environment = {
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
   ): Check;
+  /**
+   * Creates a new `Package` built with the given shell script, run inside this `Environment`
+   */
+  build(
+    _s: TemplateStringsArray,
+    ..._args: Array<NixStrLitInterpolatable>
+  ): Package;
 };
 
 /**
@@ -67,6 +74,29 @@ export function check(
   ...args: Array<NixStrLitInterpolatable>
 ) {
   return emptyEnvironment.check(s, ...args);
+}
+
+/**
+ * Creates a new `Package`, which will be built using the given shell script.
+ * It's run in the `emptyEnvironment`.
+ *
+ * The build script should copy any artifacts that you want to keep in the `Package`
+ * into `$out`.
+ *
+ * Example:
+ * ```typescript
+ * import * as pkgs from "https://garn.io/ts/v0.0.9/nixpkgs.ts";
+ *
+ * garn.build`
+ *   ${pkgs.cowsay}/bin/cowsay moo > $out/moo
+ * `;
+ * ```
+ */
+export function build(
+  s: TemplateStringsArray,
+  ...args: Array<NixStrLitInterpolatable>
+) {
+  return emptyEnvironment.build(s, ...args);
 }
 
 /**
@@ -141,6 +171,22 @@ export function mkEnvironment(
         description: `Executes ${cmdToExecute.rawNixExpressionString}`,
         nixExpression: nixStrLit`${shellEnv}`,
       };
+    },
+    build(this, s, ...args) {
+      const cmdToExecute = nixStrLit(s, ...args);
+      const wrappedScript = nixStrLit`
+      #!\${pkgs.bash}/bin/bash
+      mkdir $out
+      ${setup || ""}
+      ${cmdToExecute}
+    `;
+      const pkg = nixRaw`
+      let dev = ${this.nixExpression}; in
+      pkgs.runCommand "garn-pkg" {
+        buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+      } ${wrappedScript}
+    `;
+      return mkPackage(pkg);
     },
     withDevTools(this, extraDevTools) {
       return {

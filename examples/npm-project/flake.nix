@@ -147,6 +147,7 @@
         nodejs = pkgs.nodejs-18_x;
       }
   }/node_modules .
+      chmod -R u+rwX node_modules
     "}
       ${"npm run test"}
     "
@@ -229,6 +230,7 @@
         nodejs = pkgs.nodejs-18_x;
       }
   }/node_modules .
+      chmod -R u+rwX node_modules
     "}
       ${"npm run tsc"}
     "
