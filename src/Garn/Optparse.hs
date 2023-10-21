@@ -1,4 +1,5 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Garn.Optparse
   ( getOpts,
@@ -11,16 +12,44 @@ module Garn.Optparse
   )
 where
 
+import Control.Arrow (second)
 import qualified Data.Map as Map
 import Garn.GarnConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
+import Options.Applicative.Common (runParser)
 import qualified Options.Applicative.Help.Pretty as OA
+import Options.Applicative.Internal (runP)
+import Options.Applicative.Types (IsCmdStart (CmdStart))
+import System.Environment (getArgs)
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
 getOpts :: OptionType -> IO Options
-getOpts oType =
-  customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
+getOpts oType = do
+  allArgs <- getArgs
+  let (optParseArgs, drop 1 -> leftOverAfterDoubleDash) = span (/= "--") allArgs
+  -- We run `runParser` which will apply the parser, but give us any leftover
+  -- arguments it cannot parse.
+  let (resultWithoutLeftOversAfterDoubleDash, contexts) =
+        runP
+          (runParser (infoPolicy parserInfo) CmdStart (infoParser parserInfo) optParseArgs)
+          parserPrefs
+      result =
+        fmap (second (<> leftOverAfterDoubleDash)) resultWithoutLeftOversAfterDoubleDash
+  case result of
+    Right (WithGarnTsOpts config (Run commandOptions []), leftOverAfterRunCommand) ->
+      pure $ WithGarnTsOpts config (Run commandOptions leftOverAfterRunCommand)
+    Right (WithGarnTsOpts _config (Run _commandOptions (_ : _)), _rest) ->
+      error "BUG: parser shouldn't include any leftover args for run commands!"
+    Right (options, []) -> pure options
+    Right (_options, _ : _) -> do
+      -- This is a parse error, since only `run` commands can have arbitrary
+      -- leftover arguments. To get the normal error behavior, we parse the
+      -- flags again, this time with `execParserPure`, which processes all
+      -- arguments.
+      handleParseResult $ execParserPure parserPrefs parserInfo allArgs
+    Left err ->
+      handleParseResult $ Failure $ parserFailure parserPrefs parserInfo err contexts
   where
     unavailable :: OA.Doc
     unavailable =
@@ -33,11 +62,17 @@ getOpts oType =
                     WithGarnTs _ -> formatCommands withouGarnTsCommandInfo
                     WithoutGarnTs -> formatCommands withGarnTsCommandInfo
               )
+
+    parserPrefs :: ParserPrefs
+    parserPrefs = prefs $ showHelpOnError <> showHelpOnEmpty
+
     parser :: Parser Options
     parser = case oType of
       WithGarnTs garnConfig -> WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig)
       WithoutGarnTs -> WithoutGarnTsOpts <$> withoutGarnTsParser
-    opts =
+
+    parserInfo :: ParserInfo Options
+    parserInfo =
       info
         (parser <**> helper)
         ( fullDesc
@@ -54,9 +89,11 @@ data OptionType
 data Options
   = WithGarnTsOpts GarnConfig WithGarnTsCommand
   | WithoutGarnTsOpts WithoutGarnTsCommand
+  deriving stock (Show)
 
 data WithoutGarnTsCommand
   = Init
+  deriving stock (Show)
 
 data WithGarnTsCommand
   = Gen
@@ -81,10 +118,7 @@ buildCommand targets =
 
 runCommand :: Targets -> Parser WithGarnTsCommand
 runCommand targets =
-  Run <$> commandOptionsParser targets <*> argvParser
-  where
-    argvParser :: Parser [String]
-    argvParser = many $ strArgument $ metavar "...args"
+  Run <$> commandOptionsParser targets <*> pure []
 
 enterCommand :: Targets -> Parser WithGarnTsCommand
 enterCommand targets =
