@@ -39,6 +39,7 @@
                 "justfile"
                 "scripts"
                 "test/check-isolated-garn.sh"
+                "website"
               ];
               src = builtins.path
                 {
