@@ -15,40 +15,52 @@ fmt: fmt-nix fmt-haskell fmt-typescript
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
 # Deploy the current website
-deploy-website: build-install-script
+deploy-website commit: build-install-script
   #!/usr/bin/env bash
   set -eux
-  if [[ -z $(git status -s) ]]; then
-    COMMIT=$(git rev-parse HEAD)
-    TMP_DIR=$(mktemp --directory)
-    (cd website && npm install && npm run build)
-    ls website/dist/*
-    mv website/dist/* $TMP_DIR
-    git checkout gh-pages
-    cp -rv $TMP_DIR/* .
-    rm -rf $TMP_DIR
-    git add .
-    git commit -m "Website update from commit $COMMIT"
-    echo "Created a new commit. It is not yet pushed."
-  else
-    echo "Working directory is dirty. Please commit, stash or reset before continuing"
-  fi
+
+  TMP_DIR=$(mktemp --directory)
+  DIST_DIR=$TMP_DIR/dist
+  mkdir -p $DIST_DIR
+  cd $TMP_DIR
+  git clone git@github.com:garnix-io/garn
+  cd garn
+  git reset --hard {{ commit }}
+  COMMIT=$(git rev-parse HEAD)
+  (cd website && npm install && npm run build)
+  ls -la website/dist
+  mv website/dist/* $DIST_DIR
+  git checkout gh-pages
+  cp -rv $DIST_DIR/* .
+  git add .
+  git commit -m "Website update from commit $COMMIT"
+  echo "Created a new commit in $TMP_DIR/garn . It is not yet pushed."
 
 # Push the current version of the ts files to gh-pages
-release-ts: codegen
- #!/usr/bin/env bash
- set -eux
- read -p "Release tag (e.g. v0.1.0): " tag
- git tag $tag
- git checkout gh-pages
- mkdir -p tmp-$tag
- git --work-tree=tmp-$tag checkout main -- ts
- mv tmp-$tag/* ts/$tag
- mv ts/nixpkgs.ts ts/$tag
- rmdir tmp-$tag
- git add ts/$tag
- git commit -m "Release $tag"
- git push && git push --tags
+release-ts commit:
+  #!/usr/bin/env bash
+  set -eux
+
+  read -p "Release tag (e.g. v0.1.0): " tag
+  TMP_DIR=$(mktemp --directory)
+  cd $TMP_DIR
+  git clone git@github.com:garnix-io/garn
+  cd garn
+  git reset --hard {{ commit }}
+  git tag $tag
+
+  just codegen
+
+  git checkout gh-pages
+  mkdir -p tmp-$tag
+  git --work-tree=tmp-$tag checkout {{ commit }} -- ts
+  mv tmp-$tag/ts ts/$tag
+  mv ts/nixpkgs.ts ts/$tag
+  rmdir tmp-$tag
+  git add ts/$tag
+  git commit -m "Release $tag"
+  echo "Created a new commit in $TMP_DIR/garn . It is not yet pushed."
+  echo "Created a new tag ($tag) too. Also not yet pushed."
 
 fmt-nix:
   nixpkgs-fmt .
