@@ -4,7 +4,7 @@ import Data.Map as Map
 import Garn.GarnConfig
 import Garn.Optparse
 import System.Environment (withArgs)
-import System.Exit (ExitCode (ExitFailure))
+import System.Exit (ExitCode (ExitFailure, ExitSuccess))
 import System.IO (stderr)
 import System.IO.Silently (hSilence)
 import Test.Hspec
@@ -73,6 +73,32 @@ spec = around_ (hSilence [stderr]) $ do
                   }
         command <- testWithGarnTs ["run", "project", "more", "args"] ("project" ~> targetConfig)
         command `shouldBe` Run (CommandOptions "project" targetConfig) ["more", "args"]
+
+      it "parses run commands with additional flags (starting with `-`)" $ do
+        let targetConfig =
+              TargetConfigProject $
+                ProjectTarget
+                  { description = "test project",
+                    packages = [],
+                    checks = []
+                  }
+        command <- testWithGarnTs ["run", "project", "--flag"] ("project" ~> targetConfig)
+        command `shouldBe` Run (CommandOptions "project" targetConfig) ["--flag"]
+        command <- testWithGarnTs ["run", "project", "-f"] ("project" ~> targetConfig)
+        command `shouldBe` Run (CommandOptions "project" targetConfig) ["-f"]
+
+      it "parses --help as garn option, unless separated by `--`" $ do
+        let targetConfig =
+              TargetConfigProject $
+                ProjectTarget
+                  { description = "test project",
+                    packages = [],
+                    checks = []
+                  }
+        testWithGarnTs ["run", "project", "--help"] ("project" ~> targetConfig)
+          `shouldThrow` (== ExitSuccess)
+        command <- testWithGarnTs ["run", "project", "--", "--help"] ("project" ~> targetConfig)
+        command `shouldBe` Run (CommandOptions "project" targetConfig) ["--help"]
 
 testWithGarnTs :: [String] -> Targets -> IO WithGarnTsCommand
 testWithGarnTs args targets = do

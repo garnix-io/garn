@@ -57,17 +57,30 @@ spec =
           stdout output `shouldBe` "Hello, world!\n"
           exitCode output `shouldBe` ExitSuccess
 
-        it "allows specifying argv to the executable" $ do
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
+        describe "command line arguments" $ do
+          it "allows specifying argv to the executable" $ do
+            writeFile
+              "garn.ts"
+              [i|
+                import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.shell`printf "%s,%s,%s"`;
-            |]
-          output <- runGarn ["run", "main", "foo bar", "baz"] "" repoDir Nothing
-          stdout output `shouldBe` "foo bar,baz,"
-          exitCode output `shouldBe` ExitSuccess
+                export const main = garn.shell`printf "%s,%s,%s"`;
+              |]
+            output <- runGarn ["run", "main", "foo bar", "baz"] "" repoDir Nothing
+            stdout output `shouldBe` "foo bar,baz,"
+            exitCode output `shouldBe` ExitSuccess
+
+          it "allows passing in flags (starting with `-`)" $ do
+            writeFile
+              "garn.ts"
+              [i|
+                import * as garn from "#{repoDir}/ts/mod.ts"
+
+                export const main = garn.shell`printf "%s"`;
+              |]
+            output <- runGarn ["run", "main", "--foo"] "" repoDir Nothing
+            stdout output `shouldBe` "--foo"
+            exitCode output `shouldBe` ExitSuccess
 
         it "doesn’t format other Nix files" $ do
           let unformattedNix =
