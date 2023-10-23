@@ -1,5 +1,5 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/841889913dfd06a70ffb39f603e29e46f45f0c1a";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/21443a102b1a2f037d02e1d22e3e0ffdda2dbff9";
   inputs.flake-utils.url = "github:numtide/flake-utils";
   inputs.gomod2nix-repo.url = "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
   inputs.npmlock2nix-repo = {
@@ -147,6 +147,7 @@
         nodejs = pkgs.nodejs-18_x;
       }
   }/node_modules .
+      chmod -R u+rwX node_modules
     "}
       ${"npm run tsc"}
     "
