@@ -96,7 +96,7 @@ export function isProject(p: unknown): p is Project {
   return hasTag(p, "project");
 }
 
-type Nestable = Environment | Package | Executable | Check;
+type Nestable = Environment | Package | Executable | Check | Project;
 
 /**
  * Creates a new `Project`.

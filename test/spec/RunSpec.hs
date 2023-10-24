@@ -60,18 +60,38 @@ spec =
           stdout output `shouldBe` "Hello, world!\n"
           exitCode output `shouldBe` ExitSuccess
 
-        it "runs manually specified exeutables" $ do
+        it "runs non-default executables within projects" $ do
           writeFile
             "garn.ts"
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
-              export const myEnv = garn.mkProject({
+              export const project = garn.mkProject({
                 description: "my project",
                 defaultEnvironment: garn.emptyEnvironment,
               }, {}).addExecutable("hello")`echo Hello, world!`;
             |]
-          output <- runGarn ["run", "myEnv/hello"] "" repoDir Nothing
+          output <- runGarn ["run", "project/hello"] "" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
+          exitCode output `shouldBe` ExitSuccess
+
+        it "allows specifying deeply nested executables" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+              const a = garn.mkProject({
+                description: "a",
+                defaultExecutable: garn.shell`echo executable in a`,
+              }, {});
+              const b = garn.mkProject({
+                description: "b",
+              }, { a });
+              export const c = garn.mkProject({
+                description: "b",
+              }, { b });
+            |]
+          output <- runGarn ["run", "c/b/a"] "" repoDir Nothing
+          stdout output `shouldBe` "executable in a\n"
           exitCode output `shouldBe` ExitSuccess
 
         it "allows specifying argv to the executable" $ do
