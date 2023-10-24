@@ -76,6 +76,7 @@ library
     , getopt-generics
     , interpolate
     , optparse-applicative
+    , pretty-simple
     , process
     , shake
     , string-conversions
@@ -132,6 +133,7 @@ executable codegen
     , getopt-generics
     , interpolate
     , optparse-applicative
+    , pretty-simple
     , process
     , shake
     , string-conversions
@@ -188,6 +190,7 @@ executable garn
     , getopt-generics
     , interpolate
     , optparse-applicative
+    , pretty-simple
     , process
     , shake
     , string-conversions
@@ -275,6 +278,7 @@ test-suite spec
     , mockery
     , optparse-applicative
     , pcre-heavy
+    , pretty-simple
     , process
     , shake
     , silently
