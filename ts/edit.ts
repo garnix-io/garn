@@ -39,8 +39,8 @@ const settingsFile = (): NixExpression => {
 };
 
 /**
- * A preconfigure state.vscdb sqlite file that will prevent vscodium to open a
- * welcome tab for the deno extension.
+ * A preconfigured state.vscdb sqlite file that will prevent vscodium from
+ * opening a welcome tab for the deno extension.
  */
 const stateFile = (): Package => {
   const sqliteScript = outdent`
@@ -61,8 +61,8 @@ const stateFile = (): Package => {
 };
 
 /**
- * This is a fake home directory that contains preconfigured vscodium settings files,
- * to have a nice experience when editing garn.ts files.
+ * This is a fake home directory that contains preconfigured vscodium settings
+ * files that provide a nicer experience when editing garn.ts files.
  */
 const configDir = (): Package => {
   return garn.build`
@@ -105,6 +105,8 @@ export const editGarnConfig: garn.Executable = (() => {
     fi
 
     export HOME=$TEMP_DIR
+    export XDG_CONFIG_HOME=$TEMP_DIR/.config
+    export XDG_CACHE_HOME=$TEMP_DIR/.cache
 
     ${vscodium}/bin/codium --new-window --disable-workspace-trust ./garn.ts --wait
 
