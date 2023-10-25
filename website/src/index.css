@@ -126,6 +126,10 @@ div.feature {
 div.feature:not(:last-child) {
   min-height: 60vh;
 }
+div.feature-description {
+  font-size: 120%;
+  margin: 30px;
+}
 
 blockquote {
   margin-bottom: 10px;
@@ -332,11 +336,17 @@ figcaption {
   font-size: 85%;
 }
 
-section.say {
+section.lede {
   display: flex;
   flex-direction: column;
   justify-content: space-evenly;
   min-height: calc(100vh - 300px);
+}
+
+div.garn-description {
+  font-size: 120%;
+  text-align: center;
+  margin: 10px;
 }
 
 section.hero h1 {

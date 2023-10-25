@@ -85,66 +85,81 @@ export const Main: React.FC = () => {
 export const Info: React.FC = () => {
   return (
     <>
-      <section className="say">
-        <Typography variant="h1">what you say...</Typography>
-
+      <section className="lede">
+          <h1>garn, at your service</h1>
+        <div className="garn-description">
+          <b>garn</b> is a build tool and environment manager. It can partly or wholly replace manual README instructions, containerization technologies such as docker, package manager such as apt/brew/&c, and command runners such as just.
+        </div>
         <figure>
           <div className="filename">garn.ts</div>
           <div className="garn-ts">
             <code className="garn-ts">{garnTs} </code>
           </div>
-          <figcaption className="garn-ts">
-          <b>garn</b> is configured in Typescript.
-          You probably already know it. And anyhow, types
-          and tab-completion will guide the way.
-              </figcaption>
         </figure>
-      </section>
-      <section className="get">
-        <Typography variant="h1" className="align-right">...is what you get</Typography>
-        <br />
+        <div className="garn-description">
 
+          Your project is configured in Typescript, which provides for great
+          discoverability through auto-completion and type errors, as well as
+          facilities for abstraction and easy sharing of code. Behind the
+          scenes, we translate your Typescript configuration into <a
+          href="https://nixos.org/">Nix</a>.
+
+        </div>
+
+        <div className="garn-description"> <b>garn</b> currently supports <b>go</b>, <b>javascript</b>, and <b>haskell</b>.
+        </div>
+      </section>
+      <section className="features">
+          <h1>features</h1>
 
           <div className="feature">
-            <h2>Declarative environments</h2>
-            <ul>
-              <li>Your dependencies go in config file, not in a README </li>
-              <li>Makes life easy for your collaborators</li>
-              <li>Unlike containers, combines well with your personal dev environment</li>
-              <li>Works on Linux and Macs</li>
-            </ul>
+            <h2>declarative environments</h2>
+            <div className="feature-description">
+              Specify your dependencies easily and precisely.
+              Then switch between environments with a single command. Unlike
+              containers, <b>garn</b> environments combine well with your personal
+              dev environment.
+            </div>
             <Asciinema src={envDemoCastUrl} />
           </div>
 
           <div className="feature">
-            <h2>Reproducible builds and tests</h2>
-            <ul>
-              <li>Builds and checks can be run with no further configuration on CI</li>
-              <li>No more Heisenbugs</li>
-              <li>Because builds are deterministic, they are cacheable, speeding up development and CI</li>
-            </ul>
+            <h2>reproducible builds and tests</h2>
+            <div className="feature-description">
+            Builds and checks are run in a sandboxed environment, ensuring that
+            they are reproducible and deterministic. They can then be run
+            on CI, exactly as they are locally, without any additional effort.
+            Results can be cached and shared among your CI and local environment.
+
+            </div>
             <Asciinema src={buildDemoCastUrl} />
           </div>
 
 
           <div className="feature">
-            <h2>A unified interface</h2>
-            <ul>
-              <li>A CLI that makes the action of your project obvious</li>
-              <li>The same commands can run any test in any repo</li>
-              <li>Discoverability exactly where you need it</li>
-            </ul>
+            <h2>a unified interface</h2>
+            <div className="feature-description">
+            <b>garn</b> provides a unified interface for all your project's
+            tests, builds, environments, and executables. It can also serve
+            as command documentation, printing help
+            messages that describe exactly what commands are available.
+            Instead of wrangling with a host of tools, you can focus on getting
+            things done.
+            </div>
             <Asciinema src={runDemoCastUrl} rows={25}/>
           </div>
 
 
           <div className="feature">
-            <h2>Discoverable Typescript API</h2>
-            <ul>
-              <li>Fully configured with a single garn.ts file</li>
-              <li>Compose shared project configurations as Deno libraries</li>
-              <li>Use LSP integration with your favorite editor to quickly autocomplete your configuration</li>
-            </ul>
+            <h2>discoverable Typescript API</h2>
+            <div className="feature-description">
+            We've carefully designed <b>garn</b> so that you never get stuck.
+            After setting up LSP, the available options at any stage can be
+            discovered through auto-completion.
+            And unlike YAML files, factoring out common functionality, or
+            writing and using libraries, is easy. Especially with Deno, which
+            makes imports just a line of code.
+            </div>
             <Asciinema src={lspDemoCastUrl} />
           </div>
 
