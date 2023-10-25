@@ -196,3 +196,20 @@ spec = do
           onTestFailureLog output
           stderr output `shouldContain` "second failure"
           exitCode output `shouldBe` ExitFailure 1
+
+        it "displays an error if `addCheck` is exported without its template literal" $ \onTestFailureLog -> do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const badExport = garn.mkProject({
+                description: "mkHaskell-test",
+                defaultEnvironment: garn.emptyEnvironment,
+              }, {})
+                .addCheck("forgot-to-call-template-literal");
+            |]
+          output <- runGarn ["check"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output `shouldContain` "badExport exports the return type of \"addCheck\", but this is not the proper usage of addCheck."
+          exitCode output `shouldBe` ExitFailure 1

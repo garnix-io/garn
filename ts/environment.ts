@@ -85,7 +85,7 @@ export function check(
  *
  * Example:
  * ```typescript
- * import * as pkgs from "https://garn.io/ts/v0.0.10/nixpkgs.ts";
+ * import * as pkgs from "https://garn.io/ts/v0.0.11/nixpkgs.ts";
  *
  * garn.build`
  *   ${pkgs.cowsay}/bin/cowsay moo > $out/moo
@@ -210,7 +210,7 @@ export function mkEnvironment(
  *
  * For example:
  * ```typescript
- * import * as pkgs from "https://garn.io/ts/v0.0.10/nixpkgs.ts";
+ * import * as pkgs from "https://garn.io/ts/v0.0.11/nixpkgs.ts";
  *
  * // Create an environment with nothing but go and gopls installed:
  * emptyEnvironment.withDevTools([pkgs.go, pkgs.gopls])

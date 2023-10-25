@@ -3,23 +3,20 @@
 module Garn
   ( Env (..),
     run,
-    readOptionsAndConfig,
-    runWith,
   )
 where
 
+import Control.Exception (catch)
 import Control.Monad (forM_, when)
 import Development.Shake (Exit (Exit), cmd)
 import Garn.Common (currentSystem, nixArgs)
+import qualified Garn.Errors
 import Garn.GarnConfig
 import Garn.Init
 import Garn.Optparse
-import Paths_garn
 import System.Directory (doesFileExist)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (Handle, hPutStrLn, stderr)
-import qualified System.IO
-import qualified System.Posix.User as POSIX
 import System.Process
 
 data Env = Env
@@ -28,11 +25,12 @@ data Env = Env
     userShell :: FilePath
   }
 
-run :: IO ()
-run = do
-  env <- productionEnv
-  options <- readOptionsAndConfig
-  runWith env options
+run :: Env -> IO ()
+run env =
+  (readOptionsAndConfig >>= runWith env)
+    `catch` \(Garn.Errors.UserError err) -> do
+      hPutStrLn stderr $ "[garn] Error: " <> err
+      exitWith $ ExitFailure 1
 
 readOptionsAndConfig :: IO Options
 readOptionsAndConfig = do
@@ -91,19 +89,3 @@ checkTarget targetConfig = case targetConfig of
       Exit c <- cmd "nix build" nixArgs [".#checks." <> system <> "." <> check]
       when (c /= ExitSuccess) $ exitWith c
   TargetConfigExecutable _ -> pure ()
-
-productionEnv :: IO Env
-productionEnv = do
-  initFileName <- getDataFileName "ts/internal/init.ts"
-  userShell <- findUserShell
-  pure $
-    Env
-      { stdin = System.IO.stdin,
-        initFileName,
-        userShell
-      }
-
-findUserShell :: IO FilePath
-findUserShell = do
-  userId <- POSIX.getRealUserID
-  POSIX.userShell <$> POSIX.getUserEntryForID userId

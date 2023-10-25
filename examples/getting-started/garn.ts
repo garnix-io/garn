@@ -1,5 +1,5 @@
-import * as garn from "https://garn.io/ts/v0.0.10/mod.ts";
-import * as pkgs from "https://garn.io/ts/v0.0.10/nixpkgs.ts";
+import * as garn from "https://garn.io/ts/v0.0.11/mod.ts";
+import * as pkgs from "https://garn.io/ts/v0.0.11/nixpkgs.ts";
 
 export const frontend = garn.javascript
   .mkNpmProject({

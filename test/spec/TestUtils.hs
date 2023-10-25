@@ -115,8 +115,7 @@ runGarn args stdin repoDir shell = do
                     initFileName = repoDir <> "/ts/internal/init.ts"
                   }
           let go = do
-                options <- readOptionsAndConfig
-                runWith env options
+                run env
                 return ExitSuccess
           go `catch` \(e :: ExitCode) -> pure e
   return $

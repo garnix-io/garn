@@ -1,14 +1,14 @@
-import { GarnConfig, toGarnConfig } from "./runner.ts";
+import { DenoOutput, toDenoOutput } from "./runner.ts";
 
 type InternalLibrary = {
-  toGarnConfig: (
+  toDenoOutput: (
     nixpkgsInput: string,
     garnExports: Record<string, unknown>
-  ) => GarnConfig;
+  ) => DenoOutput;
 };
 
 const garnGetInternalLib = (): InternalLibrary => ({
-  toGarnConfig,
+  toDenoOutput,
 });
 
 // deno-lint-ignore no-explicit-any
