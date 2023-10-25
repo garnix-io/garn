@@ -128,18 +128,22 @@ files: using <Garn/> itself to provide a properly-configured editor with
 
 ### `editGarnConfig`
 
-<Garn /> offers an `Executable` called `editGarnConfig` that you can add to your
-`garn.ts` file and that you can run to spin up a vscodium editor that is
-pre-configured for editing `garn.ts` files. This is the easiest way to get a
-working editor.
+<Garn /> offers an `Executable` called `editGarnConfig`. It will spin up a
+vscodium editor that is pre-configured for editing `garn.ts` files. It won't use
+or modify your local vscodium settings, if you have any. You can can add it to
+your `garn.ts` file like this:
 
 ```typescript
 export const edit = garn.editGarnConfig;
 ```
 
-Run this with `garn run edit`.
+And then run it with `garn run edit`.
 
-### Installing the Deno LSP
+This is a very easy way to get up and running with editing `garn.ts` files. The
+disadvantage is that the editor isn't your normal configured editor. So you
+might consider installing the Deno LSP and configuring your editor:
+
+### Installing the Deno LSP and configuring your editor
 
 Alternatively you an install `deno` (including the Deno LSP) with <Garn/> itself:
 
