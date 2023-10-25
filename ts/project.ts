@@ -169,7 +169,10 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
         `'.addExecutable' can only be called on projects with a default environment`
       );
     }
-    return (s: TemplateStringsArray, ...args: Array<string>) => {
+    const templateLiteralFn = (
+      s: TemplateStringsArray,
+      ...args: Array<string>
+    ) => {
       const newExecutable = { [name]: this.shell(s, ...args) } as {
         [n in Name]: Executable;
       };
@@ -178,6 +181,13 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
         ...newExecutable,
       };
     };
+    markAsMayNotExport(templateLiteralFn, (exportName: string) =>
+      [
+        `${exportName} exports the return type of "addExecutable", but this is not the proper usage of addExecutable.`,
+        'Did you forget the template literal? Example usage: project.addExecutable("executable-name")`shell script to run`',
+      ].join(" ")
+    );
+    return templateLiteralFn;
   },
 
   addCheck<T extends Project, Name extends string>(this: T, name: Name) {
