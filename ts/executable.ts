@@ -30,3 +30,19 @@ export type Executable = {
 export function isExecutable(e: unknown): e is Executable {
   return hasTag(e, "executable");
 }
+
+/**
+ * Create an executable from a nix expression.
+ *
+ * This is a fairly low-level function. You may want to use `garn.shell`.
+ */
+export function mkExecutable(
+  nixExpression: NixExpression,
+  description: string
+): Executable {
+  return {
+    tag: "executable",
+    nixExpression,
+    description,
+  };
+}
