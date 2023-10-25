@@ -208,6 +208,69 @@
       ''
     }";
           };
+          "frontend/startDev" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = 
+      let
+          pkgs = 
+      import "${nixpkgs}" {
+        config.permittedInsecurePackages = [];
+        inherit system;
+      }
+    ;
+          packageJson = pkgs.lib.importJSON ./package.json;
+          yarnPackage = 
+    pkgs.yarn2nix-moretea.mkYarnPackage {
+      nodejs = pkgs.nodejs-18_x;
+      yarn = pkgs.yarn;
+      src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
+      buildPhase = "yarn mocha";
+      dontStrip = true;
+    };
+          nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
+      in
+        pkgs.mkShell {
+          buildInputs = [ pkgs.yarn ];
+          shellHook = "
+            export PATH=${nodeModulesPath}/.bin:\$PATH
+            export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
+          ";
+        }
+    ;
+        shell = "cd . && yarn start";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+          };
         }
       );
     };

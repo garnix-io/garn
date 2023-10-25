@@ -27,7 +27,7 @@ spec = around_ (hSilence [stderr]) $ do
                     checks = []
                   }
         command <- testWithGarnTs ["check", "project"] ("project" ~> targetConfig)
-        command `shouldBe` Check (Qualified (CommandOptions "project" targetConfig))
+        command `shouldBe` Check (Qualified (CommandOptions (fromUserFacing "project") targetConfig))
 
       it "parses unqualified check commands" $ do
         let targetConfig =
@@ -61,7 +61,7 @@ spec = around_ (hSilence [stderr]) $ do
                     checks = []
                   }
         command <- testWithGarnTs ["run", "project"] ("project" ~> targetConfig)
-        command `shouldBe` Run (CommandOptions "project" targetConfig) []
+        command `shouldBe` Run (CommandOptions (fromUserFacing "project") targetConfig) []
 
       it "parses run commands with additional arguments" $ do
         let targetConfig =
@@ -72,7 +72,7 @@ spec = around_ (hSilence [stderr]) $ do
                     checks = []
                   }
         command <- testWithGarnTs ["run", "project", "more", "args"] ("project" ~> targetConfig)
-        command `shouldBe` Run (CommandOptions "project" targetConfig) ["more", "args"]
+        command `shouldBe` Run (CommandOptions (fromUserFacing "project") targetConfig) ["more", "args"]
 
 testWithGarnTs :: [String] -> Targets -> IO WithGarnTsCommand
 testWithGarnTs args targets = do
@@ -81,5 +81,5 @@ testWithGarnTs args targets = do
     WithGarnTsOpts _ command -> command
     _ -> error "Expected WithGarnTsOpts"
 
-(~>) :: key -> value -> Map key value
-(~>) = Map.singleton
+(~>) :: String -> value -> Map TargetName value
+k ~> v = Map.singleton (TargetName k) v

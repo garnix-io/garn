@@ -7,7 +7,6 @@ import Data.List (sort)
 import Data.Maybe (isJust)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
-import Development.Shake (cmd_)
 import System.Directory
 import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..))
@@ -70,7 +69,7 @@ spec =
                 defaultEnvironment: garn.emptyEnvironment,
               }, {}).addExecutable("hello")`echo Hello, world!`;
             |]
-          output <- runGarn ["run", "project/hello"] "" repoDir Nothing
+          output <- runGarn ["run", "project.hello"] "" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
           exitCode output `shouldBe` ExitSuccess
 
@@ -90,7 +89,7 @@ spec =
                 description: "b",
               }, { b });
             |]
-          output <- runGarn ["run", "c/b/a"] "" repoDir Nothing
+          output <- runGarn ["run", "c.b.a"] "" repoDir Nothing
           stdout output `shouldBe` "executable in a\n"
           exitCode output `shouldBe` ExitSuccess
 
