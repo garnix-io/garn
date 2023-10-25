@@ -64,3 +64,7 @@ export const CI = () => {
 export const Garnix = () => {
   return <span className="garnix-name">garnix</span>;
 };
+
+export const Garn = () => {
+  return <span className="garnix-name">garn</span>;
+};
