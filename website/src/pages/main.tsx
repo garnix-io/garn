@@ -128,8 +128,8 @@ export const Info: React.FC = () => {
             <div className="feature-description">
             Builds and checks are run in a sandboxed environment, ensuring that
             they are reproducible and deterministic. They can then be run
-            without further work on CI, exactly as they are locally. And
-            results can be cached and shared among your CI and local environment.
+            on CI, exactly as they are locally, without any additional effort.
+            Results can be cached and shared among your CI and local environment.
 
             </div>
             <Asciinema src={buildDemoCastUrl} />
@@ -140,7 +140,8 @@ export const Info: React.FC = () => {
             <h2>a unified interface</h2>
             <div className="feature-description">
             <b>garn</b> provides a unified interface for all your project's
-            tests, builds, environments, and executables, as well as help
+            tests, builds, environments, and executables. It can also serve
+            as command documentation, printing help
             messages that describe exactly what commands are available.
             Instead of wrangling with a host of tools, you can focus on getting
             things done.
