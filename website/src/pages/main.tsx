@@ -56,7 +56,7 @@ export const Main: React.FC = () => {
         <Typography variant="h1">
           <Link to="/">garn</Link>
         </Typography>
-        <DiscordLink href={"https://discord.gg/XtDrPsqpVx"} title={"Join the Discord Channel"}/>
+        <DiscordLink href="https://discord.gg/XtDrPsqpVx" title="Join the Discord Channel"/>
         <GithubLink href="https://github.com/garnix-io/garn" title="View on Github"/>
       </header>
 
