@@ -5,7 +5,7 @@ type AsideTextProps = {
 }
 
 export const AsideText: React.FC<AsideTextProps> = (props) => {
-  const header = props.type !== undefined ? (<h3 className="aside-type">{props.type}</h3>) : (<div/>)
+  const header = props.type != null ? (<h3 className="aside-type">{props.type}</h3>) : null
   return (
     <aside className="text-aside">
       {header}
