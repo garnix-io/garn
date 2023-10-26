@@ -37,30 +37,30 @@ deploy-website commit: build-install-script
   echo "Created a new commit in $TMP_DIR/garn . It is not yet pushed."
 
 # Push the current version of the ts files to gh-pages
-release-ts commit:
+release-ts commit tag:
   #!/usr/bin/env bash
   set -eux
 
-  read -p "Release tag (e.g. v0.1.0): " tag
   TMP_DIR=$(mktemp --directory)
   cd $TMP_DIR
   git clone git@github.com:garnix-io/garn
   cd garn
   git reset --hard {{ commit }}
-  git tag $tag
+  git tag {{ tag }}
 
   just codegen
 
+  mkdir -p tmp-{{ tag }}
+  cp -r ts/* tmp-{{ tag }}
+
   git checkout gh-pages
-  mkdir -p tmp-$tag
-  git --work-tree=tmp-$tag checkout {{ commit }} -- ts
-  mv tmp-$tag/ts ts/$tag
-  mv ts/nixpkgs.ts ts/$tag
-  rmdir tmp-$tag
-  git add ts/$tag
-  git commit -m "Release $tag"
+  mkdir -p ts/{{ tag }}/
+  mv -v tmp-{{ tag }}/* ts/{{ tag }}/
+  rmdir tmp-{{ tag }}
+  git add ts/{{ tag }}
+  git commit -m "Release {{ tag }}"
   echo "Created a new commit in $TMP_DIR/garn . It is not yet pushed."
-  echo "Created a new tag ($tag) too. Also not yet pushed."
+  echo "Created a new tag ({{ tag }}) too. Also not yet pushed."
 
 fmt-nix:
   nixpkgs-fmt .
