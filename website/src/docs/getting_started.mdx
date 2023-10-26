@@ -1,5 +1,5 @@
 import { BashSnippetToCopy } from "../components/BashSnippetToCopy";
-import { Garnix, Garn, } from "../components/Typography";
+import { Garnix, Garn } from "../components/Typography";
 
 export const info = {
   name: "getting started",
@@ -17,7 +17,8 @@ The easiest way to install <Garn/> is with the following command:
 
 You can look at the contents of the script [here](../install.sh).
 
-<Garn/> requires [Nix](https://nixos.org/). If you don't have Nix, the above command will install it for you.
+<Garn /> requires [Nix](https://nixos.org/). If you don't have Nix, the above
+command will install it for you.
 
 ### Manual installation
 
@@ -25,16 +26,20 @@ If you prefer, you can also manually do the steps that the above script automate
 
 1. **Install Nix**. To install Nix, follow the instructions [here](https://nixos.org/download).
 2. **Configure Nix to use the <Garnix/> cache**. You can do that by adding the lines:
-  ```
+
+```
 extra-substituters = https://cache.garnix.io
 extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
-  ```
-  To `/etc/nix/nix.conf` (note that you'll need sudo).
+```
+
+To `/etc/nix/nix.conf` (note that you'll need sudo).
 
 3. **Install <Garn/>**. You can do that with:
-  ```
-  nix --extra-experimental-features 'nix-command flakes' profile install -L github:garnix-io/garn
-  ```
+
+```
+nix --extra-experimental-features 'nix-command flakes' profile install -L github:garnix-io/garn
+```
+
 4. **Check that everything worked**. Run `garn --help` to confirm that <Garn/> is installed.
 
 ## Your first `garn.ts` config
@@ -42,7 +47,7 @@ extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DT
 All examples in this getting started guide are also available
 [here](https://github.com/garnix-io/garn/tree/main/examples/getting-started).
 
-<Garn/> projects are configured with a single `garn.ts` file. Your `garn.ts`
+<Garn /> projects are configured with a single `garn.ts` file. Your `garn.ts`
 exports a collection of `Project`s. A `Project` contains all the information
 needed to build, run, and develop your software.
 
@@ -115,9 +120,32 @@ without having to install any language-specific tools or learn how to use them.
 
 ## Deno LSP
 
-`garn.ts` files are powered by [deno](https://deno.com/).
-A lot of the convenience and power for editing your `garn.ts` files comes
-from having a working Deno LSP. Installing `deno` is easy with <Garn/> itself:
+`garn.ts` files are powered by [deno](https://deno.com/). A lot of the
+convenience and power for editing your `garn.ts` files comes from having a
+working Deno LSP. There are two ways of setting up LSP for editing `garn.ts`
+files: using <Garn/> itself to provide a properly-configured editor with
+`editGarnConfig`, or setting up your editor yourself.
+
+### `editGarnConfig`
+
+<Garn /> offers an `Executable` called `editGarnConfig`. It will spin up a
+vscodium editor that is pre-configured for editing `garn.ts` files. It won't use
+or modify your local vscodium settings, if you have any. You can can add it to
+your `garn.ts` file like this:
+
+```typescript
+export const edit = garn.editGarnConfig;
+```
+
+And then run it with `garn run edit`.
+
+This is a very easy way to get up and running with editing `garn.ts` files. The
+disadvantage is that the editor isn't your normal configured editor. So you
+might consider installing the Deno LSP and configuring your editor:
+
+### Installing the Deno LSP and configuring your editor
+
+Alternatively you an install `deno` (including the Deno LSP) with <Garn/> itself:
 
 ```typescript
 export const deno = garn.mkProject(

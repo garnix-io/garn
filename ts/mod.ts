@@ -10,6 +10,7 @@ export {
 export { type Executable } from "./executable.ts";
 export { mkPackage, type Package } from "./package.ts";
 export { mkProject, type Project } from "./project.ts";
+export { editGarnConfig } from "./edit.ts";
 
 // languages
 export * as go from "./go/mod.ts";
