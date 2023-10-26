@@ -123,7 +123,7 @@ withoutGarnTsParser =
       ]
 
 data CommandOptions = CommandOptions
-  { target :: String,
+  { target :: TargetName,
     targetConfig :: TargetConfig
   }
   deriving stock (Eq, Show)
@@ -134,7 +134,7 @@ commandOptionsParser targets =
     ( foldMap
         ( \(target, targetConfig) ->
             OA.command
-              target
+              (asUserFacing target)
               ( info
                   (pure (CommandOptions target targetConfig))
                   (progDesc $ getDescription targetConfig)

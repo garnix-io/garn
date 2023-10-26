@@ -38,6 +38,17 @@ header h1 a {
   color: black;
 }
 
+.discord-link {
+  position: absolute;
+  top: 20px;
+  right: 45px;
+}
+
+.discord-link svg {
+  width: 25px;
+  height: 25px;
+}
+
 .github-link {
   position: absolute;
   top: 20px;

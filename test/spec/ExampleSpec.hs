@@ -97,7 +97,7 @@ spec = aroundAll_ withFileServer $ do
           ( cmd
               (Cwd "examples/go-http-backend")
               "cabal run garn:garn --"
-              "run dev"
+              "run server.dev"
           )
           $ do
             body <- (^. responseBody) <$> retryGet "http://localhost:3000"
@@ -106,7 +106,7 @@ spec = aroundAll_ withFileServer $ do
       it "allows to run a migrations executable" $
         onTestFailureLogger $ \onTestFailureLog -> do
           withCurrentDirectory "examples/go-http-backend" $ do
-            output <- runGarn ["run", "migrate"] "" repoDir Nothing
+            output <- runGarn ["run", "server.migrate"] "" repoDir Nothing
             onTestFailureLog output
             stdout output `shouldBe` "running migrations...\n"
 

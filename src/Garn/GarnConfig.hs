@@ -7,6 +7,7 @@ import Control.Exception (IOException, catch, throwIO)
 import Control.Monad
 import Data.Aeson
   ( FromJSON (parseJSON),
+    FromJSONKey,
     Value (Object),
     defaultOptions,
     eitherDecode,
@@ -39,7 +40,23 @@ data GarnConfig = GarnConfig
   }
   deriving (Eq, Show, Generic, FromJSON)
 
-type Targets = Map String TargetConfig
+newtype TargetName = TargetName {asNixFacing :: String}
+  deriving stock (Generic, Show, Eq, Ord)
+  deriving newtype (FromJSONKey)
+
+fromUserFacing :: String -> TargetName
+fromUserFacing = TargetName . fmap sully
+  where
+    sully '.' = '/'
+    sully x = x
+
+asUserFacing :: TargetName -> String
+asUserFacing (TargetName name) = clean <$> name
+  where
+    clean '/' = '.'
+    clean x = x
+
+type Targets = Map TargetName TargetConfig
 
 data TargetConfig
   = TargetConfigProject ProjectTarget
