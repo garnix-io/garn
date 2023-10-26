@@ -91,7 +91,7 @@ export const Info: React.FC = () => {
           <b>garn</b> is a build tool and environment manager. It can partly or
           wholly replace manual README instructions, containerization
           technologies such as docker, package managers such as apt/brew/&c, and
-          command runners such as just. </div>
+          command runners such as just.</div>
         <figure>
           <div className="filename">garn.ts</div>
           <div className="garn-ts">
