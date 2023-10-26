@@ -2,7 +2,7 @@ import * as go from "../go/initializers.ts";
 import * as haskell from "../haskell/initializers.ts";
 import * as javascript from "../javascript/initializers.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-import { GARN_TS_LIB_VERSION } from "./utils.ts";
+import { GARN_TS_LIB_VERSION } from "./version.ts";
 
 const imports = [
   `import * as garn from "https://garn.io/ts/${GARN_TS_LIB_VERSION}/mod.ts";`,

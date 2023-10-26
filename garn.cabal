@@ -81,6 +81,7 @@ library
     , process
     , shake
     , string-conversions
+    , template-haskell
     , temporary
     , text
     , unix
@@ -138,6 +139,7 @@ executable codegen
     , process
     , shake
     , string-conversions
+    , template-haskell
     , temporary
     , text
     , unix
@@ -195,6 +197,7 @@ executable garn
     , process
     , shake
     , string-conversions
+    , template-haskell
     , temporary
     , text
     , unix
@@ -285,6 +288,7 @@ test-suite spec
     , shake
     , silently
     , string-conversions
+    , template-haskell
     , temporary
     , text
     , unix

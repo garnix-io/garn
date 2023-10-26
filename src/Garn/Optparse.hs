@@ -1,4 +1,5 @@
 {-# LANGUAGE DuplicateRecordFields #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Garn.Optparse
   ( getOpts,
@@ -13,6 +14,7 @@ where
 
 import qualified Data.Map as Map
 import Garn.GarnConfig
+import Garn.Utils (garnVersion)
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 import qualified Options.Applicative.Help.Pretty as OA
@@ -37,9 +39,12 @@ getOpts oType =
     parser = case oType of
       WithGarnTs garnConfig -> WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig)
       WithoutGarnTs -> WithoutGarnTsOpts <$> withoutGarnTsParser
+    version =
+      infoOption $(garnVersion) $
+        mconcat [long "version", help ("Show garn version (" <> $(garnVersion) <> ")")]
     opts =
       info
-        (parser <**> helper)
+        (parser <**> helper <**> version)
         ( fullDesc
             <> progDesc "Develop, build, and test your projects reliably and easily"
             <> header "garn - the project manager"

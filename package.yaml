@@ -55,6 +55,7 @@ dependencies:
   - process
   - shake
   - string-conversions
+  - template-haskell
   - temporary
   - text
   - unix
