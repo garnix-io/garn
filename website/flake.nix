@@ -329,6 +329,8 @@ COMMIT;";
     fi
 
     export HOME=\$TEMP_DIR
+    export XDG_CONFIG_HOME=\$TEMP_DIR/.config
+    export XDG_CACHE_HOME=\$TEMP_DIR/.cache
 
     ${
   (pkgs.vscode-with-extensions.override
@@ -343,6 +345,38 @@ COMMIT;";
 
     rm -rf \$TEMP_DIR
   ";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+          };
+          "website/tsc-watch" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = 
+        (
+        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodejs-18_x];
+        })
+      ).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodePackages.typescript-language-server];
+        })
+      ;
+        shell = "npm run tsc -- --watch";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
