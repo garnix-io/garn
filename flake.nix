@@ -105,9 +105,19 @@
                   p.bytestring
                 ]);
             in
-            (pkgs.writeScriptBin "cabal2json" ''
-              exec ${ghc}/bin/runhaskell ${./scripts/cabal2json.hs} "$@"
-            '');
+            (pkgs.runCommand "cabal2json"
+              {
+                nativeBuildInputs =
+                  if system == "aarch64-darwin" || system == "x86_64-darwin"
+                  then [ pkgs.clang ]
+                  else [ ];
+              }
+              ''
+                cp ${./scripts/cabal2json.hs} ./cabal2json.hs
+                ${ghc}/bin/ghc ./cabal2json.hs -o cabal2json
+                mkdir -p $out/bin
+                cp cabal2json $out/bin
+              '');
           fileserver =
             let
               ghc = ourHaskell.ghc.withPackages (p:
