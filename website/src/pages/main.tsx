@@ -1,6 +1,6 @@
 import React from "react";
 import { DropdownMenu } from "../components/Dropdown";
-import { GithubLink } from "../components/GithubLink";
+import { DiscordLink, GithubLink } from "../components/HeaderLinks";
 import { Tooltip } from "../components/Hovernote";
 import { Typography } from "../components/Typography";
 import { Asciinema } from "../components/Asciinema";
@@ -56,7 +56,8 @@ export const Main: React.FC = () => {
         <Typography variant="h1">
           <Link to="/">garn</Link>
         </Typography>
-        <GithubLink />
+        <DiscordLink href="https://discord.gg/XtDrPsqpVx" title="Join the Discord Channel"/>
+        <GithubLink href="https://github.com/garnix-io/garn" title="View on Github"/>
       </header>
 
       <article>
@@ -88,8 +89,10 @@ export const Info: React.FC = () => {
       <section className="lede">
           <h1>garn, at your service</h1>
         <div className="garn-description">
-          <b>garn</b> is a build tool and environment manager. It can partly or wholly replace manual README instructions, containerization technologies such as docker, package manager such as apt/brew/&c, and command runners such as just.
-        </div>
+          <b>garn</b> is a build tool and environment manager. It can partly or
+          wholly replace manual README instructions, containerization
+          technologies such as docker, package managers such as apt/brew/&c, and
+          command runners such as just.</div>
         <figure>
           <div className="filename">garn.ts</div>
           <div className="garn-ts">

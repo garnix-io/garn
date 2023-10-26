@@ -1,4 +1,4 @@
-import { packageToEnvironment, shell } from "../environment.ts";
+import { packageToEnvironment } from "../environment.ts";
 import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";

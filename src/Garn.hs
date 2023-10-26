@@ -48,13 +48,16 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
   case opts of
     Gen -> pure ()
     Run (CommandOptions {..}) argv -> do
-      callProcess "nix" $ ["run"] <> nixArgs <> [".#" <> target, "--"] <> argv
+      callProcess "nix" $ ["run"] <> nixArgs <> [".#" <> asNixFacing target, "--"] <> argv
     Enter (CommandOptions {..}) -> do
-      hPutStrLn stderr $ "[garn] Entering " <> target <> " shell. Type 'exit' to exit."
+      hPutStrLn stderr $
+        "[garn] Entering "
+          <> asUserFacing target
+          <> " shell. Type 'exit' to exit."
       let devProc =
             ( proc
                 "nix"
-                ("develop" : nixArgs <> [".#" <> target, "--command", userShell env])
+                ("develop" : nixArgs <> [".#" <> asNixFacing target, "--command", userShell env])
             )
               { std_in = UseHandle $ stdin env,
                 std_out = Inherit,
@@ -63,7 +66,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       c <- withCreateProcess devProc $ \_ _ _ procHandle -> do
         waitForProcess procHandle
       when (c /= ExitSuccess) $ exitWith c
-      hPutStrLn stderr $ "[garn] Exiting " <> target <> " shell."
+      hPutStrLn stderr $ "[garn] Exiting " <> asUserFacing target <> " shell."
       pure ()
     Build (CommandOptions {targetConfig}) -> do
       case targetConfig of

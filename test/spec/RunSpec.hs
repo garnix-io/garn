@@ -7,7 +7,6 @@ import Data.List (sort)
 import Data.Maybe (isJust)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
-import Development.Shake (cmd_)
 import System.Directory
 import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..))
@@ -58,6 +57,40 @@ spec =
             |]
           output <- runGarn ["run", "main"] "" repoDir Nothing
           stdout output `shouldBe` "Hello, world!\n"
+          exitCode output `shouldBe` ExitSuccess
+
+        it "runs non-default executables within projects" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+              export const project = garn.mkProject({
+                description: "my project",
+                defaultEnvironment: garn.emptyEnvironment,
+              }, {}).addExecutable("hello")`echo Hello, world!`;
+            |]
+          output <- runGarn ["run", "project.hello"] "" repoDir Nothing
+          stdout output `shouldBe` "Hello, world!\n"
+          exitCode output `shouldBe` ExitSuccess
+
+        it "allows specifying deeply nested executables" $ do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+              const a = garn.mkProject({
+                description: "a",
+                defaultExecutable: garn.shell`echo executable in a`,
+              }, {});
+              const b = garn.mkProject({
+                description: "b",
+              }, { a });
+              export const c = garn.mkProject({
+                description: "b",
+              }, { b });
+            |]
+          output <- runGarn ["run", "c.b.a"] "" repoDir Nothing
+          stdout output `shouldBe` "executable in a\n"
           exitCode output `shouldBe` ExitSuccess
 
         it "allows specifying argv to the executable" $ do

@@ -1,4 +1,4 @@
-import { NixExpression, nixRaw } from "../nix.ts";
+import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 
 export const nixSource = (src: string): NixExpression => nixRaw`
   (let
@@ -59,3 +59,13 @@ export const mapValues = <T, R>(
 export const checkExhaustiveness = (x: never): never => {
   throw new Error(`Exhaustiveness check failed: ${x}`);
 };
+
+export const writeTextFile = (
+  name: string,
+  text: string
+): NixExpression => nixRaw`
+  pkgs.writeTextFile {
+    name = ${nixStrLit`${name}`};
+    text = ${nixStrLit`${text}`};
+  }
+`;
