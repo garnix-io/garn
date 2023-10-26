@@ -1,6 +1,6 @@
 import React from "react";
 
-interface AsideTextProps {
+type AsideTextProps = {
   type?: "warning" | "hint"
 }
 
