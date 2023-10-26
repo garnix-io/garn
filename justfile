@@ -15,7 +15,7 @@ fmt: fmt-nix fmt-haskell fmt-typescript hpack
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
 # Deploy the current website
-deploy-website commit: build-install-script
+deploy-website commit: build-install-script-files
   #!/usr/bin/env bash
   set -eux
 
@@ -155,11 +155,12 @@ check-isolated-garn:
   test/check-isolated-garn.sh
 
 # Start the docs website server
-docs-server: build-install-script
+docs-server: build-install-script-files
   cd website && npm install
   cd website && npm run dev
 
-build-install-script:
-  nix build -L .#installScript
+build-install-script-files:
+  nix build -L .#installScriptFiles
   mkdir -p website/public
-  cat result > website/public/install.sh
+  cp -rv result/* website/public/
+  chmod -R u+rwX website/public
