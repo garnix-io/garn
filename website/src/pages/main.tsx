@@ -1,6 +1,6 @@
 import React from "react";
 import { DropdownMenu } from "../components/Dropdown";
-import { GithubLink } from "../components/GithubLink";
+import { DiscordLink, GithubLink } from "../components/HeaderLinks";
 import { Tooltip } from "../components/Hovernote";
 import { Typography } from "../components/Typography";
 import { Asciinema } from "../components/Asciinema";
@@ -56,7 +56,8 @@ export const Main: React.FC = () => {
         <Typography variant="h1">
           <Link to="/">garn</Link>
         </Typography>
-        <GithubLink />
+        <DiscordLink href="https://discord.gg/XtDrPsqpVx" title="Join the Discord Channel"/>
+        <GithubLink href="https://github.com/garnix-io/garn" title="View on Github"/>
       </header>
 
       <article>
