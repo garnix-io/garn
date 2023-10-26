@@ -30,6 +30,24 @@
         packages = rec {
           default = self.packages.${system}.garn;
           garn =
+            pkgs.runCommand "garn"
+              {
+                nativeBuildInputs = [ pkgs.makeWrapper ];
+              }
+              ''
+                mkdir -p $out/bin
+                cp ${garnHaskellPackage}/bin/garn $out/bin
+                wrapProgram "$out/bin/garn" \
+                    --set LC_ALL C.UTF-8 \
+                    --prefix PATH : ${pkgs.lib.makeBinPath [
+                  pkgs.coreutils
+                  pkgs.deno
+                  pkgs.git
+                  pkgs.nix
+                  self.packages.${system}.cabal2json
+                ]}
+              '';
+          garnHaskellPackage =
             let
               # directories shouldn't have leading or trailing slashes
               ignored = [
@@ -55,9 +73,10 @@
                       ! (builtins.elem repoPath ignored);
                 };
             in
-            (ourHaskell.callCabal2nix "garn" src { }).overrideAttrs
+            (ourHaskell.callPackage ./garn.nix { }).overrideAttrs
               (
                 original: {
+                  inherit src;
                   nativeBuildInputs = original.nativeBuildInputs ++ [
                     pkgs.deno
                     pkgs.makeWrapper
@@ -71,14 +90,6 @@
                         --prefix PATH : ${pkgs.lib.makeBinPath [
                       pkgs.git
                       pkgs.nix
-                    ]}
-                    wrapProgram "$out/bin/garn" \
-                        --set LC_ALL C.UTF-8 \
-                        --prefix PATH : ${pkgs.lib.makeBinPath [
-                      pkgs.deno
-                      pkgs.git
-                      pkgs.nix
-                      cabal2json
                     ]}
                   '';
 
@@ -136,7 +147,7 @@
               ghcid
               cabal-install
               (ourHaskell.ghc.withHoogle (p:
-                self.packages.${system}.default.buildInputs))
+                self.packages.${system}.garnHaskellPackage.buildInputs))
               (haskell-language-server.override {
                 dynamic = true;
                 supportedGhcVersions = [ "945" ];

@@ -10,7 +10,7 @@ fast-pre-push: fmt test check-examples typescript-check test-ts
 # Run checks that we can’t yet run via the flake
 github-ci: test codegen check-isolated-garn check-examples test-ts
 
-fmt: fmt-nix fmt-haskell fmt-typescript
+fmt: fmt-nix fmt-haskell fmt-typescript hpack
 
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
@@ -74,7 +74,7 @@ fmt-haskell:
 fmt-haskell-check:
   just ormolu check
 
-ormolu mode: hpack
+ormolu mode:
   #!/usr/bin/env bash
 
   set -eux
@@ -94,6 +94,8 @@ fmt-typescript-check:
 
 hpack:
   hpack
+  cabal2nix . > garn.nix
+  nixpkgs-fmt garn.nix
 
 hpack-check:
   #!/usr/bin/env runhaskell

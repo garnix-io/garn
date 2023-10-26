@@ -19,7 +19,7 @@ if run-in-isolation git --version 2>/dev/null; then
 fi
 
 echo running codegen...
-run-in-isolation codegen
+cabal run garn:codegen
 nix build --print-build-logs "$PROJECT_ROOT#fileserver"
 nix run "$PROJECT_ROOT#fileserver" &
 fileserver_pid="$!"
