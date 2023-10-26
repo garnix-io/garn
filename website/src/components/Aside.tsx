@@ -4,7 +4,7 @@ interface AsideTextProps {
   type?: "warning" | "hint"
 }
 
-export const AsideText: React.FC = (props) => {
+export const AsideText: React.FC<AsideTextProps> = (props) => {
   const header = props.type !== undefined ? (<h3 className="aside-type">{props.type}</h3>) : (<div/>)
   return (
     <aside className="text-aside">
