@@ -93,8 +93,9 @@ enterCommand targets =
 checkCommand :: Targets -> Parser WithGarnTsCommand
 checkCommand targets =
   let checkCommandOptions =
-        Qualified <$> commandOptionsParser (Map.filter isProject targets)
-          <|> pure Unqualified
+        Qualified
+          <$> commandOptionsParser (Map.filter isProject targets)
+            <|> pure Unqualified
    in Check <$> checkCommandOptions
 
 isProject :: TargetConfig -> Bool

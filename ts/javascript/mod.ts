@@ -26,7 +26,7 @@ const nodeVersions = {
 type NodeVersion = keyof typeof nodeVersions;
 
 const fromNodeVersion = (
-  version: NodeVersion
+  version: NodeVersion,
 ): { pkgs: NixExpression; nodejs: NixExpression } => {
   const { pkg, permittedInsecurePackages } = nodeVersions[version];
   return {
@@ -75,7 +75,7 @@ export function mkNpmProject(args: {
       echo copying node_modules
       cp -r ${node_modules}/node_modules .
       chmod -R u+rwX node_modules
-    `
+    `,
   ).withDevTools([mkPackage(nodejs)]);
   return mkProject(
     {
@@ -85,7 +85,7 @@ export function mkNpmProject(args: {
     {
       devShell,
       node_modules,
-    }
+    },
   );
 }
 
@@ -116,7 +116,7 @@ export function mkYarnProject(args: {
         packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
         yarnPackage = ${yarnPackage};
         nodeModulesPath = ${nixStrLit`${nixRaw("yarnPackage")}/libexec/${nixRaw(
-          "packageJson.name"
+          "packageJson.name",
         )}/node_modules`};
     in
       (pkgs.writeScriptBin "start-server" ${nixStrLit`
@@ -137,7 +137,7 @@ export function mkYarnProject(args: {
           packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
           yarnPackage = ${yarnPackage};
           nodeModulesPath = ${nixStrLit`${nixRaw(
-            "yarnPackage"
+            "yarnPackage",
           )}/libexec/${nixRaw("packageJson.name")}/node_modules`};
       in
         pkgs.mkShell {
@@ -153,7 +153,7 @@ export function mkYarnProject(args: {
       cp -r ${nixSource(args.src)} src
       chmod -R u+rwX src
       cd src
-    `
+    `,
   );
   const startDev: Executable = devShell.shell`cd ${args.src} && ${startCommand}`;
   return mkProject(
@@ -166,6 +166,6 @@ export function mkYarnProject(args: {
       pkg,
       devShell,
       startDev,
-    }
+    },
   );
 }

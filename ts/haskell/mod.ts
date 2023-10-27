@@ -30,10 +30,10 @@ export function mkHaskellProject(args: {
     },
     {
       pkg,
-    }
+    },
   ).withDevTools([
     mkPackage(
-      nixRaw`pkgs.haskell.packages.${nixRaw(args.compiler)}.cabal-install`
+      nixRaw`pkgs.haskell.packages.${nixRaw(args.compiler)}.cabal-install`,
     ),
   ]);
 }

@@ -29,13 +29,13 @@ const getGoModNixToml = (src: string): NixExpression => {
         "",
         "Stderr:",
         new TextDecoder().decode(gen.stderr),
-      ].join("\n")
+      ].join("\n"),
     );
   }
   return nixStrLit(
     Deno.readTextFileSync(
-      path.join(getDotGarnProjectDir(src), "gomod2nix.toml")
-    )
+      path.join(getDotGarnProjectDir(src), "gomod2nix.toml"),
+    ),
   );
 };
 
@@ -60,19 +60,19 @@ export function mkGoProject(args: {
       let
         gomod2nix = gomod2nix-repo.legacyPackages.\${system};
         gomod2nix-toml = pkgs.writeText "gomod2nix-toml" ${getGoModNixToml(
-          args.src
+          args.src,
         )};
       in
         gomod2nix.buildGoApplication {
           pname = "go-package";
           version = "0.1";
           go = pkgs.${nixRaw(
-            GO_VERSION_TO_NIXPKG_NAME[args.goVersion ?? "1.20"]
+            GO_VERSION_TO_NIXPKG_NAME[args.goVersion ?? "1.20"],
           )};
           src = ${nixSource(args.src)};
           modules = gomod2nix-toml;
         }
-    `
+    `,
   );
 
   return mkProject(
@@ -84,6 +84,6 @@ export function mkGoProject(args: {
     },
     {
       pkg,
-    }
+    },
   );
 }

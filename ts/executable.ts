@@ -38,7 +38,7 @@ export function isExecutable(e: unknown): e is Executable {
  */
 export function mkExecutable(
   nixExpression: NixExpression,
-  description: string
+  description: string,
 ): Executable {
   return {
     tag: "executable",
