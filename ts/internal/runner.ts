@@ -37,7 +37,7 @@ type ExecutableTarget = {
 
 export const toDenoOutput = (
   nixpkgsInput: string,
-  garnExports: Record<string, unknown>
+  garnExports: Record<string, unknown>,
 ): DenoOutput => {
   try {
     return {
@@ -62,7 +62,7 @@ export const toDenoOutput = (
 const toTargets = (garnExports: Record<string, unknown>): Targets => {
   const result: Targets = {};
   for (const [name, exportable] of Object.entries(
-    findExportables(garnExports)
+    findExportables(garnExports),
   )) {
     if (isProject(exportable)) {
       const packages = collectProjectPackages(name, exportable);
@@ -87,13 +87,13 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
 
 const formatFlake = (
   nixpkgsInput: string,
-  garnExports: Record<string, unknown>
+  garnExports: Record<string, unknown>,
 ): NixExpression => {
   const exportables = findExportables(garnExports);
 
   const packages = mapValues(
     (p) => p.nixExpression,
-    collectPackages(exportables)
+    collectPackages(exportables),
   );
   const checks = mapValues((p) => p.nixExpression, collectChecks(exportables));
   const shells = mapValues(
@@ -101,7 +101,7 @@ const formatFlake = (
       isProject(exportable) && exportable.defaultEnvironment
         ? exportable.defaultEnvironment.nixExpression
         : undefined,
-    exportables
+    exportables,
   );
   const apps = mapValues((exportable) => {
     if (isProject(exportable) && exportable.defaultExecutable) {
@@ -171,7 +171,7 @@ const formatFlake = (
 type Exportable = Project | Executable;
 
 const findExportables = (
-  config: Record<string, unknown>
+  config: Record<string, unknown>,
 ): Record<string, Exportable> => {
   const result: Record<string, Exportable> = {};
   for (const [name, value] of Object.entries(config)) {
@@ -191,7 +191,7 @@ const findExportables = (
 };
 
 const collectPackages = (
-  config: Record<string, Exportable>
+  config: Record<string, Exportable>,
 ): Record<string, Package> => {
   let result: Record<string, Package> = {};
   for (const [name, exportable] of Object.entries(config)) {
@@ -207,15 +207,15 @@ const collectPackages = (
 
 const collectProjectPackages = (
   projectName: string,
-  project: Project
+  project: Project,
 ): Record<string, Package> =>
   mapKeys(
     (name) => `${projectName}_${name}`,
-    collectByPredicate(isPackage, project)
+    collectByPredicate(isPackage, project),
   );
 
 const collectChecks = (
-  config: Record<string, Exportable>
+  config: Record<string, Exportable>,
 ): Record<string, Check> => {
   let result: Record<string, Check> = {};
   for (const [name, exportable] of Object.entries(config)) {
@@ -231,16 +231,16 @@ const collectChecks = (
 
 const collectProjectChecks = (
   projectName: string,
-  project: Project
+  project: Project,
 ): Record<string, Check> =>
   mapKeys(
     (name) => `${projectName}_${name}`,
-    collectByPredicate(isCheck, project)
+    collectByPredicate(isCheck, project),
   );
 
 const collectByPredicate = <T>(
   predicate: (t: unknown) => t is T,
-  project: Project
+  project: Project,
 ): Record<string, T> => {
   const result: Record<string, T> = {};
   for (const [name, value] of Object.entries(project)) {

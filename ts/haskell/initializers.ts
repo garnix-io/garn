@@ -59,7 +59,7 @@ Deno.test("Initializer errors if the cabal file is unparseable", () => {
     "./foo.cabal",
     `
     name: foo
-  `
+  `,
   );
   const result = mkHaskellProjectInitializer();
   assertEquals(result.tag, "UnexpectedError");
@@ -76,7 +76,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
     `
     name: foo
     version: 0.0.1
-  `
+  `,
   );
   const result = mkHaskellProjectInitializer();
   assertEquals(result.tag, "ShouldRun");
@@ -89,7 +89,7 @@ Deno.test("Initializer returns a simple string if a cabal file exists", () => {
             executable: "",
             compiler: "ghc94",
             src: "."
-          })`
+          })`,
     );
   }
 });

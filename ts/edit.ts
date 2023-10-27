@@ -52,7 +52,7 @@ const stateFile = (): Package => {
   `;
   const sqliteScriptFile: NixExpression = writeTextFile(
     "sqlite-script",
-    sqliteScript
+    sqliteScript,
   );
   return garn.build`
     set -euo pipefail

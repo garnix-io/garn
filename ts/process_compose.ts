@@ -12,7 +12,7 @@ import { mkPackage } from "./package.ts";
  * development, e.g. a backend server and a database.
  */
 export function processCompose(
-  executables: Record<string, Executable>
+  executables: Record<string, Executable>,
 ): Executable {
   const processes = nixAttrSet(
     mapValues(
@@ -21,8 +21,8 @@ export function processCompose(
           command: executable.nixExpression,
           environment: nixList([]),
         }),
-      executables
-    )
+      executables,
+    ),
   );
 
   const processComposeConfig = nixAttrSet({
@@ -31,7 +31,7 @@ export function processCompose(
   });
 
   const configYml = mkPackage(
-    nixRaw`pkgs.writeText "process-compose.yml" (builtins.toJSON ${processComposeConfig})`
+    nixRaw`pkgs.writeText "process-compose.yml" (builtins.toJSON ${processComposeConfig})`,
   );
 
   const result = emptyEnvironment.shell`${nixRaw`pkgs.process-compose`}/bin/process-compose up -f ${configYml}`;

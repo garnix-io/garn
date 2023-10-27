@@ -31,7 +31,7 @@ const goModuleInitializer: Initializer = () => {
   }
   try {
     const { goVersion, moduleName } = parseGoMod(
-      Deno.readTextFileSync("go.mod")
+      Deno.readTextFileSync("go.mod"),
     );
     return {
       tag: "ShouldRun",

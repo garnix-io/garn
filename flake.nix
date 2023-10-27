@@ -1,6 +1,6 @@
 {
   inputs.flake-utils.url = "github:numtide/flake-utils";
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs";
+  inputs.nixpkgs.url = "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566";
   inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
   inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer";
   inputs.call-flake.url = "github:divnix/call-flake";
@@ -14,7 +14,7 @@
         };
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
-        ourHaskell = pkgs.haskell.packages.ghc945;
+        ourHaskell = pkgs.haskell.packages.ghc947;
         websiteFlake = call-flake ./website;
         websitePackages =
           if system == "x86_64-linux" then
@@ -162,7 +162,7 @@
                 self.packages.${system}.garnHaskellPackage.buildInputs))
               (haskell-language-server.override {
                 dynamic = true;
-                supportedGhcVersions = [ "945" ];
+                supportedGhcVersions = [ "947" ];
               })
               ourHaskell.cabal2nix
               fhi.packages.${system}.default

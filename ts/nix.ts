@@ -70,7 +70,7 @@ export function nixRaw(
   const rawNixExpressionString = s.reduce(
     (acc, part, i) =>
       acc + part + (interpolations[i]?.rawNixExpressionString ?? ""),
-    ""
+    "",
   );
   return { rawNixExpressionString };
 }
@@ -90,7 +90,7 @@ export function nixRaw(
  */
 export function nixList(elements: Array<NixExpression>): NixExpression {
   return nixRaw(
-    "[" + elements.map((p) => p.rawNixExpressionString.trim()).join(" ") + "]"
+    "[" + elements.map((p) => p.rawNixExpressionString.trim()).join(" ") + "]",
   );
 }
 
@@ -107,7 +107,7 @@ export function nixList(elements: Array<NixExpression>): NixExpression {
  * ```
  */
 export function nixAttrSet(
-  attrSet: Record<string, NixExpression | undefined>
+  attrSet: Record<string, NixExpression | undefined>,
 ): NixExpression {
   return nixRaw(
     "{" +
@@ -115,7 +115,7 @@ export function nixAttrSet(
         .filter((x): x is [string, NixExpression] => x[1] != null)
         .map(([k, v]) => nixRaw`${nixStrLit(k)} = ${v};`.rawNixExpressionString)
         .join("\n") +
-      "}"
+      "}",
   );
 }
 
@@ -138,7 +138,7 @@ export function nixStrLit(
   const escape = (str: string) =>
     ["\\", '"', "$"].reduce(
       (str, char) => str.replaceAll(char, `\\${char}`),
-      str
+      str,
     );
   const escapedTemplate = s.map(escape);
   const rawNixExpressionString =
@@ -173,21 +173,21 @@ Deno.test("nixStrLit correctly serializes into a nix expression", () => {
   assertEquals(nixStrLit`foo`.rawNixExpressionString, '"foo"');
   assertEquals(
     nixStrLit`with ${"string"} interpolation`.rawNixExpressionString,
-    '"with string interpolation"'
+    '"with string interpolation"',
   );
   assertEquals(
     nixStrLit`with package ${{
       rawNixExpressionString: "pkgs.hello",
     }} works`.rawNixExpressionString,
-    '"with package ${pkgs.hello} works"'
+    '"with package ${pkgs.hello} works"',
   );
   assertEquals(
     nixStrLit`escaped dollars in strings \${should not interpolate}`
       .rawNixExpressionString,
-    '"escaped dollars in strings \\${should not interpolate}"'
+    '"escaped dollars in strings \\${should not interpolate}"',
   );
   assertEquals(
     nixStrLit`"double quotes" are correctly escaped`.rawNixExpressionString,
-    '"\\"double quotes\\" are correctly escaped"'
+    '"\\"double quotes\\" are correctly escaped"',
   );
 });

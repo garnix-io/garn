@@ -68,7 +68,7 @@ type ProjectHelpers = {
    */
   addExecutable<T extends Project, Name extends string>(
     this: T,
-    name: Name
+    name: Name,
   ): (
     _s: TemplateStringsArray,
     ..._args: Array<string>
@@ -85,7 +85,7 @@ type ProjectHelpers = {
    */
   addCheck<T extends Project, Name extends string>(
     this: T,
-    name: Name
+    name: Name,
   ): (
     _s: TemplateStringsArray,
     ..._args: Array<string>
@@ -110,7 +110,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
     defaultEnvironment?: Environment;
     defaultExecutable?: Executable;
   },
-  deps: Deps
+  deps: Deps,
 ): Deps & Project {
   const helpers = proxyEnvironmentHelpers();
   return {
@@ -131,7 +131,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   ) {
     if (this.defaultEnvironment == null) {
       throw new Error(
-        `'.shell' can only be called on projects with a default environment`
+        `'.shell' can only be called on projects with a default environment`,
       );
     }
     return this.defaultEnvironment.shell(s, ...args);
@@ -144,7 +144,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   ) {
     if (this.defaultEnvironment == null) {
       throw new Error(
-        `'.check' can only be called on projects with a default environment`
+        `'.check' can only be called on projects with a default environment`,
       );
     }
     return this.defaultEnvironment.check(s, ...args);
@@ -157,7 +157,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   ) {
     if (this.defaultEnvironment == null) {
       throw new Error(
-        `'.build' can only be called on projects with a default environment`
+        `'.build' can only be called on projects with a default environment`,
       );
     }
     return this.defaultEnvironment.build(s, ...args);
@@ -166,7 +166,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   addExecutable<T extends Project, Name extends string>(this: T, name: Name) {
     if (this.defaultEnvironment == null) {
       throw new Error(
-        `'.addExecutable' can only be called on projects with a default environment`
+        `'.addExecutable' can only be called on projects with a default environment`,
       );
     }
     const templateLiteralFn = (
@@ -185,7 +185,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
       [
         `${exportName} exports the return type of "addExecutable", but this is not the proper usage of addExecutable.`,
         'Did you forget the template literal? Example usage: project.addExecutable("executable-name")`shell script to run`',
-      ].join(" ")
+      ].join(" "),
     );
     return templateLiteralFn;
   },
@@ -193,7 +193,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   addCheck<T extends Project, Name extends string>(this: T, name: Name) {
     if (this.defaultEnvironment == null) {
       throw new Error(
-        `'.addCheck' can only be called on projects with a default environment`
+        `'.addCheck' can only be called on projects with a default environment`,
       );
     }
     const templateLiteralFn = (
@@ -212,7 +212,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
       [
         `${exportName} exports the return type of "addCheck", but this is not the proper usage of addCheck.`,
         'Did you forget the template literal? Example usage: project.addCheck("check-name")`shell script to run`',
-      ].join(" ")
+      ].join(" "),
     );
     return templateLiteralFn;
   },
@@ -220,7 +220,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {
     if (this.defaultEnvironment == null) {
       throw new Error(
-        `'.withDevTools' can only be called on projects with a default environment`
+        `'.withDevTools' can only be called on projects with a default environment`,
       );
     }
     const newEnvironment = this.defaultEnvironment.withDevTools(devTools);

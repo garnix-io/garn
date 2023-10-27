@@ -77,5 +77,5 @@ Deno.writeTextFileSync(
 ${imports.join("\n")}
 
 ${initializedSections.join("\n")}
-`.trim() + "\n"
+`.trim() + "\n",
 );

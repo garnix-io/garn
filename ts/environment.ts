@@ -125,7 +125,7 @@ export function build(
  */
 export function mkEnvironment(
   nixExpression = nixRaw`pkgs.mkShell {}`,
-  setup?: NixExpression
+  setup?: NixExpression,
 ): Environment {
   return {
     tag: "environment",
@@ -237,5 +237,5 @@ export const packageToEnvironment = (pkg: Package, src: string): Environment =>
       cp -r ${nixSource(src)} src
       chmod -R u+rwX src
       cd src
-    `
+    `,
   );

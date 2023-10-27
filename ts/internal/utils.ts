@@ -31,7 +31,7 @@ export const hasTag = (x: unknown, tag: unknown): boolean =>
 
 export const mapKeys = <T>(
   f: (i: string) => string,
-  x: Record<string, T>
+  x: Record<string, T>,
 ): Record<string, T> => {
   const result: Record<string, T> = {};
   for (const [key, value] of Object.entries(x)) {
@@ -47,7 +47,7 @@ export const mapKeys = <T>(
  */
 export const mapValues = <T, R>(
   f: (i: T) => R,
-  x: Record<string, T>
+  x: Record<string, T>,
 ): Record<string, R> => {
   const result: Record<string, R> = {};
   for (const [key, value] of Object.entries(x)) {
@@ -62,7 +62,7 @@ export const checkExhaustiveness = (x: never): never => {
 
 export const writeTextFile = (
   name: string,
-  text: string
+  text: string,
 ): NixExpression => nixRaw`
   pkgs.writeTextFile {
     name = ${nixStrLit`${name}`};
