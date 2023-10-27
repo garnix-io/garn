@@ -1,4 +1,3 @@
-import { AsideText } from "../components/Aside.tsx";
 import { BashSnippetToCopy } from "../components/BashSnippetToCopy";
 import { Hovernote } from "../components/Hovernote.tsx";
 import { Garnix, Garn } from "../components/Typography";
@@ -21,6 +20,28 @@ You can look at the contents of the script [here](https://garn.io/install.sh).
 
 <Garn /> requires [Nix](https://nixos.org/). If you don't have Nix, the above
 command will install it for you.
+
+### Uninstalling
+
+To uninstall both `nix` and `garn` you can run:
+
+```bash
+/nix/nix-installer uninstall
+```
+
+### Supported platforms
+
+The installer works on the following platforms:
+
+- aarch64-darwin
+- x86_64-darwin<Hovernote>While the installer technically works for
+    `x86_64-darwin`, the garnix binary cache currently doesn't build `garn` for
+    that platform.  That means that the installer has to compile `garn` and a
+    whole lot of dependencies on your own machine.  If you're interesting in
+    better support for `x86_64-darwin`, please let us now on Github or
+    Discord.</Hovernote>
+- aarch64-linux
+- x86_64-linux
 
 ### Manual installation
 
