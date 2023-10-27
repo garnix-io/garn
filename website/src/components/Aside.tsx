@@ -1,19 +1,19 @@
 import React from "react";
 
 type AsideTextProps = {
-  type?: "warning" | "hint"
-}
+  type?: "warning" | "hint";
+};
 
 export const AsideText: React.FC<AsideTextProps> = (props) => {
-  const header = props.type != null ? (<h3 className="aside-type">{props.type}</h3>) : null
+  const header =
+    props.type != null ? <h3 className="aside-type">{props.type}</h3> : null;
   return (
     <aside className="text-aside">
       {header}
       <div className="aside-content">{props.children}</div>
     </aside>
-    );
+  );
 };
-
 
 interface AsideImgProps {
   src: string;

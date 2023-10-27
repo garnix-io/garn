@@ -7,11 +7,13 @@ export const website = garn.javascript
     nodeVersion: "18",
     src: ".",
   })
-  .addCheck("tsc")`npm run tsc`
   .withDevTools([
     garn.mkPackage(nixRaw("pkgs.nodePackages.typescript-language-server")),
+    garn.mkPackage(nixRaw("pkgs.nodePackages.prettier")),
   ])
-  .addExecutable("tsc-watch")`npm run tsc -- --watch`;
+  .addCheck("tsc")`npm run tsc`
+  .addCheck("fmt-check")`prettier src/**/*.tsx src/**/*.ts --check`
+  .addExecutable("fmt")`prettier src/**/*.tsx src/**/*.ts --write`;
 
 export const dev = website.shell`npm install ; npm run dev`;
 
