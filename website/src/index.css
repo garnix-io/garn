@@ -332,6 +332,18 @@ aside {
 .text-aside {
   border: 1px solid black;
   background: var(--very-light-gray);
+  margin-bottom: 5px;
+}
+
+.aside-type {
+  margin: 5px;
+  text-align: center;
+}
+
+.aside-content {
+  margin: 5px;
+  text-align: center;
+  font-size: 95%;
 }
 
 .align-right {
