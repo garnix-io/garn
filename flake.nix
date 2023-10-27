@@ -15,11 +15,12 @@
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
         ourHaskell = pkgs.haskell.packages.ghc945;
+        websiteFlake = call-flake ./website;
         websitePackages =
           if system == "x86_64-linux" then
             pkgs.lib.attrsets.mapAttrs'
               (name: value: { name = "website_${name}"; inherit value; })
-              (call-flake ./website).packages.${system} else { };
+              websiteFlake.packages.${system} else { };
       in
       {
         lib = pkgs.lib;
@@ -183,7 +184,7 @@
               if system == "x86_64-linux" then
                 pkgs.lib.attrsets.mapAttrs'
                   (name: check: { name = "website_${name}"; value = check; })
-                  (call-flake ./website).checks.${system} else { };
+                  websiteFlake.checks.${system} else { };
           in
           {
             nix-fmt = justRecipe "fmt-nix-check" [ self.formatter.${system} ];
