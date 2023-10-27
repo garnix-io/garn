@@ -72,11 +72,18 @@
           "website_tsc" =
             let
               dev =
-                (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+                (
+                  (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+                    nativeBuildInputs =
+                      previousAttrs.nativeBuildInputs
+                      ++
+                      [ pkgs.nodejs-18_x ];
+                  })
+                ).overrideAttrs (finalAttrs: previousAttrs: {
                   nativeBuildInputs =
                     previousAttrs.nativeBuildInputs
                     ++
-                    [ pkgs.nodejs-18_x ];
+                    [ pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier ];
                 })
               ;
             in
@@ -152,6 +159,96 @@
       ${"npm run tsc"}
     "
           ;
+          "website_fmt-check" =
+            let
+              dev =
+                (
+                  (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+                    nativeBuildInputs =
+                      previousAttrs.nativeBuildInputs
+                      ++
+                      [ pkgs.nodejs-18_x ];
+                  })
+                ).overrideAttrs (finalAttrs: previousAttrs: {
+                  nativeBuildInputs =
+                    previousAttrs.nativeBuildInputs
+                    ++
+                    [ pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier ];
+                })
+              ;
+            in
+            pkgs.runCommand "check"
+              {
+                buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+              } "
+      touch \$out
+      ${"
+      echo copying source
+      cp -r ${
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+} src
+      chmod -R u+rwX src
+      cd src
+      echo copying node_modules
+      cp -r ${
+    let
+      npmlock2nix = import npmlock2nix-repo {
+        inherit pkgs;
+      };
+      pkgs = 
+      import "${nixpkgs}" {
+        config.permittedInsecurePackages = [];
+        inherit system;
+      }
+    ;
+    in
+    npmlock2nix.v2.node_modules
+      {
+        src = 
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./.;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+;
+        nodejs = pkgs.nodejs-18_x;
+      }
+  }/node_modules .
+      chmod -R u+rwX node_modules
+    "}
+      ${"prettier src/**/*.tsx src/**/*.ts --check"}
+    "
+          ;
         }
       );
       devShells = forAllSystems (system:
@@ -174,7 +271,7 @@
               nativeBuildInputs =
                 previousAttrs.nativeBuildInputs
                 ++
-                [ pkgs.nodePackages.typescript-language-server ];
+                [ pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier ];
             })
           ;
         }
@@ -200,7 +297,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodePackages.typescript-language-server];
+            [pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier];
         })
       ;
         shell = "npm install ; npm run build";
@@ -232,7 +329,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodePackages.typescript-language-server];
+            [pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier];
         })
       ;
         shell = "npm install ; npm run dev";
@@ -357,7 +454,7 @@ COMMIT;";
       ''
     }";
           };
-          "website/tsc-watch" = {
+          "website/fmt" = {
             "type" = "app";
             "program" = "${
       let
@@ -373,10 +470,10 @@ COMMIT;";
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodePackages.typescript-language-server];
+            [pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier];
         })
       ;
-        shell = "npm run tsc -- --watch";
+        shell = "prettier src/**/*.tsx src/**/*.ts --write";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
