@@ -134,8 +134,9 @@
               export PATH=${pkgs.deno}/bin:$PATH
               exec ${ghc}/bin/runhaskell ${./scripts/fileserver.hs} "$@"
             '');
-          installScript = nix-tool-installer.lib.${system}.mkInstallScript {
+          installScriptFiles = nix-tool-installer.lib.${system}.mkInstallScriptFiles {
             toolName = "garn";
+            baseUrl = "https://garn.io";
             flakeLocation = "github:garnix-io/garn";
             testCommand = "garn --help";
           };
