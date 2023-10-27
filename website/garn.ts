@@ -7,9 +7,11 @@ export const website = garn.javascript
     nodeVersion: "18",
     src: ".",
   })
-  .addCheck("tsc")`npm run tsc`.withDevTools([
-  garn.mkPackage(nixRaw("pkgs.nodePackages.typescript-language-server")),
-]);
+  .addCheck("tsc")`npm run tsc`
+  .withDevTools([
+    garn.mkPackage(nixRaw("pkgs.nodePackages.typescript-language-server")),
+  ])
+  .addExecutable("tsc-watch")`npm run tsc -- --watch`;
 
 export const dev = website.shell`npm install ; npm run dev`;
 

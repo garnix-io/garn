@@ -1,4 +1,6 @@
+import { AsideText } from "../components/Aside.tsx";
 import { BashSnippetToCopy } from "../components/BashSnippetToCopy";
+import { Hovernote } from "../components/Hovernote.tsx";
 import { Garnix, Garn } from "../components/Typography";
 
 export const info = {
@@ -15,7 +17,7 @@ The easiest way to install <Garn/> is with the following command:
 
 <BashSnippetToCopy snippet="sh <(curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh)" />
 
-You can look at the contents of the script [here](../install.sh).
+You can look at the contents of the script [here](https://garn.io/install.sh).
 
 <Garn /> requires [Nix](https://nixos.org/). If you don't have Nix, the above
 command will install it for you.
@@ -34,20 +36,33 @@ extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DT
 
 To `/etc/nix/nix.conf` (note that you'll need sudo).
 
-3. **Install <Garn/>**. You can do that with:
+3. **Restart the Nix daemon**. (Only necessary for multi-user installations, which are the default.) On Linux, that is:
+
+```
+sudo systemctl restart nix-daemon.service
+```
+
+And on Macs, it is:
+```
+sudo launchctl kickstart -k system/org.nixos.nix-daemon
+```
+(You can run `nix-shell -p nix-info --run "nix-info -m"` to double-check whether you have a multi-user installation.)
+
+4. **Install <Garn/>**. You can do that with:
 
 ```
 nix --extra-experimental-features 'nix-command flakes' profile install -L github:garnix-io/garn
 ```
 
-4. **Check that everything worked**. Run `garn --help` to confirm that <Garn/> is installed.
+
+5. **Check that everything worked**. Run `garn --help` to confirm that <Garn/> is installed.
 
 ## Your first `garn.ts` config
 
 All examples in this getting started guide are also available
 [here](https://github.com/garnix-io/garn/tree/main/examples/getting-started).
 
-<Garn /> projects are configured with a single `garn.ts` file. Your `garn.ts`
+<Garn /> projects are configured with a single `garn.ts` file. (This file is read by <Garn /> rather than run directly via `node` or `deno`.) Your `garn.ts`
 exports a collection of `Project`s. A `Project` contains all the information
 needed to build, run, and develop your software.
 
@@ -70,9 +85,11 @@ export const frontend = garn.javascript.mkNpmProject({
 In the same directory you can now run `garn enter frontend` to enter a shell
 with `node` version 18 available.
 
-Note that -- if you do this in a git repo -- <Garn/> requires that your source
-files must be tracked by git. You have to add them to your index, or at least
-mark them as intended additions with `git add --intent-to-add`.
+<AsideText type="hint">You may have noticed that running `garn enter frontend` generated two files, `flake.nix` and `flake.lock`. These should be committed to your repository rather than gitignored. They both ensure reproducibility, and allow Nix to be used directly rather than only via <Garn/>. </AsideText>
+
+Note that if you do this in a git repo <Garn/> requires that your source
+files be tracked by git. You have to add them to your index, or at least
+mark them as intended additions with `git add --intent-to-add`.<Hovernote>This is a somewhat obnoxious requirement of Nix, intended to ensure that you don't accidentally end up getting different behavior than others will, due to uncommited or ignored files. Likely this requirement will be removed from future <Garn/> versions.</Hovernote>
 
 ```bash
 > git add --intent-to-add frontend
@@ -99,7 +116,9 @@ export const frontend = garn.javascript
 Now running `garn check frontend` will run `npm test` in the frontend project
 environment. These `Check`s are pure, i.e. they are run in a build sandbox. The
 downside of sandboxing is that these checks won't have access to the internet.
-The upside is that they'll be (almost) perfectly reproducible.
+The upside is that they'll be (almost) perfectly reproducible, cacheable, and runnable on CI.
+
+
 
 ## Multi-language support
 
