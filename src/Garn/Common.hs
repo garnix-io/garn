@@ -3,9 +3,9 @@ module Garn.Common (nixpkgsInput, nixArgs, currentSystem) where
 import Data.Aeson (eitherDecode)
 import Development.Shake (Stdout (..), cmd)
 
--- | pinned to release-23.05 on 2023-10-21
+-- | pinned to master on 2023-10-26
 nixpkgsInput :: String
-nixpkgsInput = "github:NixOS/nixpkgs/21443a102b1a2f037d02e1d22e3e0ffdda2dbff9"
+nixpkgsInput = "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566"
 
 nixArgs :: [String]
 nixArgs =
