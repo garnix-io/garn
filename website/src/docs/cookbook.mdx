@@ -1,0 +1,31 @@
+export const info = {
+  name: "cookbook",
+  url: "cookbook",
+  index: 3,
+};
+
+# Cookbook
+
+
+## Adding a formatter to a project
+
+## Combining executables
+
+
+## Writing your own language support functions
+
+### Initializers
+
+Let's say you have an existing `npm` project, and you want to start using `garn`
+with it. You could write the `garn.ts` from scratch. But ideally `garn` would
+help you out, *noticing* that you have a node project, and generating the
+corresponding `garn` file for it.
+
+That's where initializers come in. Initilizers correspond to a function
+(`mkNpmProject` in the example above), and:
+
+1. Decide whether to run at all in the existing codebase (in the `node` example,
+   we could base the decision on whether have a `package.json` file) package;
+2. Add imports to the resulting `garn.ts` file (the imports you might need);
+3. Add exports (`Project`s, usually) to the resulting `garn.ts` function.
+
