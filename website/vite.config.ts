@@ -28,7 +28,7 @@ export default defineConfig(async () => {
     routes: [
       "/",
       "/docs/concepts",
-      "/docs/installing",
+      "/docs/tutorial",
       "/docs/getting_started",
     ],
     renderer: new Renderer({
