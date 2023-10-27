@@ -15,7 +15,7 @@ fmt: fmt-nix fmt-haskell fmt-typescript hpack
 check: fmt-nix-check fmt-haskell-check hpack-check fmt-typescript-check
 
 # Deploy the current website
-deploy-website commit: build-install-script-files
+deploy-website commit:
   #!/usr/bin/env bash
   set -eux
 
@@ -27,6 +27,7 @@ deploy-website commit: build-install-script-files
   cd garn
   git reset --hard {{ commit }}
   COMMIT=$(git rev-parse HEAD)
+  just build-install-script-files
   (cd website && npm install && npm run build)
   ls -la website/dist
   mv website/dist/* $DIST_DIR
