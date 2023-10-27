@@ -1,7 +1,7 @@
 import React from "react";
 
 export const GithubLink: React.FC<{ href: string; title: string }> = (
-  props
+  props,
 ) => (
   <a href={props.href} className="github-link" title={props.title}>
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 96">
@@ -16,7 +16,7 @@ export const GithubLink: React.FC<{ href: string; title: string }> = (
 );
 
 export const DiscordLink: React.FC<{ href: string; title: string }> = (
-  props
+  props,
 ) => (
   <a href={props.href} className="discord-link" title={props.title}>
     <svg
