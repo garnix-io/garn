@@ -1,5 +1,7 @@
 import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 
+export const GARN_TS_LIB_VERSION = "v0.0.13";
+
 export const nixSource = (src: string): NixExpression => nixRaw`
   (let
     lib = pkgs.lib;

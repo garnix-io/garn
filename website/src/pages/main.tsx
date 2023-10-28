@@ -24,7 +24,7 @@ const Export: React.FC = (props) => (
 const garnTs = (
   <pre>
     <Keyword>import</Keyword> * as garn from{" "}
-    <String>"https://garn.io/ts/v0.0.12/mod.ts"</String>;<br />
+    <String>"https://garn.io/ts/v0.0.13/mod.ts"</String>;<br />
     <Keyword>import</Keyword> * as{" "}
     <Tooltip item="pkgs">
       {`This is a gigantic collection
@@ -32,7 +32,7 @@ of packages, nixpkgs. If you
 need a tool or dependency,
 it's probably here`}
     </Tooltip>{" "}
-    from <String>"https://garn.io/ts/v0.0.12/nixpkgs.ts"</String>;<br />
+    from <String>"https://garn.io/ts/v0.0.13/nixpkgs.ts"</String>;<br />
     <br />
     <Export>export</Export> <Keyword>const</Keyword> frontend =
     garn.javascript.mkNpmProject(&#123; <br />

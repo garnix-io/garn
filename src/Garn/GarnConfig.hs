@@ -15,6 +15,7 @@ import Data.Aeson
     withObject,
     (.:),
   )
+import Data.List (intercalate)
 import Data.Map (Map)
 import Data.String (IsString (fromString))
 import Data.String.Interpolate (i)
@@ -30,9 +31,24 @@ import System.IO.Temp (withSystemTempFile)
 
 -- This needs to be in sync with `DenoOutput` in runner.ts
 data DenoOutput
-  = Success GarnConfig
-  | UserError String
-  deriving (Eq, Show, Generic, FromJSON)
+  = Success Version GarnConfig
+  | UserError Version String
+  deriving stock (Eq, Show, Generic)
+
+instance FromJSON DenoOutput where
+  parseJSON = withObject "DenoOutput" $ \o -> do
+    garnTsLibVersion <- o .: fromString "garnTsLibVersion"
+    tag <- o .: fromString "tag"
+    contents <- o .: fromString "contents"
+    case tag of
+      "Success" ->
+        Success garnTsLibVersion <$> genericParseJSON defaultOptions contents
+      "UserError" ->
+        UserError garnTsLibVersion <$> parseJSON contents
+      _ -> fail $ "Unknown DenoOutput tag: " <> tag
+
+newtype Version = Version String
+  deriving newtype (Eq, Show, FromJSON)
 
 data GarnConfig = GarnConfig
   { targets :: Targets,
@@ -109,10 +125,30 @@ readGarnConfig = do
     hClose mainHandle
     Stdout out <- cmd "deno run --quiet --check --allow-write --allow-run --allow-read" mainPath
     case eitherDecode out :: Either String (Maybe DenoOutput) of
-      Left err -> error $ "Unexpected package export from garn.ts:\n" <> err
+      Left err -> do
+        let suggestion = case eitherDecode out :: Either String OnlyTsLibVersion of
+              Left err ->
+                [i|Try updating the garn typescript library! (#{err})|]
+              Right (OnlyTsLibVersion {garnTsLibVersion}) ->
+                [i|Try installing version `#{garnTsLibVersion}` of 'garn' (the cli tool).|]
+        throwIO $
+          Garn.Errors.UserError $
+            intercalate
+              "\n"
+              [ "Version mismatch detected:",
+                "'garn' (the cli tool) is not compatible with the version of the garn typescript library you're using.",
+                suggestion,
+                "(Internal details: " <> err <> ")"
+              ]
       Right Nothing -> error $ "No garn library imported in garn.ts"
-      Right (Just (UserError err)) -> throwIO $ Garn.Errors.UserError err
-      Right (Just (Success writtenConfig)) -> return writtenConfig
+      Right (Just (UserError _tsLibVersion err)) -> throwIO $ Garn.Errors.UserError err
+      Right (Just (Success _tsLibVersion writtenConfig)) -> return writtenConfig
+
+data OnlyTsLibVersion = OnlyTsLibVersion
+  { garnTsLibVersion :: Version
+  }
+  deriving stock (Generic)
+  deriving anyclass (FromJSON)
 
 writeGarnConfig :: GarnConfig -> IO ()
 writeGarnConfig garnConfig = do
