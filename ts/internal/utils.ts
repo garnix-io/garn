@@ -73,15 +73,6 @@ export const writeTextFile = (
   }
 `;
 
-export type ValidJsonValue =
-  | undefined
-  | null
-  | boolean
-  | string
-  | number
-  | Array<ValidJsonValue>
-  | { [key: string]: ValidJsonValue };
-
 type Result<T> = { data: T; error?: never } | { error: Error; data?: never };
 
 export const parseJson = <T>(schema: z.Schema<T>, json: string): Result<T> => {
