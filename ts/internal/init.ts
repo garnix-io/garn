@@ -19,7 +19,7 @@ const initializers = [
 console.error("[garn] Creating a garn.ts file");
 
 for (const init of initializers) {
-  const result = init();
+  const result = init(Deno.cwd());
   switch (result.tag) {
     case "UnexpectedError":
       console.error("[garn] " + result.reason);

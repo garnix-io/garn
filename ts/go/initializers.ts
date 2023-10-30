@@ -2,6 +2,7 @@ import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { Initializer } from "../base.ts";
 import { camelCase } from "https://deno.land/x/case@2.2.0/mod.ts";
+import { join } from "https://deno.land/std@0.201.0/path/mod.ts";
 
 function parseGoMod(goModContents: string): {
   moduleName: string;
@@ -24,13 +25,13 @@ function parseGoMod(goModContents: string): {
   throw new Error("go.mod missing module name or go version");
 }
 
-const goModuleInitializer: Initializer = () => {
-  if (!fs.existsSync("go.mod")) {
+const goModuleInitializer: Initializer = (dir) => {
+  if (!fs.existsSync(join(dir, "go.mod"))) {
     return { tag: "ShouldNotRun" };
   }
   try {
     const { goVersion, moduleName } = parseGoMod(
-      Deno.readTextFileSync("go.mod"),
+      Deno.readTextFileSync(join(dir, "go.mod")),
     );
     return {
       tag: "ShouldRun",
