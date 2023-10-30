@@ -71,3 +71,25 @@ export const writeTextFile = (
     text = ${nixStrLit`${text}`};
   }
 `;
+
+export type ValidJsonValue =
+  | undefined
+  | null
+  | boolean
+  | string
+  | number
+  | Array<ValidJsonValue>
+  | { [key: string]: ValidJsonValue };
+
+export const parseJson = (
+  json: string,
+): [true, ValidJsonValue] | [false, Error] => {
+  try {
+    return [true, JSON.parse(json)];
+  } catch (err) {
+    return [false, err];
+  }
+};
+
+export const isObj = (t: unknown): t is Record<string, unknown> =>
+  t != null && typeof t === "object";
