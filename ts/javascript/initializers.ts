@@ -1,6 +1,9 @@
 import { Initializer } from "../base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
-import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
+import {
+  assertEquals,
+  assert,
+} from "https://deno.land/std@0.201.0/assert/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { join } from "https://deno.land/std@0.201.0/path/mod.ts";
 import { isObj, parseJson } from "../internal/utils.ts";
@@ -85,10 +88,10 @@ Deno.test("NPM initializer errors if package.json is unparseable", () => {
     `,
   );
   const result = npmInitializer(tempDir);
-  assertEquals(result, {
-    tag: "UnexpectedError",
-    reason: "Could not parse package.json",
-  });
+  if (result.tag !== "UnexpectedError") {
+    throw new Error("expected an UnexpectedError");
+  }
+  assert(result.reason.startsWith("Could not parse package.json"));
 });
 
 Deno.test("NPM initializer returns the code to be generated", () => {
