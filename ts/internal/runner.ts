@@ -1,7 +1,12 @@
 import { isProject, Project } from "../project.ts";
 import { isPackage, Package } from "../package.ts";
 import { Check, isCheck } from "../check.ts";
-import { checkExhaustiveness, mapKeys, mapValues } from "./utils.ts";
+import {
+  checkExhaustiveness,
+  GARN_TS_LIB_VERSION,
+  mapKeys,
+  mapValues,
+} from "./utils.ts";
 import { GOMOD2NIX_REPO } from "../go/consts.ts";
 import { nixAttrSet, NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 import { Executable } from "../mod.ts";
@@ -11,8 +16,8 @@ import { UserError } from "./errors.ts";
 
 // This needs to be in sync with `DenoOutput` in GarnConfig.hs
 export type DenoOutput =
-  | { tag: "Success"; contents: GarnConfig }
-  | { tag: "UserError"; contents: string };
+  | { garnTsLibVersion: string; tag: "Success"; contents: GarnConfig }
+  | { garnTsLibVersion: string; tag: "UserError"; contents: string };
 
 export type GarnConfig = {
   targets: Targets;
@@ -41,6 +46,7 @@ export const toDenoOutput = (
 ): DenoOutput => {
   try {
     return {
+      garnTsLibVersion: GARN_TS_LIB_VERSION,
       tag: "Success",
       contents: {
         targets: toTargets(garnExports),
@@ -51,6 +57,7 @@ export const toDenoOutput = (
   } catch (err: unknown) {
     if (err instanceof UserError) {
       return {
+        garnTsLibVersion: GARN_TS_LIB_VERSION,
         tag: "UserError",
         contents: err.message,
       };

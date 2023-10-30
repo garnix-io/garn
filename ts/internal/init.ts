@@ -1,12 +1,11 @@
 import * as haskell from "../haskell/initializers.ts";
 import * as go from "../go/initializers.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-
-const GARN_VERSION = "v0.0.12";
+import { GARN_TS_LIB_VERSION } from "./utils.ts";
 
 const imports = [
-  `import * as garn from "https://garn.io/ts/${GARN_VERSION}/mod.ts";`,
-  `import * as pkgs from "https://garn.io/ts/${GARN_VERSION}/nixpkgs.ts";`,
+  `import * as garn from "https://garn.io/ts/${GARN_TS_LIB_VERSION}/mod.ts";`,
+  `import * as pkgs from "https://garn.io/ts/${GARN_TS_LIB_VERSION}/nixpkgs.ts";`,
 ];
 const initializedSections = [];
 

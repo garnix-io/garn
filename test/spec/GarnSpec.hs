@@ -71,3 +71,56 @@ spec = do
             _ <- runGarn ["run", "foo"] "" repoDir Nothing
             flake <- readFile "./flake.nix"
             pure $ defaultGolden "generates_formatted_flakes" flake
+
+    describe "version mismatches" $ around onTestFailureLogger $ do
+      it "gives a helpful error messages when there's a deno <-> haskell json version mismatch" $
+        \onTestFailureLog -> do
+          inTempDirectory $ do
+            writeFile
+              "garn.ts"
+              [i|
+                type DenoOutput = {
+                  "some incompatible type": null,
+                  garnTsLibVersion: string
+                };
+
+                function toDenoOutput(
+                  nixpkgsInput: string,
+                  garnExports: Record<string, unknown>,
+                ): DenoOutput {
+                  return {
+                    "some incompatible type": null,
+                    garnTsLibVersion: "test version string",
+                  };
+                }
+
+                type InternalLibrary = {
+                  toDenoOutput: (
+                    nixpkgsInput: string,
+                    garnExports: Record<string, unknown>,
+                  ) => DenoOutput;
+                };
+
+                const garnGetInternalLib = (): InternalLibrary => ({
+                  toDenoOutput,
+                });
+
+                // deno-lint-ignore no-explicit-any
+                if ((window as any).__garnGetInternalLib != null) {
+                  throw new Error(
+                    "Registering __garnGetInternalLib twice, using two different garn library versions is not supported.",
+                  );
+                }
+                // deno-lint-ignore no-explicit-any
+                (window as any).__garnGetInternalLib = garnGetInternalLib;
+              |]
+            output <- runGarn ["run", "whatever"] "" repoDir Nothing
+            onTestFailureLog output
+            stderr output
+              `shouldBe` unindent
+                [i|
+                  [garn] Error: Version mismatch detected:
+                  'garn' (the cli tool) is not compatible with the version of the garn typescript library you're using.
+                  Try installing version `test version string` of 'garn' (the cli tool).
+                  (Internal details: Error in $: key \"tag\" not found)
+                |]
