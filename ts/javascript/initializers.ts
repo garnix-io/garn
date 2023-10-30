@@ -2,7 +2,6 @@ import { Initializer } from "../base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
-import { mapValues } from "../internal/utils.ts";
 import { join } from "https://deno.land/std@0.201.0/path/mod.ts";
 
 const npmInitializer: Initializer = (dir) => {
@@ -15,29 +14,26 @@ const npmInitializer: Initializer = (dir) => {
   const contents = Deno.readTextFileSync(join(dir, "package.json"));
   try {
     const packageJson = JSON.parse(contents);
-    const scripts = mapValues(
-      (script: string) => script.replaceAll("`", "\\`"),
-      packageJson.scripts ?? {},
-    );
-    const testScript: string | undefined = scripts.test;
-    const otherScripts = Object.entries(scripts).filter(
-      ([name]) => name !== "test",
-    );
+    const scripts = Object.keys(packageJson.scripts ?? {});
+    const otherScripts = scripts.filter((name) => name !== "test");
     return {
       tag: "ShouldRun",
       imports: [],
       makeTarget: () =>
         [
           outdent`
-          export const ${packageJson.name || "npmProject"} = mkNpmProject({
-            description: "${packageJson.description || "An NPM project"}",
-            src: ".",
-            nodeVersion: "18",
-          })`,
-          ...(testScript ? [`.addCheck("test")\`${testScript}\``] : []),
+            export const ${packageJson.name || "npmProject"} = mkNpmProject({
+              description: "${packageJson.description || "An NPM project"}",
+              src: ".",
+              nodeVersion: "18",
+            })
+          `,
+          ...(scripts.includes("test")
+            ? ['.addCheck("test")`npm run test`']
+            : []),
           ...otherScripts.map(
-            ([name, script]) =>
-              `.addExecutable(${JSON.stringify(name)})\`${script}\``,
+            (name) =>
+              `.addExecutable(${JSON.stringify(name)})\`npm run ${name}\``,
           ),
         ].join("\n  "),
     };
@@ -76,14 +72,14 @@ Deno.test("NPM initializer errors if package.json is unparseable", () => {
   Deno.writeTextFileSync(
     join(tempDir, "package.json"),
     `
-    name: foo
-  `,
+      some invalid: json
+    `,
   );
   const result = npmInitializer(tempDir);
-  assertEquals(result.tag, "UnexpectedError");
-  if (result.tag === "UnexpectedError") {
-    assertEquals(result.reason, "Could not parse package.json");
-  }
+  assertEquals(result, {
+    tag: "UnexpectedError",
+    reason: "Could not parse package.json",
+  });
 });
 
 Deno.test("NPM initializer returns the code to be generated", () => {
@@ -96,19 +92,19 @@ Deno.test("NPM initializer returns the code to be generated", () => {
     }),
   );
   const result = npmInitializer(tempDir);
-  assertEquals(result.tag, "ShouldRun");
-  if (result.tag === "ShouldRun") {
-    assertEquals(
-      result.makeTarget(),
-      outdent`
-        export const somepackage = mkNpmProject({
-          description: "just some package",
-          src: ".",
-          nodeVersion: "18",
-        })
-      `,
-    );
+  if (result.tag !== "ShouldRun") {
+    throw new Error("Expected initializer to run");
   }
+  assertEquals(
+    result.makeTarget(),
+    outdent`
+      export const somepackage = mkNpmProject({
+        description: "just some package",
+        src: ".",
+        nodeVersion: "18",
+      })
+    `,
+  );
 });
 
 Deno.test(
@@ -160,42 +156,11 @@ Deno.test(
             src: ".",
             nodeVersion: "18",
           })
-            .addCheck("test")\`jest\`
-            .addExecutable("start")\`vite --port 3000\`
-            .addExecutable("build")\`vite build\`
+            .addCheck("test")\`npm run test\`
+            .addExecutable("start")\`npm run start\`
+            .addExecutable("build")\`npm run build\`
         `,
       );
     }
   },
 );
-
-Deno.test("NPM initializer escapes scripts as checks and executables", () => {
-  const tempDir = Deno.makeTempDirSync();
-  Deno.writeTextFileSync(
-    join(tempDir, "package.json"),
-    JSON.stringify({
-      name: "somepackage",
-      description: "just some package",
-      scripts: {
-        test: "echo `echo test`",
-        start: "echo `echo start`",
-      },
-    }),
-  );
-  const result = npmInitializer(tempDir);
-  assertEquals(result.tag, "ShouldRun");
-  if (result.tag === "ShouldRun") {
-    assertEquals(
-      result.makeTarget(),
-      outdent`
-          export const somepackage = mkNpmProject({
-            description: "just some package",
-            src: ".",
-            nodeVersion: "18",
-          })
-            .addCheck("test")\`echo \\\`echo test\\\`\`
-            .addExecutable("start")\`echo \\\`echo start\\\`\`
-        `,
-    );
-  }
-});
