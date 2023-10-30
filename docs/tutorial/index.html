@@ -14,7 +14,7 @@
     <meta name="description" content="A build tool and environment manager">
     <script defer="" data-domain="garn.io" src="https://plausible.io/js/script.js"></script>
     <title>garn</title>
-    <script type="module" crossorigin="" src="/assets/index.ed899341.js"></script>
+    <script type="module" crossorigin="" src="/assets/index.937b57e8.js"></script>
     <link rel="stylesheet" href="/assets/index.f8169dcb.css">
   </head>
   <body>
@@ -28,8 +28,8 @@ needed to build, run, and develop your software.</p>
 <p>The <span class="garnix-name">garn</span> library exports a lot of helpers that make it easy to quickly
 construct projects for common stacks, but you can also define these yourself.</p>
 <p>Here is an example <code>garn.ts</code> file for a single node-based project:</p>
-<pre class="language-typescript"><code class="language-typescript"><span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> garn</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.11/mod.ts"</span><span class="token punctuation">;</span>
-<span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> pkgs</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.11/nixpkgs.ts"</span><span class="token punctuation">;</span>
+<pre class="language-typescript"><code class="language-typescript"><span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> garn</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.13/mod.ts"</span><span class="token punctuation">;</span>
+<span class="token keyword module">import</span> <span class="token imports"><span class="token operator">*</span> <span class="token keyword module">as</span> pkgs</span> <span class="token keyword module">from</span> <span class="token string">"https://garn.io/ts/v0.0.13/nixpkgs.ts"</span><span class="token punctuation">;</span>
 
 <span class="token keyword module">export</span> <span class="token keyword">const</span> frontend <span class="token operator">=</span> garn<span class="token punctuation">.</span><span class="token property-access">javascript</span><span class="token punctuation">.</span><span class="token method function property-access">mkNpmProject</span><span class="token punctuation">(</span><span class="token punctuation">{</span>
   description<span class="token operator">:</span> <span class="token string">"my frontend"</span><span class="token punctuation">,</span>
