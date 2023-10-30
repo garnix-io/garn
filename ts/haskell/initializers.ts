@@ -1,11 +1,12 @@
-import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { Initializer } from "../base.ts";
 
 // Currently only works if there's a single cabal file, in the current directory
-const mkHaskellProjectInitializer: Initializer = () => {
-  const cabalFiles: fs.WalkEntry[] = [...fs.expandGlobSync("*.cabal")];
+export const mkHaskellProjectInitializer: Initializer = (dir) => {
+  const cabalFiles: fs.WalkEntry[] = [
+    ...fs.expandGlobSync("*.cabal", { root: dir }),
+  ];
   if (cabalFiles.length === 0) {
     return { tag: "ShouldNotRun" };
   }
@@ -42,54 +43,3 @@ const mkHaskellProjectInitializer: Initializer = () => {
 };
 
 export const initializers = [mkHaskellProjectInitializer];
-
-// Tests
-
-Deno.test("Initializer does not run when no cabal file is present", () => {
-  const tempDir = Deno.makeTempDirSync();
-  Deno.chdir(tempDir);
-  const result = mkHaskellProjectInitializer();
-  assertEquals(result.tag, "ShouldNotRun");
-});
-
-Deno.test("Initializer errors if the cabal file is unparseable", () => {
-  const tempDir = Deno.makeTempDirSync();
-  Deno.chdir(tempDir);
-  Deno.writeTextFileSync(
-    "./foo.cabal",
-    `
-    name: foo
-  `,
-  );
-  const result = mkHaskellProjectInitializer();
-  assertEquals(result.tag, "UnexpectedError");
-  if (result.tag === "UnexpectedError") {
-    assertEquals(result.reason, "Found but could not parse cabal file");
-  }
-});
-
-Deno.test("Initializer returns a simple string if a cabal file exists", () => {
-  const tempDir = Deno.makeTempDirSync();
-  Deno.chdir(tempDir);
-  Deno.writeTextFileSync(
-    "./foo.cabal",
-    `
-    name: foo
-    version: 0.0.1
-  `,
-  );
-  const result = mkHaskellProjectInitializer();
-  assertEquals(result.tag, "ShouldRun");
-  if (result.tag === "ShouldRun") {
-    assertEquals(
-      result.makeTarget(),
-      outdent`
-          export const foo = garn.haskell.mkHaskellProject({
-            description: "",
-            executable: "",
-            compiler: "ghc94",
-            src: "."
-          })`,
-    );
-  }
-});
