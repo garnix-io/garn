@@ -1,4 +1,5 @@
 import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 export const GARN_TS_LIB_VERSION = "v0.0.13";
 
@@ -81,14 +82,21 @@ export type ValidJsonValue =
   | Array<ValidJsonValue>
   | { [key: string]: ValidJsonValue };
 
-export const parseJson = (
+export const parseJson = <T>(
+  schema: z.Schema<T>,
   json: string,
-): [true, ValidJsonValue] | [false, Error] => {
+): [true, T] | [false, Error] => {
+  let parsed: unknown;
   try {
-    return [true, JSON.parse(json)];
+    parsed = JSON.parse(json);
   } catch (err) {
     return [false, err];
   }
+  const result = schema.safeParse(parsed);
+  if (!result.success) {
+    return [false, result.error];
+  }
+  return [true, result.data];
 };
 
 export const isObj = (t: unknown): t is Record<string, unknown> =>

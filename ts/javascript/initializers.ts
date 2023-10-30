@@ -2,7 +2,8 @@ import { Initializer } from "../base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { join } from "https://deno.land/std@0.201.0/path/mod.ts";
-import { isObj, parseJson } from "../internal/utils.ts";
+import { parseJson } from "../internal/utils.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 export const npmInitializer: Initializer = (dir) => {
   const existsPkgJson = fs.existsSync(join(dir, "package.json"));
@@ -12,24 +13,20 @@ export const npmInitializer: Initializer = (dir) => {
     return { tag: "ShouldNotRun" };
   }
   const contents = Deno.readTextFileSync(join(dir, "package.json"));
-  const [ok, packageJson] = parseJson(contents);
+  const packageJsonSchema = z.object({
+    name: z.string().optional(),
+    description: z.string().optional(),
+    scripts: z.record(z.string()).optional(),
+  });
+  const [ok, packageJson] = parseJson(packageJsonSchema, contents);
   if (!ok) {
     return {
       tag: "UnexpectedError",
       reason: `Could not parse package.json: ${packageJson.message}`,
     };
   }
-  if (!isObj(packageJson)) {
-    return {
-      tag: "UnexpectedError",
-      reason: "Could not parse package.json: package.json is not an object",
-    };
-  }
-  const scripts =
-    "scripts" in packageJson && isObj(packageJson.scripts)
-      ? Object.keys(packageJson.scripts)
-      : [];
-  const otherScripts = scripts.filter((name) => name !== "test");
+  const scripts = Object.keys(packageJson.scripts || {});
+  const nonTestScripts = scripts.filter((name) => name !== "test");
   return {
     tag: "ShouldRun",
     imports: [],
@@ -45,7 +42,7 @@ export const npmInitializer: Initializer = (dir) => {
         ...(scripts.includes("test")
           ? ['.addCheck("test")`npm run test`']
           : []),
-        ...otherScripts.map(
+        ...nonTestScripts.map(
           (name) =>
             `.addExecutable(${JSON.stringify(name)})\`npm run ${name}\``,
         ),
