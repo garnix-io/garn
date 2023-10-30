@@ -111,7 +111,7 @@ hpack-check:
       error "package.yaml has changed, please run hpack"
 
 test-ts:
-  deno test --allow-write --allow-read --allow-run ts/**/*.ts
+  deno test --allow-write --allow-read --allow-run ts/*.test.ts ts/**/*.test.ts
 
 test *args="": hpack
   cabal run --test-show-details=streaming garn:spec -- {{ args }}
