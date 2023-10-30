@@ -82,22 +82,18 @@ export type ValidJsonValue =
   | Array<ValidJsonValue>
   | { [key: string]: ValidJsonValue };
 
-export const parseJson = <T>(
-  schema: z.Schema<T>,
-  json: string,
-): [true, T] | [false, Error] => {
+type Result<T> = { data: T; error?: never } | { error: Error; data?: never };
+
+export const parseJson = <T>(schema: z.Schema<T>, json: string): Result<T> => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(json);
-  } catch (err) {
-    return [false, err];
+  } catch (error) {
+    return { error };
   }
   const result = schema.safeParse(parsed);
   if (!result.success) {
-    return [false, result.error];
+    return { error: result.error };
   }
-  return [true, result.data];
+  return { data: result.data };
 };
-
-export const isObj = (t: unknown): t is Record<string, unknown> =>
-  t != null && typeof t === "object";

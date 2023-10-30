@@ -18,14 +18,14 @@ export const npmInitializer: Initializer = (dir) => {
     description: z.string().optional(),
     scripts: z.record(z.string()).optional(),
   });
-  const [ok, packageJson] = parseJson(packageJsonSchema, contents);
-  if (!ok) {
+  const result = parseJson(packageJsonSchema, contents);
+  if (result.error) {
     return {
       tag: "UnexpectedError",
-      reason: `Could not parse package.json: ${packageJson.message}`,
+      reason: `Could not parse package.json: ${result.error.message}`,
     };
   }
-  const scripts = Object.keys(packageJson.scripts || {});
+  const scripts = Object.keys(result.data.scripts || {});
   const nonTestScripts = scripts.filter((name) => name !== "test");
   return {
     tag: "ShouldRun",
@@ -33,8 +33,8 @@ export const npmInitializer: Initializer = (dir) => {
     makeTarget: () =>
       [
         outdent`
-          export const ${packageJson.name || "npmProject"} = mkNpmProject({
-            description: "${packageJson.description || "An NPM project"}",
+          export const ${result.data.name || "npmProject"} = mkNpmProject({
+            description: "${result.data.description || "An NPM project"}",
             src: ".",
             nodeVersion: "18",
           })
