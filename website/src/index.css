@@ -75,7 +75,6 @@ section:nth-child(even) {
 }
 
 .more {
-  display: none;
   text-align: left;
   padding: 0 20px;
   max-width: 800px;
