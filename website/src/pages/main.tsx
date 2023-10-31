@@ -1,15 +1,10 @@
 import React from "react";
-import { DropdownMenu } from "../components/Dropdown";
 import { DiscordLink, GithubLink } from "../components/HeaderLinks";
 import { Tooltip } from "../components/Hovernote";
 import { Typography } from "../components/Typography";
-import { Asciinema } from "../components/Asciinema";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { docMenuItems } from "./docs";
-import envDemoCastUrl from "../casts/env-demo.cast";
-import buildDemoCastUrl from "../casts/build-demo.cast";
-import runDemoCastUrl from "../casts/run-demo.cast";
-import lspDemoCastUrl from "../casts/lsp-demo.cast";
+import { Code } from "../components/Code";
 
 const Keyword: React.FC = (props) => (
   <span className="keyword">{props.children}</span>
@@ -193,17 +188,16 @@ export const Info: React.FC = () => {
           </div>
         </div>
         <div className="">
-          <figure>
-            <header>garn.ts</header>
-            <code className="line-numbers">{garnTs}</code>
-          </figure>
-          <figure>
-            <header>terminal</header>
-            <code>
-              $ garn {termState.text}
-              <div className="cursor" />
-            </code>
-          </figure>
+          <Code header="garn.ts" lineNumbers code={garnTs} />
+          <Code
+            header="terminal"
+            code={
+              <>
+                $ garn {termState.text}
+                <div className="cursor" />
+              </>
+            }
+          />
         </div>
       </div>
       <section>
@@ -215,23 +209,26 @@ export const Info: React.FC = () => {
           <Garn /> manages all of your project dependencies in encapsulated
           environments. <a>Read more</a>
           <div className="more">
-            <code>
-              <pre>{`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+            <Code
+              header="garn.ts"
+              lineNumbers
+              code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "my frontend project",
   src: ".",
   nodeVersion: "18",
-});`}</pre>
-            </code>
-            <code>
-              <pre>{`$ node
+});`}
+            />
+            <Code
+              header="terminal"
+              code={`$ node
 node: command not found
 $ garn enter frontend
 [garn] Entering frontend shell. Type 'exit' to exit.
 $ node --version
-v18.17.1`}</pre>
-            </code>
+v18.17.1`}
+            />
           </div>
         </p>
       </section>
@@ -259,103 +256,27 @@ v18.17.1`}</pre>
           declarative environment, so if it runs for you, it will run for
           everyone on your team.
           <div className="examples">
-            <code>
-              <pre>{`export const backend = garn.go.mkGoProject({
+            <Code
+              header="garn.ts"
+              lineNumbers
+              code={`export const backend = garn.go.mkGoProject({
   description: "Go backend",
   src: ".",
   goVersion: "1.20",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
-  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\` `}</pre>
-            </code>
-            <code>
-              <pre>{`$ protoc protobufs/*.proto
+  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\` `}
+            />
+            <Code
+              header="terminal"
+              code={`$ protoc protobufs/*.proto
 protoc: command not found
 
-$ garn run backend.codegen `}</pre>
-            </code>
+$ garn run backend.codegen `}
+            />
           </div>
         </p>
       </section>
-
-      {/*
-      <section className="lede">
-        <h1>garn, at your service</h1>
-        <div className="garn-description">
-          <b>garn</b> is a build tool and environment manager. It can partly or
-          wholly replace manual README instructions, containerization
-          technologies such as docker, package managers such as apt/brew/&c, and
-          command runners such as just.
-        </div>
-        <figure>
-          <div className="filename">garn.ts</div>
-          <div className="garn-ts">
-            <code className="garn-ts">{garnTs} </code>
-          </div>
-        </figure>
-        <div className="garn-description">
-          Your project is configured in Typescript, which provides for great
-          discoverability through auto-completion and type errors, as well as
-          facilities for abstraction and easy sharing of code. Behind the
-          scenes, we translate your Typescript configuration into{" "}
-          <a href="https://nixos.org/">Nix</a>.
-        </div>
-
-        <div className="garn-description">
-          {" "}
-          <b>garn</b> currently supports <b>go</b>, <b>javascript</b>, and{" "}
-          <b>haskell</b>.
-        </div>
-      </section>
-      <section className="features">
-        <h1>features</h1>
-
-        <div className="feature">
-          <h2>declarative environments</h2>
-          <div className="feature-description">
-            Specify your dependencies easily and precisely. Then switch between
-            environments with a single command. Unlike containers, <b>garn</b>{" "}
-            environments combine well with your personal dev environment.
-          </div>
-          <Asciinema src={envDemoCastUrl} />
-        </div>
-
-        <div className="feature">
-          <h2>reproducible builds and tests</h2>
-          <div className="feature-description">
-            Builds and checks are run in a sandboxed environment, ensuring that
-            they are reproducible and deterministic. They can then be run on CI,
-            exactly as they are locally, without any additional effort. Results
-            can be cached and shared among your CI and local environment.
-          </div>
-          <Asciinema src={buildDemoCastUrl} />
-        </div>
-
-        <div className="feature">
-          <h2>a unified interface</h2>
-          <div className="feature-description">
-            <b>garn</b> provides a unified interface for all your project's
-            tests, builds, environments, and executables. It can also serve as
-            command documentation, printing help messages that describe exactly
-            what commands are available. Instead of wrangling with a host of
-            tools, you can focus on getting things done.
-          </div>
-          <Asciinema src={runDemoCastUrl} rows={25} />
-        </div>
-
-        <div className="feature">
-          <h2>discoverable Typescript API</h2>
-          <div className="feature-description">
-            We've carefully designed <b>garn</b> so that you never get stuck.
-            After setting up LSP, the available options at any stage can be
-            discovered through auto-completion. And unlike YAML files, factoring
-            out common functionality, or writing and using libraries, is easy.
-            Especially with Deno, which makes imports just a line of code.
-          </div>
-          <Asciinema src={lspDemoCastUrl} />
-        </div>
-      </section>
-      */}
     </>
   );
 };
