@@ -14,7 +14,7 @@
     <meta name="description" content="A build tool and environment manager">
     <script defer="" data-domain="garn.io" src="https://plausible.io/js/script.js"></script>
     <title>garn</title>
-    <script type="module" crossorigin="" src="/assets/index.937b57e8.js"></script>
+    <script type="module" crossorigin="" src="/assets/index.1d13ee71.js"></script>
     <link rel="stylesheet" href="/assets/index.f8169dcb.css">
   </head>
   <body>
@@ -22,9 +22,20 @@
 <h2 id="installation">Installation</h2>
 <p>The easiest way to install <span class="garnix-name">garn</span> is with the following command:</p>
 <div class="bash">sh &lt;(curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh)<span class="copy-button">Copy</span></div>
+<p><span class="garnix-name">garn</span> works on the following platforms:</p>
+<ul>
+<li>Arm Linux</li>
+<li>Intel Linux</li>
+<li>Intel Macs<span aria-describedby="footnote-label" class="hovernote"></span></li>
+<li>M1/M2 Macs</li>
+</ul>
 <p>You can look at the contents of the script <a href="https://garn.io/install.sh">here</a>.</p>
 <p><span class="garnix-name">garn</span> requires <a href="https://nixos.org/">Nix</a>. If you don't have Nix, the above
 command will install it for you.</p>
+<h3 id="uninstalling">Uninstalling</h3>
+<p>To uninstall both <code>nix</code> and <code>garn</code> you can run:</p>
+<pre class="language-bash"><code class="language-bash">/nix/nix-installer uninstall
+</code></pre>
 <h3 id="manual-installation">Manual installation</h3>
 <p>If you prefer, you can also manually do the steps that the above script automates. Those are:</p>
 <ol>
