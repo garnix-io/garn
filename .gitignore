@@ -2,6 +2,7 @@
 result
 node_modules/
 /website/dist/
-/website/public/
+/website/public/install.sh
+/website/public/nix-installer*
 /ts/nixpkgs.ts
 /.golden/*/actual

@@ -5,6 +5,7 @@ import { Typography } from "../components/Typography";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { docMenuItems } from "./docs";
 import { Code } from "../components/Code";
+import { Image } from "../components/Image";
 
 const Keyword: React.FC = (props) => (
   <span className="keyword">{props.children}</span>
@@ -267,6 +268,7 @@ export const backend = garn.haskell
 [...]
 check> No hints`}
           />
+          <Image src="/images/github_hlint_ci_check.png" header="github ui" />
         </p>
       </section>
       <section>
