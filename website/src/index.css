@@ -31,6 +31,7 @@ h1 {
 
 figure.codeblock {
   margin-top: 10px;
+  margin-bottom: 10px;
   text-align: left;
   overflow: hidden;
   border-radius: 8px;

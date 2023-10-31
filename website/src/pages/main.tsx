@@ -137,6 +137,8 @@ const terminalExamples = [
   "build backend",
 ];
 
+const ReadMore = () => <a href="./docs/tutorial">Read more...</a>;
+
 export const Info: React.FC = () => {
   const [termState, setTermState] = React.useState({
     deleting: false,
@@ -210,7 +212,6 @@ export const Info: React.FC = () => {
           Or golang? Or prettier? Or some other tool? <Garn /> manages all of
           your project's dependencies in encapsulated environments. Compilers,
           code-generators, formatters, test-runners, linters and more.{" "}
-          <a href="./docs/tutorial">Read more...</a>
           <div>
             <Code
               header="garn.ts"
@@ -233,6 +234,7 @@ $ node --version
 v18.17.1`}
             />
           </div>
+          <ReadMore />
         </p>
       </section>
       <section className="scenario">
@@ -242,8 +244,7 @@ v18.17.1`}
         </h1>
         <p>
           <Garn /> allows to declare reproducible checks that you can run
-          locally and on CI on Github.{" "}
-          <a href="./docs/tutorial">Read more...</a>
+          locally and on CI on Github.
           <Code
             header="garn.ts"
             lineNumbers
@@ -267,6 +268,7 @@ export const backend = garn.haskell
 check> No hints`}
           />
           <Image src="/images/github_hlint_ci_check.png" header="github ui" />
+          <ReadMore />
         </p>
       </section>
       <section className="scenario">
@@ -278,8 +280,7 @@ check> No hints`}
           Well, it was probably their fault for not having the right tools
           installed... <Garn /> allows you to write deterministic scripts that
           run the same everywhere. For running dev servers, bundling javascript,
-          formatting source code, running code generators and more.{" "}
-          <a href="./docs/tutorial">Read more...</a>
+          formatting source code, running code generators and more.
           <Code
             header="garn.ts"
             lineNumbers
@@ -298,6 +299,7 @@ protoc: command not found
 
 $ garn run backend.codegen `}
           />
+          <ReadMore />
         </p>
       </section>
       <section className="faq">
