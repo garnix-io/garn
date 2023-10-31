@@ -1,5 +1,6 @@
-import * as haskell from "../haskell/initializers.ts";
 import * as go from "../go/initializers.ts";
+import * as haskell from "../haskell/initializers.ts";
+import * as javascript from "../javascript/initializers.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { GARN_TS_LIB_VERSION } from "./utils.ts";
 
@@ -9,12 +10,16 @@ const imports = [
 ];
 const initializedSections = [];
 
-const initializers = [...go.initializers, ...haskell.initializers];
+const initializers = [
+  ...go.initializers,
+  ...haskell.initializers,
+  ...javascript.initializers,
+];
 
 console.error("[garn] Creating a garn.ts file");
 
 for (const init of initializers) {
-  const result = init();
+  const result = init(Deno.cwd());
   switch (result.tag) {
     case "UnexpectedError":
       console.error("[garn] " + result.reason);

@@ -1,4 +1,5 @@
 import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
 export const GARN_TS_LIB_VERSION = "v0.0.13";
 
@@ -71,3 +72,19 @@ export const writeTextFile = (
     text = ${nixStrLit`${text}`};
   }
 `;
+
+type Result<T> = { data: T; error?: never } | { error: Error; data?: never };
+
+export const parseJson = <T>(schema: z.Schema<T>, json: string): Result<T> => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(json);
+  } catch (error) {
+    return { error };
+  }
+  const result = schema.safeParse(parsed);
+  if (!result.success) {
+    return { error: result.error };
+  }
+  return { data: result.data };
+};

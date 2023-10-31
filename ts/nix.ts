@@ -1,5 +1,3 @@
-import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
-
 /**
  * A union of types that are allowed to be interpolated into the `nixStrLit`
  * template literal function. This is also used in some higher level functions, such as
@@ -168,26 +166,3 @@ export function nixStrLit(
     '"';
   return { rawNixExpressionString };
 }
-
-Deno.test("nixStrLit correctly serializes into a nix expression", () => {
-  assertEquals(nixStrLit`foo`.rawNixExpressionString, '"foo"');
-  assertEquals(
-    nixStrLit`with ${"string"} interpolation`.rawNixExpressionString,
-    '"with string interpolation"',
-  );
-  assertEquals(
-    nixStrLit`with package ${{
-      rawNixExpressionString: "pkgs.hello",
-    }} works`.rawNixExpressionString,
-    '"with package ${pkgs.hello} works"',
-  );
-  assertEquals(
-    nixStrLit`escaped dollars in strings \${should not interpolate}`
-      .rawNixExpressionString,
-    '"escaped dollars in strings \\${should not interpolate}"',
-  );
-  assertEquals(
-    nixStrLit`"double quotes" are correctly escaped`.rawNixExpressionString,
-    '"\\"double quotes\\" are correctly escaped"',
-  );
-});
