@@ -40,12 +40,7 @@ with `node` version 18 available.
 
 <AsideText type="hint">You may have noticed that running `garn enter frontend` generated two files, `flake.nix` and `flake.lock`. These should be committed to your repository rather than gitignored. They both ensure reproducibility, and allow Nix to be used directly rather than only via <Garn/>. </AsideText>
 
-Note that if you do this in a git repo <Garn/> requires that your source
-files be tracked by git. You have to add them to your index, or at least
-mark them as intended additions with `git add --intent-to-add`.<Hovernote>This is a somewhat obnoxious requirement of Nix, intended to ensure that you don't accidentally end up getting different behavior than others will, due to uncommited or ignored files. Likely this requirement will be removed from future <Garn/> versions.</Hovernote>
-
 ```bash
-> git add --intent-to-add frontend
 > garn enter frontend
 [garn] Entering frontend shell. Type 'exit' to exit.
 [...]

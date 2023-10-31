@@ -141,6 +141,21 @@ section:nth-child(even) {
   margin: 0 auto;
 }
 
+.faq details {
+  text-align: left;
+  padding: 20px;
+  border-top: 1px solid #000;
+}
+
+.faq details:last-child {
+  border-bottom: 1px solid #000;
+}
+
+.faq summary {
+  margin: 0;
+  font-weight: 800;
+}
+
 header.nav {
   display: flex;
   background-color: white;

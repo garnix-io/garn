@@ -277,6 +277,113 @@ $ garn run backend.codegen `}
           </div>
         </p>
       </section>
+      <section className="faq">
+        <h1>Frequently Asked Questions</h1>
+
+        <details>
+          <summary>How does garn differ from docker, vagrant, etc?</summary>
+          <p>
+            <Garn /> uses nix instead of containers or VMs to provide
+            dependencies. Nix has a few advantages that makes it easier to work
+            with:
+          </p>
+          <p>
+            For one, Nix runs natively on your machine so there is no overhead
+            of of a VM that you get when running containers on non-linux hosts.
+          </p>
+          <p>
+            Additionally, Nix allows you to combine the declarative environment
+            with your developer environment so entering a shell with all the
+            tools for a project does not remove your ability to use your
+            globally installed tools as well.
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            How can I configure LSP to get error messages and auto-completion
+            for garn.ts in my editor?
+          </summary>
+          <p>
+            <code>garn.ts</code> files are powered by{" "}
+            <a href="https://deno.com/">deno</a>. A lot of the convenience and
+            power for editing your <code>garn.ts</code> files comes from having
+            a working Deno LSP. There are two ways of setting up LSP for editing{" "}
+            <code>garn.ts</code>
+            files: using <Garn /> itself to provide a properly-configured editor
+            with
+            <code>editGarnConfig</code>, or setting up your editor yourself.
+          </p>
+          <h3>
+            <code>editGarnConfig</code>
+          </h3>
+          <p>
+            <Garn /> offers an <code>Executable</code> called{" "}
+            <code>editGarnConfig</code>. It will spin up a vscodium editor that
+            is pre-configured for editing <code>garn.ts</code> files. It won't
+            use or modify your local vscodium settings, if you have any. You can
+            can add it to your <code>garn.ts</code> file like this:
+          </p>
+          <Code
+            header="garn.ts"
+            lineNumbers
+            code="export const edit = garn.editGarnConfig;"
+          />
+          <p>
+            And then run it with <code>garn run edit</code>.
+          </p>
+          <p>
+            This is a very easy way to get up and running with editing{" "}
+            <code>garn.ts</code> files. The disadvantage is that the editor
+            isn't your normal configured editor. So you might consider
+            installing the Deno LSP and configuring your editor:
+          </p>
+          <h3>Installing the Deno LSP and configuring your editor</h3>
+          <p>
+            Alternatively you an install <code>deno</code> (including the Deno
+            LSP) with <Garn /> itself:
+          </p>
+          <Code
+            header="garn.ts"
+            lineNumbers
+            code={`export const deno = garn.mkProject({
+  description: "garn configuration environment",
+  defaultEnvironment: garn.emptyEnvironment.withDevTools([pkgs.deno]),
+}, {});`}
+          />
+          <p>
+            <code>garn enter deno</code> will then drop you in a shell where{" "}
+            <code>deno</code> is available.
+          </p>
+          <p>
+            For configuring your editor to use Deno's LSP refer to{" "}
+            <a href="https://docs.deno.com/runtime/manual/getting_started/setup_your_environment">
+              Deno's environment setup documentation
+            </a>
+            .
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            I'm getting no such file or directory errors for files that exist.
+            What's going on?
+          </summary>
+          <p>
+            <Garn /> uses Nix under the hood which requires files in a git
+            repository be tracked by git in order to see the files.
+          </p>
+          <p>
+            To resolve this make sure to either add untracked files to the git
+            index, or at least mark them as intended additions with{" "}
+            <code>git add --intent-to-add</code>
+          </p>
+          <p>
+            Likely this requirement will be removed from future <Garn />{" "}
+            versions
+          </p>
+        </details>
+      </section>
     </>
   );
 };
