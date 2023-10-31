@@ -101,11 +101,19 @@ export const Main: React.FC = () => {
           {docMenuItems.map(({ name, url }) => (
             <React.Fragment key={name}>
               {url.match(/^(?:https?:)?\/\//) ? (
-                <a href={url} target="_blank" rel="noopener noreferrer" className="gray">
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="gray"
+                >
                   {name}
                 </a>
               ) : (
-                <NavLink to={url} className={({ isActive }) => (isActive ? "black" : "gray")}>
+                <NavLink
+                  to={url}
+                  className={({ isActive }) => (isActive ? "black" : "gray")}
+                >
                   {name}
                 </NavLink>
               )}
@@ -131,7 +139,11 @@ export const Main: React.FC = () => {
       </article>
       <footer>
         <p>
-          Built by <a href="https://garnix.io" className="garnix-name">garnix</a>.
+          Built by{" "}
+          <a href="https://garnix.io" className="garnix-name">
+            garnix
+          </a>
+          .
         </p>
       </footer>
     </>
@@ -150,41 +162,58 @@ export const Info: React.FC = () => {
         </div>
       </div>
       <section>
-        <h1>Have you ever worked on a project where you or someone on your team had the wrong version of node installed? Or golang? Or something else?</h1>
+        <h1>
+          Have you ever worked on a project where you or someone on your team
+          had the wrong version of node installed? Or golang? Or something else?
+        </h1>
         <p>
-          <Garn /> manages all of your project dependencies in an encapsulated environment. <a>Read more</a>
+          <Garn /> manages all of your project dependencies in an encapsulated
+          environment. <a>Read more</a>
         </p>
       </section>
       <section>
-        <h1>Have you ever tried to set up CI and had to push to Github 15 times to get it working like it was locally?</h1>
+        <h1>
+          Have you ever tried to set up CI and had to push to Github 15 times to
+          get it working like it was locally?
+        </h1>
         <p>
-          <Garn /> allows to declare reproducible checks that you can run locally and on CI.  <a>Read more</a>
+          <Garn /> allows to declare reproducible checks that you can run
+          locally and on CI. <a>Read more</a>
         </p>
       </section>
       <section>
-        <h1>Have you ever written a bash script for your project that worked totally fine on your own machine, but didn't on someone else's?</h1>
+        <h1>
+          Have you ever written a bash script for your project that worked
+          totally fine on your own machine, but didn't on someone else's?
+        </h1>
         <p>
-          <Garn /> allows you to write deterministic scripts e.g. bundling, code formatting or code generation. <a>Read more</a>
+          <Garn /> allows you to write deterministic scripts e.g. bundling, code
+          formatting or code generation. <a>Read more</a>
         </p>
         <p className="more">
-          With <Garn />, support scripts for your project are run in a declarative environment, so if it runs for you, it will run for
+          With <Garn />, support scripts for your project are run in a
+          declarative environment, so if it runs for you, it will run for
           everyone on your team.
           <div className="examples">
-            <code><pre>{`
-export const backend = garn.go.mkGoProject({ 
+            <code>
+              <pre>{`
+export const backend = garn.go.mkGoProject({
   description: "Go backend",
   src: ".",
   goVersion: "1.20",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
   .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\`
-            `}</pre></code>
-            <code><pre>{`
+            `}</pre>
+            </code>
+            <code>
+              <pre>{`
 $ protoc protobufs/*.proto
 protoc: command not found
 
 $ garn run backend.gen
-            `}</pre></code>
+            `}</pre>
+            </code>
           </div>
         </p>
       </section>
