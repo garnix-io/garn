@@ -209,7 +209,7 @@ export const Info: React.FC = () => {
           Or golang? Or prettier? Or some other tool? <Garn /> manages all of
           your project dependencies in encapsulated environments. Compilers,
           code-generators, formatters, test-runners, linters and more.{" "}
-          <a href="./docs/tutorial">Read more</a>
+          <a href="./docs/tutorial">Read more...</a>
           <div className="more">
             <Code
               header="garn.ts"
@@ -241,7 +241,8 @@ v18.17.1`}
         </h1>
         <p>
           <Garn /> allows to declare reproducible checks that you can run
-          locally and on CI on Github. <a href="./docs/tutorial">Read more</a>
+          locally and on CI on Github.{" "}
+          <a href="./docs/tutorial">Read more...</a>
         </p>
         <p className="more">
           <Code
@@ -278,7 +279,7 @@ check> No hints`}
           installed... <Garn /> allows you to write deterministic scripts that
           run the same everywhere. For running dev servers, bundling javascript,
           formatting source code, running code generators and more.{" "}
-          <a href="./docs/tutorial">Read more</a>
+          <a href="./docs/tutorial">Read more...</a>
         </p>
         <p className="more">
           <Code
