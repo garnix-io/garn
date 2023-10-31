@@ -201,17 +201,17 @@ export const Info: React.FC = () => {
           />
         </div>
       </div>
-      <section>
+      <section className="scenario">
         <h1>
           Did you ever work on a project and realized you had the wrong node
           version?
         </h1>
         <p>
           Or golang? Or prettier? Or some other tool? <Garn /> manages all of
-          your project dependencies in encapsulated environments. Compilers,
+          your project's dependencies in encapsulated environments. Compilers,
           code-generators, formatters, test-runners, linters and more.{" "}
           <a href="./docs/tutorial">Read more...</a>
-          <div className="more">
+          <div>
             <Code
               header="garn.ts"
               lineNumbers
@@ -235,7 +235,7 @@ v18.17.1`}
           </div>
         </p>
       </section>
-      <section>
+      <section className="scenario">
         <h1>
           Did you ever push to the same branch on Github over and over again,
           just to get CI working like it was locally?
@@ -244,8 +244,6 @@ v18.17.1`}
           <Garn /> allows to declare reproducible checks that you can run
           locally and on CI on Github.{" "}
           <a href="./docs/tutorial">Read more...</a>
-        </p>
-        <p className="more">
           <Code
             header="garn.ts"
             lineNumbers
@@ -271,7 +269,7 @@ check> No hints`}
           <Image src="/images/github_hlint_ci_check.png" header="github ui" />
         </p>
       </section>
-      <section>
+      <section className="scenario">
         <h1>
           Did you ever write a bash script for your project that worked totally
           fine on your own machine, but crashed on someone else's?
@@ -282,8 +280,6 @@ check> No hints`}
           run the same everywhere. For running dev servers, bundling javascript,
           formatting source code, running code generators and more.{" "}
           <a href="./docs/tutorial">Read more...</a>
-        </p>
-        <p className="more">
           <Code
             header="garn.ts"
             lineNumbers
