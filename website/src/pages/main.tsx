@@ -163,12 +163,31 @@ export const Info: React.FC = () => {
       </div>
       <section>
         <h1>
-          Have you ever worked on a project where you or someone on your team
-          had the wrong version of node installed? Or golang? Or something else?
+          Have you ever worked on a project where you had the wrong version of
+          node installed? Or golang? Or something else?
         </h1>
         <p>
-          <Garn /> manages all of your project dependencies in an encapsulated
-          environment. <a>Read more</a>
+          <Garn /> manages all of your project dependencies in encapsulated
+          environments. <a>Read more</a>
+          <div className="more">
+            <code>
+              <pre>{`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+
+export const frontend = garn.javascript.mkNpmProject({
+  description: "my frontend project",
+  src: ".",
+  nodeVersion: "18",
+});`}</pre>
+            </code>
+            <code>
+              <pre>{`$ node
+node: command not found
+$ garn enter frontend
+[garn] Entering frontend shell. Type 'exit' to exit.
+$ node --version
+v18.17.1`}</pre>
+            </code>
+          </div>
         </p>
       </section>
       <section>
@@ -196,23 +215,19 @@ export const Info: React.FC = () => {
           everyone on your team.
           <div className="examples">
             <code>
-              <pre>{`
-export const backend = garn.go.mkGoProject({
+              <pre>{`export const backend = garn.go.mkGoProject({
   description: "Go backend",
   src: ".",
   goVersion: "1.20",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
-  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\`
-            `}</pre>
+  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\` `}</pre>
             </code>
             <code>
-              <pre>{`
-$ protoc protobufs/*.proto
+              <pre>{`$ protoc protobufs/*.proto
 protoc: command not found
 
-$ garn run backend.gen
-            `}</pre>
+$ garn run backend.codegen `}</pre>
             </code>
           </div>
         </p>
