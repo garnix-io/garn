@@ -24,7 +24,7 @@ const Export: React.FC = (props) => (
 const Garn = () => <span className="garnix-name">garn</span>;
 
 const garnTs = (
-  <pre>
+  <>
     <Keyword>import</Keyword> * as garn from{" "}
     <String>"https://garn.io/ts/v0.0.13/mod.ts"</String>;<br />
     <Keyword>import</Keyword> * as{" "}
@@ -36,38 +36,6 @@ it's probably here`}
     </Tooltip>{" "}
     from <String>"https://garn.io/ts/v0.0.13/nixpkgs.ts"</String>;<br />
     <br />
-    <Export>export</Export> <Keyword>const</Keyword> frontend =
-    garn.javascript.mkNpmProject(&#123; <br />
-    {"  "}description: <String>"My npm app"</String>,<br />
-    {"  "}
-    <Tooltip
-      item={
-        <>
-          src: <String>"frontend"</String>
-        </>
-      }
-    >
-      {`Supports mono-repos and multiple languages.`}
-    </Tooltip>
-    ,<br />
-    {"  "}nodeVersion: <String>"18"</String>,<br />
-    &#125;)
-    <br />
-    {"  "}.
-    <Tooltip item="withDevTools">
-      {`withDevTools is all you need
-to add a dev tool to your shell.
-`}
-    </Tooltip>
-    ([pkgs.cowsay])
-    <br />
-    {"  "}.
-    <Tooltip item="addCheck">
-      addCheck adds a *pure* check that you can run locally or on CI.
-    </Tooltip>
-    (<String>"run-tests"</String>)
-    <String>`npm run test -- --watchAll=false`</String>;<br />
-    <br />
     <Export>export</Export> <Keyword>const</Keyword>{" "}
     <Tooltip item="backend">
       {`A Project is a collection of
@@ -77,17 +45,34 @@ executables.
     </Tooltip>{" "}
     = garn.go.mkGoProject(&#123; <br />
     {"  "}description: <String>"A go server"</String>,<br />
-    {"  "}src: <String>"backend"</String>,<br />
+    {"  "}src: <String>"."</String>,<br />
     {"  "}goVersion: <String>"1.20"</String>,<br />
-    &#125;);
+    &#125;)
     <br />
-  </pre>
+    {"  "}.
+    <Tooltip item="withDevTools">
+      {`withDevTools is all you need
+to add a dev tool to your shell.
+`}
+    </Tooltip>
+    ([pkgs.protobuf, pkgs.protoc_gen_go])
+    <br />{"  "}.
+    <Tooltip item="addCheck">
+      addCheck adds a *pure* check that you can run locally or on CI.
+    </Tooltip>
+    (<String>"ensure-formatted"</String>)<String>`go fmt ./...`</String>
+    <br />{"  "}.
+    <Tooltip item="addExecutable">
+      addExecutable
+    </Tooltip>
+    (<String>"start"</String>)<String>`go run main.go`</String>;
+  </>
 );
 
 export const Main: React.FC = () => {
   return (
     <>
-      <header>
+      <header className="nav">
         <Typography variant="h1">
           <Link to="/">garn</Link>
         </Typography>
@@ -150,15 +135,69 @@ export const Main: React.FC = () => {
   );
 };
 
+const terminalExamples = [
+  "check backend.ensure-formatted",
+  "run backend.start",
+  "enter backend",
+  "build backend",
+];
+
 export const Info: React.FC = () => {
+  const [termState, setTermState] = React.useState({ deleting: false, idx: 0, text: '' });
+  const currentExample = terminalExamples[termState.idx];
+
+  React.useEffect(() => {
+    let timeout: NodeJS.Timeout;
+    const type = (delay: number, newState: Partial<typeof termState>) => {
+      timeout = setTimeout(() => {
+        setTermState({
+          ...termState,
+          ...newState,
+        });
+      }, delay);
+    }
+    if (termState.deleting) {
+      if (termState.text.length > 0) {
+        type(5 + Math.random() * 15, {
+          text: currentExample.slice(0, termState.text.length - 1),
+        });
+      } else {
+        type(50, {
+          deleting: false,
+          idx: (termState.idx + 1) % terminalExamples.length,
+        });
+      }
+    } else {
+      if (termState.text.length < currentExample.length) {
+        type(20 + Math.random() * 45, {
+          text: currentExample.slice(0, termState.text.length + 1),
+        });
+      } else {
+        type(2500, { deleting: true });
+      }
+    }
+    return () => clearTimeout(timeout);
+  });
   return (
     <>
       <div className="hero">
-        <h1>garn</h1>
-        <h2>A new way of configuring software projects</h2>
-        <div className="ctas">
-          <Link to="/">Read More</Link>
-          <Link to="/docs/getting_started">Get Started</Link>
+        <div>
+          <h1>garn</h1>
+          <h2>A new way of configuring software projects</h2>
+          <div className="ctas">
+            <Link to="/">Read More</Link>
+            <Link to="/docs/getting_started">Get Started</Link>
+          </div>
+        </div>
+        <div className="">
+          <figure>
+            <header>garn.ts</header>
+            <code className="line-numbers">{garnTs}</code>
+          </figure>
+          <figure>
+            <header>terminal</header>
+            <code>$ garn {termState.text}<div className="cursor" /></code>
+          </figure>
         </div>
       </div>
       <section>

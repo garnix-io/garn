@@ -16,8 +16,10 @@ h1 {
 }
 
 .hero {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
   padding: 80px 0 100px 0;
-  text-align: center;
   border-bottom: 5px solid #000;
 }
 
@@ -27,22 +29,80 @@ h1 {
   margin: 0;
 }
 
+.hero figure {
+  text-align: left;
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #000;
+  font-size: 14px;
+  margin: 20px;
+}
+
+.hero figure header {
+  background: #000;
+  color: #fff;
+  font-size: 16px;
+  padding: 1px 10px;
+}
+
+.hero figure code {
+  display: block;
+  position: relative;
+  white-space: pre;
+  padding: 5px;
+}
+
+.hero figure code.line-numbers {
+  padding-left: 45px;
+}
+
+.hero figure code.line-numbers:before {
+  content: "1\a 2\a 3\a 4\a 5\a 6\a 7\a 8\a 9\a 10\a 11\a 12\a 13\a 14\a 15\a 16\a 17\a 18\a 19\a 20\a 21\a 22\a 23\a 24\a 25\a 26\a 27\a 28\a 29\a 30";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 40px;
+  padding-top: 5px;
+  text-align: center;
+  white-space: pre;
+  border-right: 1px solid rgba(0,0,0,0.1);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+@keyframes cursor{
+  0%   { opacity: 1; }
+  10%  { opacity: 0; }
+  50%  { opacity: 0; }
+  60%  { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+.cursor {
+  position: absolute;
+  display: inline;
+  width: 7px;
+  margin: 2px 0 0 1px;
+  border-bottom: 16px solid #000;
+  animation: cursor 1s infinite;
+}
+
 .ctas {
   display: flex;
   margin-top: 50px;
-  justify-content: center;
 }
 
 .ctas a {
   width: 200px;
   padding: 8px 0;
-  margin: 0 10px;
+  margin-right: 20px;
   background: #000;
   color: #fff;
   border-radius: 999px;
   font-family: 'Josefin Sans', sans-serif;
   font-size: 16px;
   border: 3px solid #000;
+  text-align: center;
 }
 
 .ctas a:first-child {
@@ -90,7 +150,7 @@ section:nth-child(even) {
   margin-top: 10px;
 }
 
-header {
+header.nav {
   display: flex;
   background-color: white;
   position: fixed;
@@ -99,18 +159,18 @@ header {
   right: 0;
   height: 47px;
   padding: 0 10px;
-  border-bottom: 1px solid #000;
+  border-bottom: 5px solid #000;
   z-index: 2;
 }
 
-header h1 {
+header.nav h1 {
   margin: 0;
   font-size: 32px;
   line-height: 35px;
   font-family: "Space Mono", monospace;
 }
 
-header h1 a {
+header.nav h1 a {
   color: black;
 }
 
@@ -189,16 +249,16 @@ figcaption.garn-ts {
   font-size: 100%;
 }
 
-.garn-ts .keyword {
-  color: #227;
+code .keyword {
+  color: #118;
 }
 
-.garn-ts .string {
-  color: #252;
+code .string {
+  color: #161;
 }
 
-.garn-ts .export {
-  color: #722;
+code .export {
+  color: #811;
 }
 
 div.feature {
