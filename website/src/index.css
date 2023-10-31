@@ -142,8 +142,10 @@ section:nth-child(even) {
 }
 
 .faq details {
-  text-align: left;
+  max-width: 900px;
   padding: 20px;
+  margin: 0 auto;
+  text-align: left;
   border-top: 1px solid #000;
 }
 
@@ -154,6 +156,11 @@ section:nth-child(even) {
 .faq summary {
   margin: 0;
   font-weight: 800;
+  font-size: 18px;
+}
+
+.faq details[open] summary {
+  margin-bottom: 30px;
 }
 
 header.nav {
