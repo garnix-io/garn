@@ -62,12 +62,12 @@ figure.codeblock code.line-numbers:before {
   top: 0;
   left: 0;
   height: 100%;
-  width: 40px;
+  width: 35px;
   padding-top: 5px;
   text-align: center;
   white-space: pre;
-  border-right: 1px solid rgba(0,0,0,0.1);
-  color: rgba(0, 0, 0, 0.6);
+  border-right: 1px dotted rgba(0, 0, 0, 0.2);
+  color: rgba(0, 0, 0, 0.3);
 }
 
 @keyframes cursor{
