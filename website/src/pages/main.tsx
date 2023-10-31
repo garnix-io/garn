@@ -183,7 +183,7 @@ export const Info: React.FC = () => {
           <h1>garn</h1>
           <h2>A new way of configuring software projects</h2>
           <div className="ctas">
-            <Link to="/">Read More</Link>
+            <Link to="/docs/tutorial">Read More</Link>
             <Link to="/docs/getting_started">Get Started</Link>
           </div>
         </div>
@@ -208,7 +208,8 @@ export const Info: React.FC = () => {
         <p>
           Or golang? Or prettier? Or some other tool? <Garn /> manages all of
           your project dependencies in encapsulated environments. Compilers,
-          code-generators, formatters, test-runners, linters and more.
+          code-generators, formatters, test-runners, linters and more.{" "}
+          <a href="./docs/tutorial">Read more</a>
           <div className="more">
             <Code
               header="garn.ts"
@@ -235,47 +236,69 @@ v18.17.1`}
       </section>
       <section>
         <h1>
-          Have you ever tried to set up CI and had to push to Github 15 times to
-          get it working like it was locally?
+          Did you ever push to the same branch on Github over and over again,
+          just to get CI working like it was locally?
         </h1>
         <p>
           <Garn /> allows to declare reproducible checks that you can run
-          locally and on CI. <a>Read more</a>
+          locally and on CI on Github. <a href="./docs/tutorial">Read more</a>
+        </p>
+        <p className="more">
+          <Code
+            header="garn.ts"
+            lineNumbers
+            code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+import * as nixpkgs from "https://garn.io/ts/v0.0.13/nixpkgs.ts";
+
+export const backend = garn.haskell
+  .mkHaskellProject({
+    description: "my haskell backend",
+    executable: "server",
+    compiler: "ghc94",
+    src: ".",
+  })
+  .withDevTools([nixpkgs.hlint])
+  .addCheck("hlint")\`hlint *.hs\`; `}
+          />
+          <Code
+            header="terminal"
+            code={`$ garn check
+[...]
+check> No hints`}
+          />
         </p>
       </section>
       <section>
         <h1>
-          Have you ever written a bash script for your project that worked
-          totally fine on your own machine, but didn't on someone else's?
+          Did you ever write a bash script for your project that worked totally
+          fine on your own machine, but crashed on someone else's?
         </h1>
         <p>
-          <Garn /> allows you to write deterministic scripts e.g. bundling, code
-          formatting or code generation. <a>Read more</a>
+          Well, it was probably their fault for not having the right tools
+          installed... <Garn /> allows you to write deterministic scripts that
+          run the same everywhere. For running dev servers, bundling javascript,
+          formatting source code, running code generators and more.{" "}
+          <a href="./docs/tutorial">Read more</a>
         </p>
         <p className="more">
-          With <Garn />, support scripts for your project are run in a
-          declarative environment, so if it runs for you, it will run for
-          everyone on your team.
-          <div className="examples">
-            <Code
-              header="garn.ts"
-              lineNumbers
-              code={`export const backend = garn.go.mkGoProject({
+          <Code
+            header="garn.ts"
+            lineNumbers
+            code={`export const backend = garn.go.mkGoProject({
   description: "Go backend",
   src: ".",
   goVersion: "1.20",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
   .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\` `}
-            />
-            <Code
-              header="terminal"
-              code={`$ protoc protobufs/*.proto
+          />
+          <Code
+            header="terminal"
+            code={`$ protoc protobufs/*.proto
 protoc: command not found
 
 $ garn run backend.codegen `}
-            />
-          </div>
+          />
         </p>
       </section>
       <section className="faq">
