@@ -202,12 +202,13 @@ export const Info: React.FC = () => {
       </div>
       <section>
         <h1>
-          Have you ever worked on a project where you had the wrong version of
-          node installed? Or golang? Or something else?
+          Did you ever work on a project and realized you had the wrong node
+          version?
         </h1>
         <p>
-          <Garn /> manages all of your project dependencies in encapsulated
-          environments. <a>Read more</a>
+          Or golang? Or prettier? Or some other tool? <Garn /> manages all of
+          your project dependencies in encapsulated environments. Compilers,
+          code-generators, formatters, test-runners, linters and more.
           <div className="more">
             <Code
               header="garn.ts"
@@ -284,15 +285,15 @@ $ garn run backend.codegen `}
           <summary>How does garn differ from docker, vagrant, etc?</summary>
           <p>
             <Garn /> uses nix instead of containers or VMs to provide
-            dependencies. Nix has a few advantages that makes it easier to work
+            dependencies. nix has a few advantages that makes it easier to work
             with:
           </p>
           <p>
-            For one, Nix runs natively on your machine so there is no overhead
+            For one, nix runs natively on your machine so there is no overhead
             of of a VM that you get when running containers on non-linux hosts.
           </p>
           <p>
-            Additionally, Nix allows you to combine the declarative environment
+            Additionally, nix allows you to combine the declarative environment
             with your developer environment so entering a shell with all the
             tools for a project does not remove your ability to use your
             globally installed tools as well.
@@ -370,7 +371,7 @@ $ garn run backend.codegen `}
             What's going on?
           </summary>
           <p>
-            <Garn /> uses Nix under the hood which requires files in a git
+            <Garn /> uses nix under the hood which requires files in a git
             repository be tracked by git in order to see the files.
           </p>
           <p>
