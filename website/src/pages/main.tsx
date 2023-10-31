@@ -56,16 +56,15 @@ to add a dev tool to your shell.
 `}
     </Tooltip>
     ([pkgs.protobuf, pkgs.protoc_gen_go])
-    <br />{"  "}.
+    <br />
+    {"  "}.
     <Tooltip item="addCheck">
       addCheck adds a *pure* check that you can run locally or on CI.
     </Tooltip>
     (<String>"ensure-formatted"</String>)<String>`go fmt ./...`</String>
-    <br />{"  "}.
-    <Tooltip item="addExecutable">
-      addExecutable
-    </Tooltip>
-    (<String>"start"</String>)<String>`go run main.go`</String>;
+    <br />
+    {"  "}.<Tooltip item="addExecutable">addExecutable</Tooltip>(
+    <String>"start"</String>)<String>`go run main.go`</String>;
   </>
 );
 
@@ -143,7 +142,11 @@ const terminalExamples = [
 ];
 
 export const Info: React.FC = () => {
-  const [termState, setTermState] = React.useState({ deleting: false, idx: 0, text: '' });
+  const [termState, setTermState] = React.useState({
+    deleting: false,
+    idx: 0,
+    text: "",
+  });
   const currentExample = terminalExamples[termState.idx];
 
   React.useEffect(() => {
@@ -155,7 +158,7 @@ export const Info: React.FC = () => {
           ...newState,
         });
       }, delay);
-    }
+    };
     if (termState.deleting) {
       if (termState.text.length > 0) {
         type(5 + Math.random() * 15, {
@@ -196,7 +199,10 @@ export const Info: React.FC = () => {
           </figure>
           <figure>
             <header>terminal</header>
-            <code>$ garn {termState.text}<div className="cursor" /></code>
+            <code>
+              $ garn {termState.text}
+              <div className="cursor" />
+            </code>
           </figure>
         </div>
       </div>
