@@ -15,44 +15,118 @@ h1 {
     font-size: 32px;
 }
 
+.hero {
+  padding: 80px 0 100px 0;
+  text-align: center;
+  border-bottom: 5px solid #000;
+}
+
+.hero h1 {
+  font-family: "Space Mono", monospace;
+  font-size: 50px;
+  margin: 0;
+}
+
+.ctas {
+  display: flex;
+  margin-top: 50px;
+  justify-content: center;
+}
+
+.ctas a {
+  width: 200px;
+  padding: 8px 0;
+  margin: 0 10px;
+  background: #000;
+  color: #fff;
+  border-radius: 999px;
+  font-family: 'Josefin Sans', sans-serif;
+  font-size: 16px;
+  border: 3px solid #000;
+}
+
+.ctas a:first-child {
+  background: #fff;
+  color: #000;
+  border-color: #000;
+}
+
+section h1 {
+  font-family: sans-serif;
+  line-height: 50px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+section {
+  text-align: center;
+  padding: 150px 0px;
+  border-bottom: 5px solid #000;
+}
+
+section h1 {
+  margin-bottom: 50px;
+  font-family: 'Josefin Sans', sans-serif;
+}
+
+section:nth-child(even) {
+  background: #eee;
+}
+
+.more {
+  display: none;
+  text-align: left;
+  padding: 0 20px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.more code {
+  display: block;
+  border: 2px solid #000;
+  padding: 5px;
+  min-width: 300px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
 header {
-  --width: min(calc(100% - var(--page-padding)*2), 700px);;
+  display: flex;
   background-color: white;
-  grid-area: header;
   position: fixed;
   top: 0;
-  left: 50%;
-  width: var(--width);
-  margin-left: calc(var(--width) / -2);
-  text-align: center;
-  border-bottom: 1px solid;
+  left: 0;
+  right: 0;
+  height: 47px;
+  padding: 0 10px;
+  border-bottom: 1px solid #000;
   z-index: 2;
 }
 
 header h1 {
-  margin-bottom: 0;
+  margin: 0;
   font-size: 32px;
+  line-height: 35px;
+  font-family: "Space Mono", monospace;
 }
 
 header h1 a {
   color: black;
 }
 
-.discord-link {
-  position: absolute;
-  top: 20px;
-  right: 45px;
+.links {
+  display: flex;
+  align-items: center;
+}
+
+.links > * {
+  margin-left: 10px;
 }
 
 .discord-link svg {
   width: 25px;
   height: 25px;
-}
-
-.github-link {
-  position: absolute;
-  top: 20px;
-  right: 10px;
 }
 
 .github-link svg {
@@ -61,17 +135,15 @@ header h1 a {
 }
 
 nav {
-  border-bottom: 1px solid;
-  /* background-color: #f5f8fa; */
-  /* background-color: #fafbfc; */
-  text-align: center;
-  margin-bottom: 20px;
-  padding-top: 3px;
-  padding-bottom: 3px;
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-template-areas: "home docs";
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  margin-left: 20px;
   font-size: 16px;
+}
+
+nav > * {
+  margin: 0 10px;
 }
 
 .nav-bar-home {
@@ -156,6 +228,7 @@ blockquote p {
 }
 
 .docs {
+  padding: 10px;
   font-size: 16px;
 }
 
@@ -173,8 +246,9 @@ ul {
 
 article {
   /* display: grid; */
-  grid-area: article;
-  counter-reset: hovernotes;
+  /* grid-area: article; */
+  /* counter-reset: hovernotes; */
+  width: 100%;
 }
 
 .hovernote {
@@ -249,7 +323,7 @@ article {
 
 .main-content {
   text-align: left;
-  margin-top: 20px;
+  margin-top: 50px;
   width: 100%;
   display: block;
   position: relative;
@@ -280,7 +354,7 @@ footer a {
 body {
   background-color: white;
   margin: 0;
-  font-family: "Space Mono", monospace;
+  font-family: 'Josefin Sans', sans-serif;
   font-variant-ligatures: none; /* inappropriate fi/fl ligatures in Space Mono */
 }
 
@@ -290,7 +364,8 @@ a {
 }
 
 #root {
-  display: grid;
+  margin: 0 auto;
+  width: 100%;
   min-height: 100vh;
   grid-template-rows: 70px 1fr auto;
   grid-template-columns: minmax(var(--page-padding), auto) minmax(100px, 700px) minmax(var(--page-padding), auto);
@@ -370,10 +445,6 @@ div.garn-description {
   font-size: 120%;
   text-align: center;
   margin: 10px;
-}
-
-section.hero h1 {
-  margin: 0;
 }
 
 figure {

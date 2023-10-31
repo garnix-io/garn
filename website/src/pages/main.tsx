@@ -21,6 +21,8 @@ const Export: React.FC = (props) => (
   <span className="export">{props.children}</span>
 );
 
+const Garn = () => <span className="garnix-name">garn</span>;
+
 const garnTs = (
   <pre>
     <Keyword>import</Keyword> * as garn from{" "}
@@ -89,17 +91,6 @@ export const Main: React.FC = () => {
         <Typography variant="h1">
           <Link to="/">garn</Link>
         </Typography>
-        <DiscordLink
-          href="https://discord.gg/XtDrPsqpVx"
-          title="Join the Discord Channel"
-        />
-        <GithubLink
-          href="https://github.com/garnix-io/garn"
-          title="View on Github"
-        />
-      </header>
-
-      <article>
         <nav>
           <NavLink
             className={({ isActive }) => (isActive ? "black" : "gray")}
@@ -107,15 +98,40 @@ export const Main: React.FC = () => {
           >
             home
           </NavLink>
-          <DropdownMenu label="docs" items={docMenuItems} />
+          {docMenuItems.map(({ name, url }) => (
+            <React.Fragment key={name}>
+              {url.match(/^(?:https?:)?\/\//) ? (
+                <a href={url} target="_blank" rel="noopener noreferrer" className="gray">
+                  {name}
+                </a>
+              ) : (
+                <NavLink to={url} className={({ isActive }) => (isActive ? "black" : "gray")}>
+                  {name}
+                </NavLink>
+              )}
+            </React.Fragment>
+          ))}
         </nav>
+        <div className="links">
+          <DiscordLink
+            href="https://discord.gg/XtDrPsqpVx"
+            title="Join the Discord Channel"
+          />
+          <GithubLink
+            href="https://github.com/garnix-io/garn"
+            title="View on Github"
+          />
+        </div>
+      </header>
+
+      <article>
         <div className="main-content">
           <Outlet />
         </div>
       </article>
       <footer>
         <p>
-          Built by <a href="https://garnix.io">garnix</a>.
+          Built by <a href="https://garnix.io" className="garnix-name">garnix</a>.
         </p>
       </footer>
     </>
@@ -125,6 +141,55 @@ export const Main: React.FC = () => {
 export const Info: React.FC = () => {
   return (
     <>
+      <div className="hero">
+        <h1>garn</h1>
+        <h2>A new way of configuring software projects</h2>
+        <div className="ctas">
+          <Link to="/">Read More</Link>
+          <Link to="/docs/getting_started">Get Started</Link>
+        </div>
+      </div>
+      <section>
+        <h1>Have you ever worked on a project where you or someone on your team had the wrong version of node installed? Or golang? Or something else?</h1>
+        <p>
+          <Garn /> manages all of your project dependencies in an encapsulated environment. <a>Read more</a>
+        </p>
+      </section>
+      <section>
+        <h1>Have you ever tried to set up CI and had to push to Github 15 times to get it working like it was locally?</h1>
+        <p>
+          <Garn /> allows to declare reproducible checks that you can run locally and on CI.  <a>Read more</a>
+        </p>
+      </section>
+      <section>
+        <h1>Have you ever written a bash script for your project that worked totally fine on your own machine, but didn't on someone else's?</h1>
+        <p>
+          <Garn /> allows you to write deterministic scripts e.g. bundling, code formatting or code generation. <a>Read more</a>
+        </p>
+        <p className="more">
+          With <Garn />, support scripts for your project are run in a declarative environment, so if it runs for you, it will run for
+          everyone on your team.
+          <div className="examples">
+            <code><pre>{`
+export const backend = garn.go.mkGoProject({ 
+  description: "Go backend",
+  src: ".",
+  goVersion: "1.20",
+})
+  .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
+  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\`
+            `}</pre></code>
+            <code><pre>{`
+$ protoc protobufs/*.proto
+protoc: command not found
+
+$ garn run backend.gen
+            `}</pre></code>
+          </div>
+        </p>
+      </section>
+
+      {/*
       <section className="lede">
         <h1>garn, at your service</h1>
         <div className="garn-description">
@@ -201,6 +266,7 @@ export const Info: React.FC = () => {
           <Asciinema src={lspDemoCastUrl} />
         </div>
       </section>
+      */}
     </>
   );
 };
