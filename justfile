@@ -8,7 +8,7 @@ pre-push: fmt github-ci
 fast-pre-push: fmt test check-examples typescript-check test-ts
 
 # Run checks that we can’t yet run via the flake
-github-ci: test codegen check-isolated-garn check-examples test-ts
+github-ci: codegen test check-isolated-garn check-examples test-ts
 
 fmt: fmt-nix fmt-haskell fmt-typescript hpack
 
