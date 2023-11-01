@@ -355,23 +355,27 @@ $ garn run backend.codegen `}
             power for editing your <code>garn.ts</code> files comes from having
             a working Deno LSP. There are two ways of setting up LSP for editing{" "}
             <code>garn.ts</code> files: using <Garn /> itself to provide a
-            properly-configured editor with
-            <code>editGarnConfig</code>, or setting up your editor yourself.
+            properly-configured editor with <code>editGarnConfig</code>, or
+            using <Garn /> to provide <code>deno</code> and setting up your
+            editor configuration yourself.
           </p>
           <h3>
             <code>editGarnConfig</code>
           </h3>
           <p>
             <Garn /> offers an <code>Executable</code> called{" "}
-            <code>editGarnConfig</code>. It will spin up a vscodium editor that
-            is pre-configured for editing <code>garn.ts</code> files. It won't
-            use or modify your local vscodium settings, if you have any. You can
-            can add it to your <code>garn.ts</code> file like this:
+            <code>editGarnConfig</code>. It will spin up a{" "}
+            <a href="https://vscodium.com/">vscodium</a> editor that is
+            pre-configured for editing <code>garn.ts</code> files. It won't use
+            or modify your local vscodium settings, if you have any. You can can
+            add it to your <code>garn.ts</code> file like this:
           </p>
           <Code
             header="garn.ts"
             lineNumbers
-            code="export const edit = garn.editGarnConfig;"
+            code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+
+export const edit = garn.editGarnConfig; `}
           />
           <p>
             And then run it with <code>garn run edit</code>.
@@ -390,7 +394,9 @@ $ garn run backend.codegen `}
           <Code
             header="garn.ts"
             lineNumbers
-            code={`export const deno = garn.mkProject({
+            code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+
+export const deno = garn.mkProject({
   description: "garn configuration environment",
   defaultEnvironment: garn.emptyEnvironment.withDevTools([pkgs.deno]),
 }, {});`}
