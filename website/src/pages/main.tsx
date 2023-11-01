@@ -1,7 +1,7 @@
 import React from "react";
 import { DiscordLink, GithubLink } from "../components/HeaderLinks";
 import { Tooltip } from "../components/Hovernote";
-import { Typography } from "../components/Typography";
+import { Garnix, Typography } from "../components/Typography";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { docMenuItems } from "./docs";
 import { Code } from "../components/Code";
@@ -107,7 +107,7 @@ export const Main: React.FC = () => {
           />
           <GithubLink
             href="https://github.com/garnix-io/garn"
-            title="View on Github"
+            title="View on GitHub"
           />
         </div>
       </header>
@@ -239,12 +239,16 @@ v18.17.1`}
       </section>
       <section className="scenario">
         <h1>
-          Did you ever push to the same branch on Github over and over again,
-          just to get CI working like it was locally?
+          Did you ever push to the same branch on GitHub over and over again,
+          just to get CI working?
         </h1>
         <p>
           <Garn /> allows to declare reproducible checks that you can run
-          locally and on CI on Github.
+          locally in completely deterministic environments. And if you enable{" "}
+          <a href="https://garnix.io">
+            <Garnix />
+          </a>{" "}
+          on your GitHub repo, you get the same exact checks on CI.
           <Code
             header="garn.ts"
             lineNumbers
