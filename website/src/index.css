@@ -15,6 +15,7 @@
   --border-color: hsl(var(--hue), 60%, 30%);
   --body-bg: hsl(var(--hue), 20%, 99%);
   --body-fg:  hsl(var(--hue), 60%, 20%);
+  --footer-height: 140px;
 }
 
 h1 {
@@ -281,7 +282,6 @@ article {
 
 .main-content {
   text-align: left;
-  margin-top: 50px;
   width: 100%;
   display: block;
   position: relative;
@@ -296,11 +296,15 @@ article {
 */
 
 footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   text-align: center;
   background: var(--footer-bg);
-  grid-area: footer;
+  height: var(--footer-height);
   padding-top: 2vh;
-  padding-bottom: 4vh;
+  box-sizing: border-box;
   border-top: 5px solid var(--border-color);
 }
 
@@ -323,15 +327,11 @@ a {
 }
 
 #root {
-  margin: 0 auto;
-  width: 100%;
+  position: relative;
   min-height: 100vh;
-  grid-template-rows: 70px 1fr auto;
-  grid-template-columns: minmax(var(--page-padding), auto) minmax(100px, 700px) minmax(var(--page-padding), auto);
-  grid-template-areas:
-    ". header ."
-    ". article . "
-    ". footer .";
+  padding-top: 50px;
+  padding-bottom: calc(var(--footer-height) + 10px);
+  box-sizing: border-box;
 }
 
 button {
