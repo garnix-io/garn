@@ -314,8 +314,8 @@ $ garn run backend.codegen `}
           <p>
             <Garn /> uses nix instead of containers or VMs to provide
             dependencies. These dependencies will all be installed into the nix
-            store (in /nix/store) and will be provided from there in the
-            environments that you create with <Garn />.
+            store (in <code>/nix/store</code>) and will be provided from there
+            in the environments that you create with <Garn />.
           </p>
           <p>
             That means that <Garn /> scripts and checks and everything else you
@@ -354,9 +354,8 @@ $ garn run backend.codegen `}
             <a href="https://deno.com/">deno</a>. A lot of the convenience and
             power for editing your <code>garn.ts</code> files comes from having
             a working Deno LSP. There are two ways of setting up LSP for editing{" "}
-            <code>garn.ts</code>
-            files: using <Garn /> itself to provide a properly-configured editor
-            with
+            <code>garn.ts</code> files: using <Garn /> itself to provide a
+            properly-configured editor with
             <code>editGarnConfig</code>, or setting up your editor yourself.
           </p>
           <h3>
