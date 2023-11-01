@@ -286,6 +286,7 @@ article {
 }
 
 .tooltip-content {
+  color:#000;
   content: attr(data-hover);
   border: solid 1px black;
   background-color: white;

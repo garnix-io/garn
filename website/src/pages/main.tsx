@@ -1,14 +1,11 @@
 import React from "react";
 import { DiscordLink, GithubLink } from "../components/HeaderLinks";
-import { Tooltip } from "../components/Hovernote";
-import { Garnix, Typography } from "../components/Typography";
+import { Garn, Garnix, Typography } from "../components/Typography";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { docMenuItems } from "./docs";
 import { Code } from "../components/Code";
 import { LandingPageScenario } from "../components/LandingPageScenario";
 import { Hero } from "../components/Hero";
-
-const Garn = () => <span className="garnix-name">garn</span>;
 
 export const Main: React.FC = () => {
   return (
@@ -176,7 +173,7 @@ check> No hints`}
   goVersion: "1.20",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
-  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\` `}
+  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\`; `}
             />
             <Code
               header="terminal"

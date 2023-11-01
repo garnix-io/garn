@@ -1,12 +1,13 @@
 import React from "react";
+import { Garn } from "../Typography";
 import { Link } from "react-router-dom";
 import { Code } from "../Code";
 import { Tooltip } from "../Hovernote";
 import "./stylesheet.css";
 
 const terminalExamples = [
-  "check backend.ensure-formatted",
-  "run backend.start",
+  "check backend.no-todos-allowed",
+  "run backend.dev-server",
   "enter backend",
   "build backend",
 ];
@@ -90,7 +91,16 @@ const Export: React.FC = (props) => (
 const garnTs = (
   <>
     <Keyword>import</Keyword> * as garn from{" "}
-    <String>"https://garn.io/ts/v0.0.13/mod.ts"</String>;<br />
+    <String>
+      "
+      <Tooltip item="https://garn.io/ts/v0.0.13/mod.ts">
+        <Garn /> uses Deno to run 'garn.ts' files. This means you can import
+        dependencies directly through URLs. But you don't need to have Deno
+        installed, <Garn /> takes care of that for you.
+      </Tooltip>
+      "
+    </String>
+    ;<br />
     <Keyword>import</Keyword> * as{" "}
     <Tooltip item="pkgs">
       {`This is a gigantic collection
@@ -119,15 +129,18 @@ executables.
 to add a dev tool to your shell.
 `}
     </Tooltip>
-    ([pkgs.protobuf, pkgs.protoc_gen_go])
+    ([pkgs.ripgrep, pkgs.air])
     <br />
     {"  "}.
     <Tooltip item="addCheck">
-      addCheck adds a *pure* check that you can run locally or on CI.
+      addCheck adds a <em>pure</em> check that you can run locally or on CI.
     </Tooltip>
-    (<String>"ensure-formatted"</String>)<String>`go fmt ./...`</String>
+    (<String>"no-todos-allowed"</String>)<String>`! rg -i todo .`</String>
     <br />
-    {"  "}.<Tooltip item="addExecutable">addExecutable</Tooltip>(
-    <String>"start"</String>)<String>`go run main.go`</String>;
+    {"  "}.
+    <Tooltip item="addExecutable">
+      addExecutable adds a script that you can run locally with 'garn run'.
+    </Tooltip>
+    (<String>"dev-server"</String>)<String>`air main.go`</String>;
   </>
 );
