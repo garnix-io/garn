@@ -142,13 +142,13 @@ source <(garn --bash-completion-script `which garn`)
 
 If you have `oh-my-zsh` installed, you likely already have a completion directory (`~/.cache/oh-my-zsh/completions` or `~/.oh-my-zsh/completions`). In that case, use:
 
-```sh
+```shell
 garn --zsh-completion-script `which garn` > ~/.cache/oh-my-zsh/completions/_garn
 ```
 
 Otherwise, check your `$fpath` variable to see if it already includes a directory for user-defined completions. If it does, use:
 
-```sh
+```shell
 garn --zsh-completion-script `which garn` > $DIRECTORY_IN_YOUR_FPATH/_garn
 ```
 
@@ -160,7 +160,7 @@ If it does not, please refer to `zsh`s documentation about how to set up user-de
 Assuming `~/.config/fish/completions` exists and is in your `$fish_completion_path` (it should be), run:
 
 
-```sh
+```shell
 garn --fish-completion-script `which garn` > ~/.config/fish/completions/garn.fish
 ```
 
