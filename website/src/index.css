@@ -63,9 +63,10 @@ figure.codeblock code.line-numbers:before {
   top: 0;
   left: 0;
   height: 100%;
-  width: 35px;
+  width: 25px;
   padding-top: 5px;
-  text-align: center;
+  padding-right: 10px;
+  text-align: right;
   white-space: pre;
   border-right: 1px dotted rgba(0, 0, 0, 0.2);
   color: rgba(0, 0, 0, 0.3);
