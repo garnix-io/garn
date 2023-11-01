@@ -35,6 +35,7 @@ figure.codeblock header {
 figure.codeblock code {
   display: block;
   margin: 5px 0;
+  padding: 0 10px;
   position: relative;
   white-space: pre;
   overflow: auto;
