@@ -1,6 +1,7 @@
 import { Initializer } from "../base.ts";
 import * as fs from "https://deno.land/std@0.201.0/fs/mod.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
+import { camelCase } from "https://deno.land/x/case@2.2.0/mod.ts";
 import { join } from "https://deno.land/std@0.201.0/path/mod.ts";
 import { parseJson } from "../internal/utils.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
@@ -33,7 +34,9 @@ export const npmInitializer: Initializer = (dir) => {
     makeTarget: () =>
       [
         outdent`
-          export const ${result.data.name || "npmProject"} = mkNpmProject({
+          export const ${camelCase(
+            result.data.name || "npmProject",
+          )} = garn.javascript.mkNpmProject({
             description: "${result.data.description || "An NPM project"}",
             src: ".",
             nodeVersion: "18",
