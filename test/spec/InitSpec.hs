@@ -134,4 +134,5 @@ spec = do
             |]
 
 rewriteImportsToLocalhost :: IO ()
-rewriteImportsToLocalhost = cmd_ "sd" "https://garn.io/ts/v[0-9]*\\.[0-9]*\\.[0-9]*/" "http://localhost:8777/" "garn.ts"
+rewriteImportsToLocalhost = do
+  cmd_ "sd" "https://garn.io/ts/v[0-9]+\\.[0-9]+\\.[0-9]+/" "http://localhost:8777/" "garn.ts"
