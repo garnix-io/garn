@@ -82,49 +82,57 @@ export const Info: React.FC = () => {
       <Hero />
       <LandingPageScenario
         title="Have you ever worked on a project and realized you had the wrong node version?"
-        description={<>
-          Or golang? Or prettier? Or some other tool? <Garn /> manages all of
-          your project's dependencies in encapsulated environments. Compilers,
-          code-generators, formatters, test-runners, linters and more.
-        </>}
-        examples={<>
-          <Code
-            header="garn.ts"
-            lineNumbers
-            code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+        description={
+          <>
+            Or golang? Or prettier? Or some other tool? <Garn /> manages all of
+            your project's dependencies in encapsulated environments. Compilers,
+            code-generators, formatters, test-runners, linters and more.
+          </>
+        }
+        examples={
+          <>
+            <Code
+              header="garn.ts"
+              lineNumbers
+              code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "my frontend project",
   src: ".",
   nodeVersion: "18",
 });`}
-          />
-          <Code
-            header="terminal"
-            code={`$ node
+            />
+            <Code
+              header="terminal"
+              code={`$ node
 node: command not found
 $ garn enter frontend
 [garn] Entering frontend shell. Type 'exit' to exit.
 $ node --version
 v18.17.1`}
-          />
-        </>}
+            />
+          </>
+        }
       />
       <LandingPageScenario
-        title="Have you ever pushed to the same branch on GitHub over and over again, just to get CI working?"
-        description={<>
-          <Garn /> allows to declare reproducible checks that you can run
-          locally in completely deterministic environments. And if you enable{" "}
-          <a href="https://garnix.io">
-            <Garnix />
-          </a>{" "}
-          on your GitHub repo, you get the same exact checks on CI.
-        </>}
-        examples={<>
-          <Code
-            header="garn.ts"
-            lineNumbers
-            code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+        title="Have you ever pushed to GitHub over and over again, just to get CI working?"
+        description={
+          <>
+            <Garn /> allows to declare reproducible checks that you can run
+            locally in completely deterministic environments. And if you enable{" "}
+            CI (like{" "}
+            <a href="https://garnix.io">
+              <Garnix />
+            </a>
+            ) on your GitHub repo, you get the same exact checks there.
+          </>
+        }
+        examples={
+          <>
+            <Code
+              header="garn.ts"
+              lineNumbers
+              code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
 import * as nixpkgs from "https://garn.io/ts/v0.0.13/nixpkgs.ts";
 
 export const backend = garn.haskell
@@ -136,43 +144,49 @@ export const backend = garn.haskell
   })
   .withDevTools([nixpkgs.hlint])
   .addCheck("hlint")\`hlint *.hs\`; `}
-          />
-          <Code
-            header="terminal"
-            code={`$ garn check
+            />
+            <Code
+              header="terminal"
+              code={`$ garn check
 [...]
 check> No hints`}
-          />
-        </>}
+            />
+          </>
+        }
       />
       <LandingPageScenario
         title="Have you ever written a bash script that worked totally fine on your machine, but crashed on someone else's?"
-        description={<>
-          Well, it was probably their fault for not having the right tools
-          installed... <Garn /> allows you to add deterministic scripts to your
-          projects that run the same everywhere. Use them to run dev servers,
-          bundle javascript, format source code, run code generators and more.
-        </>}
-        examples={<>
-          <Code
-            header="garn.ts"
-            lineNumbers
-            code={`export const backend = garn.go.mkGoProject({
+        description={
+          <>
+            Well, it was probably their fault for not having the right tools
+            installed... <Garn /> allows you to add deterministic scripts to
+            your projects that run the same everywhere. Use them to run dev
+            servers, bundle javascript, format source code, run code generators
+            and more.
+          </>
+        }
+        examples={
+          <>
+            <Code
+              header="garn.ts"
+              lineNumbers
+              code={`export const backend = garn.go.mkGoProject({
   description: "Go backend",
   src: ".",
   goVersion: "1.20",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
   .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\` `}
-          />
-          <Code
-            header="terminal"
-            code={`$ protoc protobufs/*.proto
+            />
+            <Code
+              header="terminal"
+              code={`$ protoc protobufs/*.proto
 protoc: command not found
 
 $ garn run backend.codegen `}
-          />
-        </>}
+            />
+          </>
+        }
       />
       <section className="faq">
         <h1>Frequently Asked Questions</h1>
@@ -200,7 +214,7 @@ $ garn run backend.codegen `}
 
         <details>
           <summary>
-            How does garn differ from npm, cabal and other language specific
+            How does garn differ from npm, cabal and other language-specific
             tools?
           </summary>
           <p>
@@ -209,6 +223,18 @@ $ garn run backend.codegen `}
             workflows for all sub-projects. It also means that programmers that
             are unfamiliar with the toolchain of a project can use <Garn /> to
             get started quickly.
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            What languages does <Garn /> support?
+          </summary>
+          <p>
+            <Garn /> currently supports <strong>go</strong>,{" "}
+            <strong>npm</strong> and <strong>haskell</strong>. If you'd like to
+            see support for other languages or toolchains please{" "}
+            <a href="https://github.com/garnix-io/garn/issues">let us know</a>.
           </p>
         </details>
 
