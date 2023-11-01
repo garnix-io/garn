@@ -57,14 +57,11 @@ spec = do
                 src: "."
               })
             |]
-        let check = do
-              output <- runGarn ["build", "test"] "" repoDir Nothing
-              onTestFailureLog output
-              (StdoutTrim output) <- cmd "./result/bin/test"
-              output `shouldBe` "hello world"
-        check
         rewriteImportsToLocalhost
-        check
+        output <- runGarn ["build", "test"] "" repoDir Nothing
+        onTestFailureLog output
+        (StdoutTrim output) <- cmd "./result/bin/test"
+        output `shouldBe` "hello world"
 
       it "can initialize go projects" $ \onTestFailureLog -> do
         writeFile
@@ -100,15 +97,11 @@ spec = do
                 goVersion: "1.20",
               });
             |]
-        let check = do
-              output <- runGarn ["build", "someGoProject"] "" repoDir Nothing
-              onTestFailureLog output
-              (StdoutTrim output) <- cmd "./result/bin/some-go-project"
-              output `shouldBe` "hello world"
-        -- TODO: Currently broken on v0.0.13, we should re-enable this on v0.0.14.
-        -- check
         rewriteImportsToLocalhost
-        check
+        output <- runGarn ["build", "someGoProject"] "" repoDir Nothing
+        onTestFailureLog output
+        (StdoutTrim output) <- cmd "./result/bin/some-go-project"
+        output `shouldBe` "hello world"
 
       it "can initialize npm projects" $ \onTestFailureLog -> do
         writeFile
@@ -124,13 +117,10 @@ spec = do
         output <- runGarn ["init"] "" repoDir Nothing
         onTestFailureLog output
         stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
-        let check = do
-              output <- runGarn ["run", "myProject.start"] "" repoDir Nothing
-              onTestFailureLog output
-              stdout output `shouldContain` "starting my project..."
-        check
         rewriteImportsToLocalhost
-        check
+        output <- runGarn ["run", "myProject.start"] "" repoDir Nothing
+        onTestFailureLog output
+        stdout output `shouldContain` "starting my project..."
 
       it "logs unexpected errors" $ \onTestFailureLog -> do
         writeFile "garn.cabal" [i| badCabalfile |]
