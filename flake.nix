@@ -167,6 +167,7 @@
               ourHaskell.cabal2nix
               fhi.packages.${system}.default
               self.packages.${system}.cabal2json
+              sd
             ];
           };
         };

@@ -4,90 +4,144 @@ module InitSpec where
 
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
+import Development.Shake (StdoutTrim (..), cmd, cmd_)
 import System.Directory
 import Test.Hspec
 import Test.Mockery.Directory
 import Test.Mockery.Environment
 import TestUtils
 
+wrapTest :: SpecWith (ProcResult -> IO ()) -> Spec
+wrapTest =
+  aroundAll_ withFileServer
+    . around_
+      ( withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]
+          . inTempDirectory
+      )
+    . around onTestFailureLogger
+
 spec :: Spec
 spec = do
   describe "init" $ do
     repoDir <- runIO getCurrentDirectory
-    around_
-      ( withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]
-          . inTempDirectory
-      )
-      $ do
-        it "can initialize haskell projects" $ do
-          writeFile
-            "garn.cabal"
+    wrapTest $ do
+      it "can initialize haskell projects" $ \onTestFailureLog -> do
+        writeFile
+          "test.cabal"
+          [i|
+            name: test
+            version: 0.0.1
+            executable test
+              main-is: Main.hs
+              build-depends: base
+              default-language: Haskell2010
+          |]
+        writeFile
+          "Main.hs"
+          [i|
+            main = putStrLn "hello world"
+          |]
+        output <- runGarn ["init"] "" repoDir Nothing
+        onTestFailureLog output
+        stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
+        readFile "garn.ts"
+          `shouldReturn` unindent
             [i|
-              name: garn
-              version: 0.0.1
+              import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+              import * as pkgs from "https://garn.io/ts/v0.0.13/nixpkgs.ts";
+
+              export const test = garn.haskell.mkHaskellProject({
+                description: "",
+                executable: "",
+                compiler: "ghc94",
+                src: "."
+              })
             |]
-          output <- runGarn ["init"] "" repoDir Nothing
-          stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
-          readFile "garn.ts"
-            `shouldReturn` unindent
-              [i|
-                import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
-                import * as pkgs from "https://garn.io/ts/v0.0.13/nixpkgs.ts";
+        let check = do
+              output <- runGarn ["build", "test"] "" repoDir Nothing
+              onTestFailureLog output
+              (StdoutTrim output) <- cmd "./result/bin/test"
+              output `shouldBe` "hello world"
+        check
+        rewriteImportsToLocalhost
+        check
 
-                export const garn = garn.haskell.mkHaskellProject({
-                  description: "",
-                  executable: "",
-                  compiler: "ghc94",
-                  src: "."
-                })
-              |]
-
-        it "can initialize go projects" $ do
-          writeFile
-            "go.mod"
-            ( unindent
-                [i|
-                  module github.com/garnix-io/some-go-project
-                  go 1.20
-                |]
-            )
-          output <- runGarn ["init"] "" repoDir Nothing
-          stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
-          readFile "garn.ts"
-            `shouldReturn` unindent
-              [i|
-                import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
-                import * as pkgs from "https://garn.io/ts/v0.0.13/nixpkgs.ts";
-
-                export const someGoProject = garn.go.mkGoProject({
-                  description: "My go project",
-                  src: ".",
-                  goVersion: "1.20",
-                });
-              |]
-
-        it "can initialize npm projects" $ do
-          writeFile
-            "package.json"
+      it "can initialize go projects" $ \onTestFailureLog -> do
+        writeFile
+          "go.mod"
+          $ unindent
             [i|
-              {
-                "name": "my-project",
-                "scripts": {
-                  "start": "echo starting my project..."
-                }
+              module github.com/garnix-io/some-go-project
+              go 1.20
+            |]
+        writeFile "main.go" $
+          unindent
+            [i|
+              package main
+
+              import "fmt"
+
+              func main() {
+                fmt.Println("hello world")
               }
             |]
-          output <- runGarn ["init"] "" repoDir Nothing
-          stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
-          output <- runGarn ["run", "myProject.start"] "" repoDir Nothing
-          stdout output `shouldContain` "starting my project..."
+        output <- runGarn ["init"] "" repoDir Nothing
+        onTestFailureLog output
+        stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
+        readFile "garn.ts"
+          `shouldReturn` unindent
+            [i|
+              import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+              import * as pkgs from "https://garn.io/ts/v0.0.13/nixpkgs.ts";
 
-        it "logs unexpected errors" $ do
-          writeFile "garn.cabal" [i| badCabalfile |]
-          output <- runGarn ["init"] "" repoDir Nothing
-          stderr output
-            `shouldBe` unindent
-              [i|
-                [garn] Creating a garn.ts file
-                [garn] Found but could not parse cabal file
-              |]
+              export const someGoProject = garn.go.mkGoProject({
+                description: "My go project",
+                src: ".",
+                goVersion: "1.20",
+              });
+            |]
+        let check = do
+              output <- runGarn ["build", "someGoProject"] "" repoDir Nothing
+              onTestFailureLog output
+              (StdoutTrim output) <- cmd "./result/bin/some-go-project"
+              output `shouldBe` "hello world"
+        -- TODO: Currently broken on v0.0.13, we should re-enable this on v0.0.14.
+        -- check
+        rewriteImportsToLocalhost
+        check
+
+      it "can initialize npm projects" $ \onTestFailureLog -> do
+        writeFile
+          "package.json"
+          [i|
+            {
+              "name": "my-project",
+              "scripts": {
+                "start": "echo starting my project..."
+              }
+            }
+          |]
+        output <- runGarn ["init"] "" repoDir Nothing
+        onTestFailureLog output
+        stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
+        let check = do
+              output <- runGarn ["run", "myProject.start"] "" repoDir Nothing
+              onTestFailureLog output
+              stdout output `shouldContain` "starting my project..."
+        check
+        rewriteImportsToLocalhost
+        check
+
+      it "logs unexpected errors" $ \onTestFailureLog -> do
+        writeFile "garn.cabal" [i| badCabalfile |]
+        output <- runGarn ["init"] "" repoDir Nothing
+        onTestFailureLog output
+        stderr output
+          `shouldBe` unindent
+            [i|
+              [garn] Creating a garn.ts file
+              [garn] Found but could not parse cabal file
+            |]
+
+rewriteImportsToLocalhost :: IO ()
+rewriteImportsToLocalhost = cmd_ "sd" "https://garn.io/ts/v[0-9]*\\.[0-9]*\\.[0-9]*/" "http://localhost:8777/" "garn.ts"

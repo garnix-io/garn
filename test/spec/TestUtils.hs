@@ -3,13 +3,14 @@
 module TestUtils where
 
 import Control.Concurrent
+import Control.Concurrent.Async (waitEitherCatch, withAsync)
 import Control.Exception (SomeException, bracket, catch, throwIO)
-import Control.Monad (unless)
+import Control.Monad (unless, when)
 import qualified Data.Aeson as Aeson
 import Data.String.Conversions (cs)
 import Data.String.Interpolate
 import qualified Data.Yaml as Yaml
-import Development.Shake (StdoutTrim (..), cmd)
+import Development.Shake (CmdOption (EchoStdout), Exit (Exit), StdoutTrim (..), cmd)
 import Garn
 import System.Directory
 import System.Environment (withArgs)
@@ -18,6 +19,7 @@ import System.IO (Handle, IOMode (..), hPutStrLn, withFile)
 import qualified System.IO as Sys
 import System.IO.Silently (hCapture)
 import System.IO.Temp
+import System.Process (ProcessHandle, interruptProcessGroupOf, waitForProcess)
 import Test.Hspec
 import Text.Regex.PCRE.Heavy (compileM, (=~))
 
@@ -186,3 +188,44 @@ onTestFailureLogger test = do
                 hPutStrLn Sys.stderr (unlines logs)
                 throwIO e
             )
+
+raceCatch :: IO a -> IO b -> IO (Either (Either SomeException a) (Either SomeException b))
+raceCatch left right =
+  withAsync left $ \a ->
+    withAsync right $ \b ->
+      waitEitherCatch a b
+
+withCmd :: IO ProcessHandle -> IO a -> IO a
+withCmd cmd action = do
+  result <-
+    raceCatch
+      (bracket cmd interruptProcessGroupOf waitForProcess)
+      action
+  case result of
+    Left result -> do
+      expectationFailure $ "cmd exited before action: " <> show result
+      pure undefined
+    Right (Right a) -> pure a
+    Right (Left exception) -> throwIO exception
+
+withFileServer :: IO () -> IO ()
+withFileServer action = do
+  running <- isRunning
+  if running
+    then action
+    else withCmd (cmd "just fileserver") $ do
+      waitUntilRunning
+      action
+  where
+    waitUntilRunning = do
+      running <- isRunning
+      when (not running) $ do
+        threadDelay 100000
+        waitUntilRunning
+
+    isRunning = do
+      Exit c <-
+        cmd
+          "curl --silent localhost:8777/base.ts"
+          (EchoStdout False)
+      pure $ c == ExitSuccess
