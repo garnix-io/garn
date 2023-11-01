@@ -57,7 +57,7 @@ Deno.test("NPM initializer returns the code to be generated", () => {
   assertEquals(
     result.makeTarget(),
     outdent`
-      export const somepackage = mkNpmProject({
+      export const somepackage = garn.javascript.mkNpmProject({
         description: "just some package",
         src: ".",
         nodeVersion: "18",
@@ -77,7 +77,7 @@ Deno.test(
       assertEquals(
         result.makeTarget(),
         outdent`
-          export const npmProject = mkNpmProject({
+          export const npmProject = garn.javascript.mkNpmProject({
             description: "An NPM project",
             src: ".",
             nodeVersion: "18",
@@ -110,7 +110,7 @@ Deno.test(
       assertEquals(
         result.makeTarget(),
         outdent`
-          export const somepackage = mkNpmProject({
+          export const somepackage = garn.javascript.mkNpmProject({
             description: "just some package",
             src: ".",
             nodeVersion: "18",

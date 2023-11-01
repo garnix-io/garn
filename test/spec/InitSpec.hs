@@ -41,6 +41,7 @@ spec = do
                   src: "."
                 })
               |]
+
         it "can initialize go projects" $ do
           writeFile
             "go.mod"
@@ -64,6 +65,23 @@ spec = do
                   goVersion: "1.20",
                 });
               |]
+
+        it "can initialize npm projects" $ do
+          writeFile
+            "package.json"
+            [i|
+              {
+                "name": "my-project",
+                "scripts": {
+                  "start": "echo starting my project..."
+                }
+              }
+            |]
+          output <- runGarn ["init"] "" repoDir Nothing
+          stderr output `shouldBe` "[garn] Creating a garn.ts file\n"
+          output <- runGarn ["run", "myProject.start"] "" repoDir Nothing
+          stdout output `shouldContain` "starting my project..."
+
         it "logs unexpected errors" $ do
           writeFile "garn.cabal" [i| badCabalfile |]
           output <- runGarn ["init"] "" repoDir Nothing
