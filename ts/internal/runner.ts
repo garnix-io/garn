@@ -33,7 +33,7 @@ type ProjectTarget = {
   description: string;
   packages: Array<string>;
   checks: Array<string>;
-  executable: boolean;
+  runnable: boolean;
 };
 
 type ExecutableTarget = {
@@ -80,7 +80,7 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
         description: exportable.description,
         packages: Object.keys(packages),
         checks: Object.keys(checks),
-        executable: !!exportable.defaultExecutable,
+        runnable: !!exportable.defaultExecutable,
       };
     } else if (isExecutable(exportable)) {
       result[name] = {

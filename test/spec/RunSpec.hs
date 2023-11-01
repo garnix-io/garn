@@ -178,7 +178,7 @@ spec =
 
                   export const myProject = garn.mkProject({
                     description: "a runnable project",
-                    defaultExecutable: garn.shell`echo runable`,
+                    defaultExecutable: garn.shell`echo runnable`,
                   }, {});
                 |]
             output <- runGarn ["run", "--help"] "" repoDir Nothing
@@ -189,14 +189,14 @@ spec =
                     myProject.*
                 |]
 
-          it "does now show non-runnable projects in the help" $ do
+          it "does not show non-runnable projects in the help" $ do
             writeFile "garn.ts" $
               unindent
                 [i|
                   import * as garn from "#{repoDir}/ts/mod.ts"
 
                   export const myProject = garn.mkProject({
-                    description: "a runnable project",
+                    description: "not runnable",
                   }, {});
                 |]
             output <- runGarn ["run", "--help"] "" repoDir Nothing

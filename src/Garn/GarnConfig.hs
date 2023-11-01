@@ -83,7 +83,7 @@ data ProjectTarget = ProjectTarget
   { description :: String,
     packages :: [String],
     checks :: [String],
-    executable :: Bool
+    runnable :: Bool
   }
   deriving (Generic, FromJSON, Eq, Show)
 
