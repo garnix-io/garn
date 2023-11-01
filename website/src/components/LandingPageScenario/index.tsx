@@ -1,8 +1,6 @@
 import React from "react";
 import "./stylesheet.css";
 
-const ReadMore = () => <a href="./docs/tutorial">Read more...</a>;
-
 export function LandingPageScenario(props: {
   title: string;
   description: React.ReactNode;
@@ -13,10 +11,7 @@ export function LandingPageScenario(props: {
       <div>
         <h1>{props.title}</h1>
         <p>{props.description}</p>
-        <div className="examples">
-          {props.examples}
-        </div>
-        <ReadMore />
+        <div className="examples">{props.examples}</div>
       </div>
     </section>
   );
