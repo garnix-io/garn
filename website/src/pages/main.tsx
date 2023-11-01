@@ -421,16 +421,16 @@ export const deno = garn.mkProject({
           </summary>
           <p>
             <Garn /> uses nix under the hood which requires files in a git
-            repository be tracked by git in order to see the files.
+            repository to be tracked by git in order to see the files.
           </p>
           <p>
-            To resolve this make sure to either add untracked files to the git
-            index, or at least mark them as intended additions with{" "}
-            <code>git add --intent-to-add</code>
+            To resolve this make sure to either add untracked files to git (e.g.
+            with <code>git add $YOUR_FILES</code>), or mark them as intended
+            additions with <code>git add --intent-to-add $YOUR_FILES</code>
           </p>
           <p>
             Likely this requirement will be removed from future <Garn />{" "}
-            versions
+            versions.
           </p>
         </details>
       </section>
