@@ -229,6 +229,13 @@ blockquote p {
 .docs {
   padding: 10px;
   font-size: 16px;
+  max-width: 1000px;
+  margin: 0 auto;
+  line-height: 25px;
+}
+
+.docs h2 {
+  margin-top: 50px;
 }
 
 .sign-in {
