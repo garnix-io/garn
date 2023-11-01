@@ -2,59 +2,15 @@ import React from "react";
 import { DiscordLink, GithubLink } from "../components/HeaderLinks";
 import { Garn, Garnix, Typography } from "../components/Typography";
 import { Outlet, NavLink, Link } from "react-router-dom";
-import { docMenuItems } from "./docs";
 import { Code } from "../components/Code";
 import { LandingPageScenario } from "../components/LandingPageScenario";
 import { Hero } from "../components/Hero";
+import { Header } from "../components/Header";
 
 export const Main: React.FC = () => {
   return (
     <>
-      <header className="nav">
-        <Typography variant="h1">
-          <Link to="/">garn</Link>
-        </Typography>
-        <nav>
-          <NavLink
-            className={({ isActive }) => (isActive ? "black" : "gray")}
-            to="/"
-          >
-            home
-          </NavLink>
-          {docMenuItems.map(({ name, url }) => (
-            <React.Fragment key={name}>
-              {url.match(/^(?:https?:)?\/\//) ? (
-                <a
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="gray"
-                >
-                  {name}
-                </a>
-              ) : (
-                <NavLink
-                  to={url}
-                  className={({ isActive }) => (isActive ? "black" : "gray")}
-                >
-                  {name}
-                </NavLink>
-              )}
-            </React.Fragment>
-          ))}
-        </nav>
-        <div className="links">
-          <DiscordLink
-            href="https://discord.gg/XtDrPsqpVx"
-            title="Join the Discord Channel"
-          />
-          <GithubLink
-            href="https://github.com/garnix-io/garn"
-            title="View on GitHub"
-          />
-        </div>
-      </header>
-
+      <Header />
       <article>
         <div className="main-content">
           <Outlet />
