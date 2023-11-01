@@ -1,6 +1,6 @@
 import { AsideText } from "../components/Aside.tsx";
 import { Hovernote } from "../components/Hovernote.tsx";
-import { Garn } from "../components/Typography";
+import { Garn, Garnix } from "../components/Typography";
 
 export const info = {
   name: "tutorial",
@@ -66,9 +66,9 @@ export const frontend = garn.javascript
 Now running `garn check frontend` will run `npm test` in the frontend project
 environment. These `Check`s are pure, i.e. they are run in a build sandbox. The
 downside of sandboxing is that these checks won't have access to the internet.
-The upside is that they'll be (almost) perfectly reproducible, cacheable, and runnable on CI.
-
-
+The upside is that they'll be (almost) perfectly reproducible, cacheable, and
+runnable on CI (like <a href="https://garnix.io"><Garnix /></a>, see [the
+docs](https://garnix.io/docs) for more info).
 
 ## Multi-language support
 
