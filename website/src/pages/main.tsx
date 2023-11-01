@@ -1,121 +1,27 @@
 import React from "react";
-import { DropdownMenu } from "../components/Dropdown";
-import { DiscordLink, GithubLink } from "../components/HeaderLinks";
-import { Tooltip } from "../components/Hovernote";
-import { Typography } from "../components/Typography";
-import { Asciinema } from "../components/Asciinema";
+import { Garn, Garnix, Typography } from "../components/Typography";
 import { Outlet, NavLink, Link } from "react-router-dom";
-import { docMenuItems } from "./docs";
-import envDemoCastUrl from "../casts/env-demo.cast";
-import buildDemoCastUrl from "../casts/build-demo.cast";
-import runDemoCastUrl from "../casts/run-demo.cast";
-import lspDemoCastUrl from "../casts/lsp-demo.cast";
-
-const Keyword: React.FC = (props) => (
-  <span className="keyword">{props.children}</span>
-);
-const String: React.FC = (props) => (
-  <span className="string">{props.children}</span>
-);
-const Export: React.FC = (props) => (
-  <span className="export">{props.children}</span>
-);
-
-const garnTs = (
-  <pre>
-    <Keyword>import</Keyword> * as garn from{" "}
-    <String>"https://garn.io/ts/v0.0.13/mod.ts"</String>;<br />
-    <Keyword>import</Keyword> * as{" "}
-    <Tooltip item="pkgs">
-      {`This is a gigantic collection
-of packages, nixpkgs. If you
-need a tool or dependency,
-it's probably here`}
-    </Tooltip>{" "}
-    from <String>"https://garn.io/ts/v0.0.13/nixpkgs.ts"</String>;<br />
-    <br />
-    <Export>export</Export> <Keyword>const</Keyword> frontend =
-    garn.javascript.mkNpmProject(&#123; <br />
-    {"  "}description: <String>"My npm app"</String>,<br />
-    {"  "}
-    <Tooltip
-      item={
-        <>
-          src: <String>"frontend"</String>
-        </>
-      }
-    >
-      {`Supports mono-repos and multiple languages.`}
-    </Tooltip>
-    ,<br />
-    {"  "}nodeVersion: <String>"18"</String>,<br />
-    &#125;)
-    <br />
-    {"  "}.
-    <Tooltip item="withDevTools">
-      {`withDevTools is all you need
-to add a dev tool to your shell.
-`}
-    </Tooltip>
-    ([pkgs.cowsay])
-    <br />
-    {"  "}.
-    <Tooltip item="addCheck">
-      addCheck adds a *pure* check that you can run locally or on CI.
-    </Tooltip>
-    (<String>"run-tests"</String>)
-    <String>`npm run test -- --watchAll=false`</String>;<br />
-    <br />
-    <Export>export</Export> <Keyword>const</Keyword>{" "}
-    <Tooltip item="backend">
-      {`A Project is a collection of
-packages, environments, and
-executables.
-`}
-    </Tooltip>{" "}
-    = garn.go.mkGoProject(&#123; <br />
-    {"  "}description: <String>"A go server"</String>,<br />
-    {"  "}src: <String>"backend"</String>,<br />
-    {"  "}goVersion: <String>"1.20"</String>,<br />
-    &#125;);
-    <br />
-  </pre>
-);
+import { Code } from "../components/Code";
+import { LandingPageScenario } from "../components/LandingPageScenario";
+import { Hero } from "../components/Hero";
+import { Header } from "../components/Header";
 
 export const Main: React.FC = () => {
   return (
     <>
-      <header>
-        <Typography variant="h1">
-          <Link to="/">garn</Link>
-        </Typography>
-        <DiscordLink
-          href="https://discord.gg/XtDrPsqpVx"
-          title="Join the Discord Channel"
-        />
-        <GithubLink
-          href="https://github.com/garnix-io/garn"
-          title="View on Github"
-        />
-      </header>
-
+      <Header />
       <article>
-        <nav>
-          <NavLink
-            className={({ isActive }) => (isActive ? "black" : "gray")}
-            to="/"
-          >
-            home
-          </NavLink>
-          <DropdownMenu label="docs" items={docMenuItems} />
-        </nav>
         <div className="main-content">
           <Outlet />
         </div>
       </article>
       <footer>
         <p>
-          Built by <a href="https://garnix.io">garnix</a>.
+          Built by{" "}
+          <a href="https://garnix.io" className="garnix-name">
+            garnix
+          </a>
+          .
         </p>
       </footer>
     </>
@@ -125,81 +31,254 @@ export const Main: React.FC = () => {
 export const Info: React.FC = () => {
   return (
     <>
-      <section className="lede">
-        <h1>garn, at your service</h1>
-        <div className="garn-description">
-          <b>garn</b> is a build tool and environment manager. It can partly or
-          wholly replace manual README instructions, containerization
-          technologies such as docker, package managers such as apt/brew/&c, and
-          command runners such as just.
-        </div>
-        <figure>
-          <div className="filename">garn.ts</div>
-          <div className="garn-ts">
-            <code className="garn-ts">{garnTs} </code>
-          </div>
-        </figure>
-        <div className="garn-description">
-          Your project is configured in Typescript, which provides for great
-          discoverability through auto-completion and type errors, as well as
-          facilities for abstraction and easy sharing of code. Behind the
-          scenes, we translate your Typescript configuration into{" "}
-          <a href="https://nixos.org/">Nix</a>.
-        </div>
+      <Hero />
+      <LandingPageScenario
+        title="Have you ever worked on a project and realized you had the wrong node version?"
+        description={
+          <>
+            Or golang? Or prettier? Or some other tool? <Garn /> manages all of
+            your project's dependencies in encapsulated environments. Compilers,
+            code-generators, formatters, test-runners, linters and more.
+          </>
+        }
+        examples={
+          <>
+            <Code
+              header="garn.ts"
+              lineNumbers
+              code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
 
-        <div className="garn-description">
-          {" "}
-          <b>garn</b> currently supports <b>go</b>, <b>javascript</b>, and{" "}
-          <b>haskell</b>.
-        </div>
-      </section>
-      <section className="features">
-        <h1>features</h1>
+export const frontend = garn.javascript.mkNpmProject({
+  description: "my frontend project",
+  src: ".",
+  nodeVersion: "18",
+});`}
+            />
+            <Code
+              header="terminal"
+              code={`$ node
+node: command not found
+$ garn enter frontend
+[garn] Entering frontend shell. Type 'exit' to exit.
+$ node --version
+v18.17.1`}
+            />
+          </>
+        }
+      />
+      <LandingPageScenario
+        title="Have you ever pushed to GitHub over and over again, just to get CI working?"
+        description={
+          <>
+            <Garn /> allows to declare reproducible checks that you can run
+            locally in completely deterministic environments. And if you enable{" "}
+            CI (like{" "}
+            <a href="https://garnix.io">
+              <Garnix />
+            </a>
+            ) on your GitHub repo, you get the same exact checks there.
+          </>
+        }
+        examples={
+          <>
+            <Code
+              header="garn.ts"
+              lineNumbers
+              code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+import * as nixpkgs from "https://garn.io/ts/v0.0.13/nixpkgs.ts";
 
-        <div className="feature">
-          <h2>declarative environments</h2>
-          <div className="feature-description">
-            Specify your dependencies easily and precisely. Then switch between
-            environments with a single command. Unlike containers, <b>garn</b>{" "}
-            environments combine well with your personal dev environment.
-          </div>
-          <Asciinema src={envDemoCastUrl} />
-        </div>
+export const backend = garn.haskell
+  .mkHaskellProject({
+    description: "my Haskell backend",
+    executable: "server",
+    compiler: "ghc94",
+    src: ".",
+  })
+  .withDevTools([nixpkgs.hlint])
+  .addCheck("hlint")\`hlint *.hs\`; `}
+            />
+            <Code
+              header="terminal"
+              code={`$ garn check
+[...]
+check> No hints`}
+            />
+          </>
+        }
+      />
+      <LandingPageScenario
+        title="Have you ever written a bash script that worked totally fine on your machine, but crashed on someone else's?"
+        description={
+          <>
+            Well, it was probably their fault for not having the right tools
+            installed... <Garn /> allows you to add deterministic scripts to
+            your projects that run the same everywhere. Use them to run dev
+            servers, bundle Javascript, format source code, run code generators
+            and more.
+          </>
+        }
+        examples={
+          <>
+            <Code
+              header="garn.ts"
+              lineNumbers
+              code={`export const backend = garn.go.mkGoProject({
+  description: "Go backend",
+  src: ".",
+  goVersion: "1.20",
+})
+  .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
+  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\`; `}
+            />
+            <Code
+              header="terminal"
+              code={`$ protoc protobufs/*.proto
+protoc: command not found
 
-        <div className="feature">
-          <h2>reproducible builds and tests</h2>
-          <div className="feature-description">
-            Builds and checks are run in a sandboxed environment, ensuring that
-            they are reproducible and deterministic. They can then be run on CI,
-            exactly as they are locally, without any additional effort. Results
-            can be cached and shared among your CI and local environment.
-          </div>
-          <Asciinema src={buildDemoCastUrl} />
-        </div>
+$ garn run backend.codegen `}
+            />
+          </>
+        }
+      />
+      <section className="faq">
+        <h1>Frequently Asked Questions</h1>
 
-        <div className="feature">
-          <h2>a unified interface</h2>
-          <div className="feature-description">
-            <b>garn</b> provides a unified interface for all your project's
-            tests, builds, environments, and executables. It can also serve as
-            command documentation, printing help messages that describe exactly
-            what commands are available. Instead of wrangling with a host of
-            tools, you can focus on getting things done.
-          </div>
-          <Asciinema src={runDemoCastUrl} rows={25} />
-        </div>
+        <details>
+          <summary>How does garn differ from docker, vagrant, etc.?</summary>
+          <p>
+            <Garn /> uses nix instead of containers or VMs to provide
+            dependencies. These dependencies will all be installed into the nix
+            store (in <code>/nix/store</code>) and will be provided from there
+            in the environments that you create with <Garn />.
+          </p>
+          <p>
+            That means that <Garn /> scripts and checks and everything else you
+            do when developing with <Garn /> runs natively on your machine. So
+            there is no overhead that you would get when using VMs or containers
+            on non-linux hosts.
+          </p>
+          <p>
+            That also means that -- when entering an environment with garn enter
+            -- you can use your personal editor or other globally installed
+            tools with no additional work.
+          </p>
+        </details>
 
-        <div className="feature">
-          <h2>discoverable Typescript API</h2>
-          <div className="feature-description">
-            We've carefully designed <b>garn</b> so that you never get stuck.
-            After setting up LSP, the available options at any stage can be
-            discovered through auto-completion. And unlike YAML files, factoring
-            out common functionality, or writing and using libraries, is easy.
-            Especially with Deno, which makes imports just a line of code.
-          </div>
-          <Asciinema src={lspDemoCastUrl} />
-        </div>
+        <details>
+          <summary>
+            How does garn differ from 'npm', 'cabal' and other language-specific
+            tools?
+          </summary>
+          <p>
+            <Garn /> is language agnostic. That means you can use it in projects
+            that mix multiple languages and have the same experience and
+            workflows for all sub-projects. It also means that programmers that
+            are unfamiliar with the toolchain of a project can use <Garn /> to
+            get started quickly.
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            What languages does <Garn /> support?
+          </summary>
+          <p>
+            <Garn /> currently supports <strong>Go</strong>,{" "}
+            <strong>Npm</strong> and <strong>Haskell</strong>. If you'd like to
+            see support for other languages or toolchains please{" "}
+            <a href="https://github.com/garnix-io/garn/issues">let us know</a>.
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            How can I configure LSP to get error messages and auto-completion
+            for garn.ts in my editor?
+          </summary>
+          <p>
+            <code>garn.ts</code> files are powered by{" "}
+            <a href="https://deno.com/">Deno</a>. A lot of the convenience and
+            power for editing your <code>garn.ts</code> files comes from having
+            a working Deno LSP. There are two ways of setting up LSP for editing{" "}
+            <code>garn.ts</code> files: using <Garn /> itself to provide a
+            properly-configured editor with <code>editGarnConfig</code>, or
+            using <Garn /> to provide <code>deno</code> and setting up your
+            editor configuration yourself.
+          </p>
+          <h3>
+            <code>editGarnConfig</code>
+          </h3>
+          <p>
+            <Garn /> offers an <code>Executable</code> called{" "}
+            <code>editGarnConfig</code>. It will spin up a{" "}
+            <a href="https://vscodium.com/">vscodium</a> editor that is
+            pre-configured for editing <code>garn.ts</code> files. It won't use
+            or modify your local vscodium settings, if you have any. You can can
+            add it to your <code>garn.ts</code> file like this:
+          </p>
+          <Code
+            header="garn.ts"
+            lineNumbers
+            code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+
+export const edit = garn.editGarnConfig; `}
+          />
+          <p>
+            And then run it with <code>garn run edit</code>.
+          </p>
+          <p>
+            This is a very easy way to get up and running with editing{" "}
+            <code>garn.ts</code> files. The disadvantage is that the editor
+            isn't your normal configured editor. So you might consider
+            installing the Deno LSP and configuring your editor:
+          </p>
+          <h3>Installing the Deno LSP and configuring your editor</h3>
+          <p>
+            Alternatively you can install <code>deno</code> (including the Deno
+            LSP) with <Garn /> itself:
+          </p>
+          <Code
+            header="garn.ts"
+            lineNumbers
+            code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+
+export const deno = garn.mkProject({
+  description: "garn configuration environment",
+  defaultEnvironment: garn.emptyEnvironment.withDevTools([pkgs.deno]),
+}, {});`}
+          />
+          <p>
+            <code>garn enter deno</code> will then drop you in a shell where{" "}
+            <code>deno</code> is available.
+          </p>
+          <p>
+            For configuring your editor to use Deno's LSP refer to{" "}
+            <a href="https://docs.deno.com/runtime/manual/getting_started/setup_your_environment">
+              Deno's environment setup documentation
+            </a>
+            .
+          </p>
+        </details>
+
+        <details>
+          <summary>
+            I'm getting no such file or directory errors for files that exist.
+            What's going on?
+          </summary>
+          <p>
+            <Garn /> uses nix under the hood which requires files in a git
+            repository to be tracked by git in order to see the files.
+          </p>
+          <p>
+            To resolve this make sure to either add untracked files to git (e.g.
+            with <code>git add $YOUR_FILES</code>), or mark them as intended
+            additions with <code>git add --intent-to-add $YOUR_FILES</code>
+          </p>
+          <p>
+            Likely this requirement will be removed from future <Garn />{" "}
+            versions.
+          </p>
+        </details>
       </section>
     </>
   );

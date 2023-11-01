@@ -35,6 +35,7 @@ deploy-website commit:
   cp -rv $DIST_DIR/* .
   git add .
   git commit -m "Website update from commit $COMMIT"
+  git show --stat
   echo "Created a new commit in $TMP_DIR/garn . It is not yet pushed."
 
 # Push the current version of the ts files to gh-pages
@@ -60,6 +61,7 @@ release-ts commit tag:
   rmdir tmp-{{ tag }}
   git add ts/{{ tag }}
   git commit -m "Release {{ tag }}"
+  git show --stat
   echo "Created a new commit in $TMP_DIR/garn . It is not yet pushed."
   echo "Created a new tag ({{ tag }}) too. Also not yet pushed."
 

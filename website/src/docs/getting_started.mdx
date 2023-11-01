@@ -34,6 +34,9 @@ You can look at the contents of the script [here](https://garn.io/install.sh).
 <Garn /> requires [Nix](https://nixos.org/). If you don't have Nix, the above
 command will install it for you.
 
+Once you have <Garn/> installed you can head over to the
+[tutorial](/docs/tutorial) to learn how to use it.
+
 ### Uninstalling
 
 To uninstall both `nix` and `garn` you can run:
@@ -44,7 +47,7 @@ To uninstall both `nix` and `garn` you can run:
 
 ### Manual installation
 
-If you prefer, you can also manually do the steps that the above script automates. Those are:
+If you prefer, you can also manually do the steps that the above install script automates. Those are:
 
 1. **Install Nix**. To install Nix, follow the instructions [here](https://nixos.org/download).
 2. **Configure Nix to use the <Garnix/> cache**. You can do that by adding the lines:
@@ -78,9 +81,9 @@ nix --extra-experimental-features 'nix-command flakes' profile install -L github
 
 5. **Check that everything worked**. Run `garn --help` to confirm that <Garn/> is installed.
 
-## Deno LSP
+## Deno LSP (optional)
 
-`garn.ts` files are powered by [deno](https://deno.com/). A lot of the
+`garn.ts` files are powered by [Deno](https://deno.com/). A lot of the
 convenience and power for editing your `garn.ts` files comes from having a
 working Deno LSP. There are two ways of setting up LSP for editing `garn.ts`
 files: using <Garn/> itself to provide a properly-configured editor with
@@ -105,7 +108,7 @@ might consider installing the Deno LSP and configuring your editor:
 
 ### Installing the Deno LSP and configuring your editor
 
-Alternatively you an install `deno` (including the Deno LSP) with <Garn/> itself:
+Alternatively you can install `deno` (including the Deno LSP) with <Garn/> itself:
 
 ```typescript
 export const deno = garn.mkProject(
@@ -139,13 +142,13 @@ source <(garn --bash-completion-script `which garn`)
 
 If you have `oh-my-zsh` installed, you likely already have a completion directory (`~/.cache/oh-my-zsh/completions` or `~/.oh-my-zsh/completions`). In that case, use:
 
-```sh
+```shell
 garn --zsh-completion-script `which garn` > ~/.cache/oh-my-zsh/completions/_garn
 ```
 
 Otherwise, check your `$fpath` variable to see if it already includes a directory for user-defined completions. If it does, use:
 
-```sh
+```shell
 garn --zsh-completion-script `which garn` > $DIRECTORY_IN_YOUR_FPATH/_garn
 ```
 
@@ -157,15 +160,9 @@ If it does not, please refer to `zsh`s documentation about how to set up user-de
 Assuming `~/.config/fish/completions` exists and is in your `$fish_completion_path` (it should be), run:
 
 
-```sh
+```shell
 garn --fish-completion-script `which garn` > ~/.config/fish/completions/garn.fish
 ```
-
-## CI
-
-Since the checks of your <Garn/> projects are sandboxed, it's easy to run them on
-[garnix.io CI](https://garnix.io). See [the docs](https://garnix.io/docs)
-for more info.
 
 ## Further reading
 
