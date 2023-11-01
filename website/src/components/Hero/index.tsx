@@ -11,8 +11,7 @@ const terminalExamples = [
   "build backend",
 ];
 
-export function Hero(props: {
-}) {
+export function Hero() {
   const [termState, setTermState] = React.useState({
     deleting: false,
     idx: 0,
@@ -62,7 +61,7 @@ export function Hero(props: {
           <Link to="/docs/getting_started">Get Started</Link>
         </div>
       </div>
-      <div className="">
+      <div className="codeblocks">
         <Code header="garn.ts" lineNumbers code={garnTs} />
         <Code
           header="terminal"
