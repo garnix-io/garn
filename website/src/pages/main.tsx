@@ -5,7 +5,7 @@ import { Garnix, Typography } from "../components/Typography";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { docMenuItems } from "./docs";
 import { Code } from "../components/Code";
-import { Image } from "../components/Image";
+import { LandingPageScenario } from "../components/LandingPageScenario";
 
 const Keyword: React.FC = (props) => (
   <span className="keyword">{props.children}</span>
@@ -137,8 +137,6 @@ const terminalExamples = [
   "build backend",
 ];
 
-const ReadMore = () => <a href="./docs/tutorial">Read more...</a>;
-
 export const Info: React.FC = () => {
   const [termState, setTermState] = React.useState({
     deleting: false,
@@ -203,52 +201,47 @@ export const Info: React.FC = () => {
           />
         </div>
       </div>
-      <section className="scenario">
-        <h1>
-          Have you ever worked on a project and realized you had the wrong node
-          version?
-        </h1>
-        <p>
+      <LandingPageScenario
+        title="Have you ever worked on a project and realized you had the wrong node version?"
+        description={<>
           Or golang? Or prettier? Or some other tool? <Garn /> manages all of
           your project's dependencies in encapsulated environments. Compilers,
-          code-generators, formatters, test-runners, linters and more.{" "}
-          <div>
-            <Code
-              header="garn.ts"
-              lineNumbers
-              code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
+          code-generators, formatters, test-runners, linters and more.
+        </>}
+        examples={<>
+          <Code
+            header="garn.ts"
+            lineNumbers
+            code={`import * as garn from "https://garn.io/ts/v0.0.13/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "my frontend project",
   src: ".",
   nodeVersion: "18",
 });`}
-            />
-            <Code
-              header="terminal"
-              code={`$ node
+          />
+          <Code
+            header="terminal"
+            code={`$ node
 node: command not found
 $ garn enter frontend
 [garn] Entering frontend shell. Type 'exit' to exit.
 $ node --version
 v18.17.1`}
-            />
-          </div>
-          <ReadMore />
-        </p>
-      </section>
-      <section className="scenario">
-        <h1>
-          Have you ever pushed to the same branch on GitHub over and over again,
-          just to get CI working?
-        </h1>
-        <p>
+          />
+        </>}
+      />
+      <LandingPageScenario
+        title="Have you ever pushed to the same branch on GitHub over and over again, just to get CI working?"
+        description={<>
           <Garn /> allows to declare reproducible checks that you can run
           locally in completely deterministic environments. And if you enable{" "}
           <a href="https://garnix.io">
             <Garnix />
           </a>{" "}
           on your GitHub repo, you get the same exact checks on CI.
+        </>}
+        examples={<>
           <Code
             header="garn.ts"
             lineNumbers
@@ -271,20 +264,17 @@ export const backend = garn.haskell
 [...]
 check> No hints`}
           />
-          <Image src="/images/github_hlint_ci_check.png" header="github ui" />
-          <ReadMore />
-        </p>
-      </section>
-      <section className="scenario">
-        <h1>
-          Have you ever written a bash script that worked totally fine on your
-          machine, but crashed on someone else's?
-        </h1>
-        <p>
+        </>}
+      />
+      <LandingPageScenario
+        title="Have you ever written a bash script that worked totally fine on your machine, but crashed on someone else's?"
+        description={<>
           Well, it was probably their fault for not having the right tools
           installed... <Garn /> allows you to add deterministic scripts to your
           projects that run the same everywhere. Use them to run dev servers,
           bundle javascript, format source code, run code generators and more.
+        </>}
+        examples={<>
           <Code
             header="garn.ts"
             lineNumbers
@@ -303,9 +293,8 @@ protoc: command not found
 
 $ garn run backend.codegen `}
           />
-          <ReadMore />
-        </p>
-      </section>
+        </>}
+      />
       <section className="faq">
         <h1>Frequently Asked Questions</h1>
 

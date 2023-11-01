@@ -29,6 +29,10 @@ h1 {
   margin: 0;
 }
 
+.hero .codeblock {
+  font-size: 14px;
+}
+
 figure.codeblock {
   margin-top: 10px;
   margin-bottom: 10px;
@@ -36,7 +40,6 @@ figure.codeblock {
   overflow: hidden;
   border-radius: 8px;
   border: 1px solid #000;
-  font-size: 14px;
 }
 
 figure.codeblock header {
@@ -114,38 +117,12 @@ figure.codeblock code.line-numbers:before {
   border-color: #000;
 }
 
-section h1 {
-  font-family: sans-serif;
-  line-height: 50px;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-section {
-  text-align: center;
+.faq {
   padding: 150px 0px;
-  border-bottom: 5px solid #000;
 }
 
-section h1 {
-  margin-bottom: 50px;
-  font-family: 'Montserrat', sans-serif;
-}
-
-section:nth-child(even) {
-  background: #eee;
-}
-
-section p {
-  line-height: 25px;
-}
-
-.scenario p {
-  text-align: left;
-  padding: 0 20px;
-  max-width: 800px;
-  margin: 0 auto;
+.faq h1 {
+  text-align: center;
 }
 
 .faq details {
