@@ -122,6 +122,45 @@ export const deno = garn.mkProject(
 For configuring your editor to use Deno's LSP refer to [Deno's environment setup
 documentation](https://docs.deno.com/runtime/manual/getting_started/setup_your_environment).
 
+## Shell autocompletions
+
+<Garn /> ships with autocompletions for some popular shells. See below for
+instructions on installing them:
+
+### Bash
+
+Add the following line to your `.bashrc`:
+
+```
+source <(garn --bash-completion-script `which garn`)
+```
+
+### Zsh
+
+If you have `oh-my-zsh` installed, you likely already have a completion directory (`~/.cache/oh-my-zsh/completions` or `~/.oh-my-zsh/completions`). In that case, use:
+
+```sh
+garn --zsh-completion-script `which garn` > ~/.cache/oh-my-zsh/completions/_garn
+```
+
+Otherwise, check your `$fpath` variable to see if it already includes a directory for user-defined completions. If it does, use:
+
+```sh
+garn --zsh-completion-script `which garn` > $DIRECTORY_IN_YOUR_FPATH/_garn
+```
+
+If it does not, please refer to `zsh`s documentation about how to set up user-defined completions.
+
+
+### Fish
+
+Assuming `~/.config/fish/completions` exists and is in your `$fish_completion_path` (it should be), run:
+
+
+```sh
+garn --fish-completion-script `which garn` > ~/.config/fish/completions/garn.fish
+```
+
 ## CI
 
 Since the checks of your <Garn/> projects are sandboxed, it's easy to run them on
