@@ -81,7 +81,7 @@ buildCommand targets =
 
 runCommand :: Targets -> Parser WithGarnTsCommand
 runCommand targets =
-  Run <$> commandOptionsParser targets <*> argvParser
+  Run <$> commandOptionsParser (Map.filter isExecutable targets) <*> argvParser
   where
     argvParser :: Parser [String]
     argvParser = many $ strArgument $ metavar "...args"
@@ -102,6 +102,11 @@ isProject :: TargetConfig -> Bool
 isProject = \case
   TargetConfigProject _ -> True
   TargetConfigExecutable _ -> False
+
+isExecutable :: TargetConfig -> Bool
+isExecutable = \case
+  TargetConfigExecutable _ -> True
+  TargetConfigProject p -> executable p
 
 withGarnTsParser :: Targets -> Parser WithGarnTsCommand
 withGarnTsParser targets =
