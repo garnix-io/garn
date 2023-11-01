@@ -119,7 +119,7 @@ executables.
 `}
     </Tooltip>{" "}
     = garn.go.mkGoProject(&#123; <br />
-    {"  "}description: <String>"A go server"</String>,<br />
+    {"  "}description: <String>"A Go server"</String>,<br />
     {"  "}src: <String>"."</String>,<br />
     {"  "}goVersion: <String>"1.20"</String>,<br />
     &#125;)

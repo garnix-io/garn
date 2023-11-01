@@ -134,7 +134,7 @@ import * as nixpkgs from "https://garn.io/ts/v0.0.13/nixpkgs.ts";
 
 export const backend = garn.haskell
   .mkHaskellProject({
-    description: "my haskell backend",
+    description: "my Haskell backend",
     executable: "server",
     compiler: "ghc94",
     src: ".",
@@ -158,7 +158,7 @@ check> No hints`}
             Well, it was probably their fault for not having the right tools
             installed... <Garn /> allows you to add deterministic scripts to
             your projects that run the same everywhere. Use them to run dev
-            servers, bundle javascript, format source code, run code generators
+            servers, bundle Javascript, format source code, run code generators
             and more.
           </>
         }
@@ -228,8 +228,8 @@ $ garn run backend.codegen `}
             What languages does <Garn /> support?
           </summary>
           <p>
-            <Garn /> currently supports <strong>go</strong>,{" "}
-            <strong>npm</strong> and <strong>haskell</strong>. If you'd like to
+            <Garn /> currently supports <strong>Go</strong>,{" "}
+            <strong>npm</strong> and <strong>Haskell</strong>. If you'd like to
             see support for other languages or toolchains please{" "}
             <a href="https://github.com/garnix-io/garn/issues">let us know</a>.
           </p>
