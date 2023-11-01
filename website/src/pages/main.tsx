@@ -332,6 +332,20 @@ $ garn run backend.codegen `}
 
         <details>
           <summary>
+            How does garn differ from npm, cabal and other language specific
+            tools?
+          </summary>
+          <p>
+            <Garn /> is language agnostic. That means you can use it in projects
+            that mix multiple languages and have the same experience and
+            workflows for all sub-projects. It also means that programmers that
+            are unfamiliar with the toolchain of a project can use <Garn /> to
+            get started quickly.
+          </p>
+        </details>
+
+        <details>
+          <summary>
             How can I configure LSP to get error messages and auto-completion
             for garn.ts in my editor?
           </summary>
