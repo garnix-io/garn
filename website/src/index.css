@@ -2,13 +2,19 @@
 
 :root {
   --very-light-gray: #fafbfc;
-  --page-padding: 20px;
-}
 
-@media (max-width: 480px) {
-  :root {
-    --page-padding: 5px;
-  }
+  --hue: 220;
+  --codeblock-bg: hsl(var(--hue), 20%, 97%);
+  --codeblock-header: hsl(var(--hue), 60%, 20%);
+  --ctas: hsl(var(--hue), 60%, 40%);
+  --hero-bg: hsl(var(--hue), 60%, 97%);
+  --hero-fg: hsl(var(--hue), 60%, 20%);
+  --footer-bg: hsl(var(--hue), 60%, 97%);
+  --section-odd-bg: hsl(var(--hue), 20%, 90%);
+  --section-even-bg: hsl(var(--hue), 20%, 97%);
+  --border-color: hsl(var(--hue), 60%, 30%);
+  --body-bg: hsl(var(--hue), 20%, 99%);
+  --body-fg:  hsl(var(--hue), 60%, 20%);
 }
 
 h1 {
@@ -21,12 +27,12 @@ figure.codeblock {
   text-align: left;
   overflow: hidden;
   border-radius: 8px;
-  border: 1px solid #000;
-  background: #f4f6f8;
+  border: 1px solid var(--codeblock-header);
+  background: var(--codeblock-bg);
 }
 
 figure.codeblock header {
-  background: #000;
+  background: var(--codeblock-header);
   color: #fff;
   font-size: 12px;
   padding: 2px 10px;
@@ -291,11 +297,11 @@ article {
 
 footer {
   text-align: center;
-  /* background-color: green; */
+  background: var(--footer-bg);
   grid-area: footer;
   padding-top: 2vh;
   padding-bottom: 4vh;
-  border-top: 1px solid;
+  border-top: 5px solid var(--border-color);
 }
 
 footer a {
@@ -304,7 +310,8 @@ footer a {
 }
 
 body {
-  background-color: white;
+  background: var(--body-bg);
+  color: var(--body-fg);
   margin: 0;
   font-family: 'Montserrat', sans-serif;
   font-variant-ligatures: none; /* inappropriate fi/fl ligatures in Space Mono */
@@ -336,7 +343,8 @@ button {
 code {
   font-family: "Space Mono", monospace;
   font-variant-ligatures: none;
-  background: #f4f6f8;
+  color: #000;
+  background: var(--codeblock-bg);
 }
 
 pre code {

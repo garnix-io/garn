@@ -3,7 +3,9 @@
   justify-content: space-evenly;
   align-items: center;
   padding: 80px 0 100px 0;
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid var(--border-color);
+  background: var(--hero-bg);
+  color: var(--hero-fg);
 }
 
 .hero h1 {
@@ -52,20 +54,20 @@
   width: 200px;
   padding: 8px 0;
   margin-right: 20px;
-  background: #000;
-  color: #fff;
+  background: var(--ctas);
+  color: var(--hero-bg);
   border-radius: 999px;
   font-family: 'Montserrat', sans-serif;
   font-size: 16px;
   font-weight: 600;
-  border: 3px solid #000;
+  border: 3px solid var(--ctas);
   text-align: center;
 }
 
 .ctas a:first-child {
-  background: #fff;
-  color: #000;
-  border-color: #000;
+  background: var(--hero-bg);
+  color: var(--ctas);
+  border-color: var(--ctas);
 }
 
 @keyframes cursor{
