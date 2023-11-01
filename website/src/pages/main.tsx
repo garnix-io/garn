@@ -211,7 +211,7 @@ $ garn run backend.codegen `}
 
         <details>
           <summary>
-            How does garn differ from npm, cabal and other language-specific
+            How does garn differ from 'npm', 'cabal' and other language-specific
             tools?
           </summary>
           <p>
@@ -229,7 +229,7 @@ $ garn run backend.codegen `}
           </summary>
           <p>
             <Garn /> currently supports <strong>Go</strong>,{" "}
-            <strong>npm</strong> and <strong>Haskell</strong>. If you'd like to
+            <strong>Npm</strong> and <strong>Haskell</strong>. If you'd like to
             see support for other languages or toolchains please{" "}
             <a href="https://github.com/garnix-io/garn/issues">let us know</a>.
           </p>
