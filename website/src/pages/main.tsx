@@ -277,14 +277,14 @@ check> No hints`}
       </section>
       <section className="scenario">
         <h1>
-          Did you ever write a bash script for your project that worked totally
-          fine on your own machine, but crashed on someone else's?
+          Did you ever write a bash script that worked totally fine on your own
+          machine, but crashed on someone else's?
         </h1>
         <p>
           Well, it was probably their fault for not having the right tools
-          installed... <Garn /> allows you to write deterministic scripts that
-          run the same everywhere. For running dev servers, bundling javascript,
-          formatting source code, running code generators and more.
+          installed... <Garn /> allows you to add deterministic scripts to your
+          projects that run the same everywhere. Use them to run dev servers,
+          bundle javascript, format source code, run code generators and more.
           <Code
             header="garn.ts"
             lineNumbers
