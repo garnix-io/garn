@@ -205,7 +205,7 @@ export const Info: React.FC = () => {
       </div>
       <section className="scenario">
         <h1>
-          Did you ever work on a project and realized you had the wrong node
+          Have you ever worked on a project and realized you had the wrong node
           version?
         </h1>
         <p>
@@ -239,7 +239,7 @@ v18.17.1`}
       </section>
       <section className="scenario">
         <h1>
-          Did you ever push to the same branch on GitHub over and over again,
+          Have you ever pushed to the same branch on GitHub over and over again,
           just to get CI working?
         </h1>
         <p>
@@ -277,7 +277,7 @@ check> No hints`}
       </section>
       <section className="scenario">
         <h1>
-          Did you ever write a bash script that worked totally fine on your own
+          Have you ever written a bash script that worked totally fine on your
           machine, but crashed on someone else's?
         </h1>
         <p>
