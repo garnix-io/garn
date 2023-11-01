@@ -56,7 +56,8 @@ export function Hero() {
     <div className="hero">
       <div>
         <h1>garn</h1>
-        <h2>A new way of configuring software projects</h2>
+        <h2>Pin down your software</h2>
+        <p>Declaratively configure your projects, get reproducible results.</p>
         <div className="ctas">
           <Link to="/docs/tutorial">Read More</Link>
           <Link to="/docs/getting_started">Get Started</Link>
