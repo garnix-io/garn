@@ -1,5 +1,4 @@
 import React from "react";
-import { DiscordLink, GithubLink } from "../components/HeaderLinks";
 import { Garn, Garnix, Typography } from "../components/Typography";
 import { Outlet, NavLink, Link } from "react-router-dom";
 import { Code } from "../components/Code";
