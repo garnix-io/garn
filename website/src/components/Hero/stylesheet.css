@@ -1,0 +1,17 @@
+.hero {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  padding: 80px 0 100px 0;
+  border-bottom: 5px solid #000;
+}
+
+.hero h1 {
+  font-family: "Space Mono", monospace;
+  font-size: 50px;
+  margin: 0;
+}
+
+.hero .codeblock {
+  font-size: 14px;
+}
