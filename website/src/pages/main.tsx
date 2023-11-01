@@ -242,7 +242,7 @@ $ garn run backend.codegen `}
           </summary>
           <p>
             <code>garn.ts</code> files are powered by{" "}
-            <a href="https://deno.com/">deno</a>. A lot of the convenience and
+            <a href="https://deno.com/">Deno</a>. A lot of the convenience and
             power for editing your <code>garn.ts</code> files comes from having
             a working Deno LSP. There are two ways of setting up LSP for editing{" "}
             <code>garn.ts</code> files: using <Garn /> itself to provide a
@@ -279,7 +279,7 @@ export const edit = garn.editGarnConfig; `}
           </p>
           <h3>Installing the Deno LSP and configuring your editor</h3>
           <p>
-            Alternatively you an install <code>deno</code> (including the Deno
+            Alternatively you can install <code>deno</code> (including the Deno
             LSP) with <Garn /> itself:
           </p>
           <Code
