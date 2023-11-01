@@ -310,21 +310,23 @@ $ garn run backend.codegen `}
         <h1>Frequently Asked Questions</h1>
 
         <details>
-          <summary>How does garn differ from docker, vagrant, etc?</summary>
+          <summary>How does garn differ from docker, vagrant, etc.?</summary>
           <p>
             <Garn /> uses nix instead of containers or VMs to provide
-            dependencies. nix has a few advantages that makes it easier to work
-            with:
+            dependencies. These dependencies will all be installed into the nix
+            store (in /nix/store) and will be provided from there in the
+            environments that you create with <Garn />.
           </p>
           <p>
-            For one, nix runs natively on your machine so there is no overhead
-            of of a VM that you get when running containers on non-linux hosts.
+            That means that <Garn /> scripts and checks and everything else you
+            do when developing with <Garn /> runs natively on your machine. So
+            there is no overhead that you would get when using VMs or containers
+            on non-linux hosts.
           </p>
           <p>
-            Additionally, nix allows you to combine the declarative environment
-            with your developer environment so entering a shell with all the
-            tools for a project does not remove your ability to use your
-            globally installed tools as well.
+            That also means that -- when entering an environment with garn enter
+            -- you can use your personal editor or other globally installed
+            tools with no additional work.
           </p>
         </details>
 
