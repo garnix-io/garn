@@ -43,7 +43,7 @@ figure.codeblock code {
 }
 
 figure.codeblock code.line-numbers {
-  padding-left: 45px;
+  padding-left: 35px;
 }
 
 figure.codeblock code.line-numbers:before {
