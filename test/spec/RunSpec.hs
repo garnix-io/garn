@@ -168,3 +168,36 @@ spec =
                     output <- runGarn [command, "--help"] "" repoDir Nothing
                     onTestFailureLog output
                     stdout output `shouldNotContain` "topLevelExecutable"
+
+        describe "top-level projects" $ do
+          it "shows runnable projects in the help" $ do
+            writeFile "garn.ts" $
+              unindent
+                [i|
+                  import * as garn from "#{repoDir}/ts/mod.ts"
+
+                  export const myProject = garn.mkProject({
+                    description: "a runnable project",
+                    defaultExecutable: garn.shell`echo runnable`,
+                  }, {});
+                |]
+            output <- runGarn ["run", "--help"] "" repoDir Nothing
+            stdout output
+              `shouldMatch` unindent
+                [i|
+                  Available commands:
+                    myProject.*
+                |]
+
+          it "does not show non-runnable projects in the help" $ do
+            writeFile "garn.ts" $
+              unindent
+                [i|
+                  import * as garn from "#{repoDir}/ts/mod.ts"
+
+                  export const myProject = garn.mkProject({
+                    description: "not runnable",
+                  }, {});
+                |]
+            output <- runGarn ["run", "--help"] "" repoDir Nothing
+            stdout output `shouldNotContain` "myProject"
