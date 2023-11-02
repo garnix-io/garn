@@ -46,6 +46,7 @@ type ProjectHelpers = {
    * Returns a check that runs in a *pure* version of the Project's default
    * Environment.
    */
+  check(this: Project, check: string): Check;
   check(
     this: Project,
     _s: TemplateStringsArray,
@@ -80,9 +81,14 @@ type ProjectHelpers = {
    *
    * Example:
    * ```typescript
-   * myProject.addCheck("noTodos")`! grep -r TODO .`
+   * myProject.addCheck("noTodos", "! grep -r TODO .")
    * ```
    */
+  addCheck<T extends Project, Name extends string>(
+    this: T,
+    name: Name,
+    check: string,
+  ): T & { [n in Name]: Check };
   addCheck<T extends Project, Name extends string>(
     this: T,
     name: Name,
@@ -139,7 +145,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
 
   check(
     this: Project,
-    s: TemplateStringsArray,
+    s: TemplateStringsArray | string,
     ...args: Array<NixStrLitInterpolatable>
   ) {
     if (this.defaultEnvironment == null) {
@@ -147,7 +153,9 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
         `'.check' can only be called on projects with a default environment`,
       );
     }
-    return this.defaultEnvironment.check(s, ...args);
+    return typeof s === "string"
+      ? this.defaultEnvironment.check(s)
+      : this.defaultEnvironment.check(s, ...args);
   },
 
   build(
@@ -190,31 +198,41 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     return templateLiteralFn;
   },
 
-  addCheck<T extends Project, Name extends string>(this: T, name: Name) {
+  addCheck<T extends Project, Name extends string>(
+    this: T,
+    name: Name,
+    check?: string,
+  ) {
     if (this.defaultEnvironment == null) {
       throw new Error(
         `'.addCheck' can only be called on projects with a default environment`,
       );
     }
-    const templateLiteralFn = (
-      s: TemplateStringsArray,
-      ...args: Array<string>
-    ) => {
-      const newCheck = { [name]: this.check(s, ...args) } as {
-        [n in Name]: Check;
-      };
+    if (check != null) {
+      const newCheck = { [name]: this.check(check) };
       return {
         ...this,
         ...newCheck,
       };
-    };
-    markAsMayNotExport(templateLiteralFn, (exportName: string) =>
-      [
-        `${exportName} exports the return type of "addCheck", but this is not the proper usage of addCheck.`,
-        'Did you forget the template literal? Example usage: project.addCheck("check-name")`shell script to run`',
-      ].join(" "),
-    );
-    return templateLiteralFn;
+    } else {
+      const templateLiteralFn = (
+        s: TemplateStringsArray,
+        ...args: Array<string>
+      ) => {
+        const newCheck = { [name]: this.check(s, ...args) };
+        return {
+          ...this,
+          ...newCheck,
+        };
+      };
+      markAsMayNotExport(templateLiteralFn, (exportName: string) =>
+        [
+          `${exportName} exports the return type of "addCheck", but this is not the proper usage of addCheck.`,
+          'Did you forget the template literal? Example usage: project.addCheck("check-name")`shell script to run`',
+        ].join(" "),
+      );
+      return templateLiteralFn;
+    }
   },
 
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {

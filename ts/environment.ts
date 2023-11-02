@@ -37,6 +37,7 @@ export type Environment = {
   /**
    * Creates a new shell script `Check`, run inside this `Environment`
    */
+  check(check: string): Check;
   check(
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
@@ -69,11 +70,18 @@ export function shell(
  * garn.check`! grep -r TODO ${myPkg}`;
  * ```
  */
+export function check(check: string): Check;
 export function check(
   s: TemplateStringsArray,
   ...args: Array<NixStrLitInterpolatable>
+): Check;
+export function check(
+  s: TemplateStringsArray | string,
+  ...args: Array<NixStrLitInterpolatable>
 ) {
-  return emptyEnvironment.check(s, ...args);
+  return typeof s === "string"
+    ? emptyEnvironment.check(s)
+    : emptyEnvironment.check(s, ...args);
 }
 
 /**
@@ -120,7 +128,7 @@ export function build(
  * Any `Check`s created from this environment will first copy the source files
  * into the `Check`'s sandbox and then run the check script snippet:
  * ```typescript
- * const check = myEnv.check`! grep -ir TODO .`;
+ * const check = myEnv.check("! grep -ir TODO .");
  * ```
  */
 export function mkEnvironment(
@@ -130,8 +138,13 @@ export function mkEnvironment(
   return {
     tag: "environment",
     nixExpression,
-    check(this, s, ...args): Check {
-      const checkScript = nixStrLit(s, ...args);
+    check(
+      this: Environment,
+      s: TemplateStringsArray | string,
+      ...args: Array<NixStrLitInterpolatable>
+    ): Check {
+      const checkScript =
+        typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
       const wrappedScript = nixStrLit`
       touch $out
       ${setup || ""}
