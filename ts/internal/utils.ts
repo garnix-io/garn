@@ -1,7 +1,7 @@
 import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 
-export const GARN_TS_LIB_VERSION = "v0.0.13";
+export const GARN_TS_LIB_VERSION = "v0.0.14";
 
 export const nixSource = (src: string): NixExpression => nixRaw`
   (let
