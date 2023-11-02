@@ -1,6 +1,7 @@
 section.scenario {
   padding: 150px 0px;
-  border-bottom: 5px solid #000;
+  border-bottom: 5px solid var(--border-color);
+  background: var(--section-even-bg);
 }
 
 section.scenario h1 {
@@ -17,8 +18,8 @@ section.scenario h1 {
   font-family: 'Montserrat', sans-serif;
 }
 
-section.scenario:nth-child(even) {
-  background: #eee;
+section.scenario:nth-child(odd) {
+  background: var(--section-odd-bg);
 }
 
 section.scenario p {
