@@ -82,7 +82,8 @@ data TargetConfig
 data ProjectTarget = ProjectTarget
   { description :: String,
     packages :: [String],
-    checks :: [String]
+    checks :: [String],
+    runnable :: Bool
   }
   deriving (Generic, FromJSON, Eq, Show)
 

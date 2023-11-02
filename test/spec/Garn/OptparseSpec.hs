@@ -24,7 +24,8 @@ spec = around_ (hSilence [stderr]) $ do
                 ProjectTarget
                   { description = "test project",
                     packages = [],
-                    checks = []
+                    checks = [],
+                    runnable = False
                   }
         command <- testWithGarnTs ["check", "project"] ("project" ~> targetConfig)
         command `shouldBe` Check (Qualified (CommandOptions (fromUserFacing "project") targetConfig))
@@ -35,7 +36,8 @@ spec = around_ (hSilence [stderr]) $ do
                 ProjectTarget
                   { description = "test project",
                     packages = [],
-                    checks = []
+                    checks = [],
+                    runnable = False
                   }
         command <- testWithGarnTs ["check"] ("project" ~> targetConfig)
         command `shouldBe` Check Unqualified
@@ -46,7 +48,8 @@ spec = around_ (hSilence [stderr]) $ do
                 ProjectTarget
                   { description = "test project",
                     packages = [],
-                    checks = []
+                    checks = [],
+                    runnable = False
                   }
         testWithGarnTs ["check", "does-not-exist"] ("project" ~> targetConfig)
           `shouldThrow` (== ExitFailure 1)
@@ -58,7 +61,8 @@ spec = around_ (hSilence [stderr]) $ do
                 ProjectTarget
                   { description = "test project",
                     packages = [],
-                    checks = []
+                    checks = [],
+                    runnable = True
                   }
         command <- testWithGarnTs ["run", "project"] ("project" ~> targetConfig)
         command `shouldBe` Run (CommandOptions (fromUserFacing "project") targetConfig) []
@@ -69,7 +73,8 @@ spec = around_ (hSilence [stderr]) $ do
                 ProjectTarget
                   { description = "test project",
                     packages = [],
-                    checks = []
+                    checks = [],
+                    runnable = True
                   }
         command <- testWithGarnTs ["run", "project", "more", "args"] ("project" ~> targetConfig)
         command `shouldBe` Run (CommandOptions (fromUserFacing "project") targetConfig) ["more", "args"]
