@@ -10,6 +10,8 @@ import { GOMOD2NIX_REPO } from "./consts.ts";
 const getGoModNixToml = (src: string): NixExpression => {
   const gen = new Deno.Command("nix", {
     args: [
+      "--extra-experimental-features",
+      "nix-command flakes",
       "run",
       GOMOD2NIX_REPO,
       "--",
