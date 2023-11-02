@@ -16,8 +16,6 @@ const initializers = [
   ...javascript.initializers,
 ];
 
-console.error("[garn] Creating a garn.ts file");
-
 for (const init of initializers) {
   const result = init(Deno.cwd());
   switch (result.tag) {
@@ -34,45 +32,61 @@ for (const init of initializers) {
 }
 
 if (initializedSections.length === 0) {
+  console.error(
+    "[garn] Cannot detect any project toolchains, sorry! Creating example garn.ts file",
+  );
   initializedSections.push(outdent`
     // Welcome to garn! \`garn init\` was unable to find any existing supported
     // projects, but it is easy to get started!
+
 
     // Check out the language helper functions under garn.go, garn.haskell, and
     // garn.javascript.
     //
     // For example:
-    export const myGoProject = garn.go.mkGoProject({
-      description: "My go project",
-      src: "./my-go-project",
-      goVersion: "1.20",
-    });
 
-    export const myHaskellProject = garn.haskell.mkHaskellProject({
-      description: "My haskell project",
-      executable: "server",
-      compiler: "ghc94",
-      src: "./my-haskell-project",
-    });
+    // export const myGoProject = garn.go.mkGoProject({
+    //   description: "My go project",
+    //   src: "./my-go-project",
+    //   goVersion: "1.20",
+    // });
 
-    export const myNodeProject = garn.javascript.mkNpmProject({
-      description: "My node project",
-      src: "./my-node-project",
-      nodeVersion: "18",
-    });
+    // export const myHaskellProject = garn.haskell.mkHaskellProject({
+    //   description: "My haskell project",
+    //   executable: "server",
+    //   compiler: "ghc94",
+    //   src: "./my-haskell-project",
+    // });
+
+    // export const myNodeProject = garn.javascript.mkNpmProject({
+    //   description: "My node project",
+    //   src: "./my-node-project",
+    //   nodeVersion: "18",
+    // });
+
 
     // You can also manually create environments and projects. For example
     // uncomment this block and you can run \`garn enter myProject\` to be put into a
     // shell with cowsay installed, and \`garn run myProject\` to execute the default
     // executable for this project.
-    const myProjectEnvironment = garn.mkEnvironment().withDevTools([pkgs.cowsay]);
 
-    export const myProject = garn.mkProject({
-      description: "My project",
-      defaultEnvironment: myProjectEnvironment,
-      defaultExecutable: myProjectEnvironment.shell\`cowsay "Hello from garn!"\`,
-    }, {});
+    // const myProjectEnvironment = garn.mkEnvironment().withDevTools([pkgs.cowsay]);
+
+    // export const myProject = garn.mkProject({
+    //   description: "My project",
+    //   defaultEnvironment: myProjectEnvironment,
+    //   defaultExecutable: myProjectEnvironment.shell\`cowsay "Hello from garn!"\`,
+    // }, {});
+
+
+    // In order to get an isolated vscodium that ships with Deno and is
+    // pre-configured to use Deno's LSP, you can use the following:
+
+    // Run with \`garn run edit\`.
+    // export const edit = garn.editGarnConfig;
   `);
+} else {
+  console.error("[garn] Creating a garn.ts file");
 }
 
 Deno.writeTextFileSync(
