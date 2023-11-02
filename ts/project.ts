@@ -36,6 +36,7 @@ type ProjectHelpers = {
    * const myExecutable = myProject.shell`echo "hello world"`;
    * ```
    */
+  shell(this: Project, script: string): Executable;
   shell(
     this: Project,
     _s: TemplateStringsArray,
@@ -64,9 +65,14 @@ type ProjectHelpers = {
    *
    * Example:
    * ```typescript
-   * myProject.addExecutable("run-dev")`python run-dev.py`
+   * myProject.addExecutable("run-dev", "python run-dev.py")
    * ```
    */
+  addExecutable<T extends Project, Name extends string>(
+    this: T,
+    name: Name,
+    executable: string,
+  ): T & { [n in Name]: Executable };
   addExecutable<T extends Project, Name extends string>(
     this: T,
     name: Name,
@@ -132,7 +138,7 @@ export function mkProject<Deps extends Record<string, Nestable>>(
 const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   shell(
     this: Project,
-    s: TemplateStringsArray,
+    s: TemplateStringsArray | string,
     ...args: Array<NixStrLitInterpolatable>
   ) {
     if (this.defaultEnvironment == null) {
@@ -140,7 +146,9 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
         `'.shell' can only be called on projects with a default environment`,
       );
     }
-    return this.defaultEnvironment.shell(s, ...args);
+    return typeof s === "string"
+      ? this.defaultEnvironment.shell(s)
+      : this.defaultEnvironment.shell(s, ...args);
   },
 
   check(
@@ -171,31 +179,43 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     return this.defaultEnvironment.build(s, ...args);
   },
 
-  addExecutable<T extends Project, Name extends string>(this: T, name: Name) {
+  addExecutable<T extends Project, Name extends string>(
+    this: T,
+    name: Name,
+    script?: string,
+  ) {
     if (this.defaultEnvironment == null) {
       throw new Error(
         `'.addExecutable' can only be called on projects with a default environment`,
       );
     }
-    const templateLiteralFn = (
-      s: TemplateStringsArray,
-      ...args: Array<string>
-    ) => {
-      const newExecutable = { [name]: this.shell(s, ...args) } as {
-        [n in Name]: Executable;
-      };
+    if (script != null) {
+      const newExecutable = { [name]: this.shell(script) };
       return {
         ...this,
         ...newExecutable,
       };
-    };
-    markAsMayNotExport(templateLiteralFn, (exportName: string) =>
-      [
-        `${exportName} exports the return type of "addExecutable", but this is not the proper usage of addExecutable.`,
-        'Did you forget the template literal? Example usage: project.addExecutable("executable-name")`shell script to run`',
-      ].join(" "),
-    );
-    return templateLiteralFn;
+    } else {
+      const templateLiteralFn = (
+        s: TemplateStringsArray,
+        ...args: Array<string>
+      ) => {
+        const newExecutable = { [name]: this.shell(s, ...args) } as {
+          [n in Name]: Executable;
+        };
+        return {
+          ...this,
+          ...newExecutable,
+        };
+      };
+      markAsMayNotExport(templateLiteralFn, (exportName: string) =>
+        [
+          `${exportName} exports the return type of "addExecutable", but this is not the proper usage of addExecutable.`,
+          'Did you forget the template literal? Example usage: project.addExecutable("executable-name")`shell script to run`',
+        ].join(" "),
+      );
+      return templateLiteralFn;
+    }
   },
 
   addCheck<T extends Project, Name extends string>(

@@ -30,6 +30,7 @@ export type Environment = {
   /**
    * Creates a new shell script `Executable`, run inside this `Environment`
    */
+  shell(script: string): Executable;
   shell(
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
@@ -54,11 +55,18 @@ export type Environment = {
 /**
  * Creates a new shell script `Executable`, run in the `emptyEnvironment`.
  */
+export function shell(script: string): Executable;
 export function shell(
   s: TemplateStringsArray,
   ...args: Array<NixStrLitInterpolatable>
+): Executable;
+export function shell(
+  s: TemplateStringsArray | string,
+  ...args: Array<NixStrLitInterpolatable>
 ) {
-  return emptyEnvironment.shell(s, ...args);
+  return typeof s === "string"
+    ? emptyEnvironment.shell(s)
+    : emptyEnvironment.shell(s, ...args);
 }
 
 /**
@@ -162,8 +170,13 @@ export function mkEnvironment(
       `,
       };
     },
-    shell(this, s, ...args) {
-      const cmdToExecute = nixStrLit(s, ...args);
+    shell(
+      this: Environment,
+      s: TemplateStringsArray | string,
+      ...args: Array<NixStrLitInterpolatable>
+    ) {
+      const cmdToExecute =
+        typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
       const shellEnv = nixRaw`
       let
         dev = ${this.nixExpression};
