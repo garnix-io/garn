@@ -2,6 +2,7 @@
 
 module InitSpec where
 
+import Control.Monad (forM_, when)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import Development.Shake (StdoutTrim (..), cmd, cmd_)
@@ -129,9 +130,31 @@ spec = do
         stderr output
           `shouldBe` unindent
             [i|
-              [garn] Creating a garn.ts file
               [garn] Found but could not parse cabal file
+              [garn] Cannot detect any project toolchains, sorry! Creating example garn.ts file
             |]
+
+      describe "when no specific initializer runs" $ do
+        it "prints out a message about that" $ \onTestFailureLog -> do
+          output <- runGarn ["init"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output
+            `shouldBe` unindent
+              [i|
+                [garn] Cannot detect any project toolchains, sorry! Creating example garn.ts file
+              |]
+
+        it "generates a commented file, except for imports" $ \onTestFailureLog -> do
+          output <- runGarn ["init"] "" repoDir Nothing
+          onTestFailureLog output
+          garnFile <- lines <$> readFile "garn.ts"
+          take 2 garnFile
+            `shouldBe` [ "import * as garn from \"https://garn.io/ts/v0.0.14/mod.ts\";",
+                         "import * as pkgs from \"https://garn.io/ts/v0.0.14/nixpkgs.ts\";"
+                       ]
+          forM_ (drop 2 garnFile) $ \line ->
+            when (line /= "") $
+              line `shouldStartWith` "//"
 
 rewriteImportsToLocalhost :: IO ()
 rewriteImportsToLocalhost = do
