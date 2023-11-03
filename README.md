@@ -15,17 +15,19 @@ export const frontend = garn.javascript.mkNpmProject({
   description: "My project frontend",
   src: "frontend",
   nodeVersion: "18",
-});
+})
+  .addExecutable("run")`cd frontend && npm install && npm start`;
 
 export const backend = garn.go.mkGoProject({
   description: "My project backend",
   src: "backend",
   goVersion: "1.20",
-});
+})
+  .addExecutable("run")`cd backend && go run ./main.go`;
 
 export const startAll = garn.processCompose({
-  frontend: frontend.devShell.shell`cd frontend && npm install && npm start`,
-  backend: backend.defaultExecutable!,
+  frontend: frontend.run,
+  backend: backend.run,
 });
 ```
 
@@ -43,7 +45,7 @@ of using e.g. docker.
 ### Install garn
 
 ```bash
-curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh | sh
+sh <(curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh)
 ```
 
 `garn` needs [`nix`](https://nixos.org/) to be installed, so -- if you don't
