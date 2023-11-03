@@ -190,22 +190,18 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
       );
     }
     if (script != null) {
-      const newExecutable = { [name]: this.shell(script) };
       return {
         ...this,
-        ...newExecutable,
+        ...{ [name]: this.shell(script) },
       };
     } else {
       const templateLiteralFn = (
         s: TemplateStringsArray,
         ...args: Array<string>
       ) => {
-        const newExecutable = { [name]: this.shell(s, ...args) } as {
-          [n in Name]: Executable;
-        };
         return {
           ...this,
-          ...newExecutable,
+          ...{ [name]: this.shell(s, ...args) },
         };
       };
       markAsMayNotExport(templateLiteralFn, (exportName: string) =>
@@ -229,20 +225,18 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
       );
     }
     if (check != null) {
-      const newCheck = { [name]: this.check(check) };
       return {
         ...this,
-        ...newCheck,
+        ...{ [name]: this.check(check) },
       };
     } else {
       const templateLiteralFn = (
         s: TemplateStringsArray,
         ...args: Array<string>
       ) => {
-        const newCheck = { [name]: this.check(s, ...args) };
         return {
           ...this,
-          ...newCheck,
+          ...{ [name]: this.check(s, ...args) },
         };
       };
       markAsMayNotExport(templateLiteralFn, (exportName: string) =>
