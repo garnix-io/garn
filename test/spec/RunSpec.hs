@@ -48,6 +48,20 @@ spec =
           onTestFailureLog output
           stdout output `shouldBe` "foobarbaz\n"
           exitCode output `shouldBe` ExitSuccess
+
+        it "propagates the exit status of the child process" $ \onTestFailureLog -> do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const main = garn.shell`exit 23`;
+            |]
+          output <- runGarn ["run", "main"] "" repoDir Nothing
+          onTestFailureLog output
+          stdout output `shouldBe` ""
+          exitCode output `shouldBe` ExitFailure 23
+
         it "runs executables within an environment" $ \onTestFailureLog -> do
           writeFile
             "garn.ts"

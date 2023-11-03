@@ -1,1 +1,2 @@
 packages: garn.cabal
+tests: True

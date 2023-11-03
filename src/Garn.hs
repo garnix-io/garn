@@ -48,7 +48,8 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
   case opts of
     Gen -> pure ()
     Run (CommandOptions {..}) argv -> do
-      callProcess "nix" $ ["run"] <> nixArgs <> [".#" <> asNixFacing target, "--"] <> argv
+      exitCode <- rawSystem "nix" (["run"] <> nixArgs <> [".#" <> asNixFacing target, "--"] <> argv)
+      exitWith exitCode
     Enter (CommandOptions {..}) -> do
       hPutStrLn stderr $
         "[garn] Entering "

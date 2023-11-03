@@ -1,0 +1,2 @@
+*.cabal linguist-generated
+/examples/init/foo.cabal -linguist-generated
