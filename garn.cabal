@@ -29,6 +29,7 @@ library
       Garn.Common
       Garn.Errors
       Garn.GarnConfig
+      Garn.ImportVersion
       Garn.Init
       Garn.Optparse
       Garn.Utils
@@ -224,6 +225,7 @@ test-suite spec
       Garn.Common
       Garn.Errors
       Garn.GarnConfig
+      Garn.ImportVersion
       Garn.Init
       Garn.Optparse
       Garn.Utils

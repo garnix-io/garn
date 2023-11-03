@@ -1,5 +1,4 @@
 {-# LANGUAGE DuplicateRecordFields #-}
-{-# LANGUAGE TemplateHaskell #-}
 
 module Garn.Optparse
   ( getOpts,
@@ -40,8 +39,8 @@ getOpts oType =
       WithGarnTs garnConfig -> WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig)
       WithoutGarnTs -> WithoutGarnTsOpts <$> withoutGarnTsParser
     version =
-      infoOption $(garnVersion) $
-        mconcat [long "version", help ("Show garn version (" <> $(garnVersion) <> ")")]
+      infoOption garnVersion $
+        mconcat [long "version", help ("Show garn version (" <> garnVersion <> ")")]
     opts =
       info
         (parser <**> helper <**> version)
