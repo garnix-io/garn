@@ -713,15 +713,23 @@ dt::after {
   display: none;
 }
 
-.bash {
-  font-family: monospace;
+.bash-snippet-to-copy {
+  display: flex;
   font-size: 15px;
   border: black 1px solid;
+}
+
+.bash-snippet-to-copy code {
+  background: transparent;
+  flex-grow: 1;
   padding: 5px;
 }
 
-span.copy-button {
-  float: right;
-  margin-right: 10px;
+.bash-snippet-to-copy button {
+  background: transparent;
+  border: none;
+  font-family: inherit;
   cursor: pointer;
+  margin-right: 5px;
+  user-select: none;
 }
