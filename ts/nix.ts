@@ -185,10 +185,7 @@ export function toHumanReadable(nixExpr: NixExpression): string {
     if (node.type !== "strLit") {
       return "[...]";
     }
-    return node.str.rest.reduce(
-      (acc, [node, str]) => acc + astToHumanReadable(node) + str,
-      node.str.initial,
-    );
+    return renderInterpolatedString(node.str, astToHumanReadable);
   };
   return astToHumanReadable(nixExpr.__ast);
 }
@@ -203,12 +200,7 @@ export function toNixString(nixExpr: NixExpression): string {
   const astToNixString = (node: NixAst): string => {
     switch (node.type) {
       case "raw":
-        return node.raw.rest
-          .reduce(
-            (acc, [astNode, str]) => acc + astToNixString(astNode) + str,
-            node.raw.initial,
-          )
-          .trim();
+        return renderInterpolatedString(node.raw, astToNixString).trim();
       case "list":
         return (
           "[" + node.elements.map((e) => astToNixString(e)).join(" ") + "]"
@@ -232,10 +224,9 @@ export function toNixString(nixExpr: NixExpression): string {
           );
         return (
           '"' +
-          node.str.rest.reduce(
-            (acc, [astNode, str]) =>
-              acc + "${" + astToNixString(astNode) + "}" + escape(str),
-            escape(node.str.initial),
+          renderInterpolatedString(
+            mapStrings(escape, node.str),
+            (astNode) => "${" + astToNixString(astNode) + "}",
           ) +
           '"'
         );
@@ -294,5 +285,25 @@ function interpolatedStringFromString(s: string): InterpolatedString<never> {
   return {
     initial: s,
     rest: [],
+  };
+}
+
+function renderInterpolatedString<T>(
+  interpolated: InterpolatedString<T>,
+  render: (t: T) => string,
+): string {
+  return interpolated.rest.reduce(
+    (acc, [node, str]) => acc + render(node) + str,
+    interpolated.initial,
+  );
+}
+
+function mapStrings<T>(
+  f: (s: string) => string,
+  interpolated: InterpolatedString<T>,
+): InterpolatedString<T> {
+  return {
+    initial: f(interpolated.initial),
+    rest: interpolated.rest.map(([node, str]) => [node, f(str)]),
   };
 }
