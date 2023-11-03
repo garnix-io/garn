@@ -60,7 +60,7 @@ export const frontend = garn.javascript
     nodeVersion: "18",
     src: "./frontend",
   })
-  .addCheck("test")`npm test`;
+  .addCheck("test", "npm test");
 ```
 
 Now running `garn check frontend` will run `npm test` in the frontend project

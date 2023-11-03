@@ -16,14 +16,14 @@ export const frontend = garn.javascript.mkNpmProject({
   src: "frontend",
   nodeVersion: "18",
 })
-  .addExecutable("run")`cd frontend && npm install && npm start`;
+  .addExecutable("run", "cd frontend && npm install && npm start");
 
 export const backend = garn.go.mkGoProject({
   description: "My project backend",
   src: "backend",
   goVersion: "1.20",
 })
-  .addExecutable("run")`cd backend && go run ./main.go`;
+  .addExecutable("run", "cd backend && go run ./main.go");
 
 export const startAll = garn.processCompose({
   frontend: frontend.run,

@@ -95,7 +95,7 @@ export const backend = garn.haskell
     src: ".",
   })
   .withDevTools([nixpkgs.hlint])
-  .addCheck("hlint")\`hlint *.hs\`; `}
+  .addCheck("hlint", "hlint *.hs"); `}
             />
             <Code
               header="terminal"
@@ -128,7 +128,7 @@ check> No hints`}
   goVersion: "1.20",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
-  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\`; `}
+  .addExecutable("codegen", "protoc --go_out=out protobufs/*.proto"); `}
             />
             <Code
               header="terminal"
