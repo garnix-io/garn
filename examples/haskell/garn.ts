@@ -9,4 +9,4 @@ export const helloFromHaskell = garn.haskell
     src: ".",
   })
   .withDevTools([nixpkgs.hlint])
-  .addCheck("hlint")`hlint *.hs`;
+  .addCheck("hlint", "hlint *.hs");
