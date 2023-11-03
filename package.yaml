@@ -8,6 +8,7 @@ copyright: "AllRightsReserved"
 verbatim:
   data-files: |
     ts/**/*.ts
+    ts/**/*.json
   cabal-version: 2.4
 
 default-extensions:

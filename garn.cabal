@@ -14,7 +14,9 @@ copyright:      AllRightsReserved
 license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
-data-files:     ts/**/*.ts
+data-files:
+    ts/**/*.ts
+    ts/**/*.json
 
 source-repository head
   type: git
