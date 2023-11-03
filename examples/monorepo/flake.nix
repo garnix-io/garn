@@ -263,52 +263,7 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          "haskell" = {
-            "type" = "app";
-            "program" = "${
-      let
-        dev = pkgs.mkShell {};
-        shell = "${
-    (pkgs.haskell.packages.ghc94.callCabal2nix
-      "garn-pkg"
-      
-  (let
-    lib = pkgs.lib;
-    lastSafe = list :
-      if lib.lists.length list == 0
-        then null
-        else lib.lists.last list;
-  in
-  builtins.path
-    {
-      path = ./haskell;
-      name = "source";
-      filter = path: type:
-        let
-          fileName = lastSafe (lib.strings.splitString "/" path);
-        in
-         fileName != "flake.nix" &&
-         fileName != "garn.ts";
-    })
-
-      { })
-      // {
-        meta.mainProgram = "helloFromHaskell";
-      }
-  }/bin/helloFromHaskell";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
-        #!${pkgs.bash}/bin/bash
-        export PATH=$(cat ${buildPath}):$PATH
-        ${dev.shellHook}
-        ${shell} "$@"
-      ''
-    }";
-          };
-          "runBackend" = {
+          "backend/run" = {
             "type" = "app";
             "program" = "${
       let
@@ -365,6 +320,76 @@
         })
       ;
         shell = "cd backend && go run ./main.go";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+          };
+          "haskell" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = pkgs.mkShell {};
+        shell = "${
+    (pkgs.haskell.packages.ghc94.callCabal2nix
+      "garn-pkg"
+      
+  (let
+    lib = pkgs.lib;
+    lastSafe = list :
+      if lib.lists.length list == 0
+        then null
+        else lib.lists.last list;
+  in
+  builtins.path
+    {
+      path = ./haskell;
+      name = "source";
+      filter = path: type:
+        let
+          fileName = lastSafe (lib.strings.splitString "/" path);
+        in
+         fileName != "flake.nix" &&
+         fileName != "garn.ts";
+    })
+
+      { })
+      // {
+        meta.mainProgram = "helloFromHaskell";
+      }
+  }/bin/helloFromHaskell";
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!${pkgs.bash}/bin/bash
+        export PATH=$(cat ${buildPath}):$PATH
+        ${dev.shellHook}
+        ${shell} "$@"
+      ''
+    }";
+          };
+          "npmFrontend/run" = {
+            "type" = "app";
+            "program" = "${
+      let
+        dev = 
+        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+            previousAttrs.nativeBuildInputs
+            ++
+            [pkgs.nodejs-18_x];
+        })
+      ;
+        shell = "cd frontend-npm && npm install && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
