@@ -1,25 +1,57 @@
 import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
-import { nixStrLit } from "./nix.ts";
+import {
+  nixAttrSet,
+  nixList,
+  nixRaw,
+  nixStrLit,
+  toHumanReadable,
+  toNixString,
+} from "./nix.ts";
 
 Deno.test("nixStrLit correctly serializes into a nix expression", () => {
-  assertEquals(nixStrLit`foo`.rawNixExpressionString, '"foo"');
+  assertEquals(toNixString(nixStrLit`foo`), '"foo"');
   assertEquals(
-    nixStrLit`with ${"string"} interpolation`.rawNixExpressionString,
-    '"with string interpolation"',
+    toNixString(nixStrLit`with ${"string"} interpolation`),
+    '"with ${"string"} interpolation"',
   );
   assertEquals(
-    nixStrLit`with package ${{
-      rawNixExpressionString: "pkgs.hello",
-    }} works`.rawNixExpressionString,
+    toNixString(nixStrLit`with package ${nixRaw`pkgs.hello`} works`),
     '"with package ${pkgs.hello} works"',
   );
   assertEquals(
-    nixStrLit`escaped dollars in strings \${should not interpolate}`
-      .rawNixExpressionString,
+    toNixString(
+      nixStrLit`escaped dollars in strings \${should not interpolate}`,
+    ),
     '"escaped dollars in strings \\${should not interpolate}"',
   );
   assertEquals(
-    nixStrLit`"double quotes" are correctly escaped`.rawNixExpressionString,
+    toNixString(nixStrLit`"double quotes" are correctly escaped`),
     '"\\"double quotes\\" are correctly escaped"',
+  );
+});
+
+Deno.test("toHumanReadable snips out incedental dependencies in string literals", () => {
+  assertEquals(toHumanReadable(nixStrLit`foo`), "foo");
+  assertEquals(
+    toHumanReadable(nixStrLit`foo ${nixRaw`some-nix`} bar`),
+    "foo [...] bar",
+  );
+});
+
+Deno.test("nixList", () => {
+  assertEquals(
+    toNixString(nixList([nixStrLit`a`, nixStrLit`b`, nixStrLit`c`])),
+    '["a" "b" "c"]',
+  );
+});
+
+Deno.test("nixAttrSet", () => {
+  assertEquals(
+    toNixString(nixAttrSet({
+      a: nixRaw`1`,
+      b: nixRaw`2`,
+      c: undefined,
+    })),
+    '{ "a" = 1; "b" = 2; }',
   );
 });

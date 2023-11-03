@@ -7,6 +7,7 @@ import {
   nixList,
   nixRaw,
   nixStrLit,
+  toHumanReadable,
 } from "./nix.ts";
 import { Package, mkPackage } from "./package.ts";
 
@@ -168,7 +169,7 @@ export function mkEnvironment(
     `;
       return {
         tag: "executable",
-        description: `Executes ${cmdToExecute.rawNixExpressionString}`,
+        description: `Executes ${toHumanReadable(cmdToExecute)}`,
         nixExpression: nixStrLit`${shellEnv}`,
       };
     },

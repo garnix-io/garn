@@ -20,16 +20,22 @@ export type NixStrLitInterpolatable =
       nixExpression: NixExpression;
     };
 
+type NixAst =
+  | { type: "raw"; raw: InterpolatedString<NixAst> }
+  | { type: "list"; elements: Array<NixAst> }
+  | { type: "attrSet"; elements: Record<string, NixAst> }
+  | { type: "strLit"; str: InterpolatedString<NixAst> };
+
 /**
  * An opaque type representing a Nix expression.
  *
  * It is not advised to construct this type but instead use `nixRaw` or `nixStrLit`.
  *
- * It is not advised to access the `rawNixExpressionString` except within the
- * garn library itself right before constructing the final flake.nix. This way
- * all Nix expressions are contained within this opaque type and remain type safe.
+ * It is not advised to access `__ast` directly except within this file itself.
+ * This way all Nix expressions are contained within this opaque type and
+ * remain type safe.
  */
-export type NixExpression = { rawNixExpressionString: string };
+export type NixExpression = { __ast: NixAst };
 
 /**
  * A template literal function to construct `NixExpression`s from raw strings.
@@ -64,13 +70,18 @@ export function nixRaw(
   s: TemplateStringsArray | string,
   ...interpolations: Array<NixExpression>
 ): NixExpression {
-  if (typeof s === "string") return { rawNixExpressionString: s };
-  const rawNixExpressionString = s.reduce(
-    (acc, part, i) =>
-      acc + part + (interpolations[i]?.rawNixExpressionString ?? ""),
-    "",
-  );
-  return { rawNixExpressionString };
+  if (typeof s === "string") {
+    return { __ast: { type: "raw", raw: interpolatedStringFromString(s) } };
+  }
+  return {
+    __ast: {
+      type: "raw",
+      raw: interpolatedStringFromTemplate(
+        s,
+        interpolations.map((i) => i.__ast),
+      ),
+    },
+  };
 }
 
 /**
@@ -87,13 +98,17 @@ export function nixRaw(
  * ```
  */
 export function nixList(elements: Array<NixExpression>): NixExpression {
-  return nixRaw(
-    "[" + elements.map((p) => p.rawNixExpressionString.trim()).join(" ") + "]",
-  );
+  return {
+    __ast: {
+      type: "list",
+      elements: elements.map((e) => e.__ast),
+    },
+  };
 }
 
 /**
  * Turns a javascript object of `NixExpression`s into a Nix attribute set.
+ * Filters out undefined values.
  *
  * Example:
  * ```typescript
@@ -101,20 +116,24 @@ export function nixList(elements: Array<NixExpression>): NixExpression {
  * nixAttrSet({
  *   a: nixRaw`1`,
  *   b: nixRaw`2`,
+ *   c: undefined,
  * })
  * ```
  */
 export function nixAttrSet(
   attrSet: Record<string, NixExpression | undefined>,
 ): NixExpression {
-  return nixRaw(
-    "{" +
-      Object.entries(attrSet)
+  return {
+    __ast: {
+      type: "attrSet",
+      elements: Object.entries(attrSet)
         .filter((x): x is [string, NixExpression] => x[1] != null)
-        .map(([k, v]) => nixRaw`${nixStrLit(k)} = ${v};`.rawNixExpressionString)
-        .join("\n") +
-      "}",
-  );
+        .reduce(
+          (acc, [k, v]) => ({ ...acc, [k]: v.__ast }),
+          {} as Record<string, NixAst>,
+        ),
+    },
+  };
 }
 
 /**
@@ -132,37 +151,148 @@ export function nixStrLit(
   s: TemplateStringsArray | string,
   ...interpolations: Array<NixStrLitInterpolatable>
 ): NixExpression {
-  if (typeof s === "string") return nixStrLit`${s}`;
-  const escape = (str: string) =>
-    ["\\", '"', "$"].reduce(
-      (str, char) => str.replaceAll(char, `\\${char}`),
-      str,
-    );
-  const escapedTemplate = s.map(escape);
-  const rawNixExpressionString =
-    '"' +
-    escapedTemplate.reduce((acc, part, i) => {
-      const interpolation = interpolations[i];
-      switch (typeof interpolation) {
-        case "string":
-          return acc + part + escape(interpolation);
-        case "object":
-          if ("rawNixExpressionString" in interpolation) {
-            return (
-              acc + part + "${" + interpolation.rawNixExpressionString + "}"
-            );
+  if (typeof s === "string") {
+    return { __ast: { type: "strLit", str: interpolatedStringFromString(s) } };
+  }
+  return {
+    __ast: {
+      type: "strLit",
+      str: interpolatedStringFromTemplate(
+        s,
+        interpolations.map((interpolation): NixAst => {
+          if (typeof interpolation === "string") {
+            return {
+              type: "strLit",
+              str: interpolatedStringFromString(interpolation),
+            };
           }
-          return (
-            acc +
-            part +
-            "${" +
-            interpolation.nixExpression.rawNixExpressionString +
-            "}"
+          if ("__ast" in interpolation) {
+            return interpolation.__ast;
+          }
+          return interpolation.nixExpression.__ast;
+        }),
+      ),
+    },
+  };
+}
+
+/**
+ * Converts a `NixExpression` to a (hopefully concise) human readable string
+ * with incidental dependencies snipped out with "[...]"
+ */
+export function toHumanReadable(nixExpr: NixExpression): string {
+  const astToHumanReadable = (node: NixAst): string => {
+    if (node.type !== "strLit") {
+      return "[...]";
+    }
+    return node.str.rest.reduce(
+      (acc, [node, str]) => acc + astToHumanReadable(node) + str,
+      node.str.initial,
+    );
+  };
+  return astToHumanReadable(nixExpr.__ast);
+}
+
+/**
+ * Converts a `NixExpression` to a string representing that Nix expression.
+ *
+ * It is advised to defer calling this unless actually serializing to disk.
+ * This way Nix expressions remain as the type `NixExpression`.
+ */
+export function toNixString(nixExpr: NixExpression): string {
+  const astToNixString = (node: NixAst): string => {
+    switch (node.type) {
+      case "raw":
+        return node.raw.rest
+          .reduce(
+            (acc, [astNode, str]) => acc + astToNixString(astNode) + str,
+            node.raw.initial,
+          )
+          .trim();
+      case "list":
+        return (
+          "[" + node.elements.map((e) => astToNixString(e)).join(" ") + "]"
+        );
+      case "attrSet":
+        return (
+          "{ " +
+          Object.entries(node.elements)
+            .map(
+              ([k, v]) =>
+                `${astToNixString(nixStrLit(k).__ast)} = ${astToNixString(v)};`,
+            )
+            .join(" ") +
+          " }"
+        );
+      case "strLit": {
+        const escape = (str: string) =>
+          ["\\", '"', "$"].reduce(
+            (str, char) => str.replaceAll(char, `\\${char}`),
+            str,
           );
-        case "undefined":
-          return acc + part;
+        return (
+          '"' +
+          node.str.rest.reduce(
+            (acc, [astNode, str]) =>
+              acc + "${" + astToNixString(astNode) + "}" + escape(str),
+            escape(node.str.initial),
+          ) +
+          '"'
+        );
       }
-    }, "") +
-    '"';
-  return { rawNixExpressionString };
+    }
+  };
+  return astToNixString(nixExpr.__ast);
+}
+
+/**
+ * Represents a string with `T`s interspersed throughout the string.
+ *
+ * This is a more safe data structure than joining a `TemplateStringsArray`
+ * with a `T[]` (which is what tag template functions give you) since it
+ * enforces that given N strings, there will always be N-1 interpolations.
+ *
+ * Example:
+ * ```typescript
+ * // Given:
+ * myTemplateFn`foo${1}bar${2}baz`
+ *
+ * function myTemplateFn(s: TemplateStringsArray, ...i: Array<number>) {
+ *   // s is ["foo", "bar", "baz"]
+ *   // i is [1, 2]
+ *   // but nothing at the type level enforces that s.length - 1 == i.length
+ *
+ *   // Using `interpolatedStringFromTemplate` we can convert to a safer `InterpolatedString`:
+ *   const interpolatedString = interpolatedStringFromTemplate(s, i);
+ *   // interpolatedString is { initial: "foo", rest: [[1, "bar"], [2, "baz"]] }
+ * }
+ * ```
+ */
+type InterpolatedString<T> = {
+  initial: string;
+  rest: Array<[T, string]>;
+};
+
+/**
+ * Converts tag template function parameters into `InterpolatedString`s
+ */
+function interpolatedStringFromTemplate<T>(
+  s: TemplateStringsArray,
+  interpolations: Array<T>,
+): InterpolatedString<T> {
+  return {
+    initial: s[0],
+    rest: s.slice(1).map((part, i) => [interpolations[i], part]),
+  };
+}
+
+/**
+ * Convenience function to create an `InterpolatedString` with only an
+ * `initial` (no interpolations).
+ */
+function interpolatedStringFromString(s: string): InterpolatedString<never> {
+  return {
+    initial: s,
+    rest: [],
+  };
 }

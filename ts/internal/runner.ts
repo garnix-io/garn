@@ -8,7 +8,13 @@ import {
   mapValues,
 } from "./utils.ts";
 import { GOMOD2NIX_REPO } from "../go/consts.ts";
-import { nixAttrSet, NixExpression, nixRaw, nixStrLit } from "../nix.ts";
+import {
+  nixAttrSet,
+  NixExpression,
+  nixRaw,
+  nixStrLit,
+  toNixString,
+} from "../nix.ts";
 import { Executable } from "../mod.ts";
 import { isExecutable } from "../executable.ts";
 import { assertMayExport } from "./may_not_export.ts";
@@ -51,8 +57,7 @@ export const toDenoOutput = (
       tag: "Success",
       contents: {
         targets: toTargets(garnExports),
-        flakeFile: formatFlake(nixpkgsInput, garnExports)
-          .rawNixExpressionString,
+        flakeFile: toNixString(formatFlake(nixpkgsInput, garnExports)),
       },
     };
   } catch (err: unknown) {
