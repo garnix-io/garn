@@ -7,7 +7,7 @@ export const frontend = garn.javascript
     nodeVersion: "18",
     src: "./frontend",
   })
-  .addCheck("test")`npm test`;
+  .addCheck("test", "npm test");
 
 export const backend = garn.go.mkGoProject({
   description: "my backend",
@@ -20,7 +20,7 @@ export const deno = garn.mkProject(
     description: "garn configuration environment",
     defaultEnvironment: garn.emptyEnvironment.withDevTools([pkgs.deno]),
   },
-  {}
+  {},
 );
 
 export const edit = garn.editGarnConfig;

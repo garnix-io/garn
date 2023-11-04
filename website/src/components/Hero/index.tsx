@@ -136,12 +136,12 @@ to add a dev tool to your shell.
     <Tooltip item="addCheck">
       addCheck adds a <em>pure</em> check that you can run locally or on CI.
     </Tooltip>
-    (<String>"no-todos-allowed"</String>)<String>`! rg -i todo .`</String>
+    (<String>"no-todos-allowed"</String>, <String>"! rg -i todo ."</String>)
     <br />
     {"  "}.
     <Tooltip item="addExecutable">
       addExecutable adds a script that you can run locally with 'garn run'.
     </Tooltip>
-    (<String>"dev-server"</String>)<String>`air main.go`</String>;
+    (<String>"dev-server"</String>, <String>"air main.go"</String>);
   </>
 );

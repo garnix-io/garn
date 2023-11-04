@@ -84,7 +84,7 @@ Here's a small example:
 import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
 
 export const hello =
-  garn.emptyEnvironment.shell`echo Hello, world!`;
+  garn.emptyEnvironment.shell("echo Hello, world!");
 ```
 
 You can run `Executable`s with `garn run`.
@@ -135,12 +135,12 @@ export const project = garn.javascript
     description: "An Npm frontend",
     nodeVersion: "18",
   })
-  .addCheck("test")`npm run test`
-  .addCheck("tsc")`npm run tsc`
+  .addCheck("test", "npm run test")
+  .addCheck("tsc", "npm run tsc")
   .withDevTools([pkgs.ripgrep])
-  .addCheck("no todos allowed")`! rg --glob !node_modules -i todo .`;
+  .addCheck("no todos allowed", "! rg --glob !node_modules -i todo .");
 
-export const dev = project.shell`npm install ; npm run dev`;
+export const dev = project.shell("npm install ; npm run dev");
 ```
 
 With this `garn.ts` file:

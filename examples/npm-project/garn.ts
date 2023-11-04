@@ -6,6 +6,7 @@ export const project = garn.javascript
     description: "An NPM frontend",
     nodeVersion: "18",
   })
-  .addCheck("test")`npm run test`.addCheck("tsc")`npm run tsc`;
+  .addCheck("test", "npm run test")
+  .addCheck("tsc", "npm run tsc");
 
-export const run = project.shell`npm install ; npm run run`;
+export const run = project.shell("npm install ; npm run run");

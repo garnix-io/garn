@@ -6,7 +6,7 @@ export const main = garn.javascript.mkNpmProject({
   nodeVersion: "18",
 });
 
-export const start = main.shell`npm install && npm start`;
+export const start = main.shell("npm install && npm start");
 
 export const bundle: garn.Project = garn.mkProject(
   {
@@ -17,5 +17,5 @@ export const bundle: garn.Project = garn.mkProject(
       npm run build
       cp -rv build/* $out
     `,
-  }
+  },
 );

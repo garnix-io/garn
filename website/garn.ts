@@ -11,12 +11,12 @@ export const website = garn.javascript
     garn.mkPackage(nixRaw("pkgs.nodePackages.typescript-language-server")),
     garn.mkPackage(nixRaw("pkgs.nodePackages.prettier")),
   ])
-  .addCheck("tsc")`npm run tsc`
-  .addCheck("fmt-check")`prettier src/**/*.tsx src/**/*.ts --check`
-  .addExecutable("fmt")`prettier src/**/*.tsx src/**/*.ts --write`;
+  .addCheck("tsc", "npm run tsc")
+  .addCheck("fmt-check", "prettier src/**/*.tsx src/**/*.ts --check")
+  .addExecutable("fmt", "prettier src/**/*.tsx src/**/*.ts --write");
 
-export const dev = website.shell`npm install ; npm run dev`;
+export const dev = website.shell("npm install ; npm run dev");
 
-export const build = website.shell`npm install ; npm run build`;
+export const build = website.shell("npm install ; npm run build");
 
 export const edit = garn.editGarnConfig;

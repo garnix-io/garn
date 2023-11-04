@@ -44,7 +44,7 @@ spec = do
                 src: "."
               })
                 .withDevTools([garn.mkPackage(nixRaw`pkgs.hlint`)])
-                .addCheck("hlint")`hlint *.hs`;
+                .addCheck("hlint", "hlint *.hs");
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output
@@ -81,9 +81,9 @@ spec = do
               export const failing = garn.mkProject(
                 { description: 'Failing Project' },
                 {
-                  check1: garn.check`echo ABC`,
-                  check2: garn.check`echo DEF && false`,
-                  check3: garn.check`echo GHI`,
+                  check1: garn.check("echo ABC"),
+                  check2: garn.check("echo DEF && false"),
+                  check3: garn.check("echo GHI"),
                 }
               );
             |]
@@ -107,6 +107,29 @@ spec = do
           output <- runGarn ["check", "myProject"] "" repoDir Nothing
           onTestFailureLog output
           stderr output `shouldContain` "hello world"
+          exitCode output `shouldBe` ExitFailure 1
+
+        it "allows to use backtick syntax" $ \onTestFailureLog -> do
+          writeHaskellProject repoDir
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+              import { nixRaw } from "#{repoDir}/ts/nix.ts";
+
+              const hello: garn.Package = garn.mkPackage(nixRaw`pkgs.hello`);
+
+              export const haskell = garn.mkProject(
+                {
+                  description: "",
+                  defaultEnvironment: garn.emptyEnvironment,
+                },
+                {},
+              ).addCheck("test-check")`${hello}/bin/hello; false`;
+            |]
+          output <- runGarn ["check", "haskell"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output `shouldContain` "error"
           exitCode output `shouldBe` ExitFailure 1
 
         describe "exit-codes" $ do
