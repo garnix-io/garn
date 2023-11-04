@@ -79,6 +79,7 @@ tests:
       - -fdefer-typed-holes
     dependencies:
       - async
+      - cradle
       - filepath
       - hspec
       - hspec-discover

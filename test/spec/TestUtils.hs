@@ -6,6 +6,7 @@ import Control.Concurrent
 import Control.Concurrent.Async (waitEitherCatch, withAsync)
 import Control.Exception (SomeException, bracket, catch, throwIO)
 import Control.Monad (unless, when)
+import Cradle (run_)
 import qualified Data.Aeson as Aeson
 import Data.String.Conversions (cs)
 import Data.String.Interpolate
@@ -21,6 +22,9 @@ import System.IO.Temp
 import System.Process (ProcessHandle, interruptProcessGroupOf, waitForProcess)
 import Test.Hspec
 import Text.Regex.PCRE.Heavy (compileM, (=~))
+
+foo :: IO ()
+foo = run_ "foo"
 
 shouldMatch :: (HasCallStack) => String -> String -> Expectation
 shouldMatch actual expected = case compileM (cs expected) [] of

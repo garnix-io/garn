@@ -4,6 +4,7 @@
 , async
 , base
 , containers
+, cradle
 , directory
 , filepath
 , getopt-generics
@@ -80,6 +81,7 @@ mkDerivation {
     async
     base
     containers
+    cradle
     directory
     filepath
     getopt-generics
