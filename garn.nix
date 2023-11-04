@@ -44,13 +44,13 @@ mkDerivation {
     ansi-wl-pprint
     base
     containers
+    cradle
     directory
     getopt-generics
     interpolate
     optparse-applicative
     pretty-simple
     process
-    shake
     string-conversions
     template-haskell
     temporary
@@ -62,13 +62,13 @@ mkDerivation {
     ansi-wl-pprint
     base
     containers
+    cradle
     directory
     getopt-generics
     interpolate
     optparse-applicative
     pretty-simple
     process
-    shake
     string-conversions
     template-haskell
     temporary

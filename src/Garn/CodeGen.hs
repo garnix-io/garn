@@ -1,11 +1,12 @@
 {-# LANGUAGE QuasiQuotes #-}
 
 module Garn.CodeGen
-  ( run,
+  ( Garn.CodeGen.run,
     fromToplevelDerivation,
   )
 where
 
+import Cradle (StdoutUntrimmed (..), run)
 import Data.Aeson (FromJSON, eitherDecode, toJSON)
 import Data.Aeson.Text (encodeToLazyText)
 import Data.Functor ((<&>))
@@ -16,7 +17,6 @@ import Data.Maybe (fromMaybe)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
-import Development.Shake
 import GHC.Generics (Generic)
 import Garn.Common (currentSystem, nixpkgsInput)
 import WithCli (withCli)
@@ -38,10 +38,10 @@ run = withCli $ do
 fromToplevelDerivation :: String -> String -> String -> IO String
 fromToplevelDerivation garnLibRoot varName rootExpr = do
   system :: String <- do
-    Stdout json <- cmd "nix" nixArgs "eval --impure --json --expr builtins.currentSystem"
-    pure $ either error id $ eitherDecode json
-  Stdout json <- cmd "nix" nixArgs "eval" (".#lib." <> system) "--json --apply" [nixExpr]
-  pkgs :: Map String PkgInfo <- case eitherDecode json of
+    StdoutUntrimmed json <- Cradle.run "nix" nixArgs (words "eval --impure --json --expr builtins.currentSystem")
+    pure $ either error id $ eitherDecode (cs json)
+  StdoutUntrimmed json <- Cradle.run "nix" nixArgs "eval" (".#lib." <> system) "--json" "--apply" nixExpr
+  pkgs :: Map String PkgInfo <- case eitherDecode (cs json) of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in " <> cs json)
   let sanitizedPkgs = Map.mapKeys sanitize pkgs

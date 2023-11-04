@@ -1,7 +1,8 @@
 module Garn.Common (nixpkgsInput, nixArgs, currentSystem) where
 
+import Cradle (StdoutUntrimmed (..), run)
 import Data.Aeson (eitherDecode)
-import Development.Shake (Stdout (..), cmd)
+import Data.String.Conversions (cs)
 
 -- | pinned to master on 2023-10-26
 nixpkgsInput :: String
@@ -16,5 +17,5 @@ nixArgs =
 
 currentSystem :: IO String
 currentSystem = do
-  Stdout json <- cmd "nix" nixArgs "eval --impure --json --expr builtins.currentSystem"
-  pure $ either error id $ eitherDecode json
+  StdoutUntrimmed json <- run "nix" nixArgs (words "eval --impure --json --expr builtins.currentSystem")
+  pure $ either error id $ eitherDecode (cs json)

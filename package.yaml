@@ -48,13 +48,13 @@ dependencies:
   - aeson
   - ansi-wl-pprint
   - containers
+  - cradle
   - directory
   - getopt-generics
   - interpolate
   - optparse-applicative
   - pretty-simple
   - process
-  - shake
   - string-conversions
   - template-haskell
   - temporary
@@ -79,7 +79,6 @@ tests:
       - -fdefer-typed-holes
     dependencies:
       - async
-      - cradle
       - filepath
       - hspec
       - hspec-discover
@@ -91,6 +90,7 @@ tests:
       - lens-regex-pcre
       - mockery
       - pcre-heavy
+      - shake
       - silently
       - wreq
       - yaml

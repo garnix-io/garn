@@ -2,20 +2,20 @@
 
 module Garn
   ( Env (..),
-    run,
+    Garn.run,
   )
 where
 
 import Control.Exception (catch)
 import Control.Monad (forM_, when)
-import Development.Shake (Exit (Exit), cmd)
+import Cradle
 import Garn.Common (currentSystem, nixArgs)
 import qualified Garn.Errors
 import Garn.GarnConfig
 import Garn.Init
 import Garn.Optparse
 import System.Directory (doesFileExist)
-import System.Exit (ExitCode (..), exitWith)
+import System.Exit (exitWith)
 import System.IO (Handle, hPutStrLn, stderr)
 import System.Process
 
@@ -73,7 +73,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       case targetConfig of
         TargetConfigProject (ProjectTarget {packages}) -> do
           forM_ packages $ \package -> do
-            Exit c <- cmd "nix build" nixArgs [".#" <> package]
+            c <- Cradle.run "nix" "build" nixArgs (".#" <> package)
             when (c /= ExitSuccess) $ exitWith c
         TargetConfigExecutable _ -> pure ()
     Check checkOptions -> case checkOptions of
@@ -86,10 +86,10 @@ checkTarget :: TargetConfig -> IO ()
 checkTarget targetConfig = case targetConfig of
   TargetConfigProject (ProjectTarget {packages, checks}) -> do
     forM_ packages $ \package -> do
-      Exit c <- cmd "nix build" nixArgs [".#" <> package]
+      c <- Cradle.run "nix" "build" nixArgs (".#" <> package)
       when (c /= ExitSuccess) $ exitWith c
     system <- currentSystem
     forM_ checks $ \check -> do
-      Exit c <- cmd "nix build" nixArgs [".#checks." <> system <> "." <> check]
+      c <- Cradle.run "nix" "build" nixArgs (".#checks." <> system <> "." <> check)
       when (c /= ExitSuccess) $ exitWith c
   TargetConfigExecutable _ -> pure ()

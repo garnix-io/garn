@@ -76,13 +76,13 @@ library
     , ansi-wl-pprint
     , base >=4.7 && <5
     , containers
+    , cradle
     , directory
     , getopt-generics
     , interpolate
     , optparse-applicative
     , pretty-simple
     , process
-    , shake
     , string-conversions
     , template-haskell
     , temporary
@@ -133,6 +133,7 @@ executable codegen
     , ansi-wl-pprint
     , base >=4.7 && <5
     , containers
+    , cradle
     , directory
     , garn
     , getopt-generics
@@ -140,7 +141,6 @@ executable codegen
     , optparse-applicative
     , pretty-simple
     , process
-    , shake
     , string-conversions
     , template-haskell
     , temporary
@@ -191,6 +191,7 @@ executable garn
     , ansi-wl-pprint
     , base >=4.7 && <5
     , containers
+    , cradle
     , directory
     , garn
     , getopt-generics
@@ -198,7 +199,6 @@ executable garn
     , optparse-applicative
     , pretty-simple
     , process
-    , shake
     , string-conversions
     , template-haskell
     , temporary

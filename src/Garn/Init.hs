@@ -1,7 +1,7 @@
 module Garn.Init (initGarnTs) where
 
-import Development.Shake (cmd_)
+import Cradle (run_)
 
 initGarnTs :: FilePath -> IO ()
 initGarnTs initFilePath = do
-  cmd_ "deno run --quiet --check --allow-write --allow-read --allow-run" initFilePath
+  run_ (words "deno run --quiet --check --allow-write --allow-read --allow-run") initFilePath
