@@ -13,7 +13,7 @@ import {
   NixExpression,
   nixRaw,
   nixStrLit,
-  toNixString,
+  renderNixExpression,
 } from "../nix.ts";
 import { Executable } from "../mod.ts";
 import { isExecutable } from "../executable.ts";
@@ -57,7 +57,7 @@ export const toDenoOutput = (
       tag: "Success",
       contents: {
         targets: toTargets(garnExports),
-        flakeFile: toNixString(formatFlake(nixpkgsInput, garnExports)),
+        flakeFile: renderNixExpression(formatFlake(nixpkgsInput, garnExports)),
       },
     };
   } catch (err: unknown) {

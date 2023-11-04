@@ -5,27 +5,27 @@ import {
   nixRaw,
   nixStrLit,
   toHumanReadable,
-  toNixString,
+  renderNixExpression,
 } from "./nix.ts";
 
 Deno.test("nixStrLit correctly serializes into a nix expression", () => {
-  assertEquals(toNixString(nixStrLit`foo`), '"foo"');
+  assertEquals(renderNixExpression(nixStrLit`foo`), '"foo"');
   assertEquals(
-    toNixString(nixStrLit`with ${"string"} interpolation`),
+    renderNixExpression(nixStrLit`with ${"string"} interpolation`),
     '"with ${"string"} interpolation"',
   );
   assertEquals(
-    toNixString(nixStrLit`with package ${nixRaw`pkgs.hello`} works`),
+    renderNixExpression(nixStrLit`with package ${nixRaw`pkgs.hello`} works`),
     '"with package ${pkgs.hello} works"',
   );
   assertEquals(
-    toNixString(
+    renderNixExpression(
       nixStrLit`escaped dollars in strings \${should not interpolate}`,
     ),
     '"escaped dollars in strings \\${should not interpolate}"',
   );
   assertEquals(
-    toNixString(nixStrLit`"double quotes" are correctly escaped`),
+    renderNixExpression(nixStrLit`"double quotes" are correctly escaped`),
     '"\\"double quotes\\" are correctly escaped"',
   );
 });
@@ -43,14 +43,14 @@ Deno.test(
 
 Deno.test("nixList", () => {
   assertEquals(
-    toNixString(nixList([nixStrLit`a`, nixStrLit`b`, nixStrLit`c`])),
+    renderNixExpression(nixList([nixStrLit`a`, nixStrLit`b`, nixStrLit`c`])),
     '["a" "b" "c"]',
   );
 });
 
 Deno.test("nixAttrSet", () => {
   assertEquals(
-    toNixString(
+    renderNixExpression(
       nixAttrSet({
         a: nixRaw`1`,
         b: nixRaw`2`,
