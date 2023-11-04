@@ -90,10 +90,10 @@ ormolu mode:
   fi
 
 fmt-typescript:
-  prettier --write $(fd .ts ts | grep -v nixpkgs.ts)
+  prettier --write $(fd .ts ts | grep -v 'nixpkgs.ts\|version.ts')
 
 fmt-typescript-check:
-  prettier --check $(fd .ts ts | grep -v nixpkgs.ts)
+  prettier --check $(fd .ts ts | grep -v 'nixpkgs.ts\|version.ts')
 
 hpack:
   hpack
@@ -151,7 +151,7 @@ codegen: hpack && typescript-check
   cabal run codegen
 
 typescript-check *args="":
-  deno check ts/*.ts {{ args }}
+  deno check ts/*.ts ts/**/*.ts {{ args }}
   echo checked!
 
 check-isolated-garn:

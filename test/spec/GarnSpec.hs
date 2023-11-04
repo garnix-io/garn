@@ -6,6 +6,7 @@ module GarnSpec (spec) where
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import System.Directory
+import System.Exit (ExitCode (ExitSuccess))
 import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)
 import Test.Mockery.Directory (inTempDirectory)
@@ -60,67 +61,69 @@ spec = do
                   init
               |]
 
-    -- TODO: Golden tests currently can’t be integrated with the other test cases
-    --       because stackbuilders/hspec-golden#40. The case below shows the
-    --       effect that @`around_` `inTempDirectory`@ _should_ have.
-    describe "garn-golden" $ do
-      describe "run" $ do
-        it "generates formatted flakes" $ do
-          inTempDirectory $ do
-            writeHaskellProject repoDir
-            _ <- runGarn ["run", "foo"] "" repoDir Nothing
-            flake <- readFile "./flake.nix"
-            pure $ defaultGolden "generates_formatted_flakes" flake
+      it "generates formatted flakes" $ do
+        inTempDirectory $ do
+          writeHaskellProject repoDir
+          _ <- runGarn ["run", "foo"] "" repoDir Nothing
+          flake <- readFile "./flake.nix"
+          pure $ defaultGolden "generates_formatted_flakes" flake
 
-    describe "version mismatches" $ around onTestFailureLogger $ do
-      it "gives a helpful error messages when there's a deno <-> haskell json version mismatch" $
-        \onTestFailureLog -> do
-          inTempDirectory $ do
-            writeFile
-              "garn.ts"
-              [i|
-                type DenoOutput = {
-                  "some incompatible type": null,
-                  garnTsLibVersion: string
-                };
+      it "outputs a version with --version" $ onTestFailureLogger $ \onTestFailureLog -> do
+        output <- runGarn ["--version"] "" repoDir Nothing
+        onTestFailureLog output
+        stdout output `shouldBe` "v0.0.14\n"
+        stderr output `shouldBe` ""
+        exitCode output `shouldBe` ExitSuccess
 
-                function toDenoOutput(
-                  nixpkgsInput: string,
-                  garnExports: Record<string, unknown>,
-                ): DenoOutput {
-                  return {
+      describe "version mismatches" $ around onTestFailureLogger $ do
+        it "gives a helpful error messages when there's a deno <-> haskell json version mismatch" $
+          \onTestFailureLog -> do
+            inTempDirectory $ do
+              writeFile
+                "garn.ts"
+                [i|
+                  type DenoOutput = {
                     "some incompatible type": null,
-                    garnTsLibVersion: "test version string",
+                    garnTsLibVersion: string
                   };
-                }
 
-                type InternalLibrary = {
-                  toDenoOutput: (
+                  function toDenoOutput(
                     nixpkgsInput: string,
                     garnExports: Record<string, unknown>,
-                  ) => DenoOutput;
-                };
+                  ): DenoOutput {
+                    return {
+                      "some incompatible type": null,
+                      garnTsLibVersion: "test version string",
+                    };
+                  }
 
-                const garnGetInternalLib = (): InternalLibrary => ({
-                  toDenoOutput,
-                });
+                  type InternalLibrary = {
+                    toDenoOutput: (
+                      nixpkgsInput: string,
+                      garnExports: Record<string, unknown>,
+                    ) => DenoOutput;
+                  };
 
-                // deno-lint-ignore no-explicit-any
-                if ((window as any).__garnGetInternalLib != null) {
-                  throw new Error(
-                    "Registering __garnGetInternalLib twice, using two different garn library versions is not supported.",
-                  );
-                }
-                // deno-lint-ignore no-explicit-any
-                (window as any).__garnGetInternalLib = garnGetInternalLib;
-              |]
-            output <- runGarn ["run", "whatever"] "" repoDir Nothing
-            onTestFailureLog output
-            stderr output
-              `shouldBe` unindent
-                [i|
-                  [garn] Error: Version mismatch detected:
-                  'garn' (the cli tool) is not compatible with the version of the garn typescript library you're using.
-                  Try installing version `test version string` of 'garn' (the cli tool).
-                  (Internal details: Error in $: key \"tag\" not found)
+                  const garnGetInternalLib = (): InternalLibrary => ({
+                    toDenoOutput,
+                  });
+
+                  // deno-lint-ignore no-explicit-any
+                  if ((window as any).__garnGetInternalLib != null) {
+                    throw new Error(
+                      "Registering __garnGetInternalLib twice, using two different garn library versions is not supported.",
+                    );
+                  }
+                  // deno-lint-ignore no-explicit-any
+                  (window as any).__garnGetInternalLib = garnGetInternalLib;
                 |]
+              output <- runGarn ["run", "whatever"] "" repoDir Nothing
+              onTestFailureLog output
+              stderr output
+                `shouldBe` unindent
+                  [i|
+                    [garn] Error: Version mismatch detected:
+                    'garn' (the cli tool) is not compatible with the version of the garn typescript library you're using.
+                    Try installing version `test version string` of 'garn' (the cli tool).
+                    (Internal details: Error in $: key \"tag\" not found)
+                  |]

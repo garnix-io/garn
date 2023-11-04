@@ -24,6 +24,7 @@
 , shake
 , silently
 , string-conversions
+, template-haskell
 , temporary
 , text
 , unix
@@ -50,6 +51,7 @@ mkDerivation {
     process
     shake
     string-conversions
+    template-haskell
     temporary
     text
     unix
@@ -67,6 +69,7 @@ mkDerivation {
     process
     shake
     string-conversions
+    template-haskell
     temporary
     text
     unix
@@ -96,6 +99,7 @@ mkDerivation {
     shake
     silently
     string-conversions
+    template-haskell
     temporary
     text
     unix

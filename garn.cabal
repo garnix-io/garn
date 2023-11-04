@@ -14,7 +14,9 @@ copyright:      AllRightsReserved
 license:        Apache-2.0
 license-file:   LICENSE
 build-type:     Simple
-data-files:     ts/**/*.ts
+data-files:
+    ts/**/*.ts
+    ts/**/*.json
 
 source-repository head
   type: git
@@ -27,6 +29,7 @@ library
       Garn.Common
       Garn.Errors
       Garn.GarnConfig
+      Garn.ImportVersion
       Garn.Init
       Garn.Optparse
       Garn.Utils
@@ -81,6 +84,7 @@ library
     , process
     , shake
     , string-conversions
+    , template-haskell
     , temporary
     , text
     , unix
@@ -138,6 +142,7 @@ executable codegen
     , process
     , shake
     , string-conversions
+    , template-haskell
     , temporary
     , text
     , unix
@@ -195,6 +200,7 @@ executable garn
     , process
     , shake
     , string-conversions
+    , template-haskell
     , temporary
     , text
     , unix
@@ -219,6 +225,7 @@ test-suite spec
       Garn.Common
       Garn.Errors
       Garn.GarnConfig
+      Garn.ImportVersion
       Garn.Init
       Garn.Optparse
       Garn.Utils
@@ -285,6 +292,7 @@ test-suite spec
     , shake
     , silently
     , string-conversions
+    , template-haskell
     , temporary
     , text
     , unix

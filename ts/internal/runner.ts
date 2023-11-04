@@ -1,18 +1,14 @@
 import { isProject, Project } from "../project.ts";
 import { isPackage, Package } from "../package.ts";
 import { Check, isCheck } from "../check.ts";
-import {
-  checkExhaustiveness,
-  GARN_TS_LIB_VERSION,
-  mapKeys,
-  mapValues,
-} from "./utils.ts";
+import { checkExhaustiveness, mapKeys, mapValues } from "./utils.ts";
 import { GOMOD2NIX_REPO } from "../go/consts.ts";
 import { nixAttrSet, NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 import { Executable } from "../mod.ts";
 import { isExecutable } from "../executable.ts";
 import { assertMayExport } from "./may_not_export.ts";
 import { UserError } from "./errors.ts";
+import { GARN_TS_LIB_VERSION } from "./version.ts";
 
 // This needs to be in sync with `DenoOutput` in GarnConfig.hs
 export type DenoOutput =
