@@ -40,7 +40,7 @@ type ProjectHelpers = {
   shell(
     this: Project,
     _s: TemplateStringsArray,
-    ..._args: Array<string>
+    ..._args: Array<NixStrLitInterpolatable>
   ): Executable;
 
   /**
@@ -51,13 +51,13 @@ type ProjectHelpers = {
   check(
     this: Project,
     _s: TemplateStringsArray,
-    ..._args: Array<string>
+    ..._args: Array<NixStrLitInterpolatable>
   ): Check;
 
   build(
     this: Project,
     _s: TemplateStringsArray,
-    ..._args: Array<string>
+    ..._args: Array<NixStrLitInterpolatable>
   ): Package;
 
   /**
@@ -78,7 +78,7 @@ type ProjectHelpers = {
     name: Name,
   ): (
     _s: TemplateStringsArray,
-    ..._args: Array<string>
+    ..._args: Array<NixStrLitInterpolatable>
   ) => T & { [n in Name]: Executable };
 
   /**
@@ -100,7 +100,7 @@ type ProjectHelpers = {
     name: Name,
   ): (
     _s: TemplateStringsArray,
-    ..._args: Array<string>
+    ..._args: Array<NixStrLitInterpolatable>
   ) => T & { [n in Name]: Check };
 };
 
@@ -197,7 +197,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     }
     const templateLiteralFn = (
       s: TemplateStringsArray,
-      ...args: Array<string>
+      ...args: Array<NixStrLitInterpolatable>
     ) => {
       return {
         ...this,
@@ -231,7 +231,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     }
     const templateLiteralFn = (
       s: TemplateStringsArray,
-      ...args: Array<string>
+      ...args: Array<NixStrLitInterpolatable>
     ) => {
       return {
         ...this,

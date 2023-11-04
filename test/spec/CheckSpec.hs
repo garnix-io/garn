@@ -117,13 +117,15 @@ spec = do
               import * as garn from "#{repoDir}/ts/mod.ts"
               import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
+              const hello: garn.Package = garn.mkPackage(nixRaw`pkgs.hello`);
+
               export const haskell = garn.mkProject(
                 {
                   description: "",
                   defaultEnvironment: garn.emptyEnvironment,
                 },
                 {},
-              ).addCheck("test-check")`echo error; false`;
+              ).addCheck("test-check")`${hello}/bin/hello; false`;
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output

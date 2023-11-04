@@ -150,17 +150,19 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
+              const hello = garn.mkPackage(garn.nix.nixRaw`pkgs.hello`);
+
               export const main = garn.mkProject(
                 {
                   description: "",
                   defaultEnvironment: garn.emptyEnvironment,
                 },
                 {},
-              ).addExecutable("foo")`echo foo`;
+              ).addExecutable("foo")`${hello}/bin/hello`;
             |]
           output <- runGarn ["run", "main.foo"] "" repoDir Nothing
           onTestFailureLog output
-          stdout output `shouldBe` "foo\n"
+          stdout output `shouldBe` "Hello, world!\n"
 
         describe "top-level executables" $ do
           it "shows top-level executables in the help" $ \onTestFailureLog -> do
