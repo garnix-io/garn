@@ -194,24 +194,23 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
         ...this,
         ...{ [name]: this.shell(script) },
       };
-    } else {
-      const templateLiteralFn = (
-        s: TemplateStringsArray,
-        ...args: Array<string>
-      ) => {
-        return {
-          ...this,
-          ...{ [name]: this.shell(s, ...args) },
-        };
-      };
-      markAsMayNotExport(templateLiteralFn, (exportName: string) =>
-        [
-          `${exportName} exports the return type of "addExecutable", but this is not the proper usage of addExecutable.`,
-          'Did you forget the template literal? Example usage: project.addExecutable("executable-name")`shell script to run`',
-        ].join(" "),
-      );
-      return templateLiteralFn;
     }
+    const templateLiteralFn = (
+      s: TemplateStringsArray,
+      ...args: Array<string>
+    ) => {
+      return {
+        ...this,
+        ...{ [name]: this.shell(s, ...args) },
+      };
+    };
+    markAsMayNotExport(templateLiteralFn, (exportName: string) =>
+      [
+        `${exportName} exports the return type of "addExecutable", but this is not the proper usage of addExecutable.`,
+        'Did you forget the template literal? Example usage: project.addExecutable("executable-name")`shell script to run`',
+      ].join(" "),
+    );
+    return templateLiteralFn;
   },
 
   addCheck<T extends Project, Name extends string>(
@@ -229,24 +228,23 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
         ...this,
         ...{ [name]: this.check(check) },
       };
-    } else {
-      const templateLiteralFn = (
-        s: TemplateStringsArray,
-        ...args: Array<string>
-      ) => {
-        return {
-          ...this,
-          ...{ [name]: this.check(s, ...args) },
-        };
-      };
-      markAsMayNotExport(templateLiteralFn, (exportName: string) =>
-        [
-          `${exportName} exports the return type of "addCheck", but this is not the proper usage of addCheck.`,
-          'Did you forget the template literal? Example usage: project.addCheck("check-name")`shell script to run`',
-        ].join(" "),
-      );
-      return templateLiteralFn;
     }
+    const templateLiteralFn = (
+      s: TemplateStringsArray,
+      ...args: Array<string>
+    ) => {
+      return {
+        ...this,
+        ...{ [name]: this.check(s, ...args) },
+      };
+    };
+    markAsMayNotExport(templateLiteralFn, (exportName: string) =>
+      [
+        `${exportName} exports the return type of "addCheck", but this is not the proper usage of addCheck.`,
+        'Did you forget the template literal? Example usage: project.addCheck("check-name")`shell script to run`',
+      ].join(" "),
+    );
+    return templateLiteralFn;
   },
 
   withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {
