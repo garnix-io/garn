@@ -35,36 +35,7 @@
               pname = "go-package";
               version = "0.1";
               go = pkgs.go_1_20;
-              src =
-                (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./backend;
-                      name = "source";
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix" &&
-                        fileName != "garn.ts";
-                    }
-                )
-              ;
-              modules = gomod2nix-toml;
-            }
-          ;
-          "haskell_pkg" =
-            (pkgs.haskell.packages.ghc94.callCabal2nix
-              "garn-pkg"
-
-              (
+              src = (
                 let
                   lib = pkgs.lib;
                   lastSafe = list:
@@ -74,7 +45,7 @@
                 in
                 builtins.path
                   {
-                    path = ./haskell;
+                    path = ./backend;
                     name = "source";
                     filter = path: type:
                       let
@@ -83,52 +54,69 @@
                       fileName != "flake.nix" &&
                       fileName != "garn.ts";
                   }
-              )
-
-              { })
-            // {
-              meta.mainProgram = "helloFromHaskell";
-            }
-          ;
+              );
+              modules = gomod2nix-toml;
+            };
+          "haskell_pkg" = (pkgs.haskell.packages.ghc94.callCabal2nix
+            "garn-pkg"
+            (
+              let
+                lib = pkgs.lib;
+                lastSafe = list:
+                  if lib.lists.length list == 0
+                  then null
+                  else lib.lists.last list;
+              in
+              builtins.path
+                {
+                  path = ./haskell;
+                  name = "source";
+                  filter = path: type:
+                    let
+                      fileName = lastSafe (lib.strings.splitString "/" path);
+                    in
+                    fileName != "flake.nix" &&
+                      fileName != "garn.ts";
+                }
+            )
+            { })
+          // {
+            meta.mainProgram = "helloFromHaskell";
+          };
           "npmFrontend_node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
               };
-              pkgs =
-                import "${nixpkgs}" {
-                  config.permittedInsecurePackages = [ ];
-                  inherit system;
-                }
-              ;
+              pkgs = import "${nixpkgs}" {
+                config.permittedInsecurePackages = [ ];
+                inherit system;
+              };
             in
             npmlock2nix.v2.node_modules
               {
-                src =
-                  (
-                    let
-                      lib = pkgs.lib;
-                      lastSafe = list:
-                        if lib.lists.length list == 0
-                        then null
-                        else lib.lists.last list;
-                    in
-                    builtins.path
-                      {
-                        path = ./frontend-npm;
-                        name = "source";
-                        filter = path: type:
-                          let
-                            fileName = lastSafe (lib.strings.splitString "/" path);
-                          in
-                          fileName != "flake.nix" &&
-                          fileName != "garn.ts";
-                      }
-                  )
-                ;
+                src = (
+                  let
+                    lib = pkgs.lib;
+                    lastSafe = list:
+                      if lib.lists.length list == 0
+                      then null
+                      else lib.lists.last list;
+                  in
+                  builtins.path
+                    {
+                      path = ./frontend-npm;
+                      name = "source";
+                      filter = path: type:
+                        let
+                          fileName = lastSafe (lib.strings.splitString "/" path);
+                        in
+                        fileName != "flake.nix" &&
+                        fileName != "garn.ts";
+                    }
+                );
                 nodejs = pkgs.nodejs-18_x;
-              }
-          ;
+              };
         }
       );
       checks = forAllSystems (system:
@@ -148,114 +136,101 @@
           };
         in
         {
-          "backend" =
-            (
-              let
-                expr =
-                  let
-                    gomod2nix = gomod2nix-repo.legacyPackages.${system};
-                    gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
+          "backend" = (
+            let
+              expr =
+                let
+                  gomod2nix = gomod2nix-repo.legacyPackages.${system};
+                  gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
 
 [mod]
   [mod.\"github.com/gorilla/mux\"]
     version = \"v1.8.0\"
     hash = \"sha256-s905hpzMH9bOLue09E2JmzPXfIS4HhAlgT7g13HCwKE=\"
 ";
+                in
+                gomod2nix.buildGoApplication {
+                  pname = "go-package";
+                  version = "0.1";
+                  go = pkgs.go_1_20;
+                  src = (
+                    let
+                      lib = pkgs.lib;
+                      lastSafe = list:
+                        if lib.lists.length list == 0
+                        then null
+                        else lib.lists.last list;
+                    in
+                    builtins.path
+                      {
+                        path = ./backend;
+                        name = "source";
+                        filter = path: type:
+                          let
+                            fileName = lastSafe (lib.strings.splitString "/" path);
+                          in
+                          fileName != "flake.nix" &&
+                          fileName != "garn.ts";
+                      }
+                  );
+                  modules = gomod2nix-toml;
+                };
+            in
+            (if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; }
+            )
+          ).overrideAttrs (finalAttrs: previousAttrs: {
+            nativeBuildInputs =
+              previousAttrs.nativeBuildInputs
+              ++
+              [ pkgs.gopls ];
+          });
+          "haskell" = (
+            let
+              expr = (pkgs.haskell.packages.ghc94.callCabal2nix
+                "garn-pkg"
+                (
+                  let
+                    lib = pkgs.lib;
+                    lastSafe = list:
+                      if lib.lists.length list == 0
+                      then null
+                      else lib.lists.last list;
                   in
-                  gomod2nix.buildGoApplication {
-                    pname = "go-package";
-                    version = "0.1";
-                    go = pkgs.go_1_20;
-                    src =
-                      (
+                  builtins.path
+                    {
+                      path = ./haskell;
+                      name = "source";
+                      filter = path: type:
                         let
-                          lib = pkgs.lib;
-                          lastSafe = list:
-                            if lib.lists.length list == 0
-                            then null
-                            else lib.lists.last list;
+                          fileName = lastSafe (lib.strings.splitString "/" path);
                         in
-                        builtins.path
-                          {
-                            path = ./backend;
-                            name = "source";
-                            filter = path: type:
-                              let
-                                fileName = lastSafe (lib.strings.splitString "/" path);
-                              in
-                              fileName != "flake.nix" &&
-                              fileName != "garn.ts";
-                          }
-                      )
-                    ;
-                    modules = gomod2nix-toml;
-                  }
-                ;
-              in
-              (if expr ? env
-              then expr.env
-              else pkgs.mkShell { inputsFrom = [ expr ]; }
-              )
-            ).overrideAttrs (finalAttrs: previousAttrs: {
-              nativeBuildInputs =
-                previousAttrs.nativeBuildInputs
-                ++
-                [ pkgs.gopls ];
-            })
-          ;
-          "haskell" =
-            (
-              let
-                expr =
-                  (pkgs.haskell.packages.ghc94.callCabal2nix
-                    "garn-pkg"
-
-                    (
-                      let
-                        lib = pkgs.lib;
-                        lastSafe = list:
-                          if lib.lists.length list == 0
-                          then null
-                          else lib.lists.last list;
-                      in
-                      builtins.path
-                        {
-                          path = ./haskell;
-                          name = "source";
-                          filter = path: type:
-                            let
-                              fileName = lastSafe (lib.strings.splitString "/" path);
-                            in
-                            fileName != "flake.nix" &&
-                            fileName != "garn.ts";
-                        }
-                    )
-
-                    { })
-                  // {
-                    meta.mainProgram = "helloFromHaskell";
-                  }
-                ;
-              in
-              (if expr ? env
-              then expr.env
-              else pkgs.mkShell { inputsFrom = [ expr ]; }
-              )
-            ).overrideAttrs (finalAttrs: previousAttrs: {
-              nativeBuildInputs =
-                previousAttrs.nativeBuildInputs
-                ++
-                [ pkgs.haskell.packages.ghc94.cabal-install ];
-            })
-          ;
-          "npmFrontend" =
-            (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
-              nativeBuildInputs =
-                previousAttrs.nativeBuildInputs
-                ++
-                [ pkgs.nodejs-18_x ];
-            })
-          ;
+                        fileName != "flake.nix" &&
+                          fileName != "garn.ts";
+                    }
+                )
+                { })
+              // {
+                meta.mainProgram = "helloFromHaskell";
+              };
+            in
+            (if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; }
+            )
+          ).overrideAttrs (finalAttrs: previousAttrs: {
+            nativeBuildInputs =
+              previousAttrs.nativeBuildInputs
+              ++
+              [ pkgs.haskell.packages.ghc94.cabal-install ];
+          });
+          "npmFrontend" = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+            nativeBuildInputs =
+              previousAttrs.nativeBuildInputs
+              ++
+              [ pkgs.nodejs-18_x ];
+          });
         }
       );
       apps = forAllSystems (system:
@@ -265,12 +240,8 @@
         {
           "backend/run" = {
             "type" = "app";
-            "program" = "${
-      let
-        dev = 
-        (
-    let expr = 
-      let
+            "program" = "${let
+        dev = (let expr = let
         gomod2nix = gomod2nix-repo.legacyPackages.${system};
         gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
 
@@ -284,8 +255,7 @@
           pname = "go-package";
           version = "0.1";
           go = pkgs.go_1_20;
-          src = 
-  (let
+          src = (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -302,23 +272,19 @@
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })
-;
+    });
           modules = gomod2nix-toml;
-        }
-    ;
+        };
     in
       (if expr ? env
         then expr.env
         else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    ).overrideAttrs (finalAttrs: previousAttrs: {
+      )).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
             [pkgs.gopls];
-        })
-      ;
+        });
         shell = "cd backend && go run ./main.go";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
@@ -329,19 +295,15 @@
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
-      ''
-    }";
+      ''}";
           };
           "haskell" = {
             "type" = "app";
-            "program" = "${
-      let
+            "program" = "${let
         dev = pkgs.mkShell {};
-        shell = "${
-    (pkgs.haskell.packages.ghc94.callCabal2nix
+        shell = "${(pkgs.haskell.packages.ghc94.callCabal2nix
       "garn-pkg"
-      
-  (let
+      (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -359,12 +321,10 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })
-
       { })
       // {
         meta.mainProgram = "helloFromHaskell";
-      }
-  }/bin/helloFromHaskell";
+      }}/bin/${"helloFromHaskell"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -374,21 +334,17 @@
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
-      ''
-    }";
+      ''}";
           };
           "npmFrontend/run" = {
             "type" = "app";
-            "program" = "${
-      let
-        dev = 
-        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+            "program" = "${let
+        dev = (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
             [pkgs.nodejs-18_x];
-        })
-      ;
+        });
         shell = "cd frontend-npm && npm install && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
@@ -399,21 +355,14 @@
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
-      ''
-    }";
+      ''}";
           };
           "startAll" = {
             "type" = "app";
-            "program" = "${
-      let
+            "program" = "${let
         dev = pkgs.mkShell {};
-        shell = "${pkgs.process-compose}/bin/process-compose up -f ${pkgs.writeText "process-compose.yml" (builtins.toJSON {"version" = "0.5";
-"processes" = {"backend" = {"command" = "${
-      let
-        dev = 
-        (
-    let expr = 
-      let
+        shell = "${pkgs.process-compose}/bin/process-compose up -f ${pkgs.writeText "process-compose.yml" (builtins.toJSON { "version" = "0.5"; "processes" = { "backend" = { "command" = "${let
+        dev = (let expr = let
         gomod2nix = gomod2nix-repo.legacyPackages.${system};
         gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
 
@@ -427,8 +376,7 @@
           pname = "go-package";
           version = "0.1";
           go = pkgs.go_1_20;
-          src = 
-  (let
+          src = (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -445,23 +393,19 @@
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })
-;
+    });
           modules = gomod2nix-toml;
-        }
-    ;
+        };
     in
       (if expr ? env
         then expr.env
         else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    ).overrideAttrs (finalAttrs: previousAttrs: {
+      )).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
             [pkgs.gopls];
-        })
-      ;
+        });
         shell = "cd backend && go run ./main.go";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
@@ -472,17 +416,11 @@
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
-      ''
-    }";
-"environment" = [];};
-"haskell" = {"command" = "${
-      let
+      ''}"; "environment" = []; }; "haskell" = { "command" = "${let
         dev = pkgs.mkShell {};
-        shell = "${
-    (pkgs.haskell.packages.ghc94.callCabal2nix
+        shell = "${(pkgs.haskell.packages.ghc94.callCabal2nix
       "garn-pkg"
-      
-  (let
+      (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -500,12 +438,10 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })
-
       { })
       // {
         meta.mainProgram = "helloFromHaskell";
-      }
-  }/bin/helloFromHaskell";
+      }}/bin/${"helloFromHaskell"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -515,19 +451,13 @@
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
-      ''
-    }";
-"environment" = [];};
-"frontend" = {"command" = "${
-      let
-        dev = 
-        (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+      ''}"; "environment" = []; }; "frontend" = { "command" = "${let
+        dev = (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
             [pkgs.nodejs-18_x];
-        })
-      ;
+        });
         shell = "cd frontend-npm && npm install && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
@@ -538,9 +468,7 @@
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
-      ''
-    }";
-"environment" = [];};};})}";
+      ''}"; "environment" = []; }; }; })}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -550,8 +478,7 @@
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
-      ''
-    }";
+      ''}";
           };
         }
       );
