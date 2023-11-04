@@ -30,13 +30,16 @@ Deno.test("nixStrLit correctly serializes into a nix expression", () => {
   );
 });
 
-Deno.test("toHumanReadable snips out incedental dependencies in string literals", () => {
-  assertEquals(toHumanReadable(nixStrLit`foo`), "foo");
-  assertEquals(
-    toHumanReadable(nixStrLit`foo ${nixRaw`some-nix`} bar`),
-    "foo [...] bar",
-  );
-});
+Deno.test(
+  "toHumanReadable snips out incedental dependencies in string literals",
+  () => {
+    assertEquals(toHumanReadable(nixStrLit`foo`), "foo");
+    assertEquals(
+      toHumanReadable(nixStrLit`foo ${nixRaw`some-nix`} bar`),
+      "foo [...] bar",
+    );
+  },
+);
 
 Deno.test("nixList", () => {
   assertEquals(
@@ -47,11 +50,13 @@ Deno.test("nixList", () => {
 
 Deno.test("nixAttrSet", () => {
   assertEquals(
-    toNixString(nixAttrSet({
-      a: nixRaw`1`,
-      b: nixRaw`2`,
-      c: undefined,
-    })),
+    toNixString(
+      nixAttrSet({
+        a: nixRaw`1`,
+        b: nixRaw`2`,
+        c: undefined,
+      }),
+    ),
     '{ "a" = 1; "b" = 2; }',
   );
 });
