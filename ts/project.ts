@@ -192,7 +192,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     if (script != null) {
       return {
         ...this,
-        ...{ [name]: this.shell(script) },
+        [name]: this.shell(script),
       };
     }
     const templateLiteralFn = (
@@ -201,7 +201,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     ) => {
       return {
         ...this,
-        ...{ [name]: this.shell(s, ...args) },
+        [name]: this.shell(s, ...args),
       };
     };
     markAsMayNotExport(templateLiteralFn, (exportName: string) =>
@@ -226,7 +226,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     if (check != null) {
       return {
         ...this,
-        ...{ [name]: this.check(check) },
+        [name]: this.check(check),
       };
     }
     const templateLiteralFn = (
@@ -235,7 +235,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     ) => {
       return {
         ...this,
-        ...{ [name]: this.check(s, ...args) },
+        [name]: this.check(s, ...args),
       };
     };
     markAsMayNotExport(templateLiteralFn, (exportName: string) =>
