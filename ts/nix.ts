@@ -1,4 +1,5 @@
 import {
+  getInterpolations,
   InterpolatedString,
   interpolatedStringFromString,
   interpolatedStringFromTemplate,
@@ -39,6 +40,7 @@ export type NixExpression = { [__nixExpressionTag]: null } & (
   | { type: "list"; elements: Array<NixExpression> }
   | { type: "attrSet"; elements: Record<string, NixExpression> }
   | { type: "strLit"; str: InterpolatedString<NixExpression> }
+  | { type: "flakeDep"; name: string; dep: FlakeDep }
 );
 
 /**
@@ -49,6 +51,11 @@ export type NixExpression = { [__nixExpressionTag]: null } & (
  * here.
  */
 const __nixExpressionTag = Symbol("NixExpression is opaque!");
+
+type FlakeDep = {
+  url: string;
+  flake?: boolean;
+};
 
 /**
  * A template literal function to construct `NixExpression`s from raw strings.
@@ -183,6 +190,21 @@ export function nixStrLit(
 }
 
 /**
+ * Returns a `NixExpression` which represents a dependency of the file file
+ * this expression is embedded in.
+ */
+export function nixFlakeDep(name: string, dep: FlakeDep): NixExpression {
+  if (!name.match(/^[a-zA-Z0-9-]+$/)) {
+    throw Error(`flakeDep: "${name}" is not a valid nix variable name`);
+  }
+  return {
+    type: "flakeDep",
+    name,
+    dep,
+  };
+}
+
+/**
  * Converts a `NixExpression` to a (hopefully concise) human readable string
  * with incidental dependencies snipped out with "[...]"
  */
@@ -191,6 +213,72 @@ export function toHumanReadable(nixExpr: NixExpression): string {
     return "[...]";
   }
   return renderInterpolatedString(nixExpr.str, toHumanReadable);
+}
+
+function collectFlakeDeps(nixExpr: NixExpression): Record<string, FlakeDep> {
+  const collect = (arr: Array<NixExpression>) =>
+    arr.reduce(
+      (acc, nixExpr) => ({ ...acc, ...collectFlakeDeps(nixExpr) }),
+      {} as Record<string, FlakeDep>,
+    );
+  switch (nixExpr.type) {
+    case "raw":
+      return collect(getInterpolations(nixExpr.raw));
+    case "list":
+      return collect(nixExpr.elements);
+    case "attrSet":
+      return collect(Object.values(nixExpr.elements));
+    case "strLit":
+      return collect(getInterpolations(nixExpr.str));
+    case "flakeDep":
+      return { [nixExpr.name]: nixExpr.dep };
+  }
+  checkExhaustiveness(nixExpr);
+}
+
+/**
+ * Renders the nix expression as the `outputs` of a flake file with all flake
+ * deps provided as inputs.
+ *
+ * Example:
+ * ```typescript
+ * renderFlakeFile(nixAttrSet({
+ *   foo: nixFlakeDep("foo-repo", { url: "http://example.org/foo" }),
+ *   bar: nixFlakeDep("bar-repo", { url: "http://example.org/bar" }),
+ * }))
+ *
+ * // Returns:
+ * // {
+ * //   inputs.foo-repo.url = "http://example.org/foo";
+ * //   inputs.bar-repo.url = "http://example.org/bar";
+ * //   outputs = { self, foo-repo, bar-repo }: {
+ * //     "foo" = foo-repo;
+ * //     "bar" = bar-repo;
+ * //   };
+ * // }
+ * ```
+ */
+export function renderFlakeFile(nixExpr: NixExpression): string {
+  const flakeDeps = collectFlakeDeps(nixExpr);
+  const quoteStr = (s: string) => renderNixExpression(nixStrLit(s));
+  // Not using `renderNixExpression(nixAttrSet(...))` to render the flake file
+  // since the flake file is a subset of a valid Nix attribute set (e.g. quoted
+  // keys are not allowed)
+  return (
+    "{" +
+    Object.entries(flakeDeps)
+      .map(([name, dep]) =>
+        dep.flake !== false
+          ? `inputs.${name}.url = ${quoteStr(dep.url)};`
+          : `inputs.${name} = { url = ${quoteStr(dep.url)}; flake = false; };`,
+      )
+      .join("\n") +
+    "\noutputs = { " +
+    ["self", ...Object.keys(flakeDeps)].join(", ") +
+    " }:" +
+    renderNixExpression(nixExpr) +
+    ";\n}"
+  );
 }
 
 /**
@@ -233,6 +321,8 @@ export function renderNixExpression(nixExpr: NixExpression): string {
         '"'
       );
     }
+    case "flakeDep":
+      return nixExpr.name;
   }
   checkExhaustiveness(nixExpr);
 }

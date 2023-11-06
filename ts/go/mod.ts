@@ -1,5 +1,5 @@
 import { packageToEnvironment } from "../environment.ts";
-import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
+import { NixExpression, nixFlakeDep, nixRaw, nixStrLit } from "../nix.ts";
 import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
 import * as path from "https://deno.land/std@0.202.0/path/mod.ts";
@@ -58,10 +58,11 @@ export function mkGoProject(args: {
 }): Project & {
   pkg: Package;
 } {
+  const gomod2nixRepo = nixFlakeDep("gomod2nix-repo", { url: GOMOD2NIX_REPO });
   const pkg = mkPackage(
     nixRaw`
       let
-        gomod2nix = gomod2nix-repo.legacyPackages.\${system};
+        gomod2nix = ${gomod2nixRepo}.legacyPackages.\${system};
         gomod2nix-toml = pkgs.writeText "gomod2nix-toml" ${getGoModNixToml(
           args.src,
         )};
