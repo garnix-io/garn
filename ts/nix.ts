@@ -34,11 +34,21 @@ export type NixStrLitInterpolatable =
  *
  * It is not advised to construct this type but instead use `nixRaw` or `nixStrLit`.
  */
-export type NixExpression =
+export type NixExpression = { [__nixExpressionTag]: null } & (
   | { type: "raw"; raw: InterpolatedString<NixExpression> }
   | { type: "list"; elements: Array<NixExpression> }
   | { type: "attrSet"; elements: Record<string, NixExpression> }
-  | { type: "strLit"; str: InterpolatedString<NixExpression> };
+  | { type: "strLit"; str: InterpolatedString<NixExpression> }
+);
+
+/**
+ * Tag for `NixExpression`.
+ *
+ * This symbol is deliberately not exported, since you're not supposed to create
+ * `NixExpression`s outside of this module. Instead use helper functions from
+ * here.
+ */
+const __nixExpressionTag = Symbol("NixExpression is opaque!");
 
 /**
  * A template literal function to construct `NixExpression`s from raw strings.
@@ -74,6 +84,7 @@ export function nixRaw(
   ...interpolations: Array<NixExpression>
 ): NixExpression {
   return {
+    [__nixExpressionTag]: null,
     type: "raw",
     raw:
       typeof s === "string"
@@ -97,6 +108,7 @@ export function nixRaw(
  */
 export function nixList(elements: Array<NixExpression>): NixExpression {
   return {
+    [__nixExpressionTag]: null,
     type: "list",
     elements: elements,
   };
@@ -120,6 +132,7 @@ export function nixAttrSet(
   attrSet: Record<string, NixExpression | undefined>,
 ): NixExpression {
   return {
+    [__nixExpressionTag]: null,
     type: "attrSet",
     elements: filterNullValues(attrSet),
   };
@@ -141,15 +154,21 @@ export function nixStrLit(
   ...interpolations: Array<NixStrLitInterpolatable>
 ): NixExpression {
   if (typeof s === "string") {
-    return { type: "strLit", str: interpolatedStringFromString(s) };
+    return {
+      [__nixExpressionTag]: null,
+      type: "strLit",
+      str: interpolatedStringFromString(s),
+    };
   }
   return {
+    [__nixExpressionTag]: null,
     type: "strLit",
     str: interpolatedStringFromTemplate(
       s,
       interpolations.map((interpolation): NixExpression => {
         if (typeof interpolation === "string") {
           return {
+            [__nixExpressionTag]: null,
             type: "strLit",
             str: interpolatedStringFromString(interpolation),
           };
