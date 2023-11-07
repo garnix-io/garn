@@ -4,11 +4,12 @@ import { Check, isCheck } from "../check.ts";
 import { checkExhaustiveness, mapKeys, mapValues } from "./utils.ts";
 import { GOMOD2NIX_REPO } from "../go/consts.ts";
 import {
+  nixFlakeDep,
   nixAttrSet,
   NixExpression,
   nixRaw,
   nixStrLit,
-  renderNixExpression,
+  renderFlakeFile,
 } from "../nix.ts";
 import { Executable } from "../mod.ts";
 import { isExecutable } from "../executable.ts";
@@ -53,7 +54,7 @@ export const toDenoOutput = (
       tag: "Success",
       contents: {
         targets: toTargets(garnExports),
-        flakeFile: renderNixExpression(formatFlake(nixpkgsInput, garnExports)),
+        flakeFile: renderFlakeFile(formatFlake(nixpkgsInput, garnExports)),
       },
     };
   } catch (err: unknown) {
@@ -128,54 +129,47 @@ const formatFlake = (
       return undefined;
     }
   }, exportables);
-  return nixRaw`{
-    inputs.nixpkgs.url = ${nixStrLit(nixpkgsInput)};
-    inputs.flake-utils.url = "github:numtide/flake-utils";
-    inputs.gomod2nix-repo.url = ${nixStrLit(GOMOD2NIX_REPO)};
-    inputs.npmlock2nix-repo = {
-      url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81";
-      flake = false;
-    };
-    outputs = { self, nixpkgs, flake-utils, npmlock2nix-repo, gomod2nix-repo }:
-      let
-        systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
-        forAllSystems = nixpkgs.lib.genAttrs systems;
-      in
-      {
-        packages = forAllSystems (system:
-          let
-            pkgs = import "\${nixpkgs}" {
-              config.allowUnfree = true;
-              inherit system;
-            };
-          in
-            ${nixAttrSet(packages)}
-          );
-        checks = forAllSystems (system:
-          let
-            pkgs = import "\${nixpkgs}" {
-              config.allowUnfree = true;
-              inherit system;
-            };
-          in
-            ${nixAttrSet(checks)}
-          );
-        devShells = forAllSystems (system:
-          let
-            pkgs = import "\${nixpkgs}" {
-              config.allowUnfree = true;
-              inherit system;
-            };
-          in
-            ${nixAttrSet(shells)}
-          );
-        apps = forAllSystems (system: let
-            pkgs = import "\${nixpkgs}" { inherit system; };
+  return nixRaw`
+    let
+      nixpkgs = ${nixFlakeDep("nixpkgs-repo", { url: nixpkgsInput })};
+      systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
+      forAllSystems = nixpkgs.lib.genAttrs systems;
+    in
+    {
+      packages = forAllSystems (system:
+        let
+          pkgs = import "\${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
         in
-          ${nixAttrSet(apps)}
+          ${nixAttrSet(packages)}
         );
-      };
-  }`;
+      checks = forAllSystems (system:
+        let
+          pkgs = import "\${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+          ${nixAttrSet(checks)}
+        );
+      devShells = forAllSystems (system:
+        let
+          pkgs = import "\${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
+        in
+          ${nixAttrSet(shells)}
+        );
+      apps = forAllSystems (system: let
+          pkgs = import "\${nixpkgs}" { inherit system; };
+      in
+        ${nixAttrSet(apps)}
+      );
+    }
+  `;
 };
 
 type Exportable = Project | Executable;

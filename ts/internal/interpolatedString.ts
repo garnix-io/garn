@@ -71,3 +71,9 @@ export function mapStrings<T>(
     rest: interpolated.rest.map(([node, str]) => [node, f(str)]),
   };
 }
+
+export function getInterpolations<T>(
+  interpolated: InterpolatedString<T>,
+): Array<T> {
+  return interpolated.rest.map(([node, _str]) => node);
+}

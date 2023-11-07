@@ -1,9 +1,15 @@
 import { Environment, mkEnvironment } from "../environment.ts";
 import { Executable } from "../executable.ts";
-import { Package, mkPackage } from "../package.ts";
+import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
 import { nixSource } from "../internal/utils.ts";
-import { NixExpression, nixList, nixRaw, nixStrLit } from "../nix.ts";
+import {
+  nixFlakeDep,
+  NixExpression,
+  nixList,
+  nixRaw,
+  nixStrLit,
+} from "../nix.ts";
 
 const nodeVersions = {
   "14": {
@@ -52,9 +58,13 @@ export function mkNpmProject(args: {
   node_modules: Package;
 } {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
+  const npmlock2nixRepo = nixFlakeDep("npmlock2nix-repo", {
+    url: "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81",
+    flake: false,
+  });
   const node_modules = mkPackage(nixRaw`
     let
-      npmlock2nix = import npmlock2nix-repo {
+      npmlock2nix = import ${npmlock2nixRepo} {
         inherit pkgs;
       };
       pkgs = ${pkgs};

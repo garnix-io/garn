@@ -1,13 +1,10 @@
 {
-  inputs.nixpkgs.url = "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566";
-  inputs.flake-utils.url = "github:numtide/flake-utils";
+  inputs.nixpkgs-repo.url = "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566";
   inputs.gomod2nix-repo.url = "github:nix-community/gomod2nix?rev=f95720e89af6165c8c0aa77f180461fe786f3c21";
-  inputs.npmlock2nix-repo = {
-    url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81";
-    flake = false;
-  };
-  outputs = { self, nixpkgs, flake-utils, npmlock2nix-repo, gomod2nix-repo }:
+  inputs.npmlock2nix-repo = { url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81"; flake = false; };
+  outputs = { self, nixpkgs-repo, gomod2nix-repo, npmlock2nix-repo }:
     let
+      nixpkgs = nixpkgs-repo;
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forAllSystems = nixpkgs.lib.genAttrs systems;
     in
