@@ -12,10 +12,9 @@ import Data.String.Interpolate
 import qualified Data.Yaml as Yaml
 import Development.Shake (CmdOption (EchoStdout), Exit (Exit), StdoutTrim (..), cmd)
 import Garn
-import System.Directory
 import System.Environment (withArgs)
 import System.Exit
-import System.IO (Handle, IOMode (..), hPutStrLn, withFile)
+import System.IO (Handle, SeekMode (AbsoluteSeek), hPutStr, hPutStrLn, hSeek)
 import qualified System.IO as Sys
 import System.IO.Silently (hCapture)
 import System.IO.Temp
@@ -129,10 +128,11 @@ runGarn args stdin repoDir shell = do
   where
     withTempFile :: (Handle -> IO a) -> IO a
     withTempFile action =
-      bracket
-        (writeSystemTempFile "garn-test-stdin" stdin)
-        removeFile
-        (\file -> withFile file ReadMode action)
+      withSystemTempFile "garn-test-stdin" $ \_path handle ->
+        do
+          hPutStr handle stdin
+          hSeek handle AbsoluteSeek 0
+          action handle
 
 data ProcResult = ProcResult
   { stdout :: String,
