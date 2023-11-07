@@ -4,7 +4,7 @@ export const server: garn.Project = garn.go
   .mkGoProject({
     description: "example backend server in go",
     src: ".",
-    goVersion: "1.20",
+    goVersion: "1.21",
   })
   .addExecutable("migrate", "go run ./scripts/migrate.go")
   .addExecutable("dev", "go run ./main.go");

@@ -70,7 +70,7 @@ spec = do
           $ unindent
             [i|
               module github.com/garnix-io/some-go-project
-              go 1.20
+              go 1.21
             |]
         writeFile "main.go" $
           unindent
@@ -95,7 +95,7 @@ spec = do
               export const someGoProject = garn.go.mkGoProject({
                 description: "My go project",
                 src: ".",
-                goVersion: "1.20",
+                goVersion: "1.21",
               });
             |]
         rewriteImportsToLocalhost
