@@ -71,7 +71,7 @@ spec = do
       it "outputs a version with --version" $ onTestFailureLogger $ \onTestFailureLog -> do
         output <- runGarn ["--version"] "" repoDir Nothing
         onTestFailureLog output
-        stdout output `shouldBe` "v0.0.14\n"
+        stdout output `shouldBe` "v0.0.15\n"
         stderr output `shouldBe` ""
         exitCode output `shouldBe` ExitSuccess
 

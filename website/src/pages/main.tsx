@@ -46,7 +46,7 @@ export const Info: React.FC = () => {
             <Code
               header="garn.ts"
               lineNumbers
-              code={`import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
+              code={`import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "my frontend project",
@@ -84,8 +84,8 @@ v18.17.1`}
             <Code
               header="garn.ts"
               lineNumbers
-              code={`import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
-import * as nixpkgs from "https://garn.io/ts/v0.0.14/nixpkgs.ts";
+              code={`import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
+import * as nixpkgs from "https://garn.io/ts/v0.0.15/nixpkgs.ts";
 
 export const backend = garn.haskell
   .mkHaskellProject({
@@ -219,7 +219,7 @@ $ garn run backend.codegen `}
           <Code
             header="garn.ts"
             lineNumbers
-            code={`import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
+            code={`import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
 
 export const edit = garn.editGarnConfig; `}
           />
@@ -240,7 +240,7 @@ export const edit = garn.editGarnConfig; `}
           <Code
             header="garn.ts"
             lineNumbers
-            code={`import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
+            code={`import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
 
 export const deno = garn.mkProject({
   description: "garn configuration environment",
