@@ -1,4 +1,7 @@
-import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
+import {
+  assertEquals,
+  assertThrows,
+} from "https://deno.land/std@0.201.0/assert/mod.ts";
 import {
   nixAttrSet,
   nixList,
@@ -6,6 +9,8 @@ import {
   nixStrLit,
   toHumanReadable,
   renderNixExpression,
+  renderFlakeFile,
+  nixFlakeDep,
 } from "./nix.ts";
 
 Deno.test("nixStrLit correctly serializes into a nix expression", () => {
@@ -60,3 +65,49 @@ Deno.test("nixAttrSet", () => {
     '{ "a" = 1; "b" = 2; }',
   );
 });
+
+Deno.test(
+  "renderFlakeFile serializes to a nix flake file with specified inputs",
+  () => {
+    const ignoreFormatting = (s: string) =>
+      s.replaceAll(" ", "").replaceAll("\n", "");
+    assertEquals(
+      ignoreFormatting(
+        renderFlakeFile(
+          nixAttrSet({
+            foo: nixFlakeDep("foo-repo", { url: "http://example.org/foo" }),
+            bar: nixFlakeDep("bar-repo", { url: "http://example.org/bar" }),
+          }),
+        ),
+      ),
+      ignoreFormatting(`
+        {
+          inputs.foo-repo.url = "http://example.org/foo";
+          inputs.bar-repo.url = "http://example.org/bar";
+          outputs = { self, foo-repo, bar-repo }: {
+            "foo" = foo-repo;
+            "bar" = bar-repo;
+          };
+        }
+      `),
+    );
+  },
+);
+
+Deno.test(
+  "renderFlakeFile throws an error if there are duplicate flake names",
+  () => {
+    assertThrows(
+      () => {
+        renderFlakeFile(
+          nixAttrSet({
+            foo: nixFlakeDep("foo-repo", { url: "http://example.org/foo" }),
+            bar: nixFlakeDep("foo-repo", { url: "http://example.org/bar" }),
+          }),
+        );
+      },
+      Error,
+      "Duplicate flake input name: foo-repo",
+    );
+  },
+);

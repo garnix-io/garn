@@ -190,14 +190,17 @@ export function nixStrLit(
 }
 
 /**
- * Returns a `NixExpression` which represents a dependency of the file file
- * this expression is embedded in.
+ * Returns a `NixExpression` that renders as an identifier that refers to a
+ * flake input. At the same time it registers the flake input as a dependency,
+ * so that it'll be included in the inputs of the generated flake file. See
+ * `renderFlakeFile` for an example.
  */
 export function nixFlakeDep(name: string, dep: FlakeDep): NixExpression {
   if (!name.match(/^[a-zA-Z0-9-]+$/)) {
     throw Error(`flakeDep: "${name}" is not a valid nix variable name`);
   }
   return {
+    [__nixExpressionTag]: null,
     type: "flakeDep",
     name,
     dep,
@@ -218,7 +221,15 @@ export function toHumanReadable(nixExpr: NixExpression): string {
 function collectFlakeDeps(nixExpr: NixExpression): Record<string, FlakeDep> {
   const collect = (arr: Array<NixExpression>) =>
     arr.reduce(
-      (acc, nixExpr) => ({ ...acc, ...collectFlakeDeps(nixExpr) }),
+      (acc, nixExpr) => {
+        const newFlakeInputs = collectFlakeDeps(nixExpr);
+        for (const name in newFlakeInputs) {
+          if (name in acc) {
+            throw new Error(`Duplicate flake input name: ${name}`);
+          }
+        }
+        return { ...acc, ...newFlakeInputs };
+      },
       {} as Record<string, FlakeDep>,
     );
   switch (nixExpr.type) {
