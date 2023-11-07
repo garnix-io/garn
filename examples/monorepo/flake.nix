@@ -34,7 +34,7 @@
             gomod2nix.buildGoApplication {
               pname = "go-package";
               version = "0.1";
-              go = pkgs.go_1_20;
+              go = pkgs.go_1_21;
               src = (
                 let
                   lib = pkgs.lib;
@@ -152,7 +152,7 @@
                 gomod2nix.buildGoApplication {
                   pname = "go-package";
                   version = "0.1";
-                  go = pkgs.go_1_20;
+                  go = pkgs.go_1_21;
                   src = (
                     let
                       lib = pkgs.lib;
@@ -254,7 +254,7 @@
         gomod2nix.buildGoApplication {
           pname = "go-package";
           version = "0.1";
-          go = pkgs.go_1_20;
+          go = pkgs.go_1_21;
           src = (let
     lib = pkgs.lib;
     lastSafe = list :
@@ -375,7 +375,7 @@
         gomod2nix.buildGoApplication {
           pname = "go-package";
           version = "0.1";
-          go = pkgs.go_1_20;
+          go = pkgs.go_1_21;
           src = (let
     lib = pkgs.lib;
     lastSafe = list :

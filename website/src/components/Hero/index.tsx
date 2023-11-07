@@ -121,7 +121,7 @@ executables.
     = garn.go.mkGoProject(&#123; <br />
     {"  "}description: <String>"A Go server"</String>,<br />
     {"  "}src: <String>"."</String>,<br />
-    {"  "}goVersion: <String>"1.20"</String>,<br />
+    {"  "}goVersion: <String>"1.21"</String>,<br />
     &#125;)
     <br />
     {"  "}.

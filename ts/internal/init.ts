@@ -48,7 +48,7 @@ if (initializedSections.length === 0) {
     // export const myGoProject = garn.go.mkGoProject({
     //   description: "My go project",
     //   src: "./my-go-project",
-    //   goVersion: "1.20",
+    //   goVersion: "1.21",
     // });
 
     // export const myHaskellProject = garn.haskell.mkHaskellProject({
