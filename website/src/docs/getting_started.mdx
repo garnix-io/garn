@@ -45,6 +45,17 @@ To uninstall both `nix` and `garn` you can run:
 /nix/nix-installer uninstall
 ```
 
+### Updating `garn`
+
+To update garn to a new version you can run:
+
+```bash
+nix profile list
+# Find the index number of the entry where 'Original flake URL' starts with `github:garnix-io/garn`.
+nix profile remove <garn index number>
+nix profile install github:garnix-io/garn/v0.0.15
+```
+
 ### Manual installation
 
 If you prefer, you can also manually do the steps that the above install script automates. Those are:
