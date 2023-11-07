@@ -45,6 +45,7 @@ const GO_VERSION_TO_NIXPKG_NAME = {
   "1.18": "go_1_18",
   "1.19": "go_1_19",
   "1.20": "go_1_20",
+  "1.21": "go_1_21",
 };
 
 /**
@@ -69,7 +70,7 @@ export function mkGoProject(args: {
           pname = "go-package";
           version = "0.1";
           go = pkgs.${nixRaw(
-            GO_VERSION_TO_NIXPKG_NAME[args.goVersion ?? "1.20"],
+            GO_VERSION_TO_NIXPKG_NAME[args.goVersion ?? "1.21"],
           )};
           src = ${nixSource(args.src)};
           modules = gomod2nix-toml;
