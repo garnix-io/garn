@@ -1,3 +1,12 @@
+import {
+  InterpolatedString,
+  interpolatedStringFromString,
+  interpolatedStringFromTemplate,
+  mapStrings,
+  renderInterpolatedString,
+} from "./internal/interpolatedString.ts";
+import { checkExhaustiveness, filterNullValues } from "./internal/utils.ts";
+
 /**
  * A union of types that are allowed to be interpolated into the `nixStrLit`
  * template literal function. This is also used in some higher level functions, such as
@@ -24,12 +33,22 @@ export type NixStrLitInterpolatable =
  * An opaque type representing a Nix expression.
  *
  * It is not advised to construct this type but instead use `nixRaw` or `nixStrLit`.
- *
- * It is not advised to access the `rawNixExpressionString` except within the
- * garn library itself right before constructing the final flake.nix. This way
- * all Nix expressions are contained within this opaque type and remain type safe.
  */
-export type NixExpression = { rawNixExpressionString: string };
+export type NixExpression = { [__nixExpressionTag]: null } & (
+  | { type: "raw"; raw: InterpolatedString<NixExpression> }
+  | { type: "list"; elements: Array<NixExpression> }
+  | { type: "attrSet"; elements: Record<string, NixExpression> }
+  | { type: "strLit"; str: InterpolatedString<NixExpression> }
+);
+
+/**
+ * Tag for `NixExpression`.
+ *
+ * This symbol is deliberately not exported, since you're not supposed to create
+ * `NixExpression`s outside of this module. Instead use helper functions from
+ * here.
+ */
+const __nixExpressionTag = Symbol("NixExpression is opaque!");
 
 /**
  * A template literal function to construct `NixExpression`s from raw strings.
@@ -64,13 +83,14 @@ export function nixRaw(
   s: TemplateStringsArray | string,
   ...interpolations: Array<NixExpression>
 ): NixExpression {
-  if (typeof s === "string") return { rawNixExpressionString: s };
-  const rawNixExpressionString = s.reduce(
-    (acc, part, i) =>
-      acc + part + (interpolations[i]?.rawNixExpressionString ?? ""),
-    "",
-  );
-  return { rawNixExpressionString };
+  return {
+    [__nixExpressionTag]: null,
+    type: "raw",
+    raw:
+      typeof s === "string"
+        ? interpolatedStringFromString(s)
+        : interpolatedStringFromTemplate(s, interpolations),
+  };
 }
 
 /**
@@ -87,13 +107,16 @@ export function nixRaw(
  * ```
  */
 export function nixList(elements: Array<NixExpression>): NixExpression {
-  return nixRaw(
-    "[" + elements.map((p) => p.rawNixExpressionString.trim()).join(" ") + "]",
-  );
+  return {
+    [__nixExpressionTag]: null,
+    type: "list",
+    elements: elements,
+  };
 }
 
 /**
  * Turns a javascript object of `NixExpression`s into a Nix attribute set.
+ * Filters out undefined values.
  *
  * Example:
  * ```typescript
@@ -101,20 +124,18 @@ export function nixList(elements: Array<NixExpression>): NixExpression {
  * nixAttrSet({
  *   a: nixRaw`1`,
  *   b: nixRaw`2`,
+ *   c: undefined,
  * })
  * ```
  */
 export function nixAttrSet(
   attrSet: Record<string, NixExpression | undefined>,
 ): NixExpression {
-  return nixRaw(
-    "{" +
-      Object.entries(attrSet)
-        .filter((x): x is [string, NixExpression] => x[1] != null)
-        .map(([k, v]) => nixRaw`${nixStrLit(k)} = ${v};`.rawNixExpressionString)
-        .join("\n") +
-      "}",
-  );
+  return {
+    [__nixExpressionTag]: null,
+    type: "attrSet",
+    elements: filterNullValues(attrSet),
+  };
 }
 
 /**
@@ -132,37 +153,86 @@ export function nixStrLit(
   s: TemplateStringsArray | string,
   ...interpolations: Array<NixStrLitInterpolatable>
 ): NixExpression {
-  if (typeof s === "string") return nixStrLit`${s}`;
-  const escape = (str: string) =>
-    ["\\", '"', "$"].reduce(
-      (str, char) => str.replaceAll(char, `\\${char}`),
-      str,
-    );
-  const escapedTemplate = s.map(escape);
-  const rawNixExpressionString =
-    '"' +
-    escapedTemplate.reduce((acc, part, i) => {
-      const interpolation = interpolations[i];
-      switch (typeof interpolation) {
-        case "string":
-          return acc + part + escape(interpolation);
-        case "object":
-          if ("rawNixExpressionString" in interpolation) {
-            return (
-              acc + part + "${" + interpolation.rawNixExpressionString + "}"
-            );
-          }
-          return (
-            acc +
-            part +
-            "${" +
-            interpolation.nixExpression.rawNixExpressionString +
-            "}"
-          );
-        case "undefined":
-          return acc + part;
-      }
-    }, "") +
-    '"';
-  return { rawNixExpressionString };
+  if (typeof s === "string") {
+    return {
+      [__nixExpressionTag]: null,
+      type: "strLit",
+      str: interpolatedStringFromString(s),
+    };
+  }
+  return {
+    [__nixExpressionTag]: null,
+    type: "strLit",
+    str: interpolatedStringFromTemplate(
+      s,
+      interpolations.map((interpolation): NixExpression => {
+        if (typeof interpolation === "string") {
+          return {
+            [__nixExpressionTag]: null,
+            type: "strLit",
+            str: interpolatedStringFromString(interpolation),
+          };
+        }
+        if ("nixExpression" in interpolation) {
+          return interpolation.nixExpression;
+        }
+        return interpolation;
+      }),
+    ),
+  };
+}
+
+/**
+ * Converts a `NixExpression` to a (hopefully concise) human readable string
+ * with incidental dependencies snipped out with "[...]"
+ */
+export function toHumanReadable(nixExpr: NixExpression): string {
+  if (nixExpr.type !== "strLit") {
+    return "[...]";
+  }
+  return renderInterpolatedString(nixExpr.str, toHumanReadable);
+}
+
+/**
+ * Converts a `NixExpression` to a string representing that Nix expression.
+ *
+ * It is advised to defer calling this unless actually serializing to disk.
+ * This way Nix expressions remain as the type `NixExpression`.
+ */
+export function renderNixExpression(nixExpr: NixExpression): string {
+  switch (nixExpr.type) {
+    case "raw":
+      return renderInterpolatedString(nixExpr.raw, renderNixExpression).trim();
+    case "list":
+      return "[" + nixExpr.elements.map(renderNixExpression).join(" ") + "]";
+    case "attrSet":
+      return (
+        "{ " +
+        Object.entries(nixExpr.elements)
+          .map(
+            ([k, v]) =>
+              `${renderNixExpression(nixStrLit(k))} = ${renderNixExpression(
+                v,
+              )};`,
+          )
+          .join(" ") +
+        " }"
+      );
+    case "strLit": {
+      const escape = (str: string) =>
+        ["\\", '"', "$"].reduce(
+          (str, char) => str.replaceAll(char, `\\${char}`),
+          str,
+        );
+      return (
+        '"' +
+        renderInterpolatedString(
+          mapStrings(escape, nixExpr.str),
+          (astNode) => "${" + renderNixExpression(astNode) + "}",
+        ) +
+        '"'
+      );
+    }
+  }
+  checkExhaustiveness(nixExpr);
 }

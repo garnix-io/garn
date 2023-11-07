@@ -57,6 +57,16 @@ export const mapValues = <T, R>(
   return result;
 };
 
+export const filterNullValues = <T>(
+  x: Record<string, T>,
+): Record<string, NonNullable<T>> => {
+  const result: Record<string, NonNullable<T>> = {};
+  for (const [key, value] of Object.entries(x)) {
+    if (value != null) result[key] = value;
+  }
+  return result;
+};
+
 export const checkExhaustiveness = (x: never): never => {
   throw new Error(`Exhaustiveness check failed: ${x}`);
 };
