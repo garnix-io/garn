@@ -57,6 +57,12 @@ type FlakeDep = {
   flake?: boolean;
 };
 
+function flakeDepEq(a: FlakeDep, b: FlakeDep): boolean {
+  if (a.url !== b.url) return false;
+  if ((a.flake === false) !== (b.flake === false)) return false;
+  return true;
+}
+
 /**
  * A template literal function to construct `NixExpression`s from raw strings.
  *
@@ -224,7 +230,7 @@ function collectFlakeDeps(nixExpr: NixExpression): Record<string, FlakeDep> {
       (acc, nixExpr) => {
         const newFlakeInputs = collectFlakeDeps(nixExpr);
         for (const name in newFlakeInputs) {
-          if (name in acc) {
+          if (name in acc && !flakeDepEq(acc[name], newFlakeInputs[name])) {
             throw new Error(`Duplicate flake input name: ${name}`);
           }
         }

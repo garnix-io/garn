@@ -69,8 +69,6 @@ Deno.test("nixAttrSet", () => {
 Deno.test(
   "renderFlakeFile serializes to a nix flake file with specified inputs",
   () => {
-    const ignoreFormatting = (s: string) =>
-      s.replaceAll(" ", "").replaceAll("\n", "");
     assertEquals(
       ignoreFormatting(
         renderFlakeFile(
@@ -111,3 +109,33 @@ Deno.test(
     );
   },
 );
+
+Deno.test("renderFlakeFile allows duplicate flake deps if they match", () => {
+  assertEquals(
+    ignoreFormatting(
+      renderFlakeFile(
+        nixAttrSet({
+          foo: nixFlakeDep("foo-repo", {
+            url: "http://example.org/foo",
+            flake: true,
+          }),
+          bar: nixFlakeDep("foo-repo", {
+            url: "http://example.org/foo",
+            // flake: true is default
+          }),
+        }),
+      ),
+    ),
+    ignoreFormatting(`
+        {
+          inputs.foo-repo.url = "http://example.org/foo";
+          outputs = { self, foo-repo }: {
+            "foo" = foo-repo;
+            "bar" = foo-repo;
+          };
+        }
+      `),
+  );
+});
+
+const ignoreFormatting = (s: string) => s.replaceAll(/\s/g, "");
