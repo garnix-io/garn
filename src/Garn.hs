@@ -55,17 +55,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
         "[garn] Entering "
           <> asUserFacing target
           <> " shell. Type 'exit' to exit."
-      let devProc =
-            ( proc
-                "nix"
-                ("develop" : nixArgs <> [".#" <> asNixFacing target, "--command", userShell env])
-            )
-              { std_in = UseHandle $ stdin env,
-                std_out = Inherit,
-                std_err = Inherit
-              }
-      c <- withCreateProcess devProc $ \_ _ _ procHandle -> do
-        waitForProcess procHandle
+      c <- runNix (StdinHandle (stdin env), "develop", ".#" <> asNixFacing target, "--command", userShell env)
       when (c /= ExitSuccess) $ exitWith c
       hPutStrLn stderr $ "[garn] Exiting " <> asUserFacing target <> " shell."
       pure ()
@@ -73,7 +63,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       case targetConfig of
         TargetConfigProject (ProjectTarget {packages}) -> do
           forM_ packages $ \package -> do
-            c <- Cradle.run "nix" "build" nixArgs (".#" <> package)
+            c <- runNix (NoStdin, "build", ".#" <> package)
             when (c /= ExitSuccess) $ exitWith c
         TargetConfigExecutable _ -> pure ()
     Check checkOptions -> case checkOptions of
@@ -86,10 +76,13 @@ checkTarget :: TargetConfig -> IO ()
 checkTarget targetConfig = case targetConfig of
   TargetConfigProject (ProjectTarget {packages, checks}) -> do
     forM_ packages $ \package -> do
-      c <- Cradle.run "nix" "build" nixArgs (".#" <> package)
+      c <- runNix (NoStdin, "build", ".#" <> package)
       when (c /= ExitSuccess) $ exitWith c
     system <- currentSystem
     forM_ checks $ \check -> do
-      c <- Cradle.run "nix" "build" nixArgs (".#checks." <> system <> "." <> check)
+      c <- runNix (NoStdin, "build", ".#checks." <> system <> "." <> check)
       when (c /= ExitSuccess) $ exitWith c
   TargetConfigExecutable _ -> pure ()
+
+runNix :: (Input a, Output b) => a -> IO b
+runNix = Cradle.run "nix" nixArgs
