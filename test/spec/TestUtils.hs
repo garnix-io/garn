@@ -14,10 +14,10 @@ import Development.Shake (CmdOption (EchoStdout), Exit (Exit), StdoutTrim (..), 
 import Garn
 import System.Environment (withArgs)
 import System.Exit
-import System.IO (Handle, SeekMode (AbsoluteSeek), hPutStr, hPutStrLn, hSeek)
+import System.IO (Handle, hClose, hPutStr, hPutStrLn)
 import qualified System.IO as Sys
 import System.IO.Silently (hCapture)
-import System.IO.Temp
+import System.Posix (fdToHandle, openPseudoTerminal)
 import System.Process (ProcessHandle, interruptProcessGroupOf, waitForProcess)
 import Test.Hspec
 import Text.Regex.PCRE.Heavy (compileM, (=~))
@@ -106,8 +106,8 @@ runGarn :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath ->
 runGarn args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
   (stderr, (stdout, exitCode)) <- hCapture [Sys.stderr] $
-    hCapture [Sys.stdout] $
-      withTempFile $ \stdin ->
+    hCapture [Sys.stdout] $ do
+      withStdinTty stdin $ \stdin -> do
         withArgs args $ do
           let env =
                 Env
@@ -125,14 +125,20 @@ runGarn args stdin repoDir shell = do
         stderr,
         exitCode
       }
+
+withStdinTty :: String -> (Handle -> IO a) -> IO a
+withStdinTty stdinText action = do
+  bracket setup teardown (action . snd)
   where
-    withTempFile :: (Handle -> IO a) -> IO a
-    withTempFile action =
-      withSystemTempFile "garn-test-stdin" $ \_path handle ->
-        do
-          hPutStr handle stdin
-          hSeek handle AbsoluteSeek 0
-          action handle
+    setup = do
+      (write, read) <- openPseudoTerminal
+      stdinWriteHandle <- fdToHandle write
+      stdinReadHandle <- fdToHandle read
+      hPutStr stdinWriteHandle stdinText
+      pure (stdinWriteHandle, stdinReadHandle)
+    teardown (write, read) = do
+      hClose write
+      hClose read
 
 data ProcResult = ProcResult
   { stdout :: String,
