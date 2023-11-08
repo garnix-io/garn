@@ -2,13 +2,11 @@
 
 module RunSpec where
 
-import Control.Monad (forM_, when)
+import Control.Monad (forM_)
 import Data.List (sort)
-import Data.Maybe (isJust)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import System.Directory
-import System.Environment (lookupEnv)
 import System.Exit (ExitCode (..))
 import Test.Hspec
 import Test.Mockery.Directory
@@ -143,9 +141,6 @@ spec =
           readFile "./unformatted.nix" `shouldReturn` unformattedNix
 
         it "forwards the user's tty" $ \onTestFailureLog -> do
-          disableTtyTest <- lookupEnv "DISABLE_TTY_TEST"
-          when (isJust disableTtyTest) $ do
-            pendingWith "DISABLE_TTY_TEST is set"
           writeFile
             "garn.ts"
             [i|

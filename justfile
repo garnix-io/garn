@@ -120,9 +120,6 @@ test *args="": hpack
 
 # Run the tests continuously as the code changes
 watch *args="": hpack
-  #!/usr/bin/env bash
-
-  export DISABLE_TTY_TEST=true
   ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings --reload=ts
 
 fileserver *args="":
