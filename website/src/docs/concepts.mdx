@@ -18,11 +18,11 @@ of the above entities and give them structure. `Project`s are described at the
 bottom in the [Projects](#projects) section.
 
 All of these concepts are implemented as typescript types. Feel free to browse
-the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.14/mod.ts) as well.
+the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.15/mod.ts) as well.
 
 ## Environments
 
-(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.14/mod.ts/~/Environment).)
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.15/mod.ts/~/Environment).)
 
 `Environment`s define what is available to a computation. For example they can
 contain compilers and developer tools that you want to use on a project, but
@@ -42,7 +42,7 @@ what the `Environment`s provide. For example `Check`s, which are our next topic.
 
 ## Checks
 
-(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.14/mod.ts/~/Check).)
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.15/mod.ts/~/Check).)
 
 `Check`s are commands (usually shell commands) that are used to define
 reproducible, automated tests or other checks. They run in a sandbox, which
@@ -65,7 +65,7 @@ configuration.
 
 ## Executables
 
-(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.14/mod.ts/~/Executable).)
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.15/mod.ts/~/Executable).)
 
 `Executable`s are commands (usually shell snippets) that are being run on your
 local machine (not in a sandbox). They are based on an underlying `Environment`,
@@ -81,7 +81,7 @@ and can make use of e.g. the tools that `Environment`s provide. You can use
 Here's a small example:
 
 ```typescript
-import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
+import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
 
 export const hello =
   garn.emptyEnvironment.shell("echo Hello, world!");
@@ -91,7 +91,7 @@ You can run `Executable`s with `garn run`.
 
 ## Packages
 
-(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.14/mod.ts/~/Package).)
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.15/mod.ts/~/Package).)
 
 `Package`s are instructions to `garn` about how to _build_ a set of files. For
 example for a Go backend a package would define how to compile it into
@@ -107,7 +107,7 @@ You can build `Package`s with `garn build`.
 
 ## Projects
 
-(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.14/mod.ts/~/Project).)
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.15/mod.ts/~/Project).)
 
 `Project`s are used to combine `Environment`s, `Check`s, `Executable`s and
 `Package`s into a single entity. A `Project` can contain any number of these
@@ -126,8 +126,8 @@ that contains a few `Check`s and adds a developer tool to its default
 environment:
 
 ```typescript
-import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
-import * as pkgs from "https://garn.io/ts/v0.0.14/nixpkgs.ts";
+import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
+import * as pkgs from "https://garn.io/ts/v0.0.15/nixpkgs.ts";
 
 export const project = garn.javascript
   .mkNpmProject({
