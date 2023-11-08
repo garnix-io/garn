@@ -159,20 +159,6 @@ modifyPackageJson modifier = do
     Nothing -> error "could not decode package.json"
     Just decoded -> Aeson.encodeFile "package.json" $ modifier decoded
 
-shellTestCommand :: String
-shellTestCommand =
-  [i|
-    if [[ -v BASH_VERSION ]]; then
-        echo -n "using bash"
-    else
-        if [[ -v ZSH_VERSION ]]; then
-            echo -n "using zsh"
-        else
-            echo -n "using unknown shell"
-        fi
-    fi
-  |]
-
 onTestFailureLogger :: ((ProcResult -> IO ()) -> IO a) -> IO a
 onTestFailureLogger test = do
   mvar <- newMVar []

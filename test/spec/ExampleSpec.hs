@@ -79,7 +79,7 @@ spec = aroundAll_ withFileServer $ do
       exitCode output `shouldBe` ExitSuccess
 
     it "allows to run tests manually with enter" $ \onTestFailureLog -> do
-      output <- runGarn' ["enter", "project"] "npm test"
+      output <- runGarn' ["enter", "project"] "npm test\nexit\n"
       onTestFailureLog output
       stdout output `shouldContain` "> jest"
       exitCode output `shouldBe` ExitSuccess
