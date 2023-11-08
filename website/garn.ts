@@ -12,8 +12,8 @@ export const website = garn.javascript
     garn.mkPackage(nixRaw("pkgs.nodePackages.prettier")),
   ])
   .addCheck("tsc", "npm run tsc")
-  .addCheck("fmt-check", "prettier src/**/*.tsx src/**/*.ts --check")
-  .addExecutable("fmt", "prettier src/**/*.tsx src/**/*.ts --write");
+  .addCheck("fmt-check", "prettier '**/*.{ts,tsx}' --check")
+  .addExecutable("fmt", "prettier '**/*.{ts,tsx}' --write");
 
 export const dev = website.shell("npm install ; npm run dev");
 

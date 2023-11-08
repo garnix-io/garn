@@ -212,7 +212,7 @@
       }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      ${"prettier src/**/*.tsx src/**/*.ts --check"}
+      ${"prettier '**/*.{ts,tsx}' --check"}
     ";
         }
       );
@@ -405,7 +405,7 @@ COMMIT;"}";
             ++
             [pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier];
         });
-        shell = "prettier src/**/*.tsx src/**/*.ts --write";
+        shell = "prettier '**/*.{ts,tsx}' --write";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
