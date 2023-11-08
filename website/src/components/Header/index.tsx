@@ -9,12 +9,12 @@ export function Header() {
 
   React.useEffect(() => {
     const close = () => setMenuOpen(false);
-    document.addEventListener('click', close);
-    return () => document.removeEventListener('click', close);
+    document.addEventListener("click", close);
+    return () => document.removeEventListener("click", close);
   });
 
   return (
-    <header className={`nav ${menuOpen ? 'open' : ''}`}>
+    <header className={`nav ${menuOpen ? "open" : ""}`}>
       <Typography variant="h1">
         <Link to="/">garn</Link>
       </Typography>
@@ -51,7 +51,13 @@ export function Header() {
         <DiscordLink />
         <GithubLink />
       </nav>
-      <button onClick={e => { e.stopPropagation(); setMenuOpen(!menuOpen) }} className="menu-toggle">
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          setMenuOpen(!menuOpen);
+        }}
+        className="menu-toggle"
+      >
         <div />
       </button>
     </header>
@@ -59,7 +65,11 @@ export function Header() {
 }
 
 export const GithubLink = () => (
-  <a href="https://github.com/garnix-io/garn" className="social-link" title="View on GitHub">
+  <a
+    href="https://github.com/garnix-io/garn"
+    className="social-link"
+    title="View on GitHub"
+  >
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 98 96">
       <path
         fillRule="evenodd"
@@ -73,7 +83,11 @@ export const GithubLink = () => (
 );
 
 export const DiscordLink = () => (
-  <a href="https://discord.gg/XtDrPsqpVx" className="social-link" title="Join the Discord Channel">
+  <a
+    href="https://discord.gg/XtDrPsqpVx"
+    className="social-link"
+    title="Join the Discord Channel"
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="16"
