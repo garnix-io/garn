@@ -17,7 +17,6 @@ import Garn.Optparse
 import System.Directory (doesFileExist)
 import System.Exit (exitWith)
 import System.IO (Handle, hPutStrLn, stderr)
-import System.Process
 
 data Env = Env
   { stdin :: Handle,
@@ -48,7 +47,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
   case opts of
     Gen -> pure ()
     Run (CommandOptions {..}) argv -> do
-      exitCode <- rawSystem "nix" (["run"] <> nixArgs <> [".#" <> asNixFacing target, "--"] <> argv)
+      exitCode <- runNix (StdinHandle (stdin env), DelegateCtrlC, "run", ".#" <> asNixFacing target, "--", argv)
       exitWith exitCode
     Enter (CommandOptions {..}) -> do
       hPutStrLn stderr $
