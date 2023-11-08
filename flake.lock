@@ -23,14 +23,18 @@
         ]
       },
       "locked": {
-        "lastModified": 1699468103,
-        "narHash": "sha256-tDLe2ChZ5ReVUjK0QmPy/yciKHjI71XYsHgaOwfn4Kg=",
-        "path": "/home/shahn/garnix/cradle",
-        "type": "path"
+        "lastModified": 1699478452,
+        "narHash": "sha256-YrMGHdIOTp4B8BS7WI03bIDrNW2kQO7y6ANK+l2yurs=",
+        "owner": "garnix-io",
+        "repo": "cradle",
+        "rev": "de9b1fa209311c4f385f8943c338a5cd69fa6b5b",
+        "type": "github"
       },
       "original": {
-        "path": "/home/shahn/garnix/cradle",
-        "type": "path"
+        "owner": "garnix-io",
+        "ref": "sh/no-stdin",
+        "repo": "cradle",
+        "type": "github"
       }
     },
     "fhi": {
