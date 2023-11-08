@@ -13,15 +13,21 @@ import Test.Mockery.Directory (inTempDirectory)
 import Test.Mockery.Environment (withModifiedEnvironment)
 import TestUtils
 
+wrap :: SpecWith (ProcResult -> IO ()) -> Spec
+wrap =
+  around_ (withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")])
+    . around onTestFailureLogger
+
 spec :: Spec
 spec = do
   repoDir <- runIO getCurrentDirectory
 
-  around_ (withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]) $ do
+  wrap $ do
     describe "garn" $ around_ inTempDirectory $ do
       describe "--help" $ do
-        it "lists available commands" $ do
+        it "lists available commands" $ \onTestFailureLog -> do
           output <- runGarn ["--help"] "" repoDir Nothing
+          onTestFailureLog output
           stdout output
             `shouldMatch` unindent
               [i|
@@ -30,6 +36,7 @@ spec = do
               |]
           writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]
           output <- runGarn ["--help"] "" repoDir Nothing
+          onTestFailureLog output
           stdout output
             `shouldMatch` unindent
               [i|
@@ -40,8 +47,9 @@ spec = do
                   generate.*
                   check.*
               |]
-        it "lists unavailable commands" $ do
+        it "lists unavailable commands" $ \onTestFailureLog -> do
           output <- runGarn ["--help"] "" repoDir Nothing
+          onTestFailureLog output
           stdout output
             `shouldMatch` unindent
               [i|
@@ -54,6 +62,7 @@ spec = do
               |]
           writeFile "garn.ts" [i|import "#{repoDir}/ts/mod.ts"|]
           output <- runGarn ["--help"] "" repoDir Nothing
+          onTestFailureLog output
           stdout output
             `shouldMatch` unindent
               [i|
@@ -61,21 +70,22 @@ spec = do
                   init
               |]
 
-      it "generates formatted flakes" $ do
+      it "generates formatted flakes" $ \onTestFailureLog -> do
         inTempDirectory $ do
           writeHaskellProject repoDir
-          _ <- runGarn ["run", "foo"] "" repoDir Nothing
+          output <- runGarn ["run", "foo"] "" repoDir Nothing
+          onTestFailureLog output
           flake <- readFile "./flake.nix"
           pure $ defaultGolden "generates_formatted_flakes" flake
 
-      it "outputs a version with --version" $ onTestFailureLogger $ \onTestFailureLog -> do
+      it "outputs a version with --version" $ \onTestFailureLog -> do
         output <- runGarn ["--version"] "" repoDir Nothing
         onTestFailureLog output
         stdout output `shouldBe` "v0.0.15\n"
         stderr output `shouldBe` ""
         exitCode output `shouldBe` ExitSuccess
 
-      describe "version mismatches" $ around onTestFailureLogger $ do
+      describe "version mismatches" $ do
         it "gives a helpful error messages when there's a deno <-> haskell json version mismatch" $
           \onTestFailureLog -> do
             inTempDirectory $ do
