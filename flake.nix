@@ -5,7 +5,7 @@
   inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer";
   inputs.call-flake.url = "github:divnix/call-flake";
   inputs.cradle = {
-    url = "github:garnix-io/cradle";
+    url = "path:/home/shahn/garnix/cradle";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 
@@ -131,9 +131,9 @@
             let
               ghc = ourHaskell.ghc.withPackages (p:
                 [
+                  p.cradle
                   p.fsnotify
                   p.getopt-generics
-                  p.shake
                   p.wai-app-static
                   p.warp
                 ]);
