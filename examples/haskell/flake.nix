@@ -15,7 +15,7 @@
           };
         in
         {
-          "helloFromHaskell_pkg" = (pkgs.haskell.packages.ghc94.callCabal2nix
+          "helloFromHaskell/pkg" = (pkgs.haskell.packages.ghc94.callCabal2nix
             "garn-pkg"
             (
               let

@@ -17,7 +17,7 @@
           };
         in
         {
-          "backend_pkg" =
+          "backend/pkg" =
             let
               gomod2nix = gomod2nix-repo.legacyPackages.${system};
               gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -54,7 +54,7 @@
               );
               modules = gomod2nix-toml;
             };
-          "haskell_pkg" = (pkgs.haskell.packages.ghc94.callCabal2nix
+          "haskell/pkg" = (pkgs.haskell.packages.ghc94.callCabal2nix
             "garn-pkg"
             (
               let
@@ -80,7 +80,7 @@
           // {
             meta.mainProgram = "helloFromHaskell";
           };
-          "npmFrontend_node_modules" =
+          "npmFrontend/node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;

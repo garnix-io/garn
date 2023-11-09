@@ -14,8 +14,6 @@ export type Package = {
   tag: "package";
   nixExpression: NixExpression;
   description?: string;
-
-  // disableCheck(this: Package): Package;
 };
 
 export function isPackage(x: unknown): x is Package {

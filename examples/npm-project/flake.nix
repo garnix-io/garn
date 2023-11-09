@@ -16,7 +16,7 @@
           };
         in
         {
-          "project_node_modules" =
+          "project/node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;

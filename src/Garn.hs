@@ -58,12 +58,15 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       when (c /= ExitSuccess) $ exitWith c
       hPutStrLn stderr $ "[garn] Exiting " <> asUserFacing target <> " shell."
       pure ()
-    Build (CommandOptions {targetConfig}) -> do
+    Build (CommandOptions {targetConfig, target}) -> do
       case targetConfig of
         TargetConfigProject (ProjectTarget {packages}) -> do
           forM_ packages $ \package -> do
             c <- runNix (NoStdin, "build", ".#" <> package)
             when (c /= ExitSuccess) $ exitWith c
+        TargetConfigPackage (PackageTarget {}) -> do
+          c <- runNix (NoStdin, "build", ".#" <> asNixFacing target)
+          when (c /= ExitSuccess) $ exitWith c
         TargetConfigExecutable _ -> pure ()
     Check checkOptions -> case checkOptions of
       (Qualified (CommandOptions {targetConfig})) -> do
@@ -81,6 +84,7 @@ checkTarget targetConfig = case targetConfig of
     forM_ checks $ \check -> do
       c <- runNix (NoStdin, "build", ".#checks." <> system <> "." <> check)
       when (c /= ExitSuccess) $ exitWith c
+  TargetConfigPackage _ -> pure ()
   TargetConfigExecutable _ -> pure ()
 
 runNix :: (Input a, Output b) => a -> IO b

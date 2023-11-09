@@ -15,7 +15,7 @@
           };
         in
         {
-          "frontend_pkg" =
+          "frontend/pkg" =
             let
               pkgs = import "${nixpkgs}" {
                 config.permittedInsecurePackages = [ ];

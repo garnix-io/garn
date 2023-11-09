@@ -16,7 +16,7 @@
           };
         in
         {
-          "bundle_package" =
+          "bundle/package" =
             let
               dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
@@ -92,7 +92,7 @@
       cp -rv build/* \$out
     "}
     ";
-          "main_node_modules" =
+          "main/node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;

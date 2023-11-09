@@ -2,7 +2,6 @@ import { isProject, Project } from "../project.ts";
 import { isPackage, Package } from "../package.ts";
 import { Check, isCheck } from "../check.ts";
 import { checkExhaustiveness, mapKeys, mapValues } from "./utils.ts";
-import { GOMOD2NIX_REPO } from "../go/consts.ts";
 import {
   nixFlakeDep,
   nixAttrSet,
@@ -29,7 +28,7 @@ export type GarnConfig = {
 
 type Targets = Record<string, TargetConfig>;
 
-type TargetConfig = ProjectTarget | ExecutableTarget;
+type TargetConfig = ProjectTarget | PackageTarget | ExecutableTarget;
 
 type ProjectTarget = {
   tag: "project";
@@ -37,6 +36,11 @@ type ProjectTarget = {
   packages: Array<string>;
   checks: Array<string>;
   runnable: boolean;
+};
+
+type PackageTarget = {
+  tag: "package";
+  description: string;
 };
 
 type ExecutableTarget = {
@@ -83,6 +87,11 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
         packages: Object.keys(packages),
         checks: Object.keys(checks),
         runnable: !!exportable.defaultExecutable,
+      };
+    } else if (isPackage(exportable)) {
+      result[name] = {
+        tag: "package",
+        description: exportable.description ?? "TODO",
       };
     } else if (isExecutable(exportable)) {
       result[name] = {
@@ -172,7 +181,7 @@ const formatFlake = (
   `;
 };
 
-type Exportable = Project | Executable;
+type Exportable = Project | Package | Executable;
 
 const findExportables = (
   config: Record<string, unknown>,
@@ -187,6 +196,8 @@ const findExportables = (
         if (key === "defaultExecutable") continue;
         result[`${name}/${key}`] = nested[key];
       }
+    } else if (isPackage(value)) {
+      result[name] = value;
     } else if (isExecutable(value)) {
       result[name] = value;
     }
@@ -197,13 +208,10 @@ const findExportables = (
 const collectPackages = (
   config: Record<string, Exportable>,
 ): Record<string, Package> => {
-  let result: Record<string, Package> = {};
+  const result: Record<string, Package> = {};
   for (const [name, exportable] of Object.entries(config)) {
-    if (isProject(exportable)) {
-      result = {
-        ...result,
-        ...collectProjectPackages(name, exportable),
-      };
+    if (isPackage(exportable)) {
+      result[name] = exportable;
     }
   }
   return result;
@@ -214,7 +222,7 @@ const collectProjectPackages = (
   project: Project,
 ): Record<string, Package> =>
   mapKeys(
-    (name) => `${projectName}_${name}`,
+    (name) => `${projectName}/${name}`,
     collectByPredicate(isPackage, project),
   );
 
@@ -238,7 +246,7 @@ const collectProjectChecks = (
   project: Project,
 ): Record<string, Check> =>
   mapKeys(
-    (name) => `${projectName}_${name}`,
+    (name) => `${projectName}_${name}`, // TODO: make slash too?
     collectByPredicate(isCheck, project),
   );
 
