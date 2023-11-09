@@ -47,7 +47,9 @@ export const npmInitializer: Initializer = (dir) => {
           : []),
         ...nonTestScripts.map(
           (name) =>
-            `.addExecutable(${JSON.stringify(name)}, "npm run ${name}")`,
+            `.addExecutable(${JSON.stringify(name)}, ${JSON.stringify(
+              `npm run ${name}`,
+            )})`,
         ),
       ].join("\n  "),
   };
