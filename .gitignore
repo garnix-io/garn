@@ -4,5 +4,5 @@ node_modules/
 /website/dist/
 /website/public/install.sh
 /website/public/nix-installer*
-/ts/nixpkgs.ts
+/ts/internal/nixpkgs
 /.golden/*/actual

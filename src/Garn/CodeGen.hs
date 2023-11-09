@@ -2,13 +2,15 @@
 
 module Garn.CodeGen
   ( Garn.CodeGen.run,
-    fromToplevelDerivation,
   )
 where
 
+import Control.Exception (IOException, catch)
+import Control.Monad (forM_)
 import Cradle (StdoutUntrimmed (..), run)
 import Data.Aeson (FromJSON, eitherDecode, toJSON)
 import Data.Aeson.Text (encodeToLazyText)
+import Data.Char (isDigit)
 import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Map (Map, toAscList)
@@ -19,69 +21,133 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import GHC.Generics (Generic)
 import Garn.Common (currentSystem, nixpkgsInput)
+import System.Directory (createDirectoryIfMissing, removeDirectoryRecursive)
 import WithCli (withCli)
 
 run :: IO ()
 run = withCli $ do
   system <- currentSystem
-  let varName = "pkgs"
-      nixpkgsExpression =
-        [i|
-          import (builtins.getFlake "#{nixpkgsInput}") {
-            system = "#{system}";
-            config.allowAliases = false;
-          }
-        |]
-  code <- fromToplevelDerivation "." varName nixpkgsExpression
-  writeFile "ts/nixpkgs.ts" code
+  let outDir = "ts/internal/nixpkgs"
+  removeDirectoryRecursive outDir `catch` \(_ :: IOException) -> pure ()
+  pkgs <- scanPackages system
+  writePkgFiles outDir "../.." pkgs
 
-fromToplevelDerivation :: String -> String -> String -> IO String
-fromToplevelDerivation garnLibRoot varName rootExpr = do
-  system :: String <- do
-    StdoutUntrimmed json <- Cradle.run "nix" nixArgs (words "eval --impure --json --expr builtins.currentSystem")
-    pure $ either error id $ eitherDecode (cs json)
+writePkgFiles :: String -> String -> Map String PkgInfo -> IO ()
+writePkgFiles modulePath garnLibRoot pkgs = do
+  createDirectoryIfMissing True modulePath
+  let sanitizedPkgs = Map.mapKeys sanitize pkgs
+  let code =
+        unindent
+          [i|
+            import { mkPackage } from "#{garnLibRoot}/package.ts";
+            import { nixRaw } from "#{garnLibRoot}/nix.ts";
+
+          |]
+          <> pkgsString sanitizedPkgs
+  writeFile (modulePath <> "/mod.ts") code
+  forM_ (Map.assocs sanitizedPkgs) $ \(name :: String, pkgInfo :: PkgInfo) -> do
+    case pkgInfo of
+      Derivation {} -> pure ()
+      Collection {subPkgs} -> writePkgFiles (modulePath <> "/" <> name) (garnLibRoot <> "/..") subPkgs
+
+scanPackages :: String -> IO (Map String PkgInfo)
+scanPackages system = do
   StdoutUntrimmed json <- Cradle.run "nix" nixArgs "eval" (".#lib." <> system) "--json" "--apply" nixExpr
-  pkgs :: Map String PkgInfo <- case eitherDecode (cs json) of
+  case eitherDecode (cs json) of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in " <> cs json)
-  let sanitizedPkgs = Map.mapKeys sanitize pkgs
-  pure $
-    unindent
-      [i|
-        import { mkPackage } from "#{garnLibRoot}/package.ts";
-        import { nixRaw } from "#{garnLibRoot}/nix.ts";
-
-      |]
-      <> pkgsString varName sanitizedPkgs
   where
     nixExpr =
       [i|
-        lib :
-        let mk = name: value: {
-              attribute = name;
-              description = if value ? meta.description
-                then value.meta.description
+        let pkgs = import (builtins.getFlake "#{nixpkgsInput}") {
+          system = "#{system}";
+          config.allowAliases = false;
+        };
+        in lib:
+          let debug = false;
+              trace = path: value: if debug then builtins.trace path value else value;
+              brokenPkgs = {
+                __splicedPackages = true;
+                beam = { interpreters = true; packages = true; };
+                beam_minimal = { interpreters = true; packages = true; };
+                beam_nox = { interpreters = true; packages = true; };
+                buildPackages = true;
+                cudaPackages_10 = true;
+                cudaPackages_10_0 = true;
+                cudaPackages_10_1 = true;
+                cudaPackages_10_2 = true;
+                cudaPackages_11_0 = true;
+                cudaPackages_11_1 = true;
+                cudaPackages_11_2 = true;
+                cudaPackages_11_3 = true;
+                dockapps = true;
+                lib = true;
+                nixosTests = true;
+                nodePackages = { "@antora/cli" = true; };
+                nodePackages_latest = { "@antora/cli" = true; };
+                pkgs = true;
+                pkgsBuildBuild = true;
+                pkgsBuildHost = true;
+                pkgsBuildTarget = true;
+                pkgsCross = true;
+                pkgsHostHost = true;
+                pkgsHostTarget = true;
+                pkgsLLVM = true;
+                pkgsMusl = true;
+                pkgsStatic = true;
+                pkgsTargetTarget = true;
+                pkgsi686Linux = true;
+                pypy27Packages = true;
+                pypy2Packages = true;
+                pypy310Packages = true;
+                pypy39Packages = true;
+                pypy3Packages = true;
+                pypyPackages = true;
+                swiftPackages = { darwin = true; };
+                targetPackages = true;
+                tests = true;
+              };
+              isBroken = broken: name: value:
+                (broken ? ${name} && broken.${name} == true)
+                || !(builtins.tryEval value).success
+                || !(let evalResult = (builtins.tryEval (value.meta.broken or false));
+                   in evalResult.success && !evalResult.value);
+              getBroken = broken: subPkgName: if broken ? ${subPkgName} then broken.${subPkgName} else {};
+              mkDerivation = path: pkg: {
+                  tag = "Derivation";
+                  path = path;
+                  description = if pkg ? meta.description
+                    then pkg.meta.description
+                    else null;
+                };
+              mkCollection = maxDepth: broken: path: collection:
+                let
+                  subPkgs = scan (maxDepth - 1) broken path collection;
+                in if builtins.length (builtins.attrNames subPkgs) == 0
+                  then null
+                  else {
+                    tag = "Collection";
+                    inherit subPkgs;
+                  };
+              mkEntry = maxDepth: broken: path: name: value:
+                let newPath = "${path}.${name}"; in
+                if lib.isDerivation value then trace "derivation ${newPath}" mkDerivation newPath value
+                else if lib.isAttrs value then trace "collection ${newPath}" (mkCollection maxDepth (getBroken broken name) newPath value)
                 else null;
-            };
-            isNotBroken = value:
-                let broken = (builtins.tryEval (value.meta.broken or false));
-                in broken.success && !broken.value;
-            doesNotThrow = value : (builtins.tryEval value).success;
-            filterAttrs = lib.attrsets.filterAttrs
-              (name: value:
-                    doesNotThrow value
-                && lib.isDerivation value
-                && isNotBroken value);
-        in
-          (lib.mapAttrs mk
-            (filterAttrs (#{rootExpr}))
-          )
+              scan = maxDepth: broken: path: root: 
+                let
+                  working = lib.filterAttrs (k: v: !(isBroken broken k v)) root;
+                in
+                  if maxDepth > 0
+                    then lib.filterAttrs (k: v: v != null) (lib.mapAttrs (mkEntry maxDepth broken path) working)
+                    else {};
+          in
+            scan 2 brokenPkgs "pkgs" pkgs
       |]
 
-data PkgInfo = PkgInfo
-  { description :: Maybe String,
-    attribute :: String
-  }
+data PkgInfo
+  = Derivation {description :: Maybe String, path :: String}
+  | Collection {subPkgs :: Map String PkgInfo}
   deriving stock (Eq, Show, Generic)
   deriving anyclass (FromJSON)
 
@@ -96,28 +162,40 @@ pkgDoc pkgInfo = case description pkgInfo of
          */
       |]
 
-formatPkg :: String -> (String, PkgInfo) -> String
-formatPkg varName (name, pkgInfo) =
-  let escapedDoc = encodeToLazyText . toJSON $ fromMaybe "" $ description pkgInfo
-   in pkgDoc pkgInfo
-        <> unindent
-          [i|
-            export const #{name} = mkPackage(
-              nixRaw`#{varName}.#{attribute pkgInfo}`,
-              #{escapedDoc},
-            );
-          |]
+formatPkg :: (String, PkgInfo) -> String
+formatPkg (name, pkgInfo) = do
+  case pkgInfo of
+    Derivation {description, path} ->
+      let escapedDoc = encodeToLazyText . toJSON $ fromMaybe "" description
+       in pkgDoc pkgInfo
+            <> unindent
+              [i|
+                export const #{name} = mkPackage(
+                  nixRaw`#{path}`,
+                  #{escapedDoc},
+                );
+              |]
+    Collection _ ->
+      unindent
+        [i|
+          export * as #{name} from "./#{name}/mod.ts";
+        |]
 
-pkgsString :: String -> Map String PkgInfo -> String
-pkgsString varName pkgs =
-  intercalate "\n" $ formatPkg varName <$> toAscList pkgs
+pkgsString :: Map String PkgInfo -> String
+pkgsString pkgs =
+  intercalate "\n" $ formatPkg <$> toAscList pkgs
 
 sanitize :: String -> String
 sanitize str
+  | isDigit $ head str = sanitize $ "_" <> str
   | str `elem` tsKeywords = str <> "_"
   | otherwise =
       str <&> \case
+        '+' -> '_'
         '-' -> '_'
+        '.' -> '_'
+        '/' -> '_'
+        '@' -> '_'
         x -> x
 
 tsKeywords :: [String]
@@ -145,8 +223,10 @@ tsKeywords =
     "import",
     "in",
     "instanceOf",
+    "interface",
     "new",
     "null",
+    "private",
     "return",
     "super",
     "switch",
@@ -155,6 +235,7 @@ tsKeywords =
     "true",
     "try",
     "typeOf",
+    "typeof",
     "var",
     "void",
     "while",
