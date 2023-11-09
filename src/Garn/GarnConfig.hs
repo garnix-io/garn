@@ -1,10 +1,12 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Garn.GarnConfig where
 
 import Control.Exception (IOException, catch, throwIO)
 import Control.Monad
+import Cradle (Stderr (..), StdoutUntrimmed (..), run)
 import Data.Aeson
   ( FromJSON (parseJSON),
     FromJSONKey,
@@ -18,9 +20,9 @@ import Data.Aeson
 import Data.List (intercalate)
 import Data.Map (Map)
 import Data.String (IsString (fromString))
+import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
-import Development.Shake (CmdOption (EchoStderr, EchoStdout), Stdout (Stdout), cmd, cmd_)
 import GHC.Generics (Generic)
 import Garn.Common (nixArgs, nixpkgsInput)
 import qualified Garn.Errors
@@ -124,7 +126,7 @@ readGarnConfig = do
         }
       |]
     hClose mainHandle
-    Stdout out <- cmd "deno run --quiet --check --allow-write --allow-run --allow-read" mainPath
+    StdoutUntrimmed (cs -> out) <- run (words "deno run --quiet --check --allow-write --allow-run --allow-read") mainPath
     case eitherDecode out :: Either String (Maybe DenoOutput) of
       Left err -> do
         let suggestion = case eitherDecode out :: Either String OnlyTsLibVersion of
@@ -154,8 +156,10 @@ data OnlyTsLibVersion = OnlyTsLibVersion
 writeGarnConfig :: GarnConfig -> IO ()
 writeGarnConfig garnConfig = do
   writeFile "flake.nix" $ flakeFile garnConfig
-  cmd_ [EchoStderr False, EchoStdout False] "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
-  void (cmd [EchoStderr False, EchoStdout False] "git add --intent-to-add flake.nix" :: IO ExitCode) `catch` \(_ :: IOException) -> pure ()
+  (StdoutUntrimmed _, Stderr _) <- run "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
+  void (run (words "git add --intent-to-add flake.nix") :: IO (StdoutUntrimmed, Stderr, ExitCode))
+    `catch` \(_ :: IOException) -> pure ()
+  pure ()
 
 checkGarnFileExists :: IO ()
 checkGarnFileExists = do

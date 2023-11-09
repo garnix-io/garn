@@ -48,13 +48,13 @@ dependencies:
   - aeson
   - ansi-wl-pprint
   - containers
+  - cradle
   - directory
   - getopt-generics
   - interpolate
   - optparse-applicative
   - pretty-simple
   - process
-  - shake
   - string-conversions
   - template-haskell
   - temporary
@@ -64,6 +64,7 @@ dependencies:
 ghc-options:
   - -Wall
   - -with-rtsopts=-T
+  - -threaded
   - -Wno-name-shadowing
 
 tests:
@@ -90,6 +91,7 @@ tests:
       - lens-regex-pcre
       - mockery
       - pcre-heavy
+      - shake
       - silently
       - wreq
       - yaml

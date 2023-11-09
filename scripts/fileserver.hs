@@ -1,7 +1,7 @@
 import Control.Concurrent
 import Control.Monad
+import Cradle
 import Data.Function
-import Development.Shake (CmdOption (..), Exit (..), cmd)
 import Network.Wai.Application.Static
 import Network.Wai.Handler.Warp
 import System.Directory
@@ -27,12 +27,8 @@ main = withCli $ do
 
 isRunning :: IO Bool
 isRunning = do
-  Exit code <-
-    cmd
-      "curl"
-      ("http://localhost:" <> show port)
-      (EchoStdout False)
-      (EchoStderr False)
+  (code, StdoutUntrimmed _, Stderr _) <-
+    Cradle.run "curl" ("http://localhost:" <> show port)
   pure (code == ExitSuccess)
 
 port :: Int
@@ -55,7 +51,7 @@ startDenoCacheInvalidator = void $ forkIO $ do
 reload :: FilePath -> IO ()
 reload file = do
   let url = "http://localhost:8777/" <> file
-  Exit _ <- cmd ("deno cache --reload=" <> url) url
+  _ :: ExitCode <- Cradle.run "deno" "cache" ("--reload=" <> url) url
   pure ()
 
 listDirectoryRecursive :: FilePath -> IO [FilePath]

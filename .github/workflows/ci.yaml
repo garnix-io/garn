@@ -21,6 +21,4 @@ jobs:
         run: sudo rm -rf /opt/*
       - uses: lriesebos/nix-develop-command@v1
         with:
-          # Some tests require a TTY to run, by wrapping `just github-ci` in a
-          # call to `script` this emulates a TTY on github actions
-          command: "script --return --quiet --command 'just github-ci' /dev/null"
+          command: "just github-ci"

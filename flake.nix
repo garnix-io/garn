@@ -4,8 +4,12 @@
   inputs.fhi.url = "github:soenkehahn/format-haskell-interpolate";
   inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer";
   inputs.call-flake.url = "github:divnix/call-flake";
+  inputs.cradle = {
+    url = "github:garnix-io/cradle";
+    inputs.nixpkgs.follows = "nixpkgs";
+  };
 
-  outputs = { self, nixpkgs, flake-utils, fhi, nix-tool-installer, call-flake }:
+  outputs = { self, nixpkgs, flake-utils, fhi, nix-tool-installer, call-flake, cradle }:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = import "${nixpkgs}" {
@@ -14,7 +18,11 @@
         };
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
-        ourHaskell = pkgs.haskell.packages.ghc947;
+        ourHaskell = pkgs.haskell.packages.ghc947.override {
+          overrides = self: super: {
+            cradle = cradle.lib.${system}.mkCradle pkgs.haskell.packages.ghc947;
+          };
+        };
         websiteFlake = call-flake ./website;
         websitePackages =
           if system == "x86_64-linux" then
@@ -123,9 +131,9 @@
             let
               ghc = ourHaskell.ghc.withPackages (p:
                 [
+                  p.cradle
                   p.fsnotify
                   p.getopt-generics
-                  p.shake
                   p.wai-app-static
                   p.warp
                 ]);
