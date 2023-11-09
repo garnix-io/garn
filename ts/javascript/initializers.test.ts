@@ -115,9 +115,9 @@ Deno.test(
             src: ".",
             nodeVersion: "18",
           })
-            .addCheck("test")\`npm run test\`
-            .addExecutable("start")\`npm run start\`
-            .addExecutable("build")\`npm run build\`
+            .addCheck("test", "npm run test")
+            .addExecutable("start", "npm run start")
+            .addExecutable("build", "npm run build")
         `,
       );
     }

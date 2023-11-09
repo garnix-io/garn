@@ -111,7 +111,8 @@ spec = do
             {
               "name": "my-project",
               "scripts": {
-                "start": "echo starting my project..."
+                "start": "echo starting my project...",
+                "test": "echo testing..."
               }
             }
           |]
