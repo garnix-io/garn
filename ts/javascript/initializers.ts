@@ -43,11 +43,13 @@ export const npmInitializer: Initializer = (dir) => {
           })
         `,
         ...(scripts.includes("test")
-          ? ['.addCheck("test")`npm run test`']
+          ? ['.addCheck("test", "npm run test")']
           : []),
         ...nonTestScripts.map(
           (name) =>
-            `.addExecutable(${JSON.stringify(name)})\`npm run ${name}\``,
+            `.addExecutable(${JSON.stringify(name)}, ${JSON.stringify(
+              `npm run ${name}`,
+            )})`,
         ),
       ].join("\n  "),
   };
