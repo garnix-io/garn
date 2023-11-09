@@ -70,7 +70,7 @@ library
       TypeOperators
       ScopedTypeVariables
       StandaloneDeriving
-  ghc-options: -Wall -with-rtsopts=-T -Wno-name-shadowing
+  ghc-options: -Wall -with-rtsopts=-T -threaded -Wno-name-shadowing
   build-depends:
       aeson
     , ansi-wl-pprint
@@ -127,7 +127,7 @@ executable codegen
       TypeOperators
       ScopedTypeVariables
       StandaloneDeriving
-  ghc-options: -Wall -with-rtsopts=-T -Wno-name-shadowing
+  ghc-options: -Wall -with-rtsopts=-T -threaded -Wno-name-shadowing
   build-depends:
       aeson
     , ansi-wl-pprint
@@ -185,7 +185,7 @@ executable garn
       TypeOperators
       ScopedTypeVariables
       StandaloneDeriving
-  ghc-options: -Wall -with-rtsopts=-T -Wno-name-shadowing
+  ghc-options: -Wall -with-rtsopts=-T -threaded -Wno-name-shadowing
   build-depends:
       aeson
     , ansi-wl-pprint
@@ -266,7 +266,7 @@ test-suite spec
       TypeOperators
       ScopedTypeVariables
       StandaloneDeriving
-  ghc-options: -Wall -with-rtsopts=-T -Wno-name-shadowing -threaded -rtsopts -with-rtsopts=-N -fdefer-typed-holes
+  ghc-options: -Wall -with-rtsopts=-T -threaded -Wno-name-shadowing -threaded -rtsopts -with-rtsopts=-N -fdefer-typed-holes
   build-depends:
       aeson
     , ansi-wl-pprint

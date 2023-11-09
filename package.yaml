@@ -64,6 +64,7 @@ dependencies:
 ghc-options:
   - -Wall
   - -with-rtsopts=-T
+  - -threaded
   - -Wno-name-shadowing
 
 tests:
