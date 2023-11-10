@@ -73,8 +73,8 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-      touch \$out
-      ${"
+    touch \$out
+    ${"
       echo copying source
       cp -r ${(let
     lib = pkgs.lib;
@@ -130,23 +130,33 @@
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
+<<<<<<< HEAD
+    ${"npm run test"}
+  ";
+          "project_tsc" =
+            || || ||| e0f5104
+            ${"npm run test"}
+            ";
+          "project_tsc" =
+=======
       ${"npm run test"}
     ";
           "project/tsc" =
-            let
-              dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
-                nativeBuildInputs =
-                  previousAttrs.nativeBuildInputs
-                  ++
-                  [ pkgs.nodejs-18_x ];
-              });
-            in
-            pkgs.runCommand "check"
-              {
-                buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-      touch \$out
-      ${"
+            > > >>>>> origin/main
+          let
+          dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+          previousAttrs.nativeBuildInputs
+          ++
+          [ pkgs.nodejs-18_x ];
+        });
+      in
+      pkgs.runCommand "check"
+      {
+      buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+    } "
+    touch \$out
+    ${"
       echo copying source
       cp -r ${(let
     lib = pkgs.lib;
@@ -202,53 +212,53 @@
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      ${"npm run tsc"}
-    ";
-        }
-      );
-      devShells = forAllSystems (system:
-        let
-          pkgs = import "${nixpkgs}" {
-            config.allowUnfree = true;
-            inherit system;
-          };
-        in
-        {
-          "project" = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ pkgs.nodejs-18_x ];
-          });
-        }
-      );
-      apps = forAllSystems (system:
-        let
-          pkgs = import "${nixpkgs}" { inherit system; };
-        in
-        {
-          "run" = {
-            "type" = "app";
-            "program" = "${let
-        dev = (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
-          nativeBuildInputs =
-            previousAttrs.nativeBuildInputs
-            ++
-            [pkgs.nodejs-18_x];
-        });
-        shell = "npm install ; npm run run";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
+    ${"npm run tsc"}
+  ";
+}
+);
+devShells = forAllSystems (system:
+let
+pkgs = import "${nixpkgs}" {
+config.allowUnfree = true;
+inherit system;
+};
+in
+{
+"project" = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+nativeBuildInputs =
+previousAttrs.nativeBuildInputs
+++
+[ pkgs.nodejs-18_x ];
+});
+}
+);
+apps = forAllSystems (system:
+let
+pkgs = import "${nixpkgs}" { inherit system; };
+in
+{
+"run" = {
+"type" = "app";
+"program" = "${let
+dev = (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+nativeBuildInputs =
+previousAttrs.nativeBuildInputs
+++
+[pkgs.nodejs-18_x];
+});
+shell = "npm install ; npm run run";
+buildPath = pkgs.runCommand "build-inputs-path" {
+inherit (dev) buildInputs nativeBuildInputs;
+} "echo $PATH > $out";
+in
+pkgs.writeScript "shell-env"  ''
         #!${pkgs.bash}/bin/bash
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
       ''}";
-          };
-        }
-      );
-    };
+};
+}
+);
+};
 }

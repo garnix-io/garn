@@ -1,5 +1,11 @@
+import { Environment } from "./environment.ts";
 import { hasTag } from "./internal/utils.ts";
-import { NixExpression } from "./nix.ts";
+import {
+  NixExpression,
+  NixStrLitInterpolatable,
+  nixRaw,
+  nixStrLit,
+} from "./nix.ts";
 
 /**
  * `Check`s are commands (usually shell commands) that are used to define
@@ -16,6 +22,31 @@ export type Check = {
   tag: "check";
   nixExpression: NixExpression;
 };
+
+export function mkCheck(
+  env: Environment,
+  s: TemplateStringsArray | string,
+  ...args: Array<NixStrLitInterpolatable>
+): Check {
+  const checkScript =
+    typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
+  const wrappedScript = nixStrLit`
+    touch $out
+    ${env.setup}
+    ${checkScript}
+  `;
+  return {
+    tag: "check",
+    nixExpression: nixRaw`
+      let
+          dev = ${env.nixExpression};
+      in
+      pkgs.runCommand "check" {
+        buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+      } ${wrappedScript}
+    `,
+  };
+}
 
 export function isCheck(x: unknown): x is Check {
   return hasTag(x, "check");

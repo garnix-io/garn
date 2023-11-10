@@ -1,5 +1,5 @@
-import { Check } from "./check.ts";
-import { Executable } from "./executable.ts";
+import { Check, mkCheck } from "./check.ts";
+import { Executable, mkShellExecutable } from "./executable.ts";
 import { hasTag, nixSource } from "./internal/utils.ts";
 import {
   NixStrLitInterpolatable,
@@ -7,9 +7,8 @@ import {
   nixList,
   nixRaw,
   nixStrLit,
-  toHumanReadable,
 } from "./nix.ts";
-import { Package, mkPackage } from "./package.ts";
+import { Package, mkShellPackage } from "./package.ts";
 
 /**
  * `Environment`s define what files and tools are available to `Executables`,
@@ -24,6 +23,8 @@ import { Package, mkPackage } from "./package.ts";
 export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
+  setup: NixExpression;
+
   /**
    * Creates a new environment based on this one that includes the specified nix packages.
    */
@@ -65,9 +66,7 @@ export function shell(
   s: TemplateStringsArray | string,
   ...args: Array<NixStrLitInterpolatable>
 ) {
-  return typeof s === "string"
-    ? emptyEnvironment.shell(s)
-    : emptyEnvironment.shell(s, ...args);
+  return mkShellExecutable(emptyEnvironment, s, ...args);
 }
 
 /**
@@ -88,9 +87,7 @@ export function check(
   s: TemplateStringsArray | string,
   ...args: Array<NixStrLitInterpolatable>
 ) {
-  return typeof s === "string"
-    ? emptyEnvironment.check(s)
-    : emptyEnvironment.check(s, ...args);
+  return mkCheck(emptyEnvironment, s, ...args);
 }
 
 /**
@@ -113,7 +110,7 @@ export function build(
   s: TemplateStringsArray,
   ...args: Array<NixStrLitInterpolatable>
 ) {
-  return emptyEnvironment.build(s, ...args);
+  return mkShellPackage(emptyEnvironment, s, ...args);
 }
 
 /**
@@ -147,73 +144,23 @@ export function mkEnvironment(
   return {
     tag: "environment",
     nixExpression,
+    setup: setup || nixStrLit``,
     check(
       this: Environment,
       s: TemplateStringsArray | string,
       ...args: Array<NixStrLitInterpolatable>
     ): Check {
-      const checkScript =
-        typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
-      const wrappedScript = nixStrLit`
-      touch $out
-      ${setup || ""}
-      ${checkScript}
-    `;
-      return {
-        tag: "check",
-        nixExpression: nixRaw`
-        let
-            dev = ${this.nixExpression};
-        in
-        pkgs.runCommand "check" {
-          buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-        } ${wrappedScript}
-      `,
-      };
+      return mkCheck(this, s, ...args);
     },
     shell(
       this: Environment,
       s: TemplateStringsArray | string,
       ...args: Array<NixStrLitInterpolatable>
     ) {
-      const cmdToExecute =
-        typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
-      const shellEnv = nixRaw`
-      let
-        dev = ${this.nixExpression};
-        shell = ${cmdToExecute};
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
-        #!\${pkgs.bash}/bin/bash
-        export PATH=$(cat \${buildPath}):$PATH
-        \${dev.shellHook}
-        \${shell} "$@"
-      ''
-    `;
-      return {
-        tag: "executable",
-        description: `Executes ${toHumanReadable(cmdToExecute)}`,
-        nixExpression: nixStrLit`${shellEnv}`,
-      };
+      return mkShellExecutable(this, s, ...args);
     },
     build(this, s, ...args) {
-      const cmdToExecute = nixStrLit(s, ...args);
-      const wrappedScript = nixStrLit`
-      #!\${pkgs.bash}/bin/bash
-      mkdir $out
-      ${setup || ""}
-      ${cmdToExecute}
-    `;
-      const pkg = nixRaw`
-      let dev = ${this.nixExpression}; in
-      pkgs.runCommand "garn-pkg" {
-        buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-      } ${wrappedScript}
-    `;
-      return mkPackage(pkg, `Builds ${toHumanReadable(cmdToExecute)}`);
+      return mkShellPackage(this, s, ...args);
     },
     withDevTools(this, extraDevTools) {
       return {

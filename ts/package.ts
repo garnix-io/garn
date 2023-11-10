@@ -1,5 +1,12 @@
+import { Environment } from "./environment.ts";
 import { hasTag } from "./internal/utils.ts";
-import { NixExpression } from "./nix.ts";
+import {
+  NixExpression,
+  NixStrLitInterpolatable,
+  nixRaw,
+  nixStrLit,
+  toHumanReadable,
+} from "./nix.ts";
 
 /**
  * `Package`s are instructions to `garn` about how to _build_ a set of files.
@@ -32,4 +39,26 @@ export function mkPackage(
     nixExpression,
     description,
   };
+}
+
+export function mkShellPackage(
+  env: Environment,
+  s: TemplateStringsArray | string,
+  ...args: Array<NixStrLitInterpolatable>
+) {
+  const cmdToExecute =
+    typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
+  const wrappedScript = nixStrLit`
+    #!\${pkgs.bash}/bin/bash
+    mkdir $out
+    ${env.setup}
+    ${cmdToExecute}
+  `;
+  const pkg = nixRaw`
+    let dev = ${env.nixExpression}; in
+    pkgs.runCommand "garn-pkg" {
+      buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+    } ${wrappedScript}
+  `;
+  return mkPackage(pkg, `Builds ${toHumanReadable(cmdToExecute)}`);
 }

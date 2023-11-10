@@ -92,6 +92,23 @@ spec = do
           stderr output `shouldContain` "DEF"
           exitCode output `shouldBe` ExitFailure 1
 
+        it "supports running checks on projects containing a dep 'check'" $ \onTestFailureLog -> do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+              export const project = garn.mkProject({
+                description: "",
+                defaultEnvironment: garn.mkEnvironment(),
+              }, {})
+                .addExecutable("check", "true")
+                .addCheck("test", "echo this works " + Date.now());
+            |]
+          output <- runGarn ["check", "project"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output `shouldContain` "this works"
+          exitCode output `shouldBe` ExitSuccess
+
         it "does not error if there are spaces in the check key name" $ \onTestFailureLog -> do
           writeHaskellProject repoDir
           writeFile
