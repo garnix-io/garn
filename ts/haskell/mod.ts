@@ -13,15 +13,18 @@ export function mkHaskellProject(args: {
   compiler: string;
   src: string;
 }): Project & { pkg: Package } {
-  const pkg: Package = mkPackage(nixRaw`
-    (pkgs.haskell.packages.${nixRaw(args.compiler)}.callCabal2nix
-      "garn-pkg"
-      ${nixSource(args.src)}
-      { })
-      // {
-        meta.mainProgram = ${nixStrLit(args.executable)};
-      }
-  `);
+  const pkg: Package = mkPackage(
+    nixRaw`
+      (pkgs.haskell.packages.${nixRaw(args.compiler)}.callCabal2nix
+        "garn-pkg"
+        ${nixSource(args.src)}
+        { })
+        // {
+          meta.mainProgram = ${nixStrLit(args.executable)};
+        }
+    `,
+    "main package",
+  );
   return mkProject(
     {
       description: args.description,
@@ -34,6 +37,7 @@ export function mkHaskellProject(args: {
   ).withDevTools([
     mkPackage(
       nixRaw`pkgs.haskell.packages.${nixRaw(args.compiler)}.cabal-install`,
+      "cabal-install",
     ),
   ]);
 }

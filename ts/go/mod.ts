@@ -79,13 +79,14 @@ export function mkGoProject(args: {
           modules = gomod2nix-toml;
         }
     `,
+    "main package",
   );
 
   return mkProject(
     {
       description: args.description,
       defaultEnvironment: packageToEnvironment(pkg, args.src).withDevTools([
-        mkPackage(nixRaw`pkgs.gopls`),
+        mkPackage(nixRaw`pkgs.gopls`, "gopls"),
       ]),
     },
     {

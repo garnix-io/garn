@@ -16,7 +16,7 @@
           };
         in
         {
-          "project_node_modules" =
+          "project/node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -60,7 +60,7 @@
           };
         in
         {
-          "project_test" =
+          "project/test" =
             let
               dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
@@ -98,17 +98,17 @@
       cd src
       echo copying node_modules
       cp -r ${let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = import "${nixpkgs}" {
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+        pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = (let
+      in
+      npmlock2nix.v2.node_modules
+        {
+          src = (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -126,25 +126,35 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     });
-        nodejs = pkgs.nodejs-18_x;
-      }}/node_modules .
+          nodejs = pkgs.nodejs-18_x;
+        }}/node_modules .
       chmod -R u+rwX node_modules
     "}
+<<<<<<< HEAD
     ${"npm run test"}
   ";
           "project_tsc" =
-            let
-              dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
-                nativeBuildInputs =
-                  previousAttrs.nativeBuildInputs
-                  ++
-                  [ pkgs.nodejs-18_x ];
-              });
-            in
-            pkgs.runCommand "check"
-              {
-                buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
+            || || ||| e0f5104
+            ${"npm run test"}
+            ";
+          "project_tsc" =
+=======
+      ${"npm run test"}
+    ";
+          "project/tsc" =
+            > > >>>>> origin/main
+          let
+          dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+          nativeBuildInputs =
+          previousAttrs.nativeBuildInputs
+          ++
+          [ pkgs.nodejs-18_x ];
+        });
+      in
+      pkgs.runCommand "check"
+      {
+      buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+    } "
     touch \$out
     ${"
       echo copying source
@@ -170,17 +180,17 @@
       cd src
       echo copying node_modules
       cp -r ${let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = import "${nixpkgs}" {
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+        pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = (let
+      in
+      npmlock2nix.v2.node_modules
+        {
+          src = (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -198,57 +208,57 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     });
-        nodejs = pkgs.nodejs-18_x;
-      }}/node_modules .
+          nodejs = pkgs.nodejs-18_x;
+        }}/node_modules .
       chmod -R u+rwX node_modules
     "}
     ${"npm run tsc"}
   ";
-        }
-      );
-      devShells = forAllSystems (system:
-        let
-          pkgs = import "${nixpkgs}" {
-            config.allowUnfree = true;
-            inherit system;
-          };
-        in
-        {
-          "project" = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
-            nativeBuildInputs =
-              previousAttrs.nativeBuildInputs
-              ++
-              [ pkgs.nodejs-18_x ];
-          });
-        }
-      );
-      apps = forAllSystems (system:
-        let
-          pkgs = import "${nixpkgs}" { inherit system; };
-        in
-        {
-          "run" = {
-            "type" = "app";
-            "program" = "${let
-        dev = (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
-          nativeBuildInputs =
-            previousAttrs.nativeBuildInputs
-            ++
-            [pkgs.nodejs-18_x];
-        });
-        shell = "npm install ; npm run run";
-        buildPath = pkgs.runCommand "build-inputs-path" {
-          inherit (dev) buildInputs nativeBuildInputs;
-        } "echo $PATH > $out";
-      in
-      pkgs.writeScript "shell-env"  ''
+}
+);
+devShells = forAllSystems (system:
+let
+pkgs = import "${nixpkgs}" {
+config.allowUnfree = true;
+inherit system;
+};
+in
+{
+"project" = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+nativeBuildInputs =
+previousAttrs.nativeBuildInputs
+++
+[ pkgs.nodejs-18_x ];
+});
+}
+);
+apps = forAllSystems (system:
+let
+pkgs = import "${nixpkgs}" { inherit system; };
+in
+{
+"run" = {
+"type" = "app";
+"program" = "${let
+dev = (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {
+nativeBuildInputs =
+previousAttrs.nativeBuildInputs
+++
+[pkgs.nodejs-18_x];
+});
+shell = "npm install ; npm run run";
+buildPath = pkgs.runCommand "build-inputs-path" {
+inherit (dev) buildInputs nativeBuildInputs;
+} "echo $PATH > $out";
+in
+pkgs.writeScript "shell-env"  ''
         #!${pkgs.bash}/bin/bash
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
       ''}";
-          };
-        }
-      );
-    };
+};
+}
+);
+};
 }

@@ -46,6 +46,14 @@ Deno.test(
   },
 );
 
+Deno.test("toHumanReadable limits the length of the string", () => {
+  assertEquals(
+    toHumanReadable(nixStrLit`${"foo".repeat(100)}`),
+    "foofoofoofoofoofoofoofoofoo...",
+  );
+  assertEquals(toHumanReadable(nixStrLit`${"foo".repeat(100)}`).length, 30);
+});
+
 Deno.test("nixList", () => {
   assertEquals(
     renderNixExpression(nixList([nixStrLit`a`, nixStrLit`b`, nixStrLit`c`])),

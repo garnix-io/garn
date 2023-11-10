@@ -16,7 +16,7 @@
           };
         in
         {
-          "server_pkg" =
+          "server/pkg" =
             let
               gomod2nix = gomod2nix-repo.legacyPackages.${system};
               gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3

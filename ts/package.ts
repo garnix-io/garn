@@ -5,6 +5,7 @@ import {
   NixStrLitInterpolatable,
   nixRaw,
   nixStrLit,
+  toHumanReadable,
 } from "./nix.ts";
 
 /**
@@ -19,9 +20,7 @@ import {
 export type Package = {
   tag: "package";
   nixExpression: NixExpression;
-  description?: string;
-
-  // disableCheck(this: Package): Package;
+  description: string;
 };
 
 export function isPackage(x: unknown): x is Package {
@@ -33,7 +32,7 @@ export function isPackage(x: unknown): x is Package {
  */
 export function mkPackage(
   nixExpression: NixExpression,
-  description?: string,
+  description: string,
 ): Package {
   return {
     tag: "package",
@@ -61,5 +60,5 @@ export function mkShellPackage(
       buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
     } ${wrappedScript}
   `;
-  return mkPackage(pkg);
+  return mkPackage(pkg, `Builds ${toHumanReadable(cmdToExecute)}`);
 }

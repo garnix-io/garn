@@ -43,7 +43,7 @@ spec = do
                 compiler: "ghc94",
                 src: "."
               })
-                .withDevTools([garn.mkPackage(nixRaw`pkgs.hlint`)])
+                .withDevTools([garn.mkPackage(nixRaw`pkgs.hlint`, "hlint")])
                 .addCheck("hlint", "hlint *.hs");
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing

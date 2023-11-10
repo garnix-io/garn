@@ -67,7 +67,7 @@ spec =
               import * as garn from "#{repoDir}/ts/mod.ts"
               import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-              const myEnv = garn.mkEnvironment().withDevTools([garn.mkPackage(nixRaw`pkgs.hello`)]);
+              const myEnv = garn.mkEnvironment().withDevTools([garn.mkPackage(nixRaw`pkgs.hello`, "hello")]);
               export const main = myEnv.shell("hello");
             |]
           output <- runGarn ["run", "main"] "" repoDir Nothing
@@ -176,7 +176,7 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              const hello = garn.mkPackage(garn.nix.nixRaw`pkgs.hello`);
+              const hello = garn.mkPackage(garn.nix.nixRaw`pkgs.hello`, "hello");
 
               export const main = garn.mkProject(
                 {

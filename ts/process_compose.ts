@@ -32,6 +32,7 @@ export function processCompose(
 
   const configYml = mkPackage(
     nixRaw`pkgs.writeText "process-compose.yml" (builtins.toJSON ${processComposeConfig})`,
+    "process-compose config",
   );
 
   const result = emptyEnvironment.shell`${nixRaw`pkgs.process-compose`}/bin/process-compose up -f ${configYml}`;

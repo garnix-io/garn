@@ -16,7 +16,7 @@
           };
         in
         {
-          "website_node_modules" =
+          "website/node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -60,7 +60,7 @@
           };
         in
         {
-          "website_tsc" =
+          "website/tsc" =
             let
               dev = ((pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
@@ -103,17 +103,17 @@
       cd src
       echo copying node_modules
       cp -r ${let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = import "${nixpkgs}" {
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+        pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = (let
+      in
+      npmlock2nix.v2.node_modules
+        {
+          src = (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -131,13 +131,13 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     });
-        nodejs = pkgs.nodejs-18_x;
-      }}/node_modules .
+          nodejs = pkgs.nodejs-18_x;
+        }}/node_modules .
       chmod -R u+rwX node_modules
     "}
     ${"npm run tsc"}
   ";
-          "website_fmt-check" =
+          "website/fmt-check" =
             let
               dev = ((pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
@@ -180,17 +180,17 @@
       cd src
       echo copying node_modules
       cp -r ${let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = import "${nixpkgs}" {
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+        pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = (let
+      in
+      npmlock2nix.v2.node_modules
+        {
+          src = (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -208,11 +208,11 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     });
-        nodejs = pkgs.nodejs-18_x;
-      }}/node_modules .
+          nodejs = pkgs.nodejs-18_x;
+        }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-    ${"prettier src/**/*.tsx src/**/*.ts --check"}
+    ${"prettier '**/*.{ts,tsx}' --check"}
   ";
         }
       );
@@ -405,7 +405,7 @@ COMMIT;"}";
             ++
             [pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier];
         });
-        shell = "prettier src/**/*.tsx src/**/*.ts --write";
+        shell = "prettier '**/*.{ts,tsx}' --write";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
