@@ -29,9 +29,9 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-      #!\${pkgs.bash}/bin/bash
-      mkdir \$out
-      ${"
+    #!\${pkgs.bash}/bin/bash
+    mkdir \$out
+    ${"
       echo copying source
       cp -r ${(let
     lib = pkgs.lib;
@@ -87,11 +87,11 @@
       }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      ${"
+    ${"
       npm run build
       cp -rv build/* \$out
     "}
-    ";
+  ";
           "main_node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {

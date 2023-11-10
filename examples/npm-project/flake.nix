@@ -73,8 +73,8 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-      touch \$out
-      ${"
+    touch \$out
+    ${"
       echo copying source
       cp -r ${(let
     lib = pkgs.lib;
@@ -130,8 +130,8 @@
       }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      ${"npm run test"}
-    ";
+    ${"npm run test"}
+  ";
           "project_tsc" =
             let
               dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -145,8 +145,8 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-      touch \$out
-      ${"
+    touch \$out
+    ${"
       echo copying source
       cp -r ${(let
     lib = pkgs.lib;
@@ -202,8 +202,8 @@
       }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      ${"npm run tsc"}
-    ";
+    ${"npm run tsc"}
+  ";
         }
       );
       devShells = forAllSystems (system:
