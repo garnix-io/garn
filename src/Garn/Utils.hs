@@ -10,5 +10,5 @@ import Text.Pretty.Simple (pShow)
 dbg :: (Show a) => a -> a
 dbg a = trace (cs $ pShow a) a
 
-garnVersion :: String
-garnVersion = $(garnVersionSplice)
+garnCliVersion :: String
+garnCliVersion = $(garnVersionSplice)
