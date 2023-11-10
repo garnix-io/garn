@@ -61,7 +61,7 @@ Deno.test("NPM initializer returns the code to be generated", () => {
         description: "just some package",
         src: ".",
         nodeVersion: "18",
-      })
+      });
     `,
   );
 });
@@ -81,7 +81,7 @@ Deno.test(
             description: "An NPM project",
             src: ".",
             nodeVersion: "18",
-          })
+          });
         `,
       );
     }
@@ -117,7 +117,7 @@ Deno.test(
           })
             .addCheck("test", "npm run test")
             .addExecutable("start", "npm run start")
-            .addExecutable("build", "npm run build")
+            .addExecutable("build", "npm run build");
         `,
       );
     }

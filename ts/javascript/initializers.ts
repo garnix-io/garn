@@ -51,7 +51,7 @@ export const npmInitializer: Initializer = (dir) => {
               `npm run ${name}`,
             )})`,
         ),
-      ].join("\n  "),
+      ].join("\n  ") + ";",
   };
 };
 
