@@ -91,7 +91,7 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
     } else if (isPackage(exportable)) {
       result[name] = {
         tag: "package",
-        description: exportable.description ?? "TODO",
+        description: exportable.description,
       };
     } else if (isExecutable(exportable)) {
       result[name] = {

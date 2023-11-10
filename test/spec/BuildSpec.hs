@@ -75,6 +75,27 @@ spec = do
       it "builds top-level packages" $ \runGarn -> do
         pending
 
+      it "shows a nice help for packages" $ \runGarn -> do
+        writeFile "garn.ts" $
+          unindent
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts";
+
+              export const project = garn.mkProject(
+                { description: "" },
+                {
+                  short: garn.build`short command`,
+                  longer: garn.build`
+                    # this is some longer build script:
+                    bla bla bla
+                  `,
+                },
+              );
+            |]
+        output <- runGarn ["build"]
+        stderr output `shouldContain` "project.short            Builds short command"
+        stderr output `shouldContain` "project.longer           Builds # this is some longe..."
+
       describe ".build" $ do
         it "builds manually specified packages" $ \runGarn -> do
           writeFile
@@ -108,7 +129,7 @@ spec = do
                   package:
                     garn
                       .emptyEnvironment
-                      .withDevTools([garn.mkPackage(nix.nixRaw`pkgs.hello`)])
+                      .withDevTools([garn.mkPackage(nix.nixRaw`pkgs.hello`, "hello")])
                       .build`
                         hello > $out/build-artifact
                       `,

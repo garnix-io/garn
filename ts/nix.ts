@@ -218,10 +218,18 @@ export function nixFlakeDep(name: string, dep: FlakeDep): NixExpression {
  * with incidental dependencies snipped out with "[...]"
  */
 export function toHumanReadable(nixExpr: NixExpression): string {
-  if (nixExpr.type !== "strLit") {
-    return "[...]";
+  function go(nixExpr: NixExpression): string {
+    if (nixExpr.type !== "strLit") {
+      return "[...]";
+    }
+    return renderInterpolatedString(nixExpr.str, go);
   }
-  return renderInterpolatedString(nixExpr.str, toHumanReadable);
+  let result = go(nixExpr);
+  const maxLength = 30;
+  if (result.length > maxLength) {
+    result = result.slice(0, maxLength - 3) + "...";
+  }
+  return result;
 }
 
 function collectFlakeDeps(nixExpr: NixExpression): Record<string, FlakeDep> {

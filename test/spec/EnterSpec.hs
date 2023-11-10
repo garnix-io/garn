@@ -42,7 +42,7 @@ spec = do
                     src: "."
                   })
 
-                  export const bar = foo.withDevTools([mkPackage(nixRaw`pkgs.hello`)]);
+                  export const bar = foo.withDevTools([mkPackage(nixRaw`pkgs.hello`, "hello")]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -64,8 +64,8 @@ spec = do
                   })
 
                   export const bar = foo.withDevTools([
-                    mkPackage(nixRaw`pkgs.hello`),
-                    mkPackage(nixRaw`pkgs.cowsay`),
+                    mkPackage(nixRaw`pkgs.hello`, "hello"),
+                    mkPackage(nixRaw`pkgs.cowsay`, "cowsay"),
                   ]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
@@ -89,7 +89,7 @@ spec = do
                     src: "."
                   })
 
-                  export const bar = foo.withDevTools([mkPackage(nixRaw`pkgs.hello`)]);
+                  export const bar = foo.withDevTools([mkPackage(nixRaw`pkgs.hello`, "hello")]);
                 |]
             output <- runGarn ["enter", "foo"] "hello -g tool\nexit\n" repoDir Nothing
             onFailingTestLog output
@@ -112,8 +112,8 @@ spec = do
                   })
 
                   export const bar = foo
-                    .withDevTools([mkPackage(nixRaw`pkgs.hello`)])
-                    .withDevTools([mkPackage(nixRaw`pkgs.cowsay`)]);
+                    .withDevTools([mkPackage(nixRaw`pkgs.hello`, "hello")])
+                    .withDevTools([mkPackage(nixRaw`pkgs.cowsay`, "cowsay")]);
                 |]
             output <- runGarn ["enter", "bar"] "hello -g tool\nexit\n" repoDir Nothing
             stdout output `shouldBe` "tool\n"
@@ -146,13 +146,16 @@ spec = do
               import { mkProject } from "#{repoDir}/ts/project.ts"
               import { nixRaw } from "#{repoDir}/ts/nix.ts"
 
-              const pkg = mkPackage(nixRaw`
-                pkgs.stdenv.mkDerivation({
-                  name = "blah";
-                  src = ./.;
-                  buildInputs = [ pkgs.hello ];
-                })
-              `);
+              const pkg = mkPackage(
+                nixRaw`
+                  pkgs.stdenv.mkDerivation({
+                    name = "blah";
+                    src = ./.;
+                    buildInputs = [ pkgs.hello ];
+                  })
+                `,
+                "blah",
+              );
               export const foo = mkProject(
                 {
                   description: "description",

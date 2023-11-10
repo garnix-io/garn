@@ -13,7 +13,7 @@ import { NixExpression } from "./nix.ts";
 export type Package = {
   tag: "package";
   nixExpression: NixExpression;
-  description?: string;
+  description: string;
 };
 
 export function isPackage(x: unknown): x is Package {
@@ -25,7 +25,7 @@ export function isPackage(x: unknown): x is Package {
  */
 export function mkPackage(
   nixExpression: NixExpression,
-  description?: string,
+  description: string,
 ): Package {
   return {
     tag: "package",

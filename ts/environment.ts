@@ -213,7 +213,7 @@ export function mkEnvironment(
         buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
       } ${wrappedScript}
     `;
-      return mkPackage(pkg);
+      return mkPackage(pkg, `Builds ${toHumanReadable(cmdToExecute)}`);
     },
     withDevTools(this, extraDevTools) {
       return {
