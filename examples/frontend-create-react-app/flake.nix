@@ -55,17 +55,17 @@
       cd src
       echo copying node_modules
       cp -r ${let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = import "${nixpkgs}" {
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+        pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = (let
+      in
+      npmlock2nix.v2.node_modules
+        {
+          src = (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -83,8 +83,8 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     });
-        nodejs = pkgs.nodejs-18_x;
-      }}/node_modules .
+          nodejs = pkgs.nodejs-18_x;
+        }}/node_modules .
       chmod -R u+rwX node_modules
     "}
       ${"

@@ -51,15 +51,15 @@
               nodeModulesPath = "${yarnPackage}/libexec/${packageJson.name}/node_modules";
             in
             (pkgs.writeScriptBin "start-server" "
-        #!/usr/bin/env bash
+          #!/usr/bin/env bash
 
-        set -eu
+          set -eu
 
-        export PATH=${pkgs.yarn}/bin:\$PATH
-        export PATH=${nodeModulesPath}/.bin:\$PATH
-        yarn --version
-        ${"yarn start"}
-      ");
+          export PATH=${pkgs.yarn}/bin:\$PATH
+          export PATH=${nodeModulesPath}/.bin:\$PATH
+          yarn --version
+          ${"yarn start"}
+        ");
         }
       );
       checks = forAllSystems (system:
