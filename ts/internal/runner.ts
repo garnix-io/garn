@@ -246,7 +246,7 @@ const collectProjectChecks = (
   project: Project,
 ): Record<string, Check> =>
   mapKeys(
-    (name) => `${projectName}_${name}`, // TODO: make slash too?
+    (name) => `${projectName}/${name}`,
     collectByPredicate(isCheck, project),
   );
 
