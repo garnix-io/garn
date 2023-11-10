@@ -68,6 +68,22 @@ type ProjectHelpers = {
   ): Package;
 
   /**
+   * Modify the given project.
+   *
+   * This can be useful for modifying a project in a method chaining style while
+   * being able to reference that project. For example:
+   *
+   * ```typescript
+   * export const myProject = garn.mkHaskellProject(...)
+   *   .add(self => self.addExecutable("codegen")`${self.mainPackage}/bin/codegen`)
+   * ```
+   */
+  add<T extends ProjectData, U extends ProjectData>(
+    this: T,
+    fn: (p: T) => U,
+  ): U;
+
+  /**
    * Adds an `Executable` with the given name to the Project
    *
    * Example:
@@ -197,6 +213,13 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
       );
     }
     return mkShellPackage(defaultEnvironment, s, ...args);
+  },
+
+  add<T extends ProjectData, U extends ProjectData>(
+    this: T,
+    fn: (p: T) => U,
+  ): U {
+    return fn(this);
   },
 
   addExecutable<T extends ProjectData, Name extends string>(
