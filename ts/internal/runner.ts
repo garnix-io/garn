@@ -2,7 +2,6 @@ import { isProject, Project } from "../project.ts";
 import { isPackage, Package } from "../package.ts";
 import { Check, isCheck } from "../check.ts";
 import { checkExhaustiveness, mapKeys, mapValues } from "./utils.ts";
-import { GOMOD2NIX_REPO } from "../go/consts.ts";
 import {
   nixFlakeDep,
   nixAttrSet,
