@@ -13,7 +13,7 @@ where
 
 import qualified Data.Map as Map
 import Garn.GarnConfig
-import Garn.Utils (garnVersion)
+import Garn.Utils (garnCliVersion)
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 import qualified Options.Applicative.Help.Pretty as OA
@@ -39,8 +39,8 @@ getOpts oType =
       WithGarnTs garnConfig -> WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig)
       WithoutGarnTs -> WithoutGarnTsOpts <$> withoutGarnTsParser
     version =
-      infoOption garnVersion $
-        mconcat [long "version", help ("Show garn version (" <> garnVersion <> ")")]
+      infoOption garnCliVersion $
+        mconcat [long "version", help ("Show garn version (" <> garnCliVersion <> ")")]
     opts =
       info
         (parser <**> helper <**> version)

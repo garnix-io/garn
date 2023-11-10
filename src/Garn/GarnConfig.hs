@@ -26,6 +26,7 @@ import Data.String.Interpolate.Util (unindent)
 import GHC.Generics (Generic)
 import Garn.Common (nixArgs, nixpkgsInput)
 import qualified Garn.Errors
+import Garn.Utils (garnCliVersion)
 import System.Directory (doesFileExist, getCurrentDirectory)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)
@@ -139,23 +140,45 @@ readGarnConfig = do
       exitWith exitCode
     case eitherDecode out :: Either String (Maybe DenoOutput) of
       Left err -> do
-        let suggestion = case eitherDecode out :: Either String OnlyTsLibVersion of
+        let suggestion = lines $ case eitherDecode out :: Either String OnlyTsLibVersion of
               Left err ->
                 [i|Try updating the garn typescript library! (#{err})|]
               Right (OnlyTsLibVersion {garnTsLibVersion}) ->
-                [i|Try installing version `#{garnTsLibVersion}` of 'garn' (the cli tool).|]
+                unindent
+                  [i|
+                    garn cli tool version: #{garnCliVersion}
+                    garn typescript library version: #{garnTsLibVersion}
+
+                    Either:
+
+                      Install version #{garnTsLibVersion} of the garn cli tool.
+                      See https://garn.io/docs/getting_started#updating-garn for how to update.
+
+                    Or:
+
+                      Use version #{garnCliVersion} of the typescript library.
+                      E.g.: import * as garn from "https://garn.io/ts/#{garnCliVersion}/mod.ts";
+
+                  |]
         throwIO $
           Garn.Errors.UserError $
             intercalate
               "\n"
-              [ "Version mismatch detected:",
-                "'garn' (the cli tool) is not compatible with the version of the garn typescript library you're using.",
-                suggestion,
-                "(Internal details: " <> err <> ")"
-              ]
+              ( "Version mismatch detected:"
+                  : map
+                    indent
+                    ( suggestion
+                        <> ["(Internal details: " <> err <> ")"]
+                    )
+              )
       Right Nothing -> error $ "No garn library imported in garn.ts"
       Right (Just (UserError _tsLibVersion err)) -> throwIO $ Garn.Errors.UserError err
       Right (Just (Success _tsLibVersion writtenConfig)) -> return writtenConfig
+
+indent :: String -> String
+indent = \case
+  "" -> ""
+  line -> "  " <> line
 
 data OnlyTsLibVersion = OnlyTsLibVersion
   { garnTsLibVersion :: Version
