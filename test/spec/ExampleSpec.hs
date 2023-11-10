@@ -7,6 +7,7 @@ import Control.Concurrent (threadDelay)
 import Control.Exception (catch)
 import Control.Lens ((^.))
 import Control.Monad (forM_)
+import Cradle (run_)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.Text (Text)
@@ -105,3 +106,12 @@ spec = aroundAll_ withFileServer $ do
         output <- runGarn ["check"] "" repoDir Nothing
         onTestFailureLog output
         stderr output `shouldContain` "1 failed"
+
+    describe "vite-frontend" $ do
+      it "bundles the project with vite" $ \onTestFailureLog -> do
+        withCurrentDirectory "examples/vite-frontend" $ do
+          run_ "rm" "result" "-f"
+          output <- runGarn ["build", "frontend.build"] "" repoDir Nothing
+          onTestFailureLog output
+          indexFile <- readFile "result/index.html"
+          indexFile `shouldContain` "<title>Vite + TS</title>"
