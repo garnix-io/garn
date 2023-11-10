@@ -1,11 +1,11 @@
 import "./internal/registerInternalLib.ts";
 
-import { Check } from "./check.ts";
+import { Check, mkCheck } from "./check.ts";
 import { Environment } from "./environment.ts";
-import { Executable } from "./executable.ts";
+import { Executable, mkShellExecutable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
 import { NixStrLitInterpolatable } from "./nix.ts";
-import { Package } from "./package.ts";
+import { Package, mkShellPackage } from "./package.ts";
 import { markAsMayNotExport } from "./internal/may_not_export.ts";
 
 /**
@@ -13,7 +13,9 @@ import { markAsMayNotExport } from "./internal/may_not_export.ts";
  * example, you may have a 'frontend' Project, a 'backend' Project, a 'cli'
  * Project, etc.
  */
-export type Project = ProjectHelpers & {
+export type Project = ProjectHelpers & ProjectData;
+
+type ProjectData = {
   tag: "project";
   description: string;
   defaultEnvironment?: Environment;
@@ -25,7 +27,7 @@ type ProjectHelpers = {
    * Returns a new Project with the provided devtools added to the default
    * Environment.
    */
-  withDevTools<T extends Project>(this: T, devTools: Array<Package>): T;
+  withDevTools<T extends ProjectData>(this: T, devTools: Array<Package>): T;
 
   /**
    * A tagged template literal that runs the given command inside the Project's
@@ -36,9 +38,9 @@ type ProjectHelpers = {
    * const myExecutable = myProject.shell`echo "hello world"`;
    * ```
    */
-  shell(this: Project, script: string): Executable;
+  shell(this: ProjectData, script: string): Executable;
   shell(
-    this: Project,
+    this: ProjectData,
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
   ): Executable;
@@ -47,15 +49,15 @@ type ProjectHelpers = {
    * Returns a check that runs in a *pure* version of the Project's default
    * Environment.
    */
-  check(this: Project, check: string): Check;
+  check(this: ProjectData, check: string): Check;
   check(
-    this: Project,
+    this: ProjectData,
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
   ): Check;
 
   build(
-    this: Project,
+    this: ProjectData,
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
   ): Package;
@@ -68,12 +70,12 @@ type ProjectHelpers = {
    * myProject.addExecutable("run-dev", "python run-dev.py")
    * ```
    */
-  addExecutable<T extends Project, Name extends string>(
+  addExecutable<T extends ProjectData, Name extends string>(
     this: T,
     name: Name,
     executable: string,
   ): Omit<T, Name> & { [n in Name]: Executable };
-  addExecutable<T extends Project, Name extends string>(
+  addExecutable<T extends ProjectData, Name extends string>(
     this: T,
     name: Name,
   ): (
@@ -90,12 +92,12 @@ type ProjectHelpers = {
    * myProject.addCheck("noTodos", "! grep -r TODO .")
    * ```
    */
-  addCheck<T extends Project, Name extends string>(
+  addCheck<T extends ProjectData, Name extends string>(
     this: T,
     name: Name,
     check: string,
   ): Omit<T, Name> & { [n in Name]: Check };
-  addCheck<T extends Project, Name extends string>(
+  addCheck<T extends ProjectData, Name extends string>(
     this: T,
     name: Name,
   ): (
@@ -137,54 +139,54 @@ export function mkProject<Deps extends Record<string, Nestable>>(
 
 const proxyEnvironmentHelpers = (): ProjectHelpers => ({
   shell(
-    this: Project,
+    this: ProjectData,
     s: TemplateStringsArray | string,
     ...args: Array<NixStrLitInterpolatable>
   ) {
-    if (this.defaultEnvironment == null) {
+    const { defaultEnvironment } = this;
+    if (defaultEnvironment == null) {
       throw new Error(
         `'.shell' can only be called on projects with a default environment`,
       );
     }
-    return typeof s === "string"
-      ? this.defaultEnvironment.shell(s)
-      : this.defaultEnvironment.shell(s, ...args);
+    return mkShellExecutable(defaultEnvironment, s, ...args);
   },
 
   check(
-    this: Project,
+    this: ProjectData,
     s: TemplateStringsArray | string,
     ...args: Array<NixStrLitInterpolatable>
   ) {
-    if (this.defaultEnvironment == null) {
+    const { defaultEnvironment } = this;
+    if (defaultEnvironment == null) {
       throw new Error(
         `'.check' can only be called on projects with a default environment`,
       );
     }
-    return typeof s === "string"
-      ? this.defaultEnvironment.check(s)
-      : this.defaultEnvironment.check(s, ...args);
+    return mkCheck(defaultEnvironment, s, ...args);
   },
 
   build(
-    this: Project,
+    this: ProjectData,
     s: TemplateStringsArray,
     ...args: Array<NixStrLitInterpolatable>
   ) {
-    if (this.defaultEnvironment == null) {
+    const { defaultEnvironment } = this;
+    if (defaultEnvironment == null) {
       throw new Error(
         `'.build' can only be called on projects with a default environment`,
       );
     }
-    return this.defaultEnvironment.build(s, ...args);
+    return mkShellPackage(defaultEnvironment, s, ...args);
   },
 
-  addExecutable<T extends Project, Name extends string>(
+  addExecutable<T extends ProjectData, Name extends string>(
     this: T,
     name: Name,
     script?: string,
   ) {
-    if (this.defaultEnvironment == null) {
+    const { defaultEnvironment } = this;
+    if (defaultEnvironment == null) {
       throw new Error(
         `'.addExecutable' can only be called on projects with a default environment`,
       );
@@ -192,7 +194,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     if (script != null) {
       return {
         ...this,
-        [name]: this.shell(script),
+        [name]: mkShellExecutable(defaultEnvironment, script),
       };
     }
     const templateLiteralFn = (
@@ -201,7 +203,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     ) => {
       return {
         ...this,
-        [name]: this.shell(s, ...args),
+        [name]: mkShellExecutable(defaultEnvironment, s, ...args),
       };
     };
     markAsMayNotExport(templateLiteralFn, (exportName: string) =>
@@ -213,12 +215,13 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     return templateLiteralFn;
   },
 
-  addCheck<T extends Project, Name extends string>(
+  addCheck<T extends ProjectData, Name extends string>(
     this: T,
     name: Name,
     check?: string,
   ) {
-    if (this.defaultEnvironment == null) {
+    const { defaultEnvironment } = this;
+    if (defaultEnvironment == null) {
       throw new Error(
         `'.addCheck' can only be called on projects with a default environment`,
       );
@@ -226,7 +229,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     if (check != null) {
       return {
         ...this,
-        [name]: this.check(check),
+        [name]: mkCheck(defaultEnvironment, check),
       };
     }
     const templateLiteralFn = (
@@ -235,7 +238,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     ) => {
       return {
         ...this,
-        [name]: this.check(s, ...args),
+        [name]: mkCheck(defaultEnvironment, s, ...args),
       };
     };
     markAsMayNotExport(templateLiteralFn, (exportName: string) =>
@@ -247,7 +250,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     return templateLiteralFn;
   },
 
-  withDevTools<T extends Project>(this: T, devTools: Array<Package>): T {
+  withDevTools<T extends ProjectData>(this: T, devTools: Array<Package>): T {
     if (this.defaultEnvironment == null) {
       throw new Error(
         `'.withDevTools' can only be called on projects with a default environment`,

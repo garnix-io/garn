@@ -90,6 +90,23 @@ spec =
           stdout output `shouldBe` "Hello, world!\n"
           exitCode output `shouldBe` ExitSuccess
 
+        it "supports running executables on projects containing a dep 'shell'" $ \onTestFailureLog -> do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+              export const project = garn.mkProject({
+                description: "",
+                defaultEnvironment: garn.mkEnvironment(),
+              }, {})
+                .addExecutable("shell", "true")
+                .addExecutable("greet", "echo hello world");
+            |]
+          output <- runGarn ["run", "project.greet"] "" repoDir Nothing
+          onTestFailureLog output
+          stdout output `shouldContain` "hello world"
+          exitCode output `shouldBe` ExitSuccess
+
         it "allows specifying deeply nested executables" $ \onTestFailureLog -> do
           writeFile
             "garn.ts"

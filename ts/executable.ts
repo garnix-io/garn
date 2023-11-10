@@ -1,5 +1,12 @@
 import { hasTag } from "./internal/utils.ts";
-import { NixExpression } from "./nix.ts";
+import {
+  NixExpression,
+  nixRaw,
+  nixStrLit,
+  NixStrLitInterpolatable,
+  toHumanReadable,
+} from "./nix.ts";
+import { Environment } from "./environment.ts";
 
 /**
  * `Executable`s are commands (usually shell snippets) that are being run on
@@ -45,4 +52,32 @@ export function mkExecutable(
     nixExpression,
     description,
   };
+}
+
+export function mkShellExecutable(
+  env: Environment,
+  s: TemplateStringsArray | string,
+  ...args: Array<NixStrLitInterpolatable>
+): Executable {
+  const cmdToExecute =
+    typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
+  const shellEnv = nixRaw`
+      let
+        dev = ${env.nixExpression};
+        shell = ${cmdToExecute};
+        buildPath = pkgs.runCommand "build-inputs-path" {
+          inherit (dev) buildInputs nativeBuildInputs;
+        } "echo $PATH > $out";
+      in
+      pkgs.writeScript "shell-env"  ''
+        #!\${pkgs.bash}/bin/bash
+        export PATH=$(cat \${buildPath}):$PATH
+        \${dev.shellHook}
+        \${shell} "$@"
+      ''
+    `;
+  return mkExecutable(
+    nixStrLit`${shellEnv}`,
+    `Executes ${toHumanReadable(cmdToExecute)}`,
+  );
 }
