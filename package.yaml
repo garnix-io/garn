@@ -93,6 +93,7 @@ tests:
       - pcre-heavy
       - shake
       - silently
+      - strip-ansi-escape
       - wreq
       - yaml
 

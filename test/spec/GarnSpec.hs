@@ -3,6 +3,8 @@
 
 module GarnSpec (spec) where
 
+import Data.String.AnsiEscapeCodes.Strip.Text (stripAnsiEscapeCodes)
+import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import System.Directory
@@ -69,6 +71,24 @@ spec = do
                 Unavailable commands:
                   init
               |]
+
+      it "outputs deno type errors, if they exist" $ \onTestFailureLog -> do
+        writeFile
+          "garn.ts"
+          [i|
+            const x: number = "foo";
+          |]
+        output <- runGarn ["run", "foo"] "" repoDir Nothing
+        onTestFailureLog output
+        dir <- getCurrentDirectory
+        (cs . stripAnsiEscapeCodes . cs) (stderr output)
+          `shouldBe` unindent
+            [i|
+              error: TS2322 [ERROR]: Type 'string' is not assignable to type 'number'.
+                          const x: number = \"foo\";
+                                ^
+                  at file://#{dir}/garn.ts:2:19
+            |]
 
       it "generates formatted flakes" $ \onTestFailureLog -> do
         inTempDirectory $ do

@@ -293,6 +293,7 @@ test-suite spec
     , shake
     , silently
     , string-conversions
+    , strip-ansi-escape
     , template-haskell
     , temporary
     , text
