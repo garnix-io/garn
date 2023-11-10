@@ -16,7 +16,41 @@
           };
         in
         {
-          "bundle/package" =
+          "main/node_modules" =
+            let
+              npmlock2nix = import npmlock2nix-repo {
+                inherit pkgs;
+              };
+              pkgs = import "${nixpkgs}" {
+                config.permittedInsecurePackages = [ ];
+                inherit system;
+              };
+            in
+            npmlock2nix.v2.node_modules
+              {
+                src = (
+                  let
+                    lib = pkgs.lib;
+                    lastSafe = list:
+                      if lib.lists.length list == 0
+                      then null
+                      else lib.lists.last list;
+                  in
+                  builtins.path
+                    {
+                      path = ./.;
+                      name = "source";
+                      filter = path: type:
+                        let
+                          fileName = lastSafe (lib.strings.splitString "/" path);
+                        in
+                        fileName != "flake.nix" &&
+                        fileName != "garn.ts";
+                    }
+                );
+                nodejs = pkgs.nodejs-18_x;
+              };
+          "main/bundle" =
             let
               dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
@@ -87,45 +121,8 @@
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-    ${"
-      npm run build
-      cp -rv build/* \$out
-    "}
+    ${"npm run build && mv build/* \$out"}
   ";
-          "main/node_modules" =
-            let
-              npmlock2nix = import npmlock2nix-repo {
-                inherit pkgs;
-              };
-              pkgs = import "${nixpkgs}" {
-                config.permittedInsecurePackages = [ ];
-                inherit system;
-              };
-            in
-            npmlock2nix.v2.node_modules
-              {
-                src = (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./.;
-                      name = "source";
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix" &&
-                        fileName != "garn.ts";
-                    }
-                );
-                nodejs = pkgs.nodejs-18_x;
-              };
         }
       );
       checks = forAllSystems (system:
@@ -158,7 +155,7 @@
           pkgs = import "${nixpkgs}" { inherit system; };
         in
         {
-          "start" = {
+          "main/start" = {
             "type" = "app";
             "program" = "${let
         dev = (pkgs.mkShell {}).overrideAttrs (finalAttrs: previousAttrs: {

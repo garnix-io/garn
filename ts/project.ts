@@ -1,7 +1,7 @@
 import "./internal/registerInternalLib.ts";
 
 import { Check, mkCheck } from "./check.ts";
-import { Environment } from "./environment.ts";
+import { Environment, emptyEnvironment } from "./environment.ts";
 import { Executable, mkShellExecutable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
 import { NixStrLitInterpolatable } from "./nix.ts";
@@ -30,7 +30,7 @@ type ProjectHelpers = {
   withDevTools<T extends ProjectData>(this: T, devTools: Array<Package>): T;
 
   /**
-   * A tagged template literal that runs the given command inside the Project's
+   * Returns an executable that runs the given command inside the Project's
    * default Environment.
    *
    * Example:
@@ -56,6 +56,11 @@ type ProjectHelpers = {
     ..._args: Array<NixStrLitInterpolatable>
   ): Check;
 
+  /**
+   * Returns a buildable package that runs the given command inside the
+   * Project's default environment.
+   */
+  build(this: Project, build: string): Package;
   build(
     this: ProjectData,
     _s: TemplateStringsArray,
@@ -104,6 +109,20 @@ type ProjectHelpers = {
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
   ) => Omit<T, Name> & { [n in Name]: Check };
+
+  /**
+   * Adds a `Package` with the given name to the Project.
+   *
+   * Example:
+   * ```typescript
+   * myProject.addPackage("bundle", "npm run build && mv dist/* $out")
+   * ```
+   */
+  addPackage<T extends ProjectData, Name extends string>(
+    this: T,
+    name: Name,
+    pkg: string,
+  ): Omit<T, Name> & { [n in Name]: Package };
 };
 
 export function isProject(p: unknown): p is Project {
@@ -168,7 +187,7 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
 
   build(
     this: ProjectData,
-    s: TemplateStringsArray,
+    s: TemplateStringsArray | string,
     ...args: Array<NixStrLitInterpolatable>
   ) {
     const { defaultEnvironment } = this;
@@ -248,6 +267,24 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
       ].join(" "),
     );
     return templateLiteralFn;
+  },
+
+  addPackage<T extends ProjectData, Name extends string>(
+    this: T,
+    name: Name,
+    pkg: string,
+  ) {
+    const { defaultEnvironment } = this;
+    if (defaultEnvironment == null) {
+      throw new Error(
+        `'.addPackage' can only be called on projects with a default environment`,
+      );
+    }
+    const build = mkShellPackage(defaultEnvironment, pkg);
+    return {
+      ...this,
+      ...({ [name]: build } as { [n in Name]: Package }),
+    };
   },
 
   withDevTools<T extends ProjectData>(this: T, devTools: Array<Package>): T {

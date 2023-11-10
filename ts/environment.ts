@@ -48,6 +48,7 @@ export type Environment = {
   /**
    * Creates a new `Package` built with the given shell script, run inside this `Environment`
    */
+  build(build: string): Package;
   build(
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
@@ -159,7 +160,11 @@ export function mkEnvironment(
     ) {
       return mkShellExecutable(this, s, ...args);
     },
-    build(this, s, ...args) {
+    build(
+      this: Environment,
+      s: TemplateStringsArray | string,
+      ...args: Array<NixStrLitInterpolatable>
+    ) {
       return mkShellPackage(this, s, ...args);
     },
     withDevTools(this, extraDevTools) {
