@@ -146,8 +146,10 @@ readGarnConfig = do
                       Install version #{garnTsLibVersion} of the garn cli tool.
                       See https://garn.io/docs/getting_started#updating-garn for how to update.
 
-                      Or: Use version #{garnCliVersion} of the typescript library.
-                      E.g. like this: import * as garn from "https://garn.io/ts/#{garnCliVersion}/mod.ts";
+                    Or:
+
+                      Use version #{garnCliVersion} of the typescript library.
+                      E.g.: import * as garn from "https://garn.io/ts/#{garnCliVersion}/mod.ts";
 
                   |]
         throwIO $

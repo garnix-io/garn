@@ -161,8 +161,10 @@ spec = do
                         Install version <testTsLibVersion> of the garn cli tool.
                         See https://garn.io/docs/getting_started#updating-garn for how to update.
 
-                        Or: Use version v0.0.15 of the typescript library.
-                        E.g. like this: import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
+                      Or:
+
+                        Use version v0.0.15 of the typescript library.
+                        E.g.: import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
 
                       (Internal details: Error in $: key \"tag\" not found)
                   |]
