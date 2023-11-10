@@ -25,6 +25,7 @@
 , shake
 , silently
 , string-conversions
+, strip-ansi-escape
 , template-haskell
 , temporary
 , text
@@ -101,6 +102,7 @@ mkDerivation {
     shake
     silently
     string-conversions
+    strip-ansi-escape
     template-haskell
     temporary
     text
