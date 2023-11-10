@@ -24,6 +24,25 @@ import Garn.Common (currentSystem, nixpkgsInput)
 import System.Directory (createDirectoryIfMissing, removeDirectoryRecursive)
 import WithCli (withCli)
 
+-- A specification for what packages to include in the final collection
+-- collectionSpec represents a colleciton with all derivations included by
+-- default, but everything else excluded. This can be overridden with the
+-- attribute set.
+pkgSpec :: String
+pkgSpec =
+  [i|
+    collectionSpec {
+      haskellPackages = collectionSpec {};
+      nimPackages = collectionSpec {};
+      nodePackages = collectionSpec { "@antora/cli" = false; };
+      phpPackages = collectionSpec {};
+      python2Packages = collectionSpec {};
+      python3Packages = collectionSpec {};
+      rubyPackages = collectionSpec {};
+      rustPackages = collectionSpec {};
+    }
+  |]
+
 run :: IO ()
 run = withCli $ do
   system <- currentSystem
@@ -64,85 +83,38 @@ scanPackages system = do
           config.allowAliases = false;
         };
         in lib:
-          let debug = false;
-              trace = path: value: if debug then builtins.trace path value else value;
-              brokenPkgs = {
-                __splicedPackages = true;
-                beam = { interpreters = true; packages = true; };
-                beam_minimal = { interpreters = true; packages = true; };
-                beam_nox = { interpreters = true; packages = true; };
-                buildPackages = true;
-                cudaPackages_10 = true;
-                cudaPackages_10_0 = true;
-                cudaPackages_10_1 = true;
-                cudaPackages_10_2 = true;
-                cudaPackages_11_0 = true;
-                cudaPackages_11_1 = true;
-                cudaPackages_11_2 = true;
-                cudaPackages_11_3 = true;
-                dockapps = true;
-                lib = true;
-                nixosTests = true;
-                nodePackages = { "@antora/cli" = true; };
-                nodePackages_latest = { "@antora/cli" = true; };
-                pkgs = true;
-                pkgsBuildBuild = true;
-                pkgsBuildHost = true;
-                pkgsBuildTarget = true;
-                pkgsCross = true;
-                pkgsHostHost = true;
-                pkgsHostTarget = true;
-                pkgsLLVM = true;
-                pkgsMusl = true;
-                pkgsStatic = true;
-                pkgsTargetTarget = true;
-                pkgsi686Linux = true;
-                pypy27Packages = true;
-                pypy2Packages = true;
-                pypy310Packages = true;
-                pypy39Packages = true;
-                pypy3Packages = true;
-                pypyPackages = true;
-                swiftPackages = { darwin = true; };
-                targetPackages = true;
-                tests = true;
-              };
-              isBroken = broken: name: value:
-                (broken ? ${name} && broken.${name} == true)
-                || !(builtins.tryEval value).success
-                || !(let evalResult = (builtins.tryEval (value.meta.broken or false));
-                   in evalResult.success && !evalResult.value);
-              getBroken = broken: subPkgName: if broken ? ${subPkgName} then broken.${subPkgName} else {};
-              mkDerivation = path: pkg: {
-                  tag = "Derivation";
-                  path = path;
-                  description = if pkg ? meta.description
-                    then pkg.meta.description
-                    else null;
-                };
-              mkCollection = maxDepth: broken: path: collection:
+          let 
+            collectionSpec = overrides: { inherit overrides; };
+            filterNulls = lib.filterAttrs (k: v: v != null);
+            scan = pkgs: pkgSpec:
+              filterNulls (lib.mapAttrs (k: v:
                 let
-                  subPkgs = scan (maxDepth - 1) broken path collection;
-                in if builtins.length (builtins.attrNames subPkgs) == 0
-                  then null
-                  else {
-                    tag = "Collection";
-                    inherit subPkgs;
-                  };
-              mkEntry = maxDepth: broken: path: name: value:
-                let newPath = "${path}.${name}"; in
-                if lib.isDerivation value then trace "derivation ${newPath}" mkDerivation newPath value
-                else if lib.isAttrs value then trace "collection ${newPath}" (mkCollection maxDepth (getBroken broken name) newPath value)
-                else null;
-              scan = maxDepth: broken: path: root: 
-                let
-                  working = lib.filterAttrs (k: v: !(isBroken broken k v)) root;
+                  spec = if pkgSpec.overrides ? ${k}
+                    then pkgSpec.overrides.${k}
+                    else if isBroken v then false
+                    else lib.isDerivation v;
                 in
-                  if maxDepth > 0
-                    then lib.filterAttrs (k: v: v != null) (lib.mapAttrs (mkEntry maxDepth broken path) working)
-                    else {};
+                  if spec == false then null
+                  else if spec == true then mkDerivation "?" v
+                  else mkCollection (scan v spec)
+              ) pkgs);
+
+            mkCollection = subPkgs: {
+              tag = "Collection";
+              inherit subPkgs;
+            };
+            mkDerivation = path: pkg: {
+                tag = "Derivation";
+                inherit path;
+                description = if pkg ? meta.description
+                  then pkg.meta.description
+                  else null;
+              };
+            isBroken = value: !(builtins.tryEval value).success
+              || !(let evalResult = (builtins.tryEval (value.meta.broken or false));
+                 in evalResult.success && !evalResult.value);
           in
-            scan 2 brokenPkgs "pkgs" pkgs
+            scan pkgs (#{pkgSpec})
       |]
 
 data PkgInfo
