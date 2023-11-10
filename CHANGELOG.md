@@ -1,6 +1,6 @@
 # Changelog
 
-## v0.0.16
+## v0.0.16 (unreleased)
 
 - Allow to build packages that are nested within projects with `garn build projectName.packageName`.
 - Allow to build top-level packages with `garn build packageName.

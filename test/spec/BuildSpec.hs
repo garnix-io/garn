@@ -104,8 +104,8 @@ spec = do
               );
             |]
         output <- runGarn ["build"]
-        stderr output `shouldContain` "project.short            Builds short command"
-        stderr output `shouldContain` "project.longer           Builds # this is some longe..."
+        stderr output `shouldMatch` "project.short \\s+ Builds short command"
+        stderr output `shouldMatch` "project.longer \\s+ Builds # this is some longe\\.\\.\\."
 
       describe ".build" $ do
         it "builds manually specified packages" $ \runGarn -> do
