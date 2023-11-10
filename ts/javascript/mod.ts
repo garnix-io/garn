@@ -62,19 +62,22 @@ export function mkNpmProject(args: {
     url: "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81",
     flake: false,
   });
-  const node_modules = mkPackage(nixRaw`
-    let
-      npmlock2nix = import ${npmlock2nixRepo} {
-        inherit pkgs;
-      };
-      pkgs = ${pkgs};
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = ${nixSource(args.src)};
-        nodejs = ${nodejs};
-      }
-  `);
+  const node_modules = mkPackage(
+    nixRaw`
+      let
+        npmlock2nix = import ${npmlock2nixRepo} {
+          inherit pkgs;
+        };
+        pkgs = ${pkgs};
+      in
+      npmlock2nix.v2.node_modules
+        {
+          src = ${nixSource(args.src)};
+          nodejs = ${nodejs};
+        }
+    `,
+    "node_modules",
+  );
   const devShell: Environment = mkEnvironment(
     undefined,
     nixStrLit`
@@ -86,7 +89,7 @@ export function mkNpmProject(args: {
       cp -r ${node_modules}/node_modules .
       chmod -R u+rwX node_modules
     `,
-  ).withDevTools([mkPackage(nodejs)]);
+  ).withDevTools([mkPackage(nodejs, "nodejs")]);
   return mkProject(
     {
       description: args.description,
@@ -120,26 +123,29 @@ export function mkYarnProject(args: {
       buildPhase = ${nixStrLit(testCommand)};
       dontStrip = true;
     }`;
-  const pkg = mkPackage(nixRaw`
-    let
-        pkgs = ${pkgs};
-        packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
-        yarnPackage = ${yarnPackage};
-        nodeModulesPath = ${nixStrLit`${nixRaw("yarnPackage")}/libexec/${nixRaw(
-          "packageJson.name",
-        )}/node_modules`};
-    in
-      (pkgs.writeScriptBin "start-server" ${nixStrLit`
-        #!/usr/bin/env bash
+  const pkg = mkPackage(
+    nixRaw`
+      let
+          pkgs = ${pkgs};
+          packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
+          yarnPackage = ${yarnPackage};
+          nodeModulesPath = ${nixStrLit`${nixRaw(
+            "yarnPackage",
+          )}/libexec/${nixRaw("packageJson.name")}/node_modules`};
+      in
+        (pkgs.writeScriptBin "start-server" ${nixStrLit`
+          #!/usr/bin/env bash
 
-        set -eu
+          set -eu
 
-        export PATH=${nixRaw("pkgs.yarn")}/bin:$PATH
-        export PATH=${nixRaw("nodeModulesPath")}/.bin:$PATH
-        yarn --version
-        ${startCommand}
-      `})
-  `);
+          export PATH=${nixRaw("pkgs.yarn")}/bin:$PATH
+          export PATH=${nixRaw("nodeModulesPath")}/.bin:$PATH
+          yarn --version
+          ${startCommand}
+        `})
+    `,
+    "startCommand",
+  );
   const devShell: Environment = mkEnvironment(
     nixRaw`
       let

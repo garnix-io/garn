@@ -8,8 +8,11 @@ export const website = garn.javascript
     src: ".",
   })
   .withDevTools([
-    garn.mkPackage(nixRaw("pkgs.nodePackages.typescript-language-server")),
-    garn.mkPackage(nixRaw("pkgs.nodePackages.prettier")),
+    garn.mkPackage(
+      nixRaw("pkgs.nodePackages.typescript-language-server"),
+      "ts language server",
+    ),
+    garn.mkPackage(nixRaw("pkgs.nodePackages.prettier"), "prettier"),
   ])
   .addCheck("tsc", "npm run tsc")
   .addCheck("fmt-check", "prettier '**/*.{ts,tsx}' --check")
