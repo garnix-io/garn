@@ -67,13 +67,24 @@ spec = do
                 },
               );
             |]
-        _ <- runGarn ["build", "project.foo"]
+        output <- runGarn ["build", "project.foo"]
+        exitCode output `shouldBe` ExitSuccess
         readFile "result/build-artifact" `shouldReturn` "foo\n"
-        _ <- runGarn ["build", "project.bar"]
+        output <- runGarn ["build", "project.bar"]
+        exitCode output `shouldBe` ExitSuccess
         readFile "result/build-artifact" `shouldReturn` "bar\n"
 
       it "builds top-level packages" $ \runGarn -> do
-        pending
+        writeFile "garn.ts" $
+          unindent
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts";
+
+              export const p = garn.build`echo 'build output' > $out/build-artifact`;
+            |]
+        output <- runGarn ["build", "p"]
+        exitCode output `shouldBe` ExitSuccess
+        readFile "result/build-artifact" `shouldReturn` "build output\n"
 
       it "shows a nice help for packages" $ \runGarn -> do
         writeFile "garn.ts" $
