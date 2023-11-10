@@ -2,51 +2,51 @@ import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
 import { Project } from "./project.ts";
 
-const assertIsCheck = (_c: Check) => {};
-const assertIsExecutable = (_e: Executable) => {};
+const assertTypeIsCheck = (_c: Check) => {};
+const assertTypeIsExecutable = (_e: Executable) => {};
 
-const _testAddCheck = (project: Project) => {
+const _testTypeCheckingOfAddCheck = (project: Project) => {
   const p = project
     .addExecutable("unrelated1", "true")
     .addCheck("check", "true")
     .addExecutable("unrelated2", "true");
-  assertIsCheck(p.check);
-  assertIsExecutable(p.unrelated1);
-  assertIsExecutable(p.unrelated2);
+  assertTypeIsCheck(p.check);
+  assertTypeIsExecutable(p.unrelated1);
+  assertTypeIsExecutable(p.unrelated2);
   // @ts-expect-error - check should be the actual check now, not the helper
   p.check``;
 };
 
-const _testAddCheckTemplate = (project: Project) => {
+const _testTypeCheckingOfAddCheckTemplate = (project: Project) => {
   const p = project
     .addExecutable("unrelated1", "true")
     .addCheck("check")`true`.addExecutable("unrelated2", "true");
-  assertIsCheck(p.check);
-  assertIsExecutable(p.unrelated1);
-  assertIsExecutable(p.unrelated2);
+  assertTypeIsCheck(p.check);
+  assertTypeIsExecutable(p.unrelated1);
+  assertTypeIsExecutable(p.unrelated2);
   // @ts-expect-error - check should be the actual check now, not the helper
   p.check``;
 };
 
-const _testAddExecutable = (project: Project) => {
+const _testTypeCheckingOfAddExecutable = (project: Project) => {
   const p = project
     .addExecutable("unrelated1", "true")
     .addExecutable("shell", "true")
     .addExecutable("unrelated2", "true");
-  assertIsExecutable(p.shell);
-  assertIsExecutable(p.unrelated1);
-  assertIsExecutable(p.unrelated2);
+  assertTypeIsExecutable(p.shell);
+  assertTypeIsExecutable(p.unrelated1);
+  assertTypeIsExecutable(p.unrelated2);
   // @ts-expect-error - shell should be the actual executable now, not the helper
   p.shell``;
 };
 
-const _testAddExecutableTemplate = (project: Project) => {
+const _testTypeCheckingOfAddExecutableTemplate = (project: Project) => {
   const p = project
     .addExecutable("unrelated1", "true")
     .addExecutable("shell")`true`.addExecutable("unrelated2", "true");
-  assertIsExecutable(p.shell);
-  assertIsExecutable(p.unrelated1);
-  assertIsExecutable(p.unrelated2);
+  assertTypeIsExecutable(p.shell);
+  assertTypeIsExecutable(p.unrelated1);
+  assertTypeIsExecutable(p.unrelated2);
   // @ts-expect-error - shell should be the actual executable now, not the helper
   p.shell``;
 };
