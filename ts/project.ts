@@ -72,14 +72,14 @@ type ProjectHelpers = {
     this: T,
     name: Name,
     executable: string,
-  ): T & { [n in Name]: Executable };
+  ): Omit<T, Name> & { [n in Name]: Executable };
   addExecutable<T extends Project, Name extends string>(
     this: T,
     name: Name,
   ): (
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
-  ) => T & { [n in Name]: Executable };
+  ) => Omit<T, Name> & { [n in Name]: Executable };
 
   /**
    * Adds a Check with the given name to the Project that runs in a *pure*
@@ -94,14 +94,14 @@ type ProjectHelpers = {
     this: T,
     name: Name,
     check: string,
-  ): T & { [n in Name]: Check };
+  ): Omit<T, Name> & { [n in Name]: Check };
   addCheck<T extends Project, Name extends string>(
     this: T,
     name: Name,
   ): (
     _s: TemplateStringsArray,
     ..._args: Array<NixStrLitInterpolatable>
-  ) => T & { [n in Name]: Check };
+  ) => Omit<T, Name> & { [n in Name]: Check };
 };
 
 export function isProject(p: unknown): p is Project {
