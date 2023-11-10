@@ -123,7 +123,7 @@ spec = do
                   ): DenoOutput {
                     return {
                       "some incompatible type": null,
-                      garnTsLibVersion: "test version string",
+                      garnTsLibVersion: "<testTsLibVersion>",
                     };
                   }
 
@@ -153,7 +153,18 @@ spec = do
                 `shouldBe` unindent
                   [i|
                     [garn] Error: Version mismatch detected:
-                    'garn' (the cli tool) is not compatible with the version of the garn typescript library you're using.
-                    Try installing version `test version string` of 'garn' (the cli tool).
-                    (Internal details: Error in $: key \"tag\" not found)
+                      garn cli tool version: v0.0.15
+                      garn typescript library version: <testTsLibVersion>
+
+                      Either:
+
+                        Install version <testTsLibVersion> of the garn cli tool.
+                        See https://garn.io/docs/getting_started#updating-garn for how to update.
+
+                      Or:
+
+                        Use version v0.0.15 of the typescript library.
+                        E.g.: import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
+
+                      (Internal details: Error in $: key \"tag\" not found)
                   |]
