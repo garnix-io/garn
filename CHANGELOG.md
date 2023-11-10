@@ -4,6 +4,7 @@
 
 - Allow to build packages that are nested within projects with `garn build projectName.packageName`.
 - Allow to build top-level packages with `garn build packageName.
+- Allow adding packages to projects with `.addPackage("packageName", "{build script writing to $out}")`.
 
 ## v0.0.15
 

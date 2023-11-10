@@ -107,6 +107,27 @@ spec = do
         stderr output `shouldMatch` "project.short \\s+ Builds short command"
         stderr output `shouldMatch` "project.longer \\s+ Builds # this is some longe\\.\\.\\."
 
+      describe "addPackage" $ do
+        it "builds packages within the project's default environment" $ \runGarn -> do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              const env = garn.mkEnvironment(undefined, garn.nix.nixStrLit`
+                mkdir dist
+                echo build-content > dist/build-artifact
+              `);
+              export const project = garn.mkProject({
+                description: "",
+                defaultEnvironment: env,
+              }, {})
+                .addPackage("build", "mv dist/build-artifact $out/build-artifact");
+            |]
+          output <- runGarn ["build", "project"]
+          readFile "result/build-artifact" `shouldReturn` "build-content\n"
+          exitCode output `shouldBe` ExitSuccess
+
       describe ".build" $ do
         it "builds manually specified packages" $ \runGarn -> do
           writeFile
