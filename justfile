@@ -5,7 +5,7 @@ list:
 # Check what we can before pushing changes
 pre-push: fmt github-ci
 
-fast-pre-push: fmt test check-examples typescript-check test-ts
+fast-pre-push: fmt update-flakefiles test check-examples typescript-check test-ts
 
 # Run checks that we can’t yet run via the flake
 github-ci: codegen test check-isolated-garn check-examples test-ts
@@ -143,6 +143,17 @@ check-examples:
   just run-garn frontend-yarn-webpack check
   just run-garn go-http-backend check
   just run-garn monorepo check
+
+update-flakefiles:
+  #!/usr/bin/env bash
+  for EXAMPLE in examples/* website; do
+    if [ -e "$EXAMPLE/garn.ts" ]; then
+      (
+        cd "$EXAMPLE"
+        cabal run garn:garn -- generate
+      )
+    fi
+  done
 
 codegen: hpack && typescript-check
   cabal run codegen
