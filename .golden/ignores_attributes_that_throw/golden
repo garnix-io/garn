@@ -1,7 +1,0 @@
-import { mkPackage } from "../../ts/package.ts";
-import { nixRaw } from "../../ts/nix.ts";
-
-export const foo = mkPackage(
-  nixRaw`pkgs.foo`,
-  "",
-);
