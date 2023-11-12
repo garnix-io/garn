@@ -2,6 +2,9 @@
 
 module Garn.CodeGen
   ( Garn.CodeGen.run,
+    PkgInfo (Derivation, Collection, description, path, subPkgs),
+    scanPackages,
+    writePkgFiles,
   )
 where
 
@@ -43,12 +46,21 @@ pkgSpec =
     }
   |]
 
+pkgs :: String -> String
+pkgs system =
+  [i|
+    import (builtins.getFlake "#{nixpkgsInput}") {
+      system = "#{system}";
+      config.allowAliases = false;
+    }
+  |]
+
 run :: IO ()
 run = withCli $ do
   system <- currentSystem
   let outDir = "ts/internal/nixpkgs"
   removeDirectoryRecursive outDir `catch` \(_ :: IOException) -> pure ()
-  pkgs <- scanPackages system
+  pkgs <- scanPackages system (pkgs system) pkgSpec
   writePkgFiles outDir "../.." pkgs
 
 writePkgFiles :: String -> String -> Map String PkgInfo -> IO ()
@@ -69,8 +81,8 @@ writePkgFiles modulePath garnLibRoot pkgs = do
       Derivation {} -> pure ()
       Collection {subPkgs} -> writePkgFiles (modulePath <> "/" <> name) (garnLibRoot <> "/..") subPkgs
 
-scanPackages :: String -> IO (Map String PkgInfo)
-scanPackages system = do
+scanPackages :: String -> String -> String -> IO (Map String PkgInfo)
+scanPackages system pkgs pkgSpec = do
   StdoutUntrimmed json <- Cradle.run "nix" nixArgs "eval" (".#lib." <> system) "--json" "--apply" nixExpr
   case eitherDecode (cs json) of
     Right pkgs -> pure pkgs
@@ -78,25 +90,22 @@ scanPackages system = do
   where
     nixExpr =
       [i|
-        let pkgs = import (builtins.getFlake "#{nixpkgsInput}") {
-          system = "#{system}";
-          config.allowAliases = false;
-        };
-        in lib:
+        lib:
           let 
             collectionSpec = overrides: { inherit overrides; };
             filterNulls = lib.filterAttrs (k: v: v != null);
-            scan = pkgs: pkgSpec:
+            scan = path: pkgs: pkgSpec:
               filterNulls (lib.mapAttrs (k: v:
                 let
+                  newPath = "${path}.${k}";
                   spec = if pkgSpec.overrides ? ${k}
                     then pkgSpec.overrides.${k}
                     else if isBroken v then false
                     else lib.isDerivation v;
                 in
                   if spec == false then null
-                  else if spec == true then mkDerivation "?" v
-                  else mkCollection (scan v spec)
+                  else if spec == true then mkDerivation newPath v
+                  else mkCollection (scan newPath v spec)
               ) pkgs);
 
             mkCollection = subPkgs: {
@@ -114,7 +123,7 @@ scanPackages system = do
               || !(let evalResult = (builtins.tryEval (value.meta.broken or false));
                  in evalResult.success && !evalResult.value);
           in
-            scan pkgs (#{pkgSpec})
+            scan "pkgs" (#{pkgs}) (#{pkgSpec})
       |]
 
 data PkgInfo
