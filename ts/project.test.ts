@@ -1,13 +1,15 @@
 import { Check } from "./check.ts";
 import { Executable } from "./executable.ts";
-import { Project } from "./project.ts";
+import { Plugin, Project } from "./project.ts";
 import { describe, it } from "https://deno.land/std@0.206.0/testing/bdd.ts";
 import * as garn from "./mod.ts";
 import * as nix from "./nix.ts";
 import { assertStdout, assertSuccess, runExecutable } from "./testUtils.ts";
+import { Package } from "./mod.ts";
 
 const assertTypeIsCheck = (_c: Check) => {};
 const assertTypeIsExecutable = (_e: Executable) => {};
+const assertTypeIsPackage = (_p: Package) => {};
 
 const _testTypeCheckingOfAddCheck = (project: Project) => {
   const p = project
@@ -132,5 +134,79 @@ describe("Project.add", () => {
     output = runExecutable(project.b);
     assertSuccess(output);
     assertStdout(output, "bar\n");
+  });
+
+  it("provides a nice type synonym for plugins that add a field", () => {
+    const plugin: Plugin<object, { addedField: garn.Package }> = (p) => ({
+      ...p,
+      addedField: garn.build``,
+    });
+    const project = garn
+      .mkProject(
+        { description: "", defaultEnvironment: garn.emptyEnvironment },
+        {},
+      )
+      .addExecutable("foo", "")
+      .add(plugin);
+    assertTypeIsExecutable(project.foo);
+    assertTypeIsPackage(project.addedField);
+  });
+
+  it("provides a nice type synonym for plugins that add multiple fields", () => {
+    const plugin: Plugin<object, { one: garn.Package; two: garn.Check }> = (
+      p,
+    ) => ({
+      ...p,
+      one: garn.build``,
+      two: garn.check(""),
+    });
+    const project = garn
+      .mkProject(
+        { description: "", defaultEnvironment: garn.emptyEnvironment },
+        {},
+      )
+      .addExecutable("foo", "")
+      .add(plugin);
+    assertTypeIsExecutable(project.foo);
+    assertTypeIsPackage(project.one);
+    assertTypeIsCheck(project.two);
+  });
+
+  it("provides a nice interface for plugins that depend on a non-standard field", () => {
+    const plugin: Plugin<{ dep: Package }, { addedField: Executable }> = (
+      p,
+    ) => ({
+      ...p,
+      addedField: garn.shell`${p.dep}/bin/whatever`,
+    });
+    const project = garn
+      .mkProject(
+        { description: "", defaultEnvironment: garn.emptyEnvironment },
+        { dep: garn.build`` },
+      )
+      .addExecutable("foo", "")
+      .add(plugin);
+    assertTypeIsExecutable(project.foo);
+    assertTypeIsExecutable(project.addedField);
+    // @ts-expect-error - `dep` is missing
+    () => garn.mkProject({ description: "" }, {}).add(plugin);
+  });
+
+  it("allows to overwrite fields", () => {
+    const plugin: Plugin<object, { field: Package }> = (p) => ({
+      ...p,
+      field: garn.build``,
+    });
+    const project = garn
+      .mkProject(
+        { description: "", defaultEnvironment: garn.emptyEnvironment },
+        { field: garn.shell("") },
+      )
+      .addExecutable("foo", "")
+      .add(plugin);
+    assertTypeIsExecutable(project.foo);
+    // @ts-expect-error - should not be an `Executable` anymore
+    assertTypeIsExecutable(project.field);
+    assertTypeIsPackage(project.field);
   });
 });

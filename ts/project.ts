@@ -1,11 +1,11 @@
 import "./internal/registerInternalLib.ts";
 
 import { Check, mkCheck } from "./check.ts";
-import { Environment, emptyEnvironment } from "./environment.ts";
+import { Environment } from "./environment.ts";
 import { Executable, mkShellExecutable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
 import { NixStrLitInterpolatable } from "./nix.ts";
-import { Package, mkShellPackage } from "./package.ts";
+import { mkShellPackage, Package } from "./package.ts";
 import { markAsMayNotExport } from "./internal/may_not_export.ts";
 
 /**
@@ -15,12 +15,14 @@ import { markAsMayNotExport } from "./internal/may_not_export.ts";
  */
 export type Project = ProjectHelpers & ProjectData;
 
-type ProjectData = {
+export type ProjectData = {
   tag: "project";
   description: string;
   defaultEnvironment?: Environment;
   defaultExecutable?: Executable;
 };
+
+export type Plugin<Input, Output> = (project: Input) => Output;
 
 type ProjectHelpers = {
   /**
@@ -78,10 +80,10 @@ type ProjectHelpers = {
    *   .add(self => self.addExecutable("codegen")`${self.mainPackage}/bin/codegen`)
    * ```
    */
-  add<T extends ProjectData, U extends ProjectData>(
-    this: T,
-    fn: (p: T) => U,
-  ): U;
+  add<Input extends ProjectData, Output>(
+    this: Input,
+    fn: Plugin<Input, Output>,
+  ): Omit<Input, keyof Output> & Output;
 
   /**
    * Adds an `Executable` with the given name to the Project
@@ -215,11 +217,11 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     return mkShellPackage(defaultEnvironment, s, ...args);
   },
 
-  add<T extends ProjectData, U extends ProjectData>(
-    this: T,
-    fn: (p: T) => U,
-  ): U {
-    return fn(this);
+  add<Input extends ProjectData, Output>(
+    this: Input,
+    fn: Plugin<Input, Output>,
+  ): Omit<Input, keyof Output> & Output {
+    return { ...this, ...fn(this) };
   },
 
   addExecutable<T extends ProjectData, Name extends string>(
