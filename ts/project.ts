@@ -22,7 +22,7 @@ export type ProjectData = {
   defaultExecutable?: Executable;
 };
 
-export type Plugin<Input, Output> = (project: Input) => Output;
+export type Plugin<Input, Output> = (project: Input & ProjectData) => Output;
 
 type ProjectHelpers = {
   /**
