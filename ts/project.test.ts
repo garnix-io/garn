@@ -137,7 +137,7 @@ describe("Project.add", () => {
   });
 
   it("provides a nice type synonym for plugins that add a field", () => {
-    const plugin: Plugin<object, { addedField: garn.Package }> = (p) => ({
+    const plugin: Plugin<{ addedField: garn.Package }> = (p) => ({
       ...p,
       addedField: garn.build``,
     });
@@ -153,9 +153,7 @@ describe("Project.add", () => {
   });
 
   it("provides a nice type synonym for plugins that add multiple fields", () => {
-    const plugin: Plugin<object, { one: garn.Package; two: garn.Check }> = (
-      p,
-    ) => ({
+    const plugin: Plugin<{ one: garn.Package; two: garn.Check }> = (p) => ({
       ...p,
       one: garn.build``,
       two: garn.check(""),
@@ -173,7 +171,7 @@ describe("Project.add", () => {
   });
 
   it("provides a nice interface for plugins that depend on a non-standard field", () => {
-    const plugin: Plugin<{ dep: Package }, { addedField: Executable }> = (
+    const plugin: Plugin<{ addedField: Executable }, { dep: Package }> = (
       p,
     ) => ({
       ...p,
@@ -193,7 +191,7 @@ describe("Project.add", () => {
   });
 
   it("allows to overwrite fields", () => {
-    const plugin: Plugin<object, { field: Package }> = (p) => ({
+    const plugin: Plugin<{ field: Package }> = (p) => ({
       ...p,
       field: garn.build``,
     });

@@ -22,7 +22,9 @@ export type ProjectData = {
   defaultExecutable?: Executable;
 };
 
-export type Plugin<Input, Output> = (project: Input & ProjectData) => Output;
+export type Plugin<Additions, Dependencies = object> = (
+  project: Dependencies & ProjectData,
+) => Additions;
 
 type ProjectHelpers = {
   /**
@@ -80,10 +82,10 @@ type ProjectHelpers = {
    *   .add(self => self.addExecutable("codegen")`${self.mainPackage}/bin/codegen`)
    * ```
    */
-  add<Input extends ProjectData, Output>(
-    this: Input,
-    fn: Plugin<Input, Output>,
-  ): Omit<Input, keyof Output> & Output;
+  add<T extends ProjectData, Additions>(
+    this: T,
+    fn: Plugin<Additions, T>,
+  ): Omit<T, keyof Additions> & Additions;
 
   /**
    * Adds an `Executable` with the given name to the Project
@@ -217,11 +219,14 @@ const proxyEnvironmentHelpers = (): ProjectHelpers => ({
     return mkShellPackage(defaultEnvironment, s, ...args);
   },
 
-  add<Input extends ProjectData, Output>(
-    this: Input,
-    fn: Plugin<Input, Output>,
-  ): Omit<Input, keyof Output> & Output {
-    return { ...this, ...fn(this) };
+  add<T extends ProjectData, Additions>(
+    this: T,
+    fn: Plugin<Additions, T>,
+  ): Omit<T, keyof Additions> & Additions {
+    return {
+      ...this,
+      ...fn(this),
+    };
   },
 
   addExecutable<T extends ProjectData, Name extends string>(
