@@ -3,11 +3,11 @@ import * as garn from "./mod.ts";
 import * as nix from "./nix.ts";
 import { nixAttrSet } from "./nix.ts";
 
-interface Output {
+type Output = {
   exitCode: number;
   stdout: string;
   stderr: string;
-}
+};
 
 const printOutput = (output: Output) => {
   console.error(`
