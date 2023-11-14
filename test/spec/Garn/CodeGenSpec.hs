@@ -5,6 +5,7 @@ module Garn.CodeGenSpec (spec) where
 import Data.Map (Map, singleton)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
+import GHC.Conc (getNumProcessors, setNumCapabilities)
 import Garn.CodeGen (PkgInfo (Collection, Derivation, description, path, subPkgs), scanPackages, writePkgFiles)
 import Garn.Common (currentSystem)
 import System.FilePath ((</>))
@@ -12,8 +13,15 @@ import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
 import Test.Mockery.Environment (withModifiedEnvironment)
 
+inParallel :: Spec -> Spec
+inParallel spec = do
+  runIO $ do
+    n <- getNumProcessors
+    setNumCapabilities (max 1 (n - 1))
+  parallel spec
+
 spec :: Spec
-spec = do
+spec = inParallel $ do
   describe "scanPackages" $ do
     testScanPackages
       "empty pkgSpec collects all top level derivations, but skips nested ones"
