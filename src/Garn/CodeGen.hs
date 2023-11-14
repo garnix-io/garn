@@ -1,8 +1,9 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Garn.CodeGen
   ( Garn.CodeGen.run,
-    PkgInfo (Derivation, Collection, description, path, subPkgs),
+    PkgInfo (Derivation, Collection, description, path),
     scanPackages,
     writePkgFiles,
   )
@@ -27,10 +28,12 @@ import Garn.Common (currentSystem, nixpkgsInput)
 import System.Directory (createDirectoryIfMissing, removeDirectoryRecursive)
 import WithCli (withCli)
 
--- A specification for what packages to include in the final collection
--- collectionSpec represents a colleciton with all derivations included by
--- default, but everything else excluded. This can be overridden with the
--- attribute set.
+-- A nix expression that specifies which packages to include in the final
+-- collection.
+--
+-- `collectionSpec` represents a collection with all top-level derivations
+-- included by default, but everything else excluded. This can be overridden
+-- with the given attribute set.
 pkgSpec :: String
 pkgSpec =
   [i|
@@ -64,9 +67,8 @@ run = withCli $ do
   writePkgFiles outDir "../.." pkgs
 
 writePkgFiles :: String -> String -> Map String PkgInfo -> IO ()
-writePkgFiles modulePath garnLibRoot pkgs = do
+writePkgFiles modulePath garnLibRoot (Map.mapKeys sanitize -> pkgs) = do
   createDirectoryIfMissing True modulePath
-  let sanitizedPkgs = Map.mapKeys sanitize pkgs
   let code =
         unindent
           [i|
@@ -74,9 +76,9 @@ writePkgFiles modulePath garnLibRoot pkgs = do
             import { nixRaw } from "#{garnLibRoot}/nix.ts";
 
           |]
-          <> pkgsString sanitizedPkgs
+          <> pkgsString pkgs
   writeFile (modulePath <> "/mod.ts") code
-  forM_ (Map.assocs sanitizedPkgs) $ \(name :: String, pkgInfo :: PkgInfo) -> do
+  forM_ (Map.assocs pkgs) $ \(name :: String, pkgInfo :: PkgInfo) -> do
     case pkgInfo of
       Derivation {} -> pure ()
       Collection {subPkgs} -> writePkgFiles (modulePath <> "/" <> name) (garnLibRoot <> "/..") subPkgs
@@ -91,7 +93,7 @@ scanPackages system pkgs pkgSpec = do
     nixExpr =
       [i|
         lib:
-          let 
+          let
             collectionSpec = overrides: { inherit overrides; };
             filterNulls = lib.filterAttrs (k: v: v != null);
             scan = path: pkgs: pkgSpec:
