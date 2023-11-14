@@ -36,7 +36,7 @@ readOptionsAndConfig env = do
     else getOpts env WithoutGarnTs
 
 runWith :: Env -> Options -> IO ()
-runWith env (WithoutGarnTsOpts Init) = initGarnTs $ initFileName env
+runWith env (WithoutGarnTsOpts Init) = initGarnTs env $ initFileName env
 runWith env (WithGarnTsOpts garnConfig opts) = do
   writeGarnConfig env garnConfig
   case opts of

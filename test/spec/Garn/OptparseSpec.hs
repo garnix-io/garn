@@ -84,10 +84,15 @@ spec = around_ (hSilence [System.IO.stderr]) $ do
 testWithGarnTs :: [String] -> Targets -> IO WithGarnTsCommand
 testWithGarnTs args targets = do
   -- todo: put into TestUtils?
+  (stdinReadEnd, _) <- createPipe
   (_, stderrWriteEnd) <- createPipe
   let testEnv =
         Env
-          { stderr = stderrWriteEnd
+          { workingDir = ".",
+            stdin = stdinReadEnd,
+            stderr = stderrWriteEnd,
+            initFileName = "",
+            userShell = ""
           }
   options <- withArgs args $ getOpts testEnv $ WithGarnTs $ GarnConfig targets "test flake file"
   pure $ case options of
