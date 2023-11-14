@@ -26,7 +26,8 @@ nixArgs :: [String]
 nixArgs =
   [ "--extra-experimental-features",
     "flakes nix-command",
-    "--print-build-logs"
+    "--print-build-logs",
+    "--include-untracked-files"
   ]
 
 currentSystem :: IO String

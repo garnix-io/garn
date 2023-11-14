@@ -4,7 +4,7 @@
 
 module Garn.GarnConfig where
 
-import Control.Exception (IOException, catch, throwIO)
+import Control.Exception (throwIO)
 import Control.Monad
 import Cradle (Stderr (..), StdoutUntrimmed (..), run)
 import Data.Aeson
@@ -189,8 +189,6 @@ writeGarnConfig :: GarnConfig -> IO ()
 writeGarnConfig garnConfig = do
   writeFile "flake.nix" $ flakeFile garnConfig
   (StdoutUntrimmed _, Stderr _) <- run "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
-  void (run (words "git add --intent-to-add flake.nix") :: IO (StdoutUntrimmed, Stderr, ExitCode))
-    `catch` \(_ :: IOException) -> pure ()
   pure ()
 
 checkGarnFileExists :: IO ()

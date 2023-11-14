@@ -259,26 +259,6 @@ export const deno = garn.mkProject({
             .
           </p>
         </details>
-
-        <details>
-          <summary>
-            I'm getting no such file or directory errors for files that exist.
-            What's going on?
-          </summary>
-          <p>
-            <Garn /> uses nix under the hood which requires files in a git
-            repository to be tracked by git in order to see the files.
-          </p>
-          <p>
-            To resolve this make sure to either add untracked files to git (e.g.
-            with <code>git add $YOUR_FILES</code>), or mark them as intended
-            additions with <code>git add --intent-to-add $YOUR_FILES</code>
-          </p>
-          <p>
-            Likely this requirement will be removed from future <Garn />{" "}
-            versions.
-          </p>
-        </details>
       </section>
     </>
   );
