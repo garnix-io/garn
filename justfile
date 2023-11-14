@@ -112,8 +112,8 @@ hpack-check:
     when (oldCabal /= newCabal) $
       error "package.yaml has changed, please run hpack"
 
-test-ts:
-  deno test --allow-write --allow-read --allow-run ts/*.test.ts ts/**/*.test.ts
+test-ts *args="":
+  deno test --check --allow-write --allow-read --allow-run ts/*.test.ts ts/**/*.test.ts {{ args }}
 
 test *args="": hpack
   cabal run --test-show-details=streaming garn:spec -- {{ args }}
