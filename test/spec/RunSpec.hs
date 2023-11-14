@@ -7,11 +7,11 @@ import Data.List (sort)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import System.Directory
+import System.Environment (setEnv)
 import System.Exit (ExitCode (..))
 import System.FilePath ((</>))
 import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
-import Test.Mockery.Environment (withModifiedEnvironment)
 import TestUtils
   ( ProcResult (..),
     onTestFailureLogger,
@@ -279,9 +279,9 @@ writeFile context = \path content ->
 withContext :: SpecWith Context -> Spec
 withContext test = do
   repoDir <- runIO getCurrentDirectory
-  around
-    ( \test ->
-        withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")] $
+  beforeAll_ (setEnv "NIX_CONFIG" "experimental-features =") $
+    around
+      ( \test ->
           withSystemTempDirectory "garn-test" $ \tempDir ->
             onTestFailureLogger $ \onTestFailureLog ->
               test $
@@ -290,5 +290,5 @@ withContext test = do
                     tempDir,
                     onTestFailureLog
                   }
-    )
-    test
+      )
+      test
