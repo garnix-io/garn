@@ -90,6 +90,7 @@ testWithGarnTs args targets = do
   let testEnv =
         Env
           { workingDir = ".",
+            args = [],
             stdin = stdinReadEnd,
             stdout = stdoutWriteEnd,
             stderr = stderrWriteEnd,

@@ -18,15 +18,14 @@ import Garn.GarnConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 import qualified Options.Applicative.Help.Pretty as OA
-import System.Environment (getArgs, getProgName)
+import System.Environment (getProgName)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hPutStrLn)
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
 getOpts :: Env -> OptionType -> IO Options
 getOpts env oType = do
-  args <- getArgs
-  let result = execParserPure (prefs $ showHelpOnError <> showHelpOnEmpty) opts args
+  let result = execParserPure (prefs $ showHelpOnError <> showHelpOnEmpty) opts (args env)
   case result of
     OA.Failure failure -> do
       programName <- getProgName

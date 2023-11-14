@@ -4,6 +4,7 @@ import System.IO (Handle)
 
 data Env = Env
   { workingDir :: FilePath,
+    args :: [String],
     stdin :: Handle,
     stdout :: Handle,
     stderr :: Handle,

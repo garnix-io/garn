@@ -128,22 +128,22 @@ runGarnInDir tempDir args stdin repoDir shell = do
     return $ readMVar mvar
   exitCode <- do
     withStdinTty stdin $ \stdin -> do
-      withArgs args $ do
-        let env =
-              Env
-                { workingDir = tempDir,
-                  stdin,
-                  stdout = stdoutWriteEnd,
-                  stderr = stderrWriteEnd,
-                  userShell,
-                  initFileName = repoDir <> "/ts/internal/init.ts"
-                }
-        let go = do
-              run env `finally` do
-                hClose stdoutWriteEnd
-                hClose stderrWriteEnd
-              return ExitSuccess
-        go `catch` \(e :: ExitCode) -> pure e
+      let env =
+            Env
+              { workingDir = tempDir,
+                args,
+                stdin,
+                stdout = stdoutWriteEnd,
+                stderr = stderrWriteEnd,
+                userShell,
+                initFileName = repoDir <> "/ts/internal/init.ts"
+              }
+      let go = do
+            run env `finally` do
+              hClose stdoutWriteEnd
+              hClose stderrWriteEnd
+            return ExitSuccess
+      go `catch` \(e :: ExitCode) -> pure e
   stdout <- waitForStdout
   stderr <- waitForStderr
   return $
