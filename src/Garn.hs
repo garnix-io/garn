@@ -86,6 +86,7 @@ runNix :: (Input a, Output b) => Env -> a -> IO b
 runNix env =
   Cradle.run
     (WorkingDir (workingDir env))
+    (StdoutHandle (stdout env))
     (StderrHandle (stderr env))
     "nix"
     nixArgs

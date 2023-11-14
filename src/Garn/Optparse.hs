@@ -32,7 +32,7 @@ getOpts env oType = do
       programName <- getProgName
       let (msg, exit) = renderFailure failure programName
       case exit of
-        ExitSuccess -> putStrLn msg
+        ExitSuccess -> hPutStrLn (stdout env) msg
         ExitFailure _ -> hPutStrLn (stderr env) msg
       exitWith exit
     _ ->

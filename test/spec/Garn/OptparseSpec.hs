@@ -85,11 +85,13 @@ testWithGarnTs :: [String] -> Targets -> IO WithGarnTsCommand
 testWithGarnTs args targets = do
   -- todo: put into TestUtils?
   (stdinReadEnd, _) <- createPipe
+  (_, stdoutWriteEnd) <- createPipe
   (_, stderrWriteEnd) <- createPipe
   let testEnv =
         Env
           { workingDir = ".",
             stdin = stdinReadEnd,
+            stdout = stdoutWriteEnd,
             stderr = stderrWriteEnd,
             initFileName = "",
             userShell = ""

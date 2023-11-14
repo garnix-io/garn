@@ -22,7 +22,6 @@ import System.Exit
 import System.FilePath (takeDirectory, (</>))
 import System.IO (Handle, hClose, hGetContents, hPutStr, hPutStrLn)
 import qualified System.IO as Sys
-import System.IO.Silently (hCapture)
 import System.Posix (fdToHandle, openPseudoTerminal)
 import System.Process (ProcessHandle, createPipe, interruptProcessGroupOf, waitForProcess)
 import Test.Hspec
@@ -115,28 +114,37 @@ runGarn = runGarnInDir "."
 runGarnInDir :: (HasCallStack) => FilePath -> [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
 runGarnInDir tempDir args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
+  (stdoutReadEnd, stdoutWriteEnd) <- createPipe
+  waitForStdout <- do
+    mvar <- newEmptyMVar
+    _ <- forkIO $ do
+      hGetContents stdoutReadEnd >>= putMVar mvar
+    return $ readMVar mvar
   (stderrReadEnd, stderrWriteEnd) <- createPipe
   waitForStderr <- do
     mvar <- newEmptyMVar
     _ <- forkIO $ do
       hGetContents stderrReadEnd >>= putMVar mvar
     return $ readMVar mvar
-  (stdout, exitCode) <-
-    hCapture [Sys.stdout] $ do
-      withStdinTty stdin $ \stdin -> do
-        withArgs args $ do
-          let env =
-                Env
-                  { workingDir = tempDir,
-                    stdin,
-                    stderr = stderrWriteEnd,
-                    userShell,
-                    initFileName = repoDir <> "/ts/internal/init.ts"
-                  }
-          let go = do
-                run env `finally` hClose stderrWriteEnd
-                return ExitSuccess
-          go `catch` \(e :: ExitCode) -> pure e
+  exitCode <- do
+    withStdinTty stdin $ \stdin -> do
+      withArgs args $ do
+        let env =
+              Env
+                { workingDir = tempDir,
+                  stdin,
+                  stdout = stdoutWriteEnd,
+                  stderr = stderrWriteEnd,
+                  userShell,
+                  initFileName = repoDir <> "/ts/internal/init.ts"
+                }
+        let go = do
+              run env `finally` do
+                hClose stdoutWriteEnd
+                hClose stderrWriteEnd
+              return ExitSuccess
+        go `catch` \(e :: ExitCode) -> pure e
+  stdout <- waitForStdout
   stderr <- waitForStderr
   return $
     ProcResult
@@ -191,7 +199,7 @@ onTestFailureLogger test = do
             acc
               ++ [ "exitcode: " <> show (exitCode x),
                    "=======",
-                   "stdout: \n" <> stdout x,
+                   "stdout: \n" <> TestUtils.stdout x,
                    "=======",
                    "stderr: \n" <> TestUtils.stderr x,
                    "======="
