@@ -90,14 +90,14 @@ testWithGarnTs args targets = do
   let testEnv =
         Env
           { workingDir = ".",
-            args = [],
+            args,
             stdin = stdinReadEnd,
             stdout = stdoutWriteEnd,
             stderr = stderrWriteEnd,
             initFileName = "",
             userShell = ""
           }
-  options <- withArgs args $ getOpts testEnv $ WithGarnTs $ GarnConfig targets "test flake file"
+  options <- getOpts testEnv $ WithGarnTs $ GarnConfig targets "test flake file"
   pure $ case options of
     WithGarnTsOpts _ command -> command
     _ -> error "Expected WithGarnTsOpts"
