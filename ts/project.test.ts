@@ -58,7 +58,7 @@ const _testTypeCheckingOfAddExecutableTemplate = (project: Project) => {
 };
 
 describe("Project.add", () => {
-  it("allows to add fields with .add", () => {
+  it("allows adding fields with .add", () => {
     const project = garn
       .mkProject({ description: "" }, {})
       .add((self) => ({ ...self, foo: garn.shell("echo foo") }));
@@ -67,7 +67,7 @@ describe("Project.add", () => {
     assertStdout(output, "foo\n");
   });
 
-  it("allows to add fields while referencing the Project", () => {
+  it("allows adding fields while referencing the Project", () => {
     const project = garn
       .mkProject(
         { description: "", defaultEnvironment: garn.emptyEnvironment },
@@ -80,7 +80,7 @@ describe("Project.add", () => {
     assertStdout(output, "Hello, world!\n");
   });
 
-  it("allows to splice in existing fields", () => {
+  it("allows splicing in existing fields", () => {
     const project = garn
       .mkProject(
         { description: "", defaultEnvironment: garn.emptyEnvironment },
@@ -98,7 +98,7 @@ describe("Project.add", () => {
     assertStdout(output, "main executable\n");
   });
 
-  it("allows to bundle multiple changes into plugins", () => {
+  it("allows bundling multiple changes into plugins", () => {
     const plugin = <P extends garn.Project>(p: P) =>
       p.addExecutable("foo", "echo foo").addExecutable("bar", "echo bar");
     const project = garn
@@ -115,7 +115,7 @@ describe("Project.add", () => {
     assertStdout(output, "bar\n");
   });
 
-  it("allows to write plugins with parameters", () => {
+  it("allows writing plugins with parameters", () => {
     const plugin =
       <P extends garn.Project>(config: { a: string; b: string }) =>
       (p: P) =>
@@ -190,7 +190,7 @@ describe("Project.add", () => {
     () => garn.mkProject({ description: "" }, {}).add(plugin);
   });
 
-  it("allows to overwrite fields", () => {
+  it("allows overwriting fields", () => {
     const plugin: Plugin<{ field: Package }> = (p) => ({
       ...p,
       field: garn.build``,
