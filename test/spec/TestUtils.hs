@@ -8,12 +8,14 @@ import Control.Concurrent.Async (waitEitherCatch, withAsync)
 import Control.Exception (SomeException, bracket, catch, throwIO)
 import Control.Monad (forM_, unless, when)
 import qualified Data.Aeson as Aeson
+import Data.Maybe (fromMaybe)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate
 import qualified Data.Yaml as Yaml
 import Development.Shake (CmdOption (EchoStdout), Exit (Exit), StdoutTrim (..), cmd)
 import Development.Shake.Command (CmdOption (Cwd), Stdout (Stdout))
 import Garn
+import Garn.Env
 import System.Directory (copyFile, createDirectoryIfMissing)
 import System.Environment (withArgs)
 import System.Exit
@@ -35,10 +37,10 @@ shouldMatch actual expected = case compileM (cs expected) [] of
       expectationFailure $
         "expected " <> actual <> " to match regex " <> show expected
 
-writeHaskellProject :: FilePath -> IO ()
-writeHaskellProject repoDir = do
+writeHaskellProject :: FilePath -> Maybe FilePath -> IO ()
+writeHaskellProject repoDir (fromMaybe "." -> tempDir) = do
   writeFile
-    "garn.ts"
+    (tempDir </> "garn.ts")
     [i|
       import { mkHaskellProject } from "#{repoDir}/ts/haskell/mod.ts"
 
@@ -50,13 +52,13 @@ writeHaskellProject repoDir = do
       })
     |]
   writeFile
-    "Main.hs"
+    (tempDir </> "Main.hs")
     [i|
       main :: IO ()
       main = putStrLn "haskell test output"
     |]
   writeFile
-    "package.yaml"
+    (tempDir </> "package.yaml")
     [i|
       executables:
         garn-test:
@@ -108,7 +110,10 @@ writeNpmFrontendProject repoDir = do
     |]
 
 runGarn :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
-runGarn args stdin repoDir shell = do
+runGarn = runGarnInDir "."
+
+runGarnInDir :: (HasCallStack) => FilePath -> [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
+runGarnInDir tempDir args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
   (stderr, (stdout, exitCode)) <- hCapture [Sys.stderr] $
     hCapture [Sys.stdout] $ do
@@ -116,7 +121,8 @@ runGarn args stdin repoDir shell = do
         withArgs args $ do
           let env =
                 Env
-                  { stdin,
+                  { workingDir = tempDir,
+                    stdin,
                     userShell,
                     initFileName = repoDir <> "/ts/internal/init.ts"
                   }

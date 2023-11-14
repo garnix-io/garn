@@ -27,7 +27,7 @@ spec = do
       $ do
         describe "withDevTools" $ do
           it "allows dev tools to be added to the dev shell" $ do
-            writeHaskellProject repoDir
+            writeHaskellProject repoDir Nothing
             writeFile "garn.ts" $
               unindent
                 [i|
@@ -48,7 +48,7 @@ spec = do
             stdout output `shouldBe` "tool\n"
 
           it "allows multiple dev tools to be added to the dev shell" $ do
-            writeHaskellProject repoDir
+            writeHaskellProject repoDir Nothing
             writeFile "garn.ts" $
               unindent
                 [i|
@@ -74,7 +74,7 @@ spec = do
             stdout output `shouldStartWith` "/nix/store"
 
           it "does not destructively update the given package" $ onTestFailureLogger $ \onFailingTestLog -> do
-            writeHaskellProject repoDir
+            writeHaskellProject repoDir Nothing
             writeFile "garn.ts" $
               unindent
                 [i|
@@ -96,7 +96,7 @@ spec = do
             stderr output `shouldContain` "hello: command not found"
 
           it "can safely be used twice" $ do
-            writeHaskellProject repoDir
+            writeHaskellProject repoDir Nothing
             writeFile "garn.ts" $
               unindent
                 [i|
@@ -121,12 +121,12 @@ spec = do
             stdout output `shouldStartWith` "/nix/store"
 
         it "has the right GHC version" $ do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           output <- runGarn ["enter", "foo"] "ghc --numeric-version\nexit\n" repoDir Nothing
           stdout output `shouldStartWith` "9.4"
 
         it "registers Haskell dependencies with ghc-pkg" $ do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           modifyPackageYaml $
             key "executables"
               . key "garn-test"
@@ -181,7 +181,7 @@ spec = do
                   fi
                   exit
                 |]
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           StdoutTrim userShell <- cmd ("which bash" :: String)
           output <-
             runGarn ["enter", "foo"] shellTestCommand repoDir $ Just userShell
@@ -192,17 +192,17 @@ spec = do
           stdout output `shouldBe` "using zsh"
 
         it "provides a message indicating the command succeeded" $ do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           output <- runGarn ["enter", "foo"] "exit\n" repoDir Nothing
           stderr output `shouldContain` "[garn] Entering foo shell. Type 'exit' to exit."
 
         it "provides a message indicating the shell exited" $ do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           output <- runGarn ["enter", "foo"] "exit\n" repoDir Nothing
           stderr output `shouldContain` "[garn] Exiting foo shell"
 
         it "fails when the shell cannot be entered" $ do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           removeFile "package.yaml"
           output <- runGarn ["enter", "foo"] "echo 'This cannot be executed.'\nexit\n" repoDir Nothing
           exitCode output `shouldBe` ExitFailure 1

@@ -8,253 +8,287 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import System.Directory
 import System.Exit (ExitCode (..))
+import System.FilePath ((</>))
+import System.IO.Temp (withSystemTempDirectory)
 import Test.Hspec
-import Test.Mockery.Directory
 import Test.Mockery.Environment (withModifiedEnvironment)
 import TestUtils
+  ( ProcResult (..),
+    onTestFailureLogger,
+    runGarnInDir,
+    shouldMatch,
+    writeHaskellProject,
+  )
+import Prelude hiding (writeFile)
+import qualified Prelude
 
 spec :: Spec
 spec =
-  describe "run" $ around onTestFailureLogger $ do
+  describe "run" $ withContext $ do
     repoDir <- runIO getCurrentDirectory
-    around_
-      ( withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]
-          . inTempDirectory
-      )
-      $ do
-        it "runs a simple Haskell program" $ \onTestFailureLog -> do
-          writeHaskellProject repoDir
-          output <- runGarn ["run", "foo"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldBe` "haskell test output\n"
-        it "writes flake.{lock,nix}, but no other files" $ \onTestFailureLog -> do
-          writeHaskellProject repoDir
-          filesBefore <- listDirectory "."
-          output <- runGarn ["run", "foo"] "" repoDir Nothing
-          onTestFailureLog output
-          filesAfter <- sort <$> listDirectory "."
-          filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
-        it "runs arbitrary executables" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
+    it "runs a simple Haskell program" $ \context -> do
+      writeHaskellProject repoDir (Just (tempDir context))
+      output <- runGarn context ["run", "foo"]
+      stdout output `shouldBe` "haskell test output\n"
 
-              export const main = garn.shell("echo foobarbaz");
+    it "writes flake.{lock,nix}, but no other files" $ \context -> do
+      writeHaskellProject repoDir (Just (tempDir context))
+      filesBefore <- listDirectory (tempDir context)
+      _ <- runGarn context ["run", "foo"]
+      filesAfter <- sort <$> listDirectory (tempDir context)
+      filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
+
+    it "runs arbitrary executables" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+
+          export const main = garn.shell("echo foobarbaz");
+        |]
+      output <- runGarn context ["run", "main"]
+      stdout output `shouldBe` "foobarbaz\n"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "propagates the exit status of the child process" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+
+          export const main = garn.shell`exit 23`;
+        |]
+      output <- runGarn context ["run", "main"]
+      stdout output `shouldBe` ""
+      exitCode output `shouldBe` ExitFailure 23
+
+    it "runs executables within an environment" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+          import { nixRaw } from "#{repoDir}/ts/nix.ts";
+
+          const myEnv = garn.mkEnvironment().withDevTools([garn.mkPackage(nixRaw`pkgs.hello`, "hello")]);
+          export const main = myEnv.shell("hello");
+        |]
+      output <- runGarn context ["run", "main"]
+      stdout output `shouldBe` "Hello, world!\n"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "runs non-default executables within projects" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+          export const project = garn.mkProject({
+            description: "my project",
+            defaultEnvironment: garn.emptyEnvironment,
+          }, {}).addExecutable("hello", "echo Hello, world!");
+        |]
+      output <- runGarn context ["run", "project.hello"]
+      stdout output `shouldBe` "Hello, world!\n"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "supports running executables on projects containing a dep 'shell'" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+          export const project = garn.mkProject({
+            description: "",
+            defaultEnvironment: garn.mkEnvironment(),
+          }, {})
+            .addExecutable("shell", "true")
+            .addExecutable("greet", "echo hello world");
+        |]
+      output <- runGarn context ["run", "project.greet"]
+      stdout output `shouldContain` "hello world"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "allows specifying deeply nested executables" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+          const a = garn.mkProject({
+            description: "a",
+            defaultExecutable: garn.shell("echo executable in a"),
+          }, {});
+          const b = garn.mkProject({
+            description: "b",
+          }, { a });
+          export const c = garn.mkProject({
+            description: "b",
+          }, { b });
+        |]
+      output <- runGarn context ["run", "c.b.a"]
+      stdout output `shouldBe` "executable in a\n"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "allows specifying argv to the executable" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+
+          export const main = garn.shell('printf "%s,%s,%s"');
+        |]
+      output <- runGarn context ["run", "main", "foo bar", "baz"]
+      stdout output `shouldBe` "foo bar,baz,"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "doesn’t format other Nix files" $ \context -> do
+      let unformattedNix =
+            [i|
+                  { ...
+                    }
+              :       {
+                some              =     poorly
+              formatted nix;
+                    }
             |]
-          output <- runGarn ["run", "main"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldBe` "foobarbaz\n"
-          exitCode output `shouldBe` ExitSuccess
+      writeFile context "unformatted.nix" unformattedNix
+      writeHaskellProject repoDir (Just (tempDir context))
+      _ <- runGarn context ["run", "foo"]
+      readFile (tempDir context </> "./unformatted.nix")
+        `shouldReturn` unformattedNix
 
-        it "propagates the exit status of the child process" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
+    it "forwards the user's tty" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+
+          export const printTty = garn.shell("tty");
+        |]
+      output <- runGarn context ["run", "printTty"]
+      stdout output `shouldStartWith` "/dev/"
+      exitCode output `shouldBe` ExitSuccess
+
+    it "allows to use backtick syntax" $ \context -> do
+      writeFile
+        context
+        "garn.ts"
+        [i|
+          import * as garn from "#{repoDir}/ts/mod.ts"
+
+          const hello = garn.mkPackage(garn.nix.nixRaw`pkgs.hello`, "hello");
+
+          export const main = garn.mkProject(
+            {
+              description: "",
+              defaultEnvironment: garn.emptyEnvironment,
+            },
+            {},
+          ).addExecutable("foo")`${hello}/bin/hello`;
+        |]
+      output <- runGarn context ["run", "main.foo"]
+      stdout output `shouldBe` "Hello, world!\n"
+
+    describe "top-level executables" $ do
+      it "shows top-level executables in the help" $ \context -> do
+        writeFile context "garn.ts" $
+          unindent
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.shell`exit 23`;
+              export const topLevelExecutable: garn.Executable = garn.shell("true");
             |]
-          output <- runGarn ["run", "main"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldBe` ""
-          exitCode output `shouldBe` ExitFailure 23
-
-        it "runs executables within an environment" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
+        output <- runGarn context ["run", "--help"]
+        stdout output
+          `shouldMatch` unindent
             [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-              import { nixRaw } from "#{repoDir}/ts/nix.ts";
-
-              const myEnv = garn.mkEnvironment().withDevTools([garn.mkPackage(nixRaw`pkgs.hello`, "hello")]);
-              export const main = myEnv.shell("hello");
+              Available commands:
+                topLevelExecutable.*
             |]
-          output <- runGarn ["run", "main"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldBe` "Hello, world!\n"
-          exitCode output `shouldBe` ExitSuccess
 
-        it "runs non-default executables within projects" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
+      describe "help of other subcommands" $ do
+        let commands = ["build", "enter", "check"]
+        forM_ commands $ \command -> do
+          describe command $ do
+            it "does not show top-level executables in the help" $ \context -> do
+              writeFile context "garn.ts" $
+                unindent
+                  [i|
+                    import * as garn from "#{repoDir}/ts/mod.ts"
+
+                    export const topLevelExecutable: garn.Executable = garn.shell("true");
+                  |]
+              output <- runGarn context [command, "--help"]
+              stdout output `shouldNotContain` "topLevelExecutable"
+
+    describe "top-level projects" $ do
+      it "shows runnable projects in the help" $ \context -> do
+        writeFile context "garn.ts" $
+          unindent
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
-              export const project = garn.mkProject({
-                description: "my project",
-                defaultEnvironment: garn.emptyEnvironment,
-              }, {}).addExecutable("hello", "echo Hello, world!");
-            |]
-          output <- runGarn ["run", "project.hello"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldBe` "Hello, world!\n"
-          exitCode output `shouldBe` ExitSuccess
 
-        it "supports running executables on projects containing a dep 'shell'" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-              export const project = garn.mkProject({
-                description: "",
-                defaultEnvironment: garn.mkEnvironment(),
-              }, {})
-                .addExecutable("shell", "true")
-                .addExecutable("greet", "echo hello world");
-            |]
-          output <- runGarn ["run", "project.greet"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldContain` "hello world"
-          exitCode output `shouldBe` ExitSuccess
-
-        it "allows specifying deeply nested executables" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-              const a = garn.mkProject({
-                description: "a",
-                defaultExecutable: garn.shell("echo executable in a"),
+              export const myProject = garn.mkProject({
+                description: "a runnable project",
+                defaultExecutable: garn.shell("echo runnable"),
               }, {});
-              const b = garn.mkProject({
-                description: "b",
-              }, { a });
-              export const c = garn.mkProject({
-                description: "b",
-              }, { b });
             |]
-          output <- runGarn ["run", "c.b.a"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldBe` "executable in a\n"
-          exitCode output `shouldBe` ExitSuccess
+        output <- runGarn context ["run", "--help"]
+        stdout output
+          `shouldMatch` unindent
+            [i|
+              Available commands:
+                myProject.*
+            |]
 
-        it "allows specifying argv to the executable" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
+      it "does not show non-runnable projects in the help" $ \context -> do
+        writeFile context "garn.ts" $
+          unindent
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.shell('printf "%s,%s,%s"');
+              export const myProject = garn.mkProject({
+                description: "not runnable",
+              }, {});
             |]
-          output <- runGarn ["run", "main", "foo bar", "baz"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldBe` "foo bar,baz,"
-          exitCode output `shouldBe` ExitSuccess
+        output <- runGarn context ["run", "--help"]
+        stdout output `shouldNotContain` "myProject"
 
-        it "doesn’t format other Nix files" $ \onTestFailureLog -> do
-          let unformattedNix =
-                [i|
-                      { ...
-                        }
-                  :       {
-                    some              =     poorly
-                  formatted nix;
-                        }
-                |]
-          writeFile "unformatted.nix" unformattedNix
-          writeHaskellProject repoDir
-          output <- runGarn ["run", "foo"] "" repoDir Nothing
-          onTestFailureLog output
-          readFile "./unformatted.nix" `shouldReturn` unformattedNix
+data Context = Context
+  { repoDir :: FilePath,
+    tempDir :: FilePath,
+    onTestFailureLog :: ProcResult -> IO ()
+  }
 
-        it "forwards the user's tty" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
+runGarn :: Context -> [String] -> IO ProcResult
+runGarn context =
+  \args -> do
+    output <- runGarnInDir (tempDir context) args "" (repoDir context) Nothing
+    onTestFailureLog context output
+    pure output
 
-              export const printTty = garn.shell("tty");
-            |]
-          output <- runGarn ["run", "printTty"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldStartWith` "/dev/"
-          exitCode output `shouldBe` ExitSuccess
+writeFile :: Context -> FilePath -> String -> IO ()
+writeFile context = \path content ->
+  Prelude.writeFile (tempDir context </> path) content
 
-        it "allows to use backtick syntax" $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-
-              const hello = garn.mkPackage(garn.nix.nixRaw`pkgs.hello`, "hello");
-
-              export const main = garn.mkProject(
-                {
-                  description: "",
-                  defaultEnvironment: garn.emptyEnvironment,
-                },
-                {},
-              ).addExecutable("foo")`${hello}/bin/hello`;
-            |]
-          output <- runGarn ["run", "main.foo"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output `shouldBe` "Hello, world!\n"
-
-        describe "top-level executables" $ do
-          it "shows top-level executables in the help" $ \onTestFailureLog -> do
-            writeFile "garn.ts" $
-              unindent
-                [i|
-                  import * as garn from "#{repoDir}/ts/mod.ts"
-
-                  export const topLevelExecutable: garn.Executable = garn.shell("true");
-                |]
-            output <- runGarn ["run", "--help"] "" repoDir Nothing
-            onTestFailureLog output
-            stdout output
-              `shouldMatch` unindent
-                [i|
-                  Available commands:
-                    topLevelExecutable.*
-                |]
-
-          describe "help of other subcommands" $ do
-            let commands = ["build", "enter", "check"]
-            forM_ commands $ \command -> do
-              describe command $ do
-                it "does not show top-level executables in the help" $ \onTestFailureLog -> do
-                  writeFile "garn.ts" $
-                    unindent
-                      [i|
-                        import * as garn from "#{repoDir}/ts/mod.ts"
-
-                        export const topLevelExecutable: garn.Executable = garn.shell("true");
-                      |]
-                  output <- runGarn [command, "--help"] "" repoDir Nothing
-                  onTestFailureLog output
-                  stdout output `shouldNotContain` "topLevelExecutable"
-
-        describe "top-level projects" $ do
-          it "shows runnable projects in the help" $ \onTestFailureLog -> do
-            writeFile "garn.ts" $
-              unindent
-                [i|
-                  import * as garn from "#{repoDir}/ts/mod.ts"
-
-                  export const myProject = garn.mkProject({
-                    description: "a runnable project",
-                    defaultExecutable: garn.shell("echo runnable"),
-                  }, {});
-                |]
-            output <- runGarn ["run", "--help"] "" repoDir Nothing
-            onTestFailureLog output
-            stdout output
-              `shouldMatch` unindent
-                [i|
-                  Available commands:
-                    myProject.*
-                |]
-
-          it "does not show non-runnable projects in the help" $ \onTestFailureLog -> do
-            writeFile "garn.ts" $
-              unindent
-                [i|
-                  import * as garn from "#{repoDir}/ts/mod.ts"
-
-                  export const myProject = garn.mkProject({
-                    description: "not runnable",
-                  }, {});
-                |]
-            output <- runGarn ["run", "--help"] "" repoDir Nothing
-            onTestFailureLog output
-            stdout output `shouldNotContain` "myProject"
+withContext :: SpecWith Context -> Spec
+withContext test = do
+  repoDir <- runIO getCurrentDirectory
+  around
+    ( \test ->
+        withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")] $
+          withSystemTempDirectory "garn-test" $ \tempDir ->
+            onTestFailureLogger $ \onTestFailureLog ->
+              test $
+                Context
+                  { repoDir,
+                    tempDir,
+                    onTestFailureLog
+                  }
+    )
+    test

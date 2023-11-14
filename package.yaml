@@ -50,6 +50,7 @@ dependencies:
   - containers
   - cradle
   - directory
+  - filepath
   - getopt-generics
   - interpolate
   - optparse-applicative
@@ -80,7 +81,6 @@ tests:
       - -fdefer-typed-holes
     dependencies:
       - async
-      - filepath
       - hspec
       - hspec-discover
       - hspec-discover

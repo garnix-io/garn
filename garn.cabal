@@ -27,6 +27,7 @@ library
       Garn
       Garn.CodeGen
       Garn.Common
+      Garn.Env
       Garn.Errors
       Garn.GarnConfig
       Garn.ImportVersion
@@ -78,6 +79,7 @@ library
     , containers
     , cradle
     , directory
+    , filepath
     , getopt-generics
     , interpolate
     , optparse-applicative
@@ -135,6 +137,7 @@ executable codegen
     , containers
     , cradle
     , directory
+    , filepath
     , garn
     , getopt-generics
     , interpolate
@@ -193,6 +196,7 @@ executable garn
     , containers
     , cradle
     , directory
+    , filepath
     , garn
     , getopt-generics
     , interpolate
@@ -223,6 +227,7 @@ test-suite spec
       Garn
       Garn.CodeGen
       Garn.Common
+      Garn.Env
       Garn.Errors
       Garn.GarnConfig
       Garn.ImportVersion

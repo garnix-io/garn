@@ -23,11 +23,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1699553399,
-        "narHash": "sha256-eBxciNI9jHqClb/hZpoBTfuoGKI8oiTJwp6FoTMaIMQ=",
+        "lastModified": 1700618825,
+        "narHash": "sha256-Ks5VmsXOMa+ynKdkAukmFKMu8l86SFoVzparkPJ7VNU=",
         "owner": "garnix-io",
         "repo": "cradle",
-        "rev": "d692d73965d7a07df15eeaabab6de3a504978b4b",
+        "rev": "db9929e3bed34ac793293c53195cd0a6804c5e71",
         "type": "github"
       },
       "original": {

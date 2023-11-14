@@ -92,7 +92,7 @@ spec = do
 
       it "generates formatted flakes" $ \onTestFailureLog -> do
         inTempDirectory $ do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           output <- runGarn ["run", "foo"] "" repoDir Nothing
           onTestFailureLog output
           flake <- readFile "./flake.nix"
