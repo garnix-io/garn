@@ -17,13 +17,13 @@ import Garn.Optparse
 import System.Directory (doesFileExist)
 import System.Exit (exitWith)
 import System.FilePath ((</>))
-import System.IO (hPutStrLn, stderr)
+import System.IO (hPutStrLn)
 
 run :: Env -> IO ()
 run env =
   (readOptionsAndConfig env >>= runWith env)
     `catch` \(Garn.Errors.UserError err) -> do
-      hPutStrLn stderr $ "[garn] Error: " <> err
+      hPutStrLn (stderr env) $ "[garn] Error: " <> err
       exitWith $ ExitFailure 1
 
 readOptionsAndConfig :: Env -> IO Options
@@ -32,8 +32,8 @@ readOptionsAndConfig env = do
   if hasGarn
     then do
       garnConfig <- readGarnConfig env
-      getOpts (WithGarnTs garnConfig)
-    else getOpts WithoutGarnTs
+      getOpts env (WithGarnTs garnConfig)
+    else getOpts env WithoutGarnTs
 
 runWith :: Env -> Options -> IO ()
 runWith env (WithoutGarnTsOpts Init) = initGarnTs $ initFileName env
@@ -45,13 +45,13 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
       exitCode <- runNix env (StdinHandle (stdin env), DelegateCtrlC, "run", ".#" <> asNixFacing target, "--", argv)
       exitWith exitCode
     Enter (CommandOptions {..}) -> do
-      hPutStrLn stderr $
+      hPutStrLn (stderr env) $
         "[garn] Entering "
           <> asUserFacing target
           <> " shell. Type 'exit' to exit."
       c <- runNix env (StdinHandle (stdin env), "develop", ".#" <> asNixFacing target, "--command", userShell env)
       when (c /= ExitSuccess) $ exitWith c
-      hPutStrLn stderr $ "[garn] Exiting " <> asUserFacing target <> " shell."
+      hPutStrLn (stderr env) $ "[garn] Exiting " <> asUserFacing target <> " shell."
       pure ()
     Build (CommandOptions {targetConfig, target}) -> do
       case targetConfig of
@@ -83,4 +83,9 @@ checkTarget env targetConfig = case targetConfig of
   TargetConfigExecutable _ -> pure ()
 
 runNix :: (Input a, Output b) => Env -> a -> IO b
-runNix env = Cradle.run (WorkingDir (workingDir env)) "nix" nixArgs
+runNix env =
+  Cradle.run
+    (WorkingDir (workingDir env))
+    (StderrHandle (stderr env))
+    "nix"
+    nixArgs

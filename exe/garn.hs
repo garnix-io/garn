@@ -19,6 +19,7 @@ productionEnv = do
     Env
       { workingDir = ".",
         stdin = System.IO.stdin,
+        stderr = System.IO.stderr,
         initFileName,
         userShell
       }

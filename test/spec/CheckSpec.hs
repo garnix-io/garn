@@ -146,6 +146,7 @@ spec = do
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output
+          -- todo: this should be different
           stderr output `shouldContain` "error"
           exitCode output `shouldBe` ExitFailure 1
 

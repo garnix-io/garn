@@ -6,7 +6,7 @@ module Garn.GarnConfig where
 
 import Control.Exception (throwIO)
 import Control.Monad
-import Cradle (Stderr (..), StdoutUntrimmed (..), run)
+import Cradle (Stderr (..), StderrHandle (..), StdoutUntrimmed (..), run)
 import Data.Aeson
   ( FromJSON (parseJSON),
     FromJSONKey,
@@ -135,7 +135,11 @@ readGarnConfig env = do
         }
       |]
     hClose mainHandle
-    (exitCode, StdoutUntrimmed (cs -> out)) <- run (words "deno run --quiet --check --allow-write --allow-run --allow-read") mainPath
+    (exitCode, StdoutUntrimmed (cs -> out)) <-
+      run
+        (StderrHandle (stderr env))
+        (words "deno run --quiet --check --allow-write --allow-run --allow-read")
+        mainPath
     when (exitCode /= ExitSuccess) $ do
       exitWith exitCode
     case eitherDecode out :: Either String (Maybe DenoOutput) of
