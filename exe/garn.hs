@@ -1,6 +1,7 @@
 module Main where
 
-import Garn (Env (..), run)
+import Garn (run)
+import Garn.Env (Env (..))
 import Paths_garn (getDataFileName)
 import qualified System.IO
 import qualified System.Posix.User as POSIX
@@ -16,7 +17,8 @@ productionEnv = do
   userShell <- findUserShell
   pure $
     Env
-      { stdin = System.IO.stdin,
+      { workingDir = ".",
+        stdin = System.IO.stdin,
         initFileName,
         userShell
       }
