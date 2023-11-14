@@ -18,6 +18,7 @@ export const npmInitializer: Initializer = (dir) => {
     name: z.string().optional(),
     description: z.string().optional(),
     scripts: z.record(z.string()).optional(),
+    devDependencies: z.record(z.string()).optional(),
   });
   const result = parseJson(packageJsonSchema, contents);
   if (result.error) {
@@ -26,8 +27,11 @@ export const npmInitializer: Initializer = (dir) => {
       reason: `Could not parse package.json: ${result.error.message}`,
     };
   }
-  const scripts = Object.keys(result.data.scripts || {});
-  const nonTestScripts = scripts.filter((name) => name !== "test");
+  const scripts = result.data.scripts || {};
+  const nonTestScripts = Object.entries(scripts).filter(
+    ([name, _]) => name !== "test",
+  );
+  const isViteProject = result.data.devDependencies?.vite != null;
   return {
     tag: "ShouldRun",
     imports: [],
@@ -42,17 +46,31 @@ export const npmInitializer: Initializer = (dir) => {
             nodeVersion: "18",
           })
         `,
-        ...(scripts.includes("test")
-          ? ['.addCheck("test", "npm run test")']
-          : []),
-        ...nonTestScripts.map(
-          (name) =>
-            `.addExecutable(${JSON.stringify(name)}, ${JSON.stringify(
-              `npm run ${name}`,
-            )})`,
-        ),
+        ...(isViteProject ? [`.add(garn.javascript.vite)`] : []),
+        ...("test" in scripts ? ['.addCheck("test", "npm run test")'] : []),
+        ...nonTestScripts
+          .filter(([name, script]) =>
+            isViteProject ? !isSuperSeededByVitePlugin(name, script) : true,
+          )
+          .map(
+            ([name, _]) =>
+              `.addExecutable(${JSON.stringify(name)}, ${JSON.stringify(
+                `npm run ${name}`,
+              )})`,
+          ),
       ].join("\n  ") + ";",
   };
+};
+
+const isSuperSeededByVitePlugin = (name: string, script: string): boolean => {
+  const viteScaffoldedScripts = [
+    ["dev", "vite"],
+    ["dev", "vite dev"],
+    ["build", "tsc && vite build"],
+    ["build", "vite build"],
+    ["preview", "vite preview"],
+  ];
+  return viteScaffoldedScripts.some(([n, s]) => n === name && s === script);
 };
 
 export const initializers = [npmInitializer];

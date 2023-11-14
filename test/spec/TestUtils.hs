@@ -1,25 +1,30 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module TestUtils where
 
 import Control.Concurrent
 import Control.Concurrent.Async (waitEitherCatch, withAsync)
 import Control.Exception (SomeException, bracket, catch, throwIO)
-import Control.Monad (unless, when)
+import Control.Monad (forM_, unless, when)
 import qualified Data.Aeson as Aeson
 import Data.String.Conversions (cs)
 import Data.String.Interpolate
 import qualified Data.Yaml as Yaml
 import Development.Shake (CmdOption (EchoStdout), Exit (Exit), StdoutTrim (..), cmd)
+import Development.Shake.Command (CmdOption (Cwd), Stdout (Stdout))
 import Garn
+import System.Directory (copyFile, createDirectoryIfMissing)
 import System.Environment (withArgs)
 import System.Exit
+import System.FilePath (takeDirectory, (</>))
 import System.IO (Handle, hClose, hPutStr, hPutStrLn)
 import qualified System.IO as Sys
 import System.IO.Silently (hCapture)
 import System.Posix (fdToHandle, openPseudoTerminal)
 import System.Process (ProcessHandle, interruptProcessGroupOf, waitForProcess)
 import Test.Hspec
+import Test.Mockery.Directory (inTempDirectory)
 import Text.Regex.PCRE.Heavy (compileM, (=~))
 
 shouldMatch :: (HasCallStack) => String -> String -> Expectation
@@ -221,3 +226,12 @@ withFileServer action = do
           "curl --silent localhost:8777/base.ts"
           (EchoStdout False)
       pure $ c == ExitSuccess
+
+inExampleCopy :: FilePath -> FilePath -> IO a -> IO a
+inExampleCopy repoDir exampleDir action = do
+  Stdout (words -> files) <- cmd (Cwd (repoDir </> "examples" </> exampleDir)) "git ls-files"
+  inTempDirectory $ do
+    forM_ files $ \file -> do
+      createDirectoryIfMissing True $ takeDirectory file
+      copyFile (repoDir </> "examples" </> exampleDir </> file) file
+    action

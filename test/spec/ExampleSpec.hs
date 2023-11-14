@@ -6,7 +6,6 @@ module ExampleSpec where
 import Control.Concurrent (threadDelay)
 import Control.Exception (catch)
 import Control.Lens ((^.))
-import Control.Monad (forM_)
 import Cradle (run_)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
@@ -14,12 +13,10 @@ import Data.Text (Text)
 import Development.Shake
 import Network.HTTP.Client (HttpException)
 import Network.Wreq (Response, get, responseBody)
-import System.Directory (copyFile, createDirectoryIfMissing, getCurrentDirectory, withCurrentDirectory)
+import System.Directory (getCurrentDirectory, withCurrentDirectory)
 import System.Exit (ExitCode (..))
-import System.FilePath (takeDirectory, (</>))
 import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)
-import Test.Mockery.Directory (inTempDirectory)
 import TestUtils
 
 retryGet :: String -> IO (Response Text)
@@ -91,11 +88,7 @@ spec = aroundAll_ withFileServer $ do
       exitCode output `shouldBe` ExitSuccess
 
     it "catches failing checks" $ \onTestFailureLog -> do
-      Stdout (words -> files) <- cmd (Cwd "examples/npm-project") "git ls-files"
-      inTempDirectory $ do
-        forM_ files $ \file -> do
-          createDirectoryIfMissing True $ takeDirectory file
-          copyFile (repoDir </> "examples/npm-project" </> file) file
+      inExampleCopy repoDir "npm-project" $ do
         writeFile
           "src/index.test.ts"
           [i|
