@@ -22,11 +22,45 @@ export type ProjectData = {
   defaultExecutable?: Executable;
 };
 
+/**
+ * `Plugin`s automatically add one or more fields to your project. You can use
+ * existing plugins to automatically add a few useful fields without having to
+ * declare them manually yourself.
+ *
+ * Here's an example of a simple `Plugin` and how to use it:
+ *
+ * ```typescript
+ * import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
+ *
+ * const prettier =
+ *   (
+ *     globPattern: string,
+ *   ): garn.Plugin<
+ *     { formatCheck: garn.Check; format: garn.Executable },
+ *     garn.ProjectHelpers
+ *   > =>
+ *   (p) =>
+ *     p
+ *       .withDevTools([
+ *         garn.mkPackage(garn.nix.nixRaw`pkgs.nodePackages.prettier`, "prettier"),
+ *       ])
+ *       .addCheck("formatCheck", `prettier --check '${globPattern}'`)
+ *       .addExecutable("format", `prettier --write '${globPattern}'`);
+ *
+ * export const frontend = garn.javascript
+ *   .mkNpmProject({
+ *     src: ".",
+ *     description: "An NPM frontend",
+ *     nodeVersion: "18",
+ *   })
+ *   .add(prettier("src/*.ts"));
+ * ```
+ */
 export type Plugin<Additions, Dependencies = object> = (
   project: Dependencies & ProjectData,
 ) => Additions;
 
-type ProjectHelpers = {
+export type ProjectHelpers = {
   /**
    * Returns a new Project with the provided devtools added to the default
    * Environment.
