@@ -61,7 +61,7 @@ describe("Project.add", () => {
   it("allows adding fields with .add", () => {
     const project = garn
       .mkProject({ description: "" }, {})
-      .add((self) => ({ ...self, foo: garn.shell("echo foo") }));
+      .add((_self) => ({ foo: garn.shell("echo foo") }));
     const output = runExecutable(project.foo);
     assertSuccess(output);
     assertStdout(output, "foo\n");
@@ -74,7 +74,7 @@ describe("Project.add", () => {
         {},
       )
       .withDevTools([garn.mkPackage(nix.nixRaw`pkgs.hello`, "")])
-      .add((self) => ({ ...self, foo: self.shell("hello") }));
+      .add((self) => ({ foo: self.shell("hello") }));
     const output = runExecutable(project.foo);
     assertSuccess(output);
     assertStdout(output, "Hello, world!\n");
@@ -92,7 +92,7 @@ describe("Project.add", () => {
           `,
         },
       )
-      .add((self) => ({ ...self, foo: self.shell`${self.package}/bin/main` }));
+      .add((self) => ({ foo: self.shell`${self.package}/bin/main` }));
     const output = runExecutable(project.foo);
     assertSuccess(output);
     assertStdout(output, "main executable\n");
