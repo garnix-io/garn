@@ -13,7 +13,7 @@ import Test.Hspec
 import Test.Mockery.Environment (withModifiedEnvironment)
 
 spec :: Spec
-spec = parallel $ do
+spec = do
   describe "scanPackages" $ do
     it "empty pkgSpec collects all top level derivations, but skips nested ones"
       $ testScanPackages
