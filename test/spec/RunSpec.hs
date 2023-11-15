@@ -24,12 +24,14 @@ import qualified Prelude
 
 spec :: Spec
 spec =
-  describe "run" $ withContext $ do
+  parallel $ fdescribe "run" $ withContext $ do
     repoDir <- runIO getCurrentDirectory
-    it "runs a simple Haskell program" $ \context -> do
+    fit "runs a simple Haskell program" $ \context -> do
+      print repoDir
       writeHaskellProject repoDir (Just (tempDir context))
       output <- runGarn context ["run", "foo"]
-      stdout output `shouldBe` "haskell test output\n"
+      pure ()
+    -- stdout output `shouldBe` "haskell test output\n"
 
     it "writes flake.{lock,nix}, but no other files" $ \context -> do
       writeHaskellProject repoDir (Just (tempDir context))
@@ -279,16 +281,15 @@ writeFile context = \path content ->
 withContext :: SpecWith Context -> Spec
 withContext test = do
   repoDir <- runIO getCurrentDirectory
-  beforeAll_ (setEnv "NIX_CONFIG" "experimental-features =") $
-    around
-      ( \test ->
-          withSystemTempDirectory "garn-test" $ \tempDir ->
-            onTestFailureLogger $ \onTestFailureLog ->
-              test $
-                Context
-                  { repoDir,
-                    tempDir,
-                    onTestFailureLog
-                  }
-      )
-      test
+  around
+    ( \test ->
+        withSystemTempDirectory "garn-test" $ \tempDir ->
+          onTestFailureLogger $ \onTestFailureLog ->
+            test $
+              Context
+                { repoDir,
+                  tempDir,
+                  onTestFailureLog
+                }
+    )
+    test

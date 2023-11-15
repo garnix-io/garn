@@ -31,10 +31,11 @@ wrap spec = do
 
 spec :: Spec
 spec = do
-  describe "build" $ do
+  fdescribe "build" $ do
     repoDir <- runIO getCurrentDirectory
     wrap $ do
       it "builds packages and creates a result link" $ \runGarn -> do
+        print repoDir
         writeHaskellProject repoDir Nothing
         _ <- runGarn ["build", "foo"]
         doesDirectoryExist "result" `shouldReturn` True
