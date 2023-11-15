@@ -24,7 +24,7 @@ export type ProjectData = {
 
 /**
  * `Plugin`s automatically add one or more fields to your project. You can use
- * existing plugins to automatically add a few useful fields without having to
+ * existing plugins to automatically add prepackaged functionality to your `Project`.
  * declare them manually yourself.
  *
  * Here's an example of a simple `Plugin` and how to use it:
