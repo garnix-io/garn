@@ -31,21 +31,20 @@ import WithCli (withCli)
 -- A nix expression that specifies which packages to include in the final
 -- collection.
 --
--- `collectionSpec` represents a collection with all top-level derivations
--- included by default, but everything else excluded. This can be overridden
--- with the given attribute set.
+-- All top-level derivations included by default, but everything else excluded.
+-- This can be overridden with the given attribute set.
 pkgSpec :: String
 pkgSpec =
   [i|
-    collectionSpec {
-      haskellPackages = collectionSpec {};
-      nimPackages = collectionSpec {};
-      nodePackages = collectionSpec { "@antora/cli" = false; };
-      phpPackages = collectionSpec {};
-      python2Packages = collectionSpec {};
-      python3Packages = collectionSpec {};
-      rubyPackages = collectionSpec {};
-      rustPackages = collectionSpec {};
+    {
+      haskellPackages = {};
+      nimPackages = {};
+      nodePackages = { "@antora/cli" = false; };
+      phpPackages = {};
+      python2Packages = {};
+      python3Packages = {};
+      rubyPackages = {};
+      rustPackages = {};
     }
   |]
 
@@ -94,26 +93,23 @@ scanPackages system pkgs pkgSpec = do
       [i|
         lib:
           let
-            collectionSpec = overrides: { inherit overrides; };
-            filterNulls = lib.filterAttrs (k: v: v != null);
             scan = path: pkgs: pkgSpec:
-              filterNulls (lib.mapAttrs (k: v:
-                let
-                  newPath = "${path}.${k}";
-                  spec = if pkgSpec.overrides ? ${k}
-                    then pkgSpec.overrides.${k}
-                    else if isBroken v then false
-                    else lib.isDerivation v;
-                in
-                  if spec == false then null
-                  else if spec == true then mkDerivation newPath v
-                  else mkCollection (scan newPath v spec)
-              ) pkgs);
-
-            mkCollection = subPkgs: {
-              tag = "Collection";
-              inherit subPkgs;
-            };
+              if pkgSpec == false then null
+              else filterNulls (lib.mapAttrs (k: v:
+                  let
+                    newPath = "${path}.${k}";
+                  in
+                    if pkgSpec ? ${k}
+                      then mkCollection (scan newPath v (pkgSpec.${k}))
+                      else if isWorkingDerivation v then mkDerivation newPath v
+                      else null
+                ) pkgs);
+            mkCollection = subPkgs:
+              if subPkgs == null then null
+              else {
+                tag = "Collection";
+                inherit subPkgs;
+              };
             mkDerivation = path: pkg: {
                 tag = "Derivation";
                 inherit path;
@@ -121,9 +117,15 @@ scanPackages system pkgs pkgSpec = do
                   then pkg.meta.description
                   else null;
               };
-            isBroken = value: !(builtins.tryEval value).success
-              || !(let evalResult = (builtins.tryEval (value.meta.broken or false));
-                 in evalResult.success && !evalResult.value);
+            filterNulls = lib.filterAttrs (k: v: v != null);
+            isWorkingDerivation = value:
+              (builtins.tryEval value).success &&
+              (let
+                evalResult = (builtins.tryEval (value.meta.broken or false));
+               in
+                evalResult.success &&
+                !evalResult.value &&
+                lib.isDerivation value);
           in
             scan "pkgs" (#{pkgs}) (#{pkgSpec})
       |]

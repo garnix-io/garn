@@ -38,9 +38,7 @@ spec = parallel $ do
             };
           }
         |]
-        [i|
-          collectionSpec {}
-        |]
+        "{}"
       $ mempty
         <> "foo" ~> Derivation {description = Nothing, path = "pkgs.foo"}
         <> "bar" ~> Derivation {description = Nothing, path = "pkgs.bar"}
@@ -70,11 +68,7 @@ spec = parallel $ do
             };
           }
         |]
-        [i|
-          collectionSpec {
-            nested = collectionSpec {};
-          }
-        |]
+        "{ nested = {}; }"
       $ mempty
         <> "foo" ~> Derivation {description = Nothing, path = "pkgs.foo"}
         <> "nested" ~> Collection ("nested-once" ~> Derivation {description = Nothing, path = "pkgs.nested.nested-once"})
@@ -110,10 +104,10 @@ spec = parallel $ do
           }
         |]
         [i|
-          collectionSpec {
+          {
             bad = false;
-            nested = collectionSpec {
-              nested-again = collectionSpec {
+            nested = {
+              nested-again = {
                 nested-bad = false;
               };
             };
@@ -142,9 +136,7 @@ spec = parallel $ do
             baz = { isa = "hey"; };
           }
         |]
-        [i|
-          collectionSpec {}
-        |]
+        "{}"
       $ "foo" ~> Derivation {description = Nothing, path = "pkgs.foo"}
 
     it "ignores attributes that throw"
@@ -159,9 +151,7 @@ spec = parallel $ do
             throwing = throw "test error message";
           }
         |]
-        [i|
-          collectionSpec {}
-        |]
+        "{}"
       $ "foo" ~> Derivation {description = Nothing, path = "pkgs.foo"}
 
     it "ignores attributes that are marked broken"
@@ -185,9 +175,7 @@ spec = parallel $ do
             } // { meta.broken = false; };
           }
         |]
-        [i|
-          collectionSpec {}
-        |]
+        "{}"
       $ "foo" ~> Derivation {description = Nothing, path = "pkgs.foo"}
 
     it "outputs package descriptions to be turned into JSDoc comments"
@@ -208,9 +196,7 @@ spec = parallel $ do
             };
           }
         |]
-        [i|
-          collectionSpec {}
-        |]
+        "{}"
       $ mempty
         <> "foo" ~> Derivation {description = Just "This is the bestest derivation.", path = "pkgs.foo"}
         <> "bar" ~> Derivation {description = Just "This one - eh, not so good!", path = "pkgs.bar"}
