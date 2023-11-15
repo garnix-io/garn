@@ -62,8 +62,8 @@ spec = do
               export const project = garn.mkProject(
                 { description: "" },
                 {
-                  foo: garn.build`echo 'foo' > $out/build-artifact`,
-                  bar: garn.build`echo 'bar' > $out/build-artifact`,
+                  foo: garn.build("echo 'foo' > $out/build-artifact"),
+                  bar: garn.build("echo 'bar' > $out/build-artifact"),
                 },
               );
             |]
@@ -80,7 +80,7 @@ spec = do
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts";
 
-              export const p = garn.build`echo 'build output' > $out/build-artifact`;
+              export const p = garn.build("echo 'build output' > $out/build-artifact");
             |]
         output <- runGarn ["build", "p"]
         exitCode output `shouldBe` ExitSuccess
@@ -95,7 +95,7 @@ spec = do
               export const project = garn.mkProject(
                 { description: "" },
                 {
-                  short: garn.build`short command`,
+                  short: garn.build("short command"),
                   longer: garn.build`
                     # this is some longer build script:
                     bla bla bla
@@ -138,9 +138,7 @@ spec = do
               export const project = garn.mkProject(
                 { description: "" },
                 {
-                  package: garn.build`
-                    echo "build-content" > $out/build-artifact
-                  `,
+                  package: garn.build("echo "build-content" > $out/build-artifact"),
                 },
               )
             |]
@@ -162,9 +160,7 @@ spec = do
                     garn
                       .emptyEnvironment
                       .withDevTools([garn.mkPackage(nix.nixRaw`pkgs.hello`, "hello")])
-                      .build`
-                        hello > $out/build-artifact
-                      `,
+                      .build("hello > $out/build-artifact"),
                 },
               )
             |]
@@ -187,9 +183,7 @@ spec = do
                       undefined,
                       nix.nixStrLit`SETUP_VAR="hello from setup"`,
                     )
-                    .build`
-                      echo $SETUP_VAR > $out/build-artifact
-                    `,
+                    .build("echo $SETUP_VAR > $out/build-artifact"),
                 },
               )
             |]
