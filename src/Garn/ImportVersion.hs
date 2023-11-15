@@ -1,18 +1,23 @@
-module Garn.ImportVersion (garnVersionSplice) where
+{-# LANGUAGE DeriveLift #-}
+{-# LANGUAGE TemplateHaskell #-}
+
+module Garn.ImportVersion (Versions (..), versionsSplice) where
 
 import Data.Aeson (FromJSON, eitherDecodeFileStrict')
 import GHC.Generics (Generic)
-import Language.Haskell.TH (Exp (LitE), Lit (StringL), Q, runIO)
+import Language.Haskell.TH (Exp, Q, runIO)
+import Language.Haskell.TH.Syntax (Lift (..))
 
-newtype Version = Version
-  { tsLibVersion :: String
+data Versions = Versions
+  { tsLibVersion :: String,
+    nixpkgsInput :: String
   }
-  deriving stock (Generic)
+  deriving stock (Generic, Lift)
   deriving anyclass (FromJSON)
 
-garnVersionSplice :: Q Exp
-garnVersionSplice = do
-  version <- runIO $ eitherDecodeFileStrict' "./ts/internal/version.json"
-  case version of
-    Right version -> pure $ LitE $ StringL $ tsLibVersion version
+versionsSplice :: Q Exp
+versionsSplice = do
+  versions <- runIO $ eitherDecodeFileStrict' "./ts/internal/version.json"
+  case versions of
+    Right (versions :: Versions) -> [|versions|]
     Left err -> fail err

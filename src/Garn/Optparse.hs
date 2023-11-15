@@ -12,8 +12,8 @@ module Garn.Optparse
 where
 
 import qualified Data.Map as Map
+import Garn.Common (garnCliVersion)
 import Garn.GarnConfig
-import Garn.Utils (garnCliVersion)
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 import qualified Options.Applicative.Help.Pretty as OA

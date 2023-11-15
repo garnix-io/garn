@@ -9,7 +9,12 @@ export {
 } from "./environment.ts";
 export { type Executable } from "./executable.ts";
 export { mkPackage, type Package } from "./package.ts";
-export { mkProject, type Project } from "./project.ts";
+export {
+  mkProject,
+  type Project,
+  type Plugin,
+  type ProjectHelpers,
+} from "./project.ts";
 export { editGarnConfig } from "./edit.ts";
 
 // languages
