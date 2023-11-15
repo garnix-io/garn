@@ -1,17 +1,12 @@
-import { Check } from "./check.ts";
-import { Executable } from "./executable.ts";
-import { Plugin, Project } from "./project.ts";
 import { describe, it } from "https://deno.land/std@0.206.0/testing/bdd.ts";
 import * as garn from "./mod.ts";
-import * as nix from "./nix.ts";
 import { assertStdout, assertSuccess, runExecutable } from "./testUtils.ts";
-import { Package } from "./mod.ts";
 
-const assertTypeIsCheck = (_c: Check) => {};
-const assertTypeIsExecutable = (_e: Executable) => {};
-const assertTypeIsPackage = (_p: Package) => {};
+const assertTypeIsCheck = (_c: garn.Check) => {};
+const assertTypeIsExecutable = (_e: garn.Executable) => {};
+const assertTypeIsPackage = (_p: garn.Package) => {};
 
-const _testTypeCheckingOfAddCheck = (project: Project) => {
+const _testTypeCheckingOfAddCheck = (project: garn.Project) => {
   const p = project
     .addExecutable("unrelated1", "true")
     .addCheck("check", "true")
@@ -23,7 +18,7 @@ const _testTypeCheckingOfAddCheck = (project: Project) => {
   p.check``;
 };
 
-const _testTypeCheckingOfAddCheckTemplate = (project: Project) => {
+const _testTypeCheckingOfAddCheckTemplate = (project: garn.Project) => {
   const p = project
     .addExecutable("unrelated1", "true")
     .addCheck("check")`true`.addExecutable("unrelated2", "true");
@@ -34,7 +29,7 @@ const _testTypeCheckingOfAddCheckTemplate = (project: Project) => {
   p.check``;
 };
 
-const _testTypeCheckingOfAddExecutable = (project: Project) => {
+const _testTypeCheckingOfAddExecutable = (project: garn.Project) => {
   const p = project
     .addExecutable("unrelated1", "true")
     .addExecutable("shell", "true")
@@ -46,7 +41,7 @@ const _testTypeCheckingOfAddExecutable = (project: Project) => {
   p.shell``;
 };
 
-const _testTypeCheckingOfAddExecutableTemplate = (project: Project) => {
+const _testTypeCheckingOfAddExecutableTemplate = (project: garn.Project) => {
   const p = project
     .addExecutable("unrelated1", "true")
     .addExecutable("shell")`true`.addExecutable("unrelated2", "true");
@@ -73,7 +68,7 @@ describe("Project.add", () => {
         { description: "", defaultEnvironment: garn.emptyEnvironment },
         {},
       )
-      .withDevTools([garn.mkPackage(nix.nixRaw`pkgs.hello`, "")])
+      .withDevTools([garn.mkPackage(garn.nix.nixRaw`pkgs.hello`, "")])
       .add((self) => ({ foo: self.shell("hello") }));
     const output = runExecutable(project.foo);
     assertSuccess(output);
@@ -137,7 +132,7 @@ describe("Project.add", () => {
   });
 
   it("provides a nice type synonym for plugins that add a field", () => {
-    const plugin: Plugin<{ addedField: garn.Package }> = (p) => ({
+    const plugin: garn.Plugin<{ addedField: garn.Package }> = (_p) => ({
       addedField: garn.build``,
     });
     const project = garn
@@ -152,7 +147,9 @@ describe("Project.add", () => {
   });
 
   it("provides a nice type synonym for plugins that add multiple fields", () => {
-    const plugin: Plugin<{ one: garn.Package; two: garn.Check }> = (p) => ({
+    const plugin: garn.Plugin<{ one: garn.Package; two: garn.Check }> = (
+      _p,
+    ) => ({
       one: garn.build``,
       two: garn.check(""),
     });
@@ -169,9 +166,10 @@ describe("Project.add", () => {
   });
 
   it("provides a nice interface for plugins that depend on a non-standard field", () => {
-    const plugin: Plugin<{ addedField: Executable }, { dep: Package }> = (
-      p,
-    ) => ({
+    const plugin: garn.Plugin<
+      { addedField: garn.Executable },
+      { dep: garn.Package }
+    > = (p) => ({
       addedField: garn.shell`${p.dep}/bin/whatever`,
     });
     const project = garn
@@ -188,7 +186,7 @@ describe("Project.add", () => {
   });
 
   it("allows overwriting fields", () => {
-    const plugin: Plugin<{ field: Package }> = (p) => ({
+    const plugin: garn.Plugin<{ field: garn.Package }> = (_p) => ({
       field: garn.build``,
     });
     const project = garn
