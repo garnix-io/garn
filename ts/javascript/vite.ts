@@ -37,7 +37,7 @@ export const plugin: Plugin<
 > = (base) => {
   if (base.defaultEnvironment == null) {
     throw new Error(
-      `'vite.addBuilder' can only be added to projects with a default environment`,
+      `The 'garn.javascript.vite' plugin can only be added to projects with a default environment.`,
     );
   }
   return {
