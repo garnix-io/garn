@@ -28,9 +28,6 @@ export const npmInitializer: Initializer = (dir) => {
     };
   }
   const scripts = result.data.scripts || {};
-  const nonTestScripts = Object.entries(scripts).filter(
-    ([name, _]) => name !== "test",
-  );
   const isViteProject = result.data.devDependencies?.vite != null;
   return {
     tag: "ShouldRun",
@@ -48,10 +45,13 @@ export const npmInitializer: Initializer = (dir) => {
         `,
         ...(isViteProject ? [`.add(garn.javascript.vite)`] : []),
         ...("test" in scripts ? ['.addCheck("test", "npm run test")'] : []),
-        ...nonTestScripts
-          .filter(([name, script]) =>
-            isViteProject ? !isSuperSeededByVitePlugin(name, script) : true,
-          )
+        ...Object.entries(scripts)
+          .filter(([name, script]) => {
+            if (name === "test") return false;
+            if (isViteProject && isSuperSeededByVitePlugin(name, script))
+              return false;
+            return true;
+          })
           .map(
             ([name, _]) =>
               `.addExecutable(${JSON.stringify(name)}, ${JSON.stringify(
