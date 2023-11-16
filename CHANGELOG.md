@@ -9,6 +9,7 @@
   provides a nice way to bundle up more complex project modifications into a
   single declaration. It also allows to use `Plugin`s from other sources,
   including third-party libraries.
+- Add `garn.javascript.vite`, a `Plugin` that adds fields for bundling vite projects into a `Package`.
 
 ## v0.0.15
 

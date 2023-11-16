@@ -106,10 +106,17 @@ export type ProjectHelpers = {
   ): Package;
 
   /**
-   * Modify the given project.
+   * Apply a `Plugin` to the given project.
    *
-   * This can be useful for modifying a project in a method chaining style while
-   * being able to reference that project. For example:
+   * For example, this is how you add the `vite` plugin:
+   *
+   * ```typescript
+   * export const myProject = garn.mkNpmProject(...)
+   *   .add(garn.javascript.vite)
+   * ```
+   *
+   * This can also be useful for modifying a project in a method chaining style
+   * while being able to reference the project itself. For example:
    *
    * ```typescript
    * export const myProject = garn.mkHaskellProject(...)

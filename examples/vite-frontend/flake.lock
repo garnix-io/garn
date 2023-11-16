@@ -1,0 +1,45 @@
+{
+  "nodes": {
+    "nixpkgs-repo": {
+      "locked": {
+        "lastModified": 1698376214,
+        "narHash": "sha256-8UC0cK/cT600ug+8RVc6a1sE66+U1dfsileTo65zPCg=",
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6fc7203e423bbf1c8f84cccf1c4818d097612566",
+        "type": "github"
+      },
+      "original": {
+        "owner": "NixOS",
+        "repo": "nixpkgs",
+        "rev": "6fc7203e423bbf1c8f84cccf1c4818d097612566",
+        "type": "github"
+      }
+    },
+    "npmlock2nix-repo": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1673447413,
+        "narHash": "sha256-sJM82Sj8yfQYs9axEmGZ9Evzdv/kDcI9sddqJ45frrU=",
+        "owner": "nix-community",
+        "repo": "npmlock2nix",
+        "rev": "9197bbf397d76059a76310523d45df10d2e4ca81",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "npmlock2nix",
+        "rev": "9197bbf397d76059a76310523d45df10d2e4ca81",
+        "type": "github"
+      }
+    },
+    "root": {
+      "inputs": {
+        "nixpkgs-repo": "nixpkgs-repo",
+        "npmlock2nix-repo": "npmlock2nix-repo"
+      }
+    }
+  },
+  "root": "root",
+  "version": 7
+}

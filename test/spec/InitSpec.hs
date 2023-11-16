@@ -124,6 +124,17 @@ spec = do
         onTestFailureLog output
         stdout output `shouldContain` "starting my project..."
 
+      it "adds a builder Package to vite projects" $ \onTestFailureLog -> do
+        inExampleCopy repoDir "vite-frontend" $ do
+          forM_ ["garn.ts", "flake.nix", "flake.lock"] removeFile
+          output <- runGarn ["init"] "" repoDir Nothing
+          onTestFailureLog output
+          rewriteImportsToLocalhost
+          output <- runGarn ["build", "viteFrontend.build"] "" repoDir Nothing
+          onTestFailureLog output
+          indexFile <- readFile "result/index.html"
+          indexFile `shouldContain` "<title>Vite + TS</title>"
+
       it "logs unexpected errors" $ \onTestFailureLog -> do
         writeFile "garn.cabal" [i| badCabalfile |]
         output <- runGarn ["init"] "" repoDir Nothing
