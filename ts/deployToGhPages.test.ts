@@ -15,7 +15,7 @@ const project = garn
       defaultEnvironment: garn.emptyEnvironment,
     },
     {
-      buildProject: garn.build`echo built > $out/artifact ; echo hidden > $out/.hidden`,
+      buildProject: garn.build`mkdir -p $out/assets ; echo built > $out/assets/artifact ; echo hidden > $out/.hidden`,
     },
   )
   .add(garn.deployToGhPages((self) => self.buildProject));
@@ -23,8 +23,9 @@ const project = garn
 const mkGitRepo = () => {
   const path = Deno.makeTempDirSync();
   const run = (...args: Array<string>) => {
-    const output = runCommand(new Deno.Command("git", { args, cwd: path }));
-    assertSuccess(output);
+    const output = assertSuccess(
+      runCommand(new Deno.Command("git", { args, cwd: path })),
+    );
     return output.stdout;
   };
   run("init");
@@ -34,13 +35,14 @@ const mkGitRepo = () => {
 
 const ansiRegexp = "\\x1b\\[[0-9;]+m";
 
-describe("deployToGhPagesBranch", () => {
+describe("deployToGhPages", () => {
   it("allows to create a commit on a new 'gh-pages' branch", () => {
     const gitRepo = mkGitRepo();
-    const output = runExecutable(project.deployToGhPages, {
-      cwd: gitRepo.path,
-    });
-    assertSuccess(output);
+    const output = assertSuccess(
+      runExecutable(project.deployToGhPages, {
+        cwd: gitRepo.path,
+      }),
+    );
     assertMatch(
       output.stderr,
       regexp`
@@ -61,9 +63,12 @@ describe("deployToGhPagesBranch", () => {
       Array.from(Deno.readDirSync(gitRepo.path))
         .map((x) => x.name)
         .sort(),
-      [".git", ".hidden", "artifact"],
+      [".git", ".hidden", "assets"],
     );
-    assertEquals(Deno.readTextFileSync(`${gitRepo.path}/artifact`), "built\n");
+    assertEquals(
+      Deno.readTextFileSync(`${gitRepo.path}/assets/artifact`),
+      "built\n",
+    );
     assertMatch(
       gitRepo.run("log", "-n1", "--pretty=format:%s"),
       /^Deploy [0-9a-f]{7} to gh-pages$/,
@@ -87,9 +92,12 @@ describe("deployToGhPagesBranch", () => {
       Array.from(Deno.readDirSync(gitRepo.path))
         .map((x) => x.name)
         .sort(),
-      [".git", ".hidden", "artifact"],
+      [".git", ".hidden", "assets"],
     );
-    assertEquals(Deno.readTextFileSync(`${gitRepo.path}/artifact`), "built\n");
+    assertEquals(
+      Deno.readTextFileSync(`${gitRepo.path}/assets/artifact`),
+      "built\n",
+    );
     assertMatch(
       gitRepo.run("log", "--pretty=format:%s"),
       /^Deploy [0-9a-f]{7} to gh-pages\nAdd some files$/,
@@ -111,7 +119,7 @@ describe("deployToGhPagesBranch", () => {
       Array.from(Deno.readDirSync(gitRepo.path))
         .map((x) => x.name)
         .sort(),
-      [".git", ".hidden", "artifact"],
+      [".git", ".hidden", "assets"],
     );
     assertMatch(
       gitRepo.run("log", "--pretty=format:%s"),

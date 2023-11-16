@@ -7,11 +7,12 @@ const ansiReset = "\\e[0m";
 const ansiRedBold = "\\e[31;1m";
 
 /**
- * A garn plugin that allows easy deployment of a package to GitHub pages.
+ * A garn plugin that allows easy deployment of a package to [GitHub
+ * pages](https://pages.github.com/).
  *
  * @param pkg - The `Package` whose artifacts will be committed to the
  * `gh-pages` branch. For convenience, this can also be a function that takes
- * in a refrence to the project and returns the `Package`.
+ * in a reference to the project and returns the `Package`.
  *
  * Example:
  * ```typescript
@@ -60,7 +61,7 @@ export function deployToGhPages<T>(
         git clone --quiet "$REPO_DIR" "$TMP_SRC"
         git -C "$TMP_SRC" checkout gh-pages 2>/dev/null || git -C "$TMP_SRC" checkout --quiet --orphan gh-pages
         cp -rv ${typeof pkg === "function" ? pkg(p) : pkg} "$TMP_DST"
-        chmod +w "$TMP_DST"
+        chmod -R +w "$TMP_DST"
         mv "$TMP_SRC/.git" "$TMP_DST"
         git -C "$TMP_DST" add .
         git -C "$TMP_DST" commit -m "Deploy $VERSION_NAME to gh-pages"

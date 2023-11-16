@@ -28,9 +28,10 @@ const printOutput = (output: Output) => {
   `);
 };
 
-export const assertSuccess = (output: Output) => {
+export const assertSuccess = (output: Output): Output => {
   try {
     assertEquals(output.exitCode, 0);
+    return output;
   } catch (e) {
     printOutput(output);
     throw e;

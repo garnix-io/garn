@@ -21,8 +21,8 @@ jobs:
         run: sudo rm -rf /opt/*
       - name: Set up git user
         run: |
-          git config --global user.name "GitHub CI"
-          git config --global user.email "github-ci@example.com"
+          git config --global user.name "ci-test-user"
+          git config --global user.email "ci-test-user@example.com"
       - uses: lriesebos/nix-develop-command@v1
         with:
           command: "just github-ci"
