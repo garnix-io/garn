@@ -9,7 +9,7 @@
   provides a nice way to bundle up more complex project modifications into a
   single declaration. It also allows to use `Plugin`s from other sources,
   including third-party libraries.
-- Expose some useful nested nix packages in the garn `pkgs.ts` package.
+- Expose some useful nested nix packages in the garn `nixpkgs.ts` package.
 
 ## v0.0.15
 

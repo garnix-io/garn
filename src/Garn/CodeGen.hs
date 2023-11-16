@@ -64,6 +64,7 @@ run = withCli $ do
   removeDirectoryRecursive outDir `catch` \(_ :: IOException) -> pure ()
   pkgs <- scanPackages system (pkgs system) pkgSpec
   writePkgFiles outDir "../.." pkgs
+  writeFile "ts/nixpkgs.ts" "export * from \"./internal/nixpkgs/mod.ts\";\n"
 
 writePkgFiles :: String -> String -> Map String PkgInfo -> IO ()
 writePkgFiles modulePath garnLibRoot (Map.mapKeys sanitize -> pkgs) = do
