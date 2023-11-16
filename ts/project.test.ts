@@ -133,7 +133,7 @@ describe("Project.add", () => {
 
   it("provides a nice type synonym for plugins that add a field", () => {
     const plugin: garn.Plugin<{ addedField: garn.Package }> = (_p) => ({
-      addedField: garn.build``,
+      addedField: garn.build(""),
     });
     const project = garn
       .mkProject(
@@ -150,7 +150,7 @@ describe("Project.add", () => {
     const plugin: garn.Plugin<{ one: garn.Package; two: garn.Check }> = (
       _p,
     ) => ({
-      one: garn.build``,
+      one: garn.build(""),
       two: garn.check(""),
     });
     const project = garn
@@ -175,7 +175,7 @@ describe("Project.add", () => {
     const project = garn
       .mkProject(
         { description: "", defaultEnvironment: garn.emptyEnvironment },
-        { dep: garn.build`` },
+        { dep: garn.build("") },
       )
       .addExecutable("foo", "")
       .add(plugin);
@@ -187,7 +187,7 @@ describe("Project.add", () => {
 
   it("allows overwriting fields", () => {
     const plugin: garn.Plugin<{ field: garn.Package }> = (_p) => ({
-      field: garn.build``,
+      field: garn.build(""),
     });
     const project = garn
       .mkProject(
