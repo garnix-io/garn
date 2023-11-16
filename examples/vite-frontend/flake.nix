@@ -122,6 +122,8 @@
       chmod -R u+rwX node_modules
     "}
     ${"
+      set -eu
+
       export PATH=${let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
@@ -153,6 +155,9 @@
     });
           nodejs = pkgs.nodejs-18_x;
         }}/bin:\$PATH
+      ${pkgs.which}/bin/which vite 2> /dev/null ||         (echo vite is not a dependency of the project, maybe run:
+         echo '  npm install --save-dev vite'
+          exit 1)
       vite build --outDir \$out
     "}
   ";

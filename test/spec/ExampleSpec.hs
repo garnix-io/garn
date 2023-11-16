@@ -5,10 +5,13 @@ module ExampleSpec where
 
 import Control.Concurrent (threadDelay)
 import Control.Exception (catch)
-import Control.Lens ((^.))
+import Control.Lens
 import Cradle (run_)
+import Data.Aeson.Lens (atKey, key)
+import Data.String (fromString)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
+import Data.String.Interpolate.Util (unindent)
 import Data.Text (Text)
 import Development.Shake
 import Network.HTTP.Client (HttpException)
@@ -108,3 +111,16 @@ spec = aroundAll_ withFileServer $ do
           onTestFailureLog output
           indexFile <- readFile "result/index.html"
           indexFile `shouldContain` "<title>Vite + TS</title>"
+
+      it "gives a nice error message when vite isn't installed" $ \onTestFailureLog -> do
+        inExampleCopy repoDir "vite-frontend" $ do
+          modifyYamlFile "package.json" $
+            key (fromString "devDependencies")
+              . atKey (fromString "vite")
+              .~ Nothing
+          output <- runGarn ["build", "frontend.build"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output
+            `shouldContain` "vite is not a dependency of the project, maybe run:"
+          stderr output
+            `shouldContain` "npm install --save-dev vite"

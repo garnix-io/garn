@@ -153,9 +153,12 @@ data ProcResult = ProcResult
   deriving (Show)
 
 modifyPackageYaml :: (Aeson.Value -> Aeson.Value) -> IO ()
-modifyPackageYaml modifier = do
-  decoded <- Yaml.decodeFileThrow "package.yaml"
-  Yaml.encodeFile "package.yaml" $ modifier decoded
+modifyPackageYaml = modifyYamlFile "package.yaml"
+
+modifyYamlFile :: FilePath -> (Aeson.Value -> Aeson.Value) -> IO ()
+modifyYamlFile file modifier = do
+  decoded <- Yaml.decodeFileThrow file
+  Aeson.encodeFile file $ modifier decoded
 
 modifyPackageJson :: (Aeson.Value -> Aeson.Value) -> IO ()
 modifyPackageJson modifier = do

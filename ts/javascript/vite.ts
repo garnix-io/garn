@@ -1,4 +1,5 @@
 import { Executable } from "../executable.ts";
+import { nixRaw } from "../nix.ts";
 import { Package } from "../package.ts";
 import { Plugin } from "../project.ts";
 
@@ -37,12 +38,18 @@ export const plugin: Plugin<
 > = (base) => {
   if (base.defaultEnvironment == null) {
     throw new Error(
-      `The 'garn.javascript.vite' plugin can only be added to projects with a default environment.`,
+      "The 'garn.javascript.vite' plugin can only be added to projects with a default environment.",
     );
   }
   return {
     build: base.defaultEnvironment.build`
+      set -eu
+
       export PATH=${base.node_modules}/bin:$PATH
+      ${nixRaw`pkgs.which`}/bin/which vite 2> /dev/null || \
+        (echo vite is not a dependency of the project, maybe run:
+         echo '  npm install --save-dev vite'
+          exit 1)
       vite build --outDir $out
     `,
     dev: base.defaultEnvironment.shell`
