@@ -46,10 +46,10 @@ describe("deployToGhPagesBranch", () => {
       regexp`
         ^
         warning: creating lock file [^\\n]+\\n
-        (?:
-        this derivation will be built:\\n
-        [^\\n]+\\n
-        building[^\\n]+\\n
+        (
+        (this|these \\d+) derivations? will be built:\\n
+        ([^\\n]+\\n)+
+        (building[^\\n]+\\n)+
         )?
         Created commit to "gh-pages" branch, but it has not been pushed yet\\n
         Run ${ansiRegexp}git push <remote> gh-pages:gh-pages${ansiRegexp} to deploy\\n
