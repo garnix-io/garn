@@ -11,6 +11,8 @@ import {
   nixStrLit,
 } from "../nix.ts";
 
+export { plugin as vite } from "./vite.ts";
+
 const nodeVersions = {
   "14": {
     pkg: nixRaw`pkgs.nodejs-14_x`,

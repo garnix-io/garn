@@ -1,14 +1,20 @@
 {-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE ViewPatterns #-}
 
 module Garn.CodeGen
   ( Garn.CodeGen.run,
-    fromToplevelDerivation,
+    PkgInfo (Derivation, Collection, description, path),
+    scanPackages,
+    writePkgFiles,
   )
 where
 
+import Control.Exception (IOException, catch)
+import Control.Monad (forM_)
 import Cradle (StdoutUntrimmed (..), run)
 import Data.Aeson (FromJSON, eitherDecode, toJSON)
 import Data.Aeson.Text (encodeToLazyText)
+import Data.Char (isDigit)
 import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Map (Map, toAscList)
@@ -19,69 +25,115 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import GHC.Generics (Generic)
 import Garn.Common (currentSystem, nixpkgsInput)
+import System.Directory (createDirectoryIfMissing, removeDirectoryRecursive)
 import WithCli (withCli)
+
+-- A nix expression that specifies which packages to include in the final
+-- collection.
+--
+-- All top-level derivations included by default, but everything else excluded.
+-- This can be overridden with the given attribute set.
+pkgSpec :: String
+pkgSpec =
+  [i|
+    {
+      haskellPackages = {};
+      nimPackages = {};
+      nodePackages = { "@antora/cli" = false; };
+      phpPackages = {};
+      python2Packages = {};
+      python3Packages = {};
+      rubyPackages = {};
+      rustPackages = {};
+    }
+  |]
+
+pkgs :: String -> String
+pkgs system =
+  [i|
+    import (builtins.getFlake "#{nixpkgsInput}") {
+      system = "#{system}";
+      config.allowAliases = false;
+    }
+  |]
 
 run :: IO ()
 run = withCli $ do
   system <- currentSystem
-  let varName = "pkgs"
-      nixpkgsExpression =
-        [i|
-          import (builtins.getFlake "#{nixpkgsInput}") {
-            system = "#{system}";
-            config.allowAliases = false;
-          }
-        |]
-  code <- fromToplevelDerivation "." varName nixpkgsExpression
-  writeFile "ts/nixpkgs.ts" code
+  let outDir = "ts/internal/nixpkgs"
+  removeDirectoryRecursive outDir `catch` \(_ :: IOException) -> pure ()
+  pkgs <- scanPackages system (pkgs system) pkgSpec
+  writePkgFiles outDir "../.." pkgs
+  writeFile "ts/nixpkgs.ts" "export * from \"./internal/nixpkgs/mod.ts\";\n"
 
-fromToplevelDerivation :: String -> String -> String -> IO String
-fromToplevelDerivation garnLibRoot varName rootExpr = do
-  system :: String <- do
-    StdoutUntrimmed json <- Cradle.run "nix" nixArgs (words "eval --impure --json --expr builtins.currentSystem")
-    pure $ either error id $ eitherDecode (cs json)
+writePkgFiles :: String -> String -> Map String PkgInfo -> IO ()
+writePkgFiles modulePath garnLibRoot (Map.mapKeys sanitize -> pkgs) = do
+  createDirectoryIfMissing True modulePath
+  let code =
+        unindent
+          [i|
+            import { mkPackage } from "#{garnLibRoot}/package.ts";
+            import { nixRaw } from "#{garnLibRoot}/nix.ts";
+
+          |]
+          <> pkgsString pkgs
+  writeFile (modulePath <> "/mod.ts") code
+  forM_ (Map.assocs pkgs) $ \(name :: String, pkgInfo :: PkgInfo) -> do
+    case pkgInfo of
+      Derivation {} -> pure ()
+      Collection {subPkgs} -> writePkgFiles (modulePath <> "/" <> name) (garnLibRoot <> "/..") subPkgs
+
+scanPackages :: String -> String -> String -> IO (Map String PkgInfo)
+scanPackages system pkgs pkgSpec = do
   StdoutUntrimmed json <- Cradle.run "nix" nixArgs "eval" (".#lib." <> system) "--json" "--apply" nixExpr
-  pkgs :: Map String PkgInfo <- case eitherDecode (cs json) of
+  case eitherDecode (cs json) of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in " <> cs json)
-  let sanitizedPkgs = Map.mapKeys sanitize pkgs
-  pure $
-    unindent
-      [i|
-        import { mkPackage } from "#{garnLibRoot}/package.ts";
-        import { nixRaw } from "#{garnLibRoot}/nix.ts";
-
-      |]
-      <> pkgsString varName sanitizedPkgs
   where
     nixExpr =
       [i|
-        lib :
-        let mk = name: value: {
-              attribute = name;
-              description = if value ? meta.description
-                then value.meta.description
-                else null;
-            };
-            isNotBroken = value:
-                let broken = (builtins.tryEval (value.meta.broken or false));
-                in broken.success && !broken.value;
-            doesNotThrow = value : (builtins.tryEval value).success;
-            filterAttrs = lib.attrsets.filterAttrs
-              (name: value:
-                    doesNotThrow value
-                && lib.isDerivation value
-                && isNotBroken value);
-        in
-          (lib.mapAttrs mk
-            (filterAttrs (#{rootExpr}))
-          )
+        lib:
+          let
+            scan = path: pkgs: pkgSpec:
+              if pkgSpec == false then null
+              else filterNulls (lib.mapAttrs (k: v:
+                  let
+                    newPath = "${path}.${k}";
+                  in
+                    if pkgSpec ? ${k}
+                      then mkCollection (scan newPath v (pkgSpec.${k}))
+                      else if isWorkingDerivation v then mkDerivation newPath v
+                      else null
+                ) pkgs);
+            mkCollection = subPkgs:
+              if subPkgs == null then null
+              else {
+                tag = "Collection";
+                inherit subPkgs;
+              };
+            mkDerivation = path: pkg: {
+                tag = "Derivation";
+                inherit path;
+                description = if pkg ? meta.description
+                  then pkg.meta.description
+                  else null;
+              };
+            filterNulls = lib.filterAttrs (k: v: v != null);
+            isWorkingDerivation = value:
+              (builtins.tryEval value).success &&
+              (let
+                evalResult = (builtins.tryEval (value.meta.broken or false));
+               in
+                evalResult.success &&
+                !evalResult.value &&
+                lib.isDerivation value);
+          in
+            scan "pkgs" (#{pkgs}) (#{pkgSpec})
       |]
 
-data PkgInfo = PkgInfo
-  { description :: Maybe String,
-    attribute :: String
-  }
+data PkgInfo
+  = Derivation {description :: Maybe String, path :: String}
+  | Collection {subPkgs :: Map String PkgInfo}
   deriving stock (Eq, Show, Generic)
   deriving anyclass (FromJSON)
 
@@ -96,28 +148,40 @@ pkgDoc pkgInfo = case description pkgInfo of
          */
       |]
 
-formatPkg :: String -> (String, PkgInfo) -> String
-formatPkg varName (name, pkgInfo) =
-  let escapedDoc = encodeToLazyText . toJSON $ fromMaybe "" $ description pkgInfo
-   in pkgDoc pkgInfo
-        <> unindent
-          [i|
-            export const #{name} = mkPackage(
-              nixRaw`#{varName}.#{attribute pkgInfo}`,
-              #{escapedDoc},
-            );
-          |]
+formatPkg :: (String, PkgInfo) -> String
+formatPkg (name, pkgInfo) = do
+  case pkgInfo of
+    Derivation {description, path} ->
+      let escapedDoc = encodeToLazyText . toJSON $ fromMaybe "" description
+       in pkgDoc pkgInfo
+            <> unindent
+              [i|
+                export const #{name} = mkPackage(
+                  nixRaw`#{path}`,
+                  #{escapedDoc},
+                );
+              |]
+    Collection _ ->
+      unindent
+        [i|
+          export * as #{name} from "./#{name}/mod.ts";
+        |]
 
-pkgsString :: String -> Map String PkgInfo -> String
-pkgsString varName pkgs =
-  intercalate "\n" $ formatPkg varName <$> toAscList pkgs
+pkgsString :: Map String PkgInfo -> String
+pkgsString pkgs =
+  intercalate "\n" $ formatPkg <$> toAscList pkgs
 
 sanitize :: String -> String
 sanitize str
+  | isDigit $ head str = sanitize $ "_" <> str
   | str `elem` tsKeywords = str <> "_"
   | otherwise =
       str <&> \case
+        '+' -> '_'
         '-' -> '_'
+        '.' -> '_'
+        '/' -> '_'
+        '@' -> '_'
         x -> x
 
 tsKeywords :: [String]
@@ -145,8 +209,10 @@ tsKeywords =
     "import",
     "in",
     "instanceOf",
+    "interface",
     "new",
     "null",
+    "private",
     "return",
     "super",
     "switch",
@@ -155,6 +221,7 @@ tsKeywords =
     "true",
     "try",
     "typeOf",
+    "typeof",
     "var",
     "void",
     "while",

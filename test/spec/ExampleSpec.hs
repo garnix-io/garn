@@ -5,20 +5,21 @@ module ExampleSpec where
 
 import Control.Concurrent (threadDelay)
 import Control.Exception (catch)
-import Control.Lens ((^.))
-import Control.Monad (forM_)
+import Control.Lens
+import Cradle (run_)
+import Data.Aeson.Lens (atKey, key)
+import Data.String (fromString)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
+import Data.String.Interpolate.Util (unindent)
 import Data.Text (Text)
 import Development.Shake
 import Network.HTTP.Client (HttpException)
 import Network.Wreq (Response, get, responseBody)
-import System.Directory (copyFile, createDirectoryIfMissing, getCurrentDirectory, withCurrentDirectory)
+import System.Directory (getCurrentDirectory, withCurrentDirectory)
 import System.Exit (ExitCode (..))
-import System.FilePath (takeDirectory, (</>))
 import Test.Hspec
 import Test.Hspec.Golden (defaultGolden)
-import Test.Mockery.Directory (inTempDirectory)
 import TestUtils
 
 retryGet :: String -> IO (Response Text)
@@ -90,11 +91,7 @@ spec = aroundAll_ withFileServer $ do
       exitCode output `shouldBe` ExitSuccess
 
     it "catches failing checks" $ \onTestFailureLog -> do
-      Stdout (words -> files) <- cmd (Cwd "examples/npm-project") "git ls-files"
-      inTempDirectory $ do
-        forM_ files $ \file -> do
-          createDirectoryIfMissing True $ takeDirectory file
-          copyFile (repoDir </> "examples/npm-project" </> file) file
+      inExampleCopy repoDir "npm-project" $ do
         writeFile
           "src/index.test.ts"
           [i|
@@ -105,3 +102,25 @@ spec = aroundAll_ withFileServer $ do
         output <- runGarn ["check"] "" repoDir Nothing
         onTestFailureLog output
         stderr output `shouldContain` "1 failed"
+
+    describe "vite-frontend" $ do
+      it "bundles the project with vite" $ \onTestFailureLog -> do
+        withCurrentDirectory "examples/vite-frontend" $ do
+          run_ "rm" "result" "-f"
+          output <- runGarn ["build", "frontend.build"] "" repoDir Nothing
+          onTestFailureLog output
+          indexFile <- readFile "result/index.html"
+          indexFile `shouldContain` "<title>Vite + TS</title>"
+
+      it "gives a nice error message when vite isn't installed" $ \onTestFailureLog -> do
+        inExampleCopy repoDir "vite-frontend" $ do
+          modifyYamlFile "package.json" $
+            key (fromString "devDependencies")
+              . atKey (fromString "vite")
+              .~ Nothing
+          output <- runGarn ["build", "frontend.build"] "" repoDir Nothing
+          onTestFailureLog output
+          stderr output
+            `shouldContain` "vite is not a dependency of the project, maybe run:"
+          stderr output
+            `shouldContain` "npm install --save-dev vite"
