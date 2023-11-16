@@ -10,6 +10,7 @@
   single declaration. It also allows to use `Plugin`s from other sources,
   including third-party libraries.
 - Expose some useful nested nix packages in the garn `nixpkgs.ts` package.
+- Add `garn.javascript.vite`, a `Plugin` that adds fields for bundling vite projects into a `Package`.
 
 ## v0.0.15
 

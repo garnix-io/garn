@@ -107,10 +107,15 @@ export function check(
  * `;
  * ```
  */
+export function build(s: string): Package;
 export function build(
   s: TemplateStringsArray,
   ...args: Array<NixStrLitInterpolatable>
-) {
+): Package;
+export function build(
+  s: TemplateStringsArray | string,
+  ...args: Array<NixStrLitInterpolatable>
+): Package {
   return mkShellPackage(emptyEnvironment, s, ...args);
 }
 

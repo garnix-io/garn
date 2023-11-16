@@ -61,7 +61,7 @@ Deno.test("NPM initializer returns the code to be generated", () => {
         description: "just some package",
         src: ".",
         nodeVersion: "18",
-      })
+      });
     `,
   );
 });
@@ -81,7 +81,7 @@ Deno.test(
             description: "An NPM project",
             src: ".",
             nodeVersion: "18",
-          })
+          });
         `,
       );
     }
@@ -117,9 +117,110 @@ Deno.test(
           })
             .addCheck("test", "npm run test")
             .addExecutable("start", "npm run start")
-            .addExecutable("build", "npm run build")
+            .addExecutable("build", "npm run build");
         `,
       );
     }
   },
 );
+
+Deno.test("adds the vite plugin if vite is in the devDependencies", () => {
+  const tempDir = Deno.makeTempDirSync();
+  Deno.writeTextFileSync(
+    join(tempDir, "package.json"),
+    JSON.stringify({
+      name: "somepackage",
+      description: "just some package",
+      devDependencies: {
+        vite: "*",
+      },
+    }),
+  );
+  const result = npmInitializer(tempDir);
+  assertEquals(result.tag, "ShouldRun");
+  if (result.tag === "ShouldRun") {
+    assertEquals(
+      result.makeTarget(),
+      outdent`
+        export const somepackage = garn.javascript.mkNpmProject({
+          description: "just some package",
+          src: ".",
+          nodeVersion: "18",
+        })
+          .add(garn.javascript.vite);
+      `,
+    );
+  }
+});
+
+Deno.test(
+  "doesn't add known vite scripts if superseeded by vite plugin",
+  () => {
+    const tempDir = Deno.makeTempDirSync();
+    Deno.writeTextFileSync(
+      join(tempDir, "package.json"),
+      JSON.stringify({
+        name: "somepackage",
+        description: "just some package",
+        scripts: {
+          build: "vite build",
+          dev: "vite",
+          foo: "test script",
+        },
+        devDependencies: {
+          vite: "*",
+        },
+      }),
+    );
+    const result = npmInitializer(tempDir);
+    assertEquals(result.tag, "ShouldRun");
+    if (result.tag === "ShouldRun") {
+      assertEquals(
+        result.makeTarget(),
+        outdent`
+          export const somepackage = garn.javascript.mkNpmProject({
+            description: "just some package",
+            src: ".",
+            nodeVersion: "18",
+          })
+            .add(garn.javascript.vite)
+            .addExecutable("foo", "npm run foo");
+        `,
+      );
+    }
+  },
+);
+
+Deno.test("doesn't remove executables when not a vite plugin", () => {
+  const tempDir = Deno.makeTempDirSync();
+  Deno.writeTextFileSync(
+    join(tempDir, "package.json"),
+    JSON.stringify({
+      name: "somepackage",
+      description: "just some package",
+      scripts: {
+        build: "vite build",
+        dev: "vite",
+        foo: "test script",
+      },
+      devDependencies: {},
+    }),
+  );
+  const result = npmInitializer(tempDir);
+  assertEquals(result.tag, "ShouldRun");
+  if (result.tag === "ShouldRun") {
+    assertEquals(
+      result.makeTarget(),
+      outdent`
+        export const somepackage = garn.javascript.mkNpmProject({
+          description: "just some package",
+          src: ".",
+          nodeVersion: "18",
+        })
+          .addExecutable("build", "npm run build")
+          .addExecutable("dev", "npm run dev")
+          .addExecutable("foo", "npm run foo");
+      `,
+    );
+  }
+});

@@ -22,11 +22,45 @@ export type ProjectData = {
   defaultExecutable?: Executable;
 };
 
+/**
+ * `Plugin`s automatically add one or more fields to your project. You can use
+ * existing plugins to automatically add prepackaged functionality to your `Project`.
+ * declare them manually yourself.
+ *
+ * Here's an example of a simple `Plugin` and how to use it:
+ *
+ * ```typescript
+ * import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
+ *
+ * const prettier =
+ *   (
+ *     globPattern: string,
+ *   ): garn.Plugin<
+ *     { formatCheck: garn.Check; format: garn.Executable },
+ *     garn.ProjectHelpers
+ *   > =>
+ *   (p) =>
+ *     p
+ *       .withDevTools([
+ *         garn.mkPackage(garn.nix.nixRaw`pkgs.nodePackages.prettier`, "prettier"),
+ *       ])
+ *       .addCheck("formatCheck", `prettier --check '${globPattern}'`)
+ *       .addExecutable("format", `prettier --write '${globPattern}'`);
+ *
+ * export const frontend = garn.javascript
+ *   .mkNpmProject({
+ *     src: ".",
+ *     description: "An NPM frontend",
+ *     nodeVersion: "18",
+ *   })
+ *   .add(prettier("src/*.ts"));
+ * ```
+ */
 export type Plugin<Additions, Dependencies = object> = (
   project: Dependencies & ProjectData,
 ) => Additions;
 
-type ProjectHelpers = {
+export type ProjectHelpers = {
   /**
    * Returns a new Project with the provided devtools added to the default
    * Environment.
@@ -72,10 +106,17 @@ type ProjectHelpers = {
   ): Package;
 
   /**
-   * Modify the given project.
+   * Apply a `Plugin` to the given project.
    *
-   * This can be useful for modifying a project in a method chaining style while
-   * being able to reference that project. For example:
+   * For example, this is how you add the `vite` plugin:
+   *
+   * ```typescript
+   * export const myProject = garn.mkNpmProject(...)
+   *   .add(garn.javascript.vite)
+   * ```
+   *
+   * This can also be useful for modifying a project in a method chaining style
+   * while being able to reference the project itself. For example:
    *
    * ```typescript
    * export const myProject = garn.mkHaskellProject(...)

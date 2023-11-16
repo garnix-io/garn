@@ -1,12 +1,26 @@
-module Garn.Common (nixpkgsInput, nixArgs, currentSystem) where
+{-# LANGUAGE TemplateHaskell #-}
+
+module Garn.Common
+  ( garnCliVersion,
+    Garn.Common.nixpkgsInput,
+    nixArgs,
+    currentSystem,
+  )
+where
 
 import Cradle (StdoutUntrimmed (..), run)
 import Data.Aeson (eitherDecode)
 import Data.String.Conversions (cs)
+import Garn.ImportVersion (Versions (..), versionsSplice)
 
--- | pinned to master on 2023-10-26
+versionFromJson :: Versions
+versionFromJson = $(versionsSplice)
+
+garnCliVersion :: String
+garnCliVersion = tsLibVersion versionFromJson
+
 nixpkgsInput :: String
-nixpkgsInput = "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566"
+nixpkgsInput = Garn.ImportVersion.nixpkgsInput versionFromJson
 
 nixArgs :: [String]
 nixArgs =
