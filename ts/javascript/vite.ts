@@ -46,10 +46,11 @@ export const plugin: Plugin<
       set -eu
 
       export PATH=${base.node_modules}/bin:$PATH
-      ${nixRaw`pkgs.which`}/bin/which vite 2> /dev/null || \
-        (echo vite is not a dependency of the project, maybe run:
-         echo '  npm install --save-dev vite'
-          exit 1)
+      if ! ${nixRaw`pkgs.which`}/bin/which vite 2> /dev/null; then
+        echo 'vite is not a dependency of the project, maybe run:'
+        echo '  npm install --save-dev vite'
+        exit 1
+      fi
       vite build --outDir $out
     `,
     dev: base.defaultEnvironment.shell`
