@@ -68,7 +68,9 @@ export function deployToGhPages<T>(
         git fetch --quiet "$TMP_DST" gh-pages:gh-pages
         >&2 echo -e 'Created commit to "gh-pages" branch, but it has not been pushed yet'
         >&2 echo -e 'Run ${ansiBold}git push <remote> gh-pages:gh-pages${ansiReset} to deploy'
-      `,
+      `.setDescription(
+        "Builds this project and commits the output to your local `gh-pages` branch",
+      ),
     };
   };
 }
