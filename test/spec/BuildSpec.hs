@@ -138,7 +138,7 @@ spec = do
               export const project = garn.mkProject(
                 { description: "" },
                 {
-                  package: garn.build("echo "build-content" > $out/build-artifact"),
+                  package: garn.build("echo 'build-content' > $out/build-artifact"),
                 },
               )
             |]
