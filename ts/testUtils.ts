@@ -9,6 +9,15 @@ type Output = {
   stderr: string;
 };
 
+export const runCommand = (command: Deno.Command): Output => {
+  const output = command.outputSync();
+  return {
+    exitCode: output.code,
+    stdout: new TextDecoder().decode(output.stdout),
+    stderr: new TextDecoder().decode(output.stderr),
+  };
+};
+
 const printOutput = (output: Output) => {
   console.error(`
     exitcode: ${output.exitCode}
@@ -19,9 +28,10 @@ const printOutput = (output: Output) => {
   `);
 };
 
-export const assertSuccess = (output: Output) => {
+export const assertSuccess = (output: Output): Output => {
   try {
     assertEquals(output.exitCode, 0);
+    return output;
   } catch (e) {
     printOutput(output);
     throw e;
@@ -46,7 +56,10 @@ export const assertStderr = (output: Output, expected: string) => {
   }
 };
 
-export const runExecutable = (executable: garn.Executable): Output => {
+export const runExecutable = (
+  executable: garn.Executable,
+  options: { cwd?: string } = {},
+): Output => {
   const tempDir = Deno.makeTempDirSync({ prefix: "garn-test" });
   const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
     url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
@@ -70,12 +83,10 @@ export const runExecutable = (executable: garn.Executable): Output => {
     }),
   );
   Deno.writeTextFileSync(`${tempDir}/flake.nix`, flakeFile);
-  const output = new Deno.Command("nix", {
-    args: ["run", tempDir],
-  }).outputSync();
-  return {
-    exitCode: output.code,
-    stdout: new TextDecoder().decode(output.stdout),
-    stderr: new TextDecoder().decode(output.stderr),
-  };
+  return runCommand(
+    new Deno.Command("nix", {
+      args: ["run", tempDir],
+      cwd: options.cwd,
+    }),
+  );
 };

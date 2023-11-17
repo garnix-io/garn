@@ -239,7 +239,8 @@
     });
           nodejs = pkgs.nodejs-18_x;
         }}/bin:\$PATH
-      vite";
+      vite
+    ";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -292,7 +293,8 @@
     });
           nodejs = pkgs.nodejs-18_x;
         }}/bin:\$PATH
-      vite preview";
+      vite preview
+    ";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";

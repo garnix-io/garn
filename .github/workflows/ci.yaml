@@ -19,6 +19,10 @@ jobs:
             fallback = true
       - name: Remove /opt to free up disk space
         run: sudo rm -rf /opt/*
+      - name: Set up git user
+        run: |
+          git config --global user.name "ci-test-user"
+          git config --global user.email "ci-test-user@example.com"
       - uses: lriesebos/nix-develop-command@v1
         with:
           command: "just github-ci"
