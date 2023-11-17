@@ -31,6 +31,7 @@ export type ProjectData = {
  *
  * ```typescript
  * import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
+ * import * as pkgs from "https://garn.io/ts/v0.0.15/nixpkgs.ts";
  *
  * const prettier =
  *   (
@@ -41,9 +42,7 @@ export type ProjectData = {
  *   > =>
  *   (p) =>
  *     p
- *       .withDevTools([
- *         garn.mkPackage(garn.nix.nixRaw`pkgs.nodePackages.prettier`, "prettier"),
- *       ])
+ *       .withDevTools([pkgs.nodePackages.prettier])
  *       .addCheck("formatCheck", `prettier --check '${globPattern}'`)
  *       .addExecutable("format", `prettier --write '${globPattern}'`);
  *
