@@ -52,12 +52,14 @@ export const plugin: Plugin<
         exit 1
       fi
       vite build --outDir $out
-    `,
+    `.setDescription("Builds this vite package for production"),
     dev: base.defaultEnvironment.shell`
       export PATH=${base.node_modules}/bin:$PATH
-      vite`,
+      vite
+    `.setDescription("Starts vite dev server"),
     preview: base.defaultEnvironment.shell`
       export PATH=${base.node_modules}/bin:$PATH
-      vite preview`,
+      vite preview
+    `.setDescription("Locally previews a production build"),
   };
 };

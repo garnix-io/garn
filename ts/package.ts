@@ -21,6 +21,11 @@ export type Package = {
   tag: "package";
   nixExpression: NixExpression;
   description: string;
+
+  /**
+   * Update the description for this `Package`
+   */
+  setDescription: (this: Package, newDescription: string) => Package;
 };
 
 export function isPackage(x: unknown): x is Package {
@@ -38,6 +43,13 @@ export function mkPackage(
     tag: "package",
     nixExpression,
     description,
+
+    setDescription(this: Package, newDescription: string): Package {
+      return {
+        ...this,
+        description: newDescription,
+      };
+    },
   };
 }
 
