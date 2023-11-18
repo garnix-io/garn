@@ -47,6 +47,7 @@ Deno.test(
           export const foo = garn.haskell.mkHaskellProject({
             description: "",
             compiler: "ghc94",
+            executables: [],
             src: "."
           })`,
       );
@@ -77,8 +78,9 @@ Deno.test(
           export const foo = garn.haskell.mkHaskellProject({
             description: "",
             compiler: "ghc94",
+            executables: ["bar"],
             src: "."
-          }).withCabalExecutable("bar")`,
+          })`,
       );
     }
   }

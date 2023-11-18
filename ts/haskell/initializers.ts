@@ -30,9 +30,7 @@ export const mkHaskellProjectInitializer: Initializer = (dir) => {
   const parsedCabal = JSON.parse(decoder.decode(jsonParseResult.stdout));
 
   const executables = parsedCabal.executables
-    ? parsedCabal.executables.reduce(
-      (prev : string, cur : string) => `${prev}.withCabalExecutable("${cur}")`,
-      "")
+    ? `\n  executables: ${JSON.stringify(parsedCabal.executables)},`
     : ""
   return {
     tag: "ShouldRun",
@@ -40,9 +38,9 @@ export const mkHaskellProjectInitializer: Initializer = (dir) => {
       outdent`
       export const ${parsedCabal.name} = garn.haskell.mkHaskellProject({
         description: "${parsedCabal.synopsis || parsedCabal.description || ""}",
-        compiler: "ghc94",
+        compiler: "ghc94",${executables}
         src: "."
-      })${executables}`,
+      })`,
   };
 };
 

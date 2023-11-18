@@ -60,7 +60,7 @@ export const runExecutable = (
   executable: garn.Executable,
   options: { cwd?: string } = {},
 ): Output => {
-  const tempDir = Deno.makeTempDirSync({ prefix: "garn-test" });
+  const tempDir = options.cwd ? options.cwd : Deno.makeTempDirSync({ prefix: "garn-test" });
   const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
     url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
   });
