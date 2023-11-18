@@ -44,7 +44,7 @@ writeHaskellProject repoDir = do
 
       export const foo = mkHaskellProject({
         description: "mkHaskellProject-test",
-        executable: "garn-test",
+        executables: ["garn-test"],
         compiler: "ghc94",
         src: "."
       })

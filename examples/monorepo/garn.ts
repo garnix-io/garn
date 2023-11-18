@@ -9,7 +9,7 @@ export const backend = garn.go
 
 export const haskell = garn.haskell.mkHaskellProject({
   description: "My haskell executable",
-  executable: "helloFromHaskell",
+  executables: ["hello"],
   compiler: "ghc94",
   src: "haskell",
 });

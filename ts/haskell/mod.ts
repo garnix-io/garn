@@ -1,6 +1,6 @@
 import { packageToEnvironment } from "../environment.ts";
 import { mkPackage, Package } from "../package.ts";
-import { mkProject, Project, Nestable } from "../project.ts";
+import { mkProject, Project } from "../project.ts";
 import { Executable } from "../executable.ts";
 import { nixSource } from "../internal/utils.ts";
 import { nixRaw } from "../nix.ts";
@@ -13,14 +13,18 @@ export type HaskellAddenda = {
    * A package building the entire Haskell project
    */
   pkg: Package;
-  /**
-   * Make an executable from the cabal file available to garn.
-   */
-  addCabalExecutable: <T extends Project & HaskellAddenda, Name extends string>(
-    this: T,
-    executableName: Name,
-  ) => Omit<T, Name> & { [n in Name]: Executable };
+   /**
+    * Make an executable from the cabal file available to garn.
+    */
+   addCabalExecutable: <T extends Project & HaskellAddenda, Name extends string>(
+     this: T,
+     executableName: Name,
+   ) => Omit<T, Name> & { [n in Name]: Executable };
 };
+
+type Execs<Exe extends string[]> = {
+  [e in Exe[number]]: Executable;
+}
 
 /**
  * Creates a haskell-based garn Project.
@@ -35,12 +39,12 @@ export type HaskellAddenda = {
  * @param executables - The name of the executables in the cabal file
  * @param src - The source directory
  */
-export function mkHaskellProject(args: {
+export function mkHaskellProject<const Executables extends string[]>(args: {
   description: string;
   compiler: string;
-  executables?: string[];
+  executables?: Executables;
   src: string;
-}): Project & HaskellAddenda {
+}): Project & HaskellAddenda & Execs<Executables> {
   const pkg: Package = mkPackage(
     nixRaw`
       (pkgs.haskell.packages.${nixRaw(args.compiler)}.callCabal2nix
@@ -54,19 +58,18 @@ export function mkHaskellProject(args: {
   const defaultEnvironment = packageToEnvironment(pkg, args.src);
 
   const execs = args.executables
-    ? args.executables.reduce<Record<string, Nestable>>((prev, cur) => {
+    ? args.executables.reduce((prev, cur) => {
         return { ...prev, [cur]: defaultEnvironment.shell`${pkg}/bin/${cur}` };
-      }, {})
-    : {};
+      }, {} as Execs<Executables>)
+    : {} as Execs<Executables>;
 
-  const projectBase = mkProject(
+  const projectBase  = mkProject(
     {
       description: args.description,
       defaultEnvironment: defaultEnvironment,
     },
     {
       pkg,
-      ...execs,
     },
   ).withDevTools([
     mkPackage(
@@ -85,5 +88,6 @@ export function mkHaskellProject(args: {
         executableName,
       )`${this.pkg}/bin/${executableName}`;
     },
+    ...execs,
   };
 }

@@ -53,8 +53,8 @@ spec = do
 
               export const test = garn.haskell.mkHaskellProject({
                 description: "",
-                executable: "",
                 compiler: "ghc94",
+                executables: ["test"],
                 src: "."
               })
             |]

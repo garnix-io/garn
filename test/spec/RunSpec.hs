@@ -24,13 +24,13 @@ spec =
       $ do
         it "runs a simple Haskell program" $ \onTestFailureLog -> do
           writeHaskellProject repoDir
-          output <- runGarn ["run", "foo"] "" repoDir Nothing
+          output <- runGarn ["run", "foo.garn-test"] "" repoDir Nothing
           onTestFailureLog output
           stdout output `shouldBe` "haskell test output\n"
         it "writes flake.{lock,nix}, but no other files" $ \onTestFailureLog -> do
           writeHaskellProject repoDir
           filesBefore <- listDirectory "."
-          output <- runGarn ["run", "foo"] "" repoDir Nothing
+          output <- runGarn ["run", "foo.garn-test"] "" repoDir Nothing
           onTestFailureLog output
           filesAfter <- sort <$> listDirectory "."
           filesAfter `shouldBe` sort (filesBefore ++ ["flake.lock", "flake.nix"])
