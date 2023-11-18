@@ -31,7 +31,7 @@ export const mkHaskellProjectInitializer: Initializer = (dir) => {
 
   const executables = parsedCabal.executables
     ? `\n  executables: ${JSON.stringify(parsedCabal.executables)},`
-    : ""
+    : "";
   return {
     tag: "ShouldRun",
     makeTarget: () =>

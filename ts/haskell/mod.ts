@@ -5,7 +5,6 @@ import { Executable } from "../executable.ts";
 import { nixSource } from "../internal/utils.ts";
 import { nixRaw } from "../nix.ts";
 
-
 /**
  * Project components returned by `mkHaskellProject`
  */
@@ -13,14 +12,15 @@ export type HaskellAddenda = {
   /**
    * A package building the entire Haskell project
    */
-  pkg: Package
+  pkg: Package;
   /**
    * Make an executable from the cabal file available to garn.
    */
-  addCabalExecutable:<T extends Project & HaskellAddenda, Name extends string>(this: T, executableName : Name) =>
-    Omit<T, Name> & { [n in Name] : Executable }
-}
-
+  addCabalExecutable: <T extends Project & HaskellAddenda, Name extends string>(
+    this: T,
+    executableName: Name,
+  ) => Omit<T, Name> & { [n in Name]: Executable };
+};
 
 /**
  * Creates a haskell-based garn Project.
@@ -38,7 +38,7 @@ export type HaskellAddenda = {
 export function mkHaskellProject(args: {
   description: string;
   compiler: string;
-  executables?: string[],
+  executables?: string[];
   src: string;
 }): Project & HaskellAddenda {
   const pkg: Package = mkPackage(
@@ -53,11 +53,11 @@ export function mkHaskellProject(args: {
 
   const defaultEnvironment = packageToEnvironment(pkg, args.src);
 
-  const execs = args.executables ? args.executables.reduce<Record<string,Nestable>>(
-          (prev, cur) => {
-              return {...prev, [cur]: defaultEnvironment.shell`${pkg}/bin/${cur}`}
-          }, {})
-        : {}
+  const execs = args.executables
+    ? args.executables.reduce<Record<string, Nestable>>((prev, cur) => {
+        return { ...prev, [cur]: defaultEnvironment.shell`${pkg}/bin/${cur}` };
+      }, {})
+    : {};
 
   const projectBase = mkProject(
     {
@@ -66,7 +66,7 @@ export function mkHaskellProject(args: {
     },
     {
       pkg,
-      ...execs
+      ...execs,
     },
   ).withDevTools([
     mkPackage(
@@ -77,11 +77,13 @@ export function mkHaskellProject(args: {
 
   return {
     ...projectBase,
-    addCabalExecutable: function<
+    addCabalExecutable: function <
       T extends Project & HaskellAddenda,
-      Name extends string
+      Name extends string,
     >(this: T, executableName: Name) {
-        return this.addExecutable(executableName)`${this.pkg}/bin/${executableName}`
-    }
-  }
+      return this.addExecutable(
+        executableName,
+      )`${this.pkg}/bin/${executableName}`;
+    },
+  };
 }
