@@ -3,7 +3,6 @@ import * as haskell from "./mod.ts";
 import {
   assertStdout,
   assertSuccess,
-  assertStderr,
   runExecutable,
 } from "../testUtils.ts";
 
