@@ -5,8 +5,8 @@ export const helloFromHaskell = garn.haskell
   .mkHaskellProject({
     description: "My haskell executable",
     compiler: "ghc94",
+    executables: ["hello"],
     src: ".",
   })
   .withDevTools([nixpkgs.hlint])
-  .addCheck("hlint", "hlint *.hs")
-  .withCabalExecutable("helloFromHaskell");
+  .addCheck("hlint", "hlint *.hs");

@@ -1,7 +1,7 @@
 name: helloFromHaskell
 
 executables:
-  helloFromHaskell:
+  hello:
     main: Main.hs
     dependencies:
       - base
