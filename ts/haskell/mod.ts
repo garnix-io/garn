@@ -3,7 +3,7 @@ import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
 import { Executable } from "../executable.ts";
 import { nixSource } from "../internal/utils.ts";
-import { nixRaw } from "../nix.ts";
+import { nixRaw, nixAttrSet } from "../nix.ts";
 
 /**
  * Project components returned by `mkHaskellProject`
@@ -43,17 +43,29 @@ export function mkHaskellProject<const Executables extends string[]>(args: {
   description: string;
   compiler: string;
   executables?: Executables;
+  overrideDependencies?: Record<string, string>,
   src: string;
 }): Project & HaskellAddenda & Execs<Executables> {
-  const pkg: Package = mkPackage(
-    nixRaw`
-      (pkgs.haskell.packages.${nixRaw(args.compiler)}.callCabal2nix
+
+  const deps = args.overrideDependencies ? args.overrideDependencies : {};
+
+  const nixPkg = nixRaw`
+    let
+      haskell = pkgs.haskell.packages.${nixRaw(args.compiler)}.override {
+        overrides = final: prev:
+          ${nixAttrSet(Object.fromEntries(
+              Object.entries(deps).map(([pkgName, pkgVersion]) =>
+                [pkgName, nixRaw`prev.callHackage
+                    "${nixRaw(pkgName)}" ${nixRaw(pkgVersion)}
+                `])))}
+        ;
+      };
+      in haskell.callCabal2nix
         "garn-pkg"
         ${nixSource(args.src)}
-        { })
-    `,
-    "main package",
-  );
+        {}`
+
+  const pkg: Package = mkPackage(nixPkg, "main package");
 
   const defaultEnvironment = packageToEnvironment(pkg, args.src);
 
@@ -62,6 +74,7 @@ export function mkHaskellProject<const Executables extends string[]>(args: {
         return { ...prev, [cur]: defaultEnvironment.shell`${pkg}/bin/${cur}` };
       }, {} as Execs<Executables>)
     : {} as Execs<Executables>;
+
 
   const projectBase  = mkProject(
     {
