@@ -30,8 +30,8 @@ export type ProjectData = {
  * Here's an example of a simple `Plugin` and how to use it:
  *
  * ```typescript
- * import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
- * import * as pkgs from "https://garn.io/ts/v0.0.15/nixpkgs.ts";
+ * import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
+ * import * as pkgs from "https://garn.io/ts/v0.0.16/nixpkgs.ts";
  *
  * const prettier =
  *   (
