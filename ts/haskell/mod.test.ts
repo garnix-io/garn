@@ -1,10 +1,6 @@
 import { describe, it } from "https://deno.land/std@0.206.0/testing/bdd.ts";
 import * as haskell from "./mod.ts";
-import {
-  assertStdout,
-  assertSuccess,
-  runExecutable,
-} from "../testUtils.ts";
+import { assertStdout, assertSuccess, runExecutable } from "../testUtils.ts";
 
 describe("mkHaskellProject", () => {
   describe("addCabalExecutable", () => {

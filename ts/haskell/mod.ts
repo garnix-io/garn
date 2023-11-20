@@ -13,18 +13,18 @@ export type HaskellAddenda = {
    * A package building the entire Haskell project
    */
   pkg: Package;
-   /**
-    * Make an executable from the cabal file available to garn.
-    */
-   addCabalExecutable: <T extends Project & HaskellAddenda, Name extends string>(
-     this: T,
-     executableName: Name,
-   ) => Omit<T, Name> & { [n in Name]: Executable };
+  /**
+   * Make an executable from the cabal file available to garn.
+   */
+  addCabalExecutable: <T extends Project & HaskellAddenda, Name extends string>(
+    this: T,
+    executableName: Name,
+  ) => Omit<T, Name> & { [n in Name]: Executable };
 };
 
 type Execs<Exe extends string[]> = {
   [e in Exe[number]]: Executable;
-}
+};
 
 /**
  * Creates a haskell-based garn Project.
@@ -61,9 +61,9 @@ export function mkHaskellProject<const Executables extends string[]>(args: {
     ? args.executables.reduce((prev, cur) => {
         return { ...prev, [cur]: defaultEnvironment.shell`${pkg}/bin/${cur}` };
       }, {} as Execs<Executables>)
-    : {} as Execs<Executables>;
+    : ({} as Execs<Executables>);
 
-  const projectBase  = mkProject(
+  const projectBase = mkProject(
     {
       description: args.description,
       defaultEnvironment: defaultEnvironment,
