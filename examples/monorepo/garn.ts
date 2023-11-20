@@ -24,6 +24,6 @@ export const npmFrontend = garn.javascript
 
 export const startAll = garn.processCompose({
   backend: backend.run,
-  haskell: haskell.defaultExecutable!,
+  haskell: haskell.hello,
   frontend: npmFrontend.run,
 });
