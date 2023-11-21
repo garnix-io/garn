@@ -3,7 +3,7 @@ import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
 import { Executable } from "../executable.ts";
 import { nixSource } from "../internal/utils.ts";
-import { nixRaw, nixAttrSet } from "../nix.ts";
+import { nixRaw, nixAttrSet  } from "../nix.ts";
 
 /**
  * Project components returned by `mkHaskellProject`
@@ -56,7 +56,7 @@ export function mkHaskellProject<const Executables extends string[]>(args: {
           ${nixAttrSet(Object.fromEntries(
               Object.entries(deps).map(([pkgName, pkgVersion]) =>
                 [pkgName, nixRaw`prev.callHackage
-                    "${nixRaw(pkgName)}" ${nixRaw(pkgVersion)}
+                    "${nixRaw(pkgName)}" "${nixRaw(pkgVersion)}" {}
                 `])))}
         ;
       };
@@ -64,6 +64,7 @@ export function mkHaskellProject<const Executables extends string[]>(args: {
         "garn-pkg"
         ${nixSource(args.src)}
         {}`
+
 
   const pkg: Package = mkPackage(nixPkg, "main package");
 

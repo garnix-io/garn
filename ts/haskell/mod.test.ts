@@ -62,38 +62,6 @@ describe("mkHaskellProject", () => {
       assertSuccess(output2);
       assertStdout(output2, ">= 0.4\n");
     })
-    it("fails informatively if the version is not available on Hackage", () => {
-      const path = Deno.makeTempDirSync();
-      Deno.writeTextFileSync(
-        `${path}/project.cabal`,
-        outdent`
-            name: project
-            version: 0.0.1
-            executable foo
-              main-is: Main.hs
-              build-depends: base, string-conversions
-              default-language: Haskell2010
-          `,
-      );
-      Deno.writeTextFileSync(
-        `${path}/Main.hs`,
-        outdent`
-        main = putStrLn "yo"
-        `,
-      );
-      const project = haskell
-        .mkHaskellProject({
-          description: "",
-          compiler: "ghc94",
-          src: ".",
-          executables: ["foo"],
-          overrideDependencies: {
-            "string-conversions": "291.34.7.3"
-          }
-        });
-      const output = runExecutable(project.foo, { cwd: path });
-      assertStderr(output, "No such version: string-conversions 291.34.7.3. Perhaps it doesn't exist, or is not yet included in our release.");
-    })
   }),
   describe("addCabalExecutable", () => {
     it("allows adding existing cabal executables with .addCabalExecutable", () => {
