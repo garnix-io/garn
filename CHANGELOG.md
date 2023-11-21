@@ -2,6 +2,8 @@
 
 ## v0.0.17 (unreleased)
 
+- Fix locale warnings on MacOS
+
 ## v0.0.16
 
 - Allow to build packages that are nested within projects with `garn build projectName.packageName`.
