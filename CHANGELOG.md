@@ -15,6 +15,7 @@
   including third-party libraries.
 - Expose some useful nested nix packages in the garn `nixpkgs.ts` package.
 - Add `garn.javascript.vite`, a `Plugin` that adds fields for bundling vite projects into a `Package`.
+- Add `garn.deployToGhPages` plugin to help publish `Packages` to github pages.
 
 ## v0.0.15
 
