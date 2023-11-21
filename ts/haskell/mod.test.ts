@@ -15,7 +15,7 @@ describe("mkHaskellProject", () => {
               main-is: Main.hs
               build-depends: base
               default-language: Haskell2010
-          `,
+        `,
       );
       Deno.writeTextFileSync(
         `${path}/Main.hs`,
