@@ -18,7 +18,7 @@ import { Plugin } from "../project.ts";
  * Here's an example:
  *
  * ```typescript
- * import * as garn from "https://garn.io/ts/v0.0.15/mod.ts";
+ * import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
  *
  * export const frontend = garn.javascript
  *   .mkNpmProject({
@@ -52,12 +52,14 @@ export const plugin: Plugin<
         exit 1
       fi
       vite build --outDir $out
-    `,
+    `.setDescription("Builds this vite package for production"),
     dev: base.defaultEnvironment.shell`
       export PATH=${base.node_modules}/bin:$PATH
-      vite`,
+      vite
+    `.setDescription("Starts vite dev server"),
     preview: base.defaultEnvironment.shell`
       export PATH=${base.node_modules}/bin:$PATH
-      vite preview`,
+      vite preview
+    `.setDescription("Locally previews a production build"),
   };
 };

@@ -32,6 +32,11 @@ export type Executable = {
    * The executable description is rendered in the executable list when running `garn run`.
    */
   description: string;
+
+  /**
+   * Update the description for this `Executable`
+   */
+  setDescription: (this: Executable, newDescription: string) => Executable;
 };
 
 export function isExecutable(e: unknown): e is Executable {
@@ -51,6 +56,13 @@ export function mkExecutable(
     tag: "executable",
     nixExpression,
     description,
+
+    setDescription(this: Executable, newDescription: string): Executable {
+      return {
+        ...this,
+        description: newDescription,
+      };
+    },
   };
 }
 
