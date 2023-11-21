@@ -47,7 +47,6 @@
                 mkdir -p $out/bin
                 cp ${garnHaskellPackage}/bin/garn $out/bin
                 wrapProgram "$out/bin/garn" \
-                    --set LC_ALL C.UTF-8 \
                     --prefix PATH : ${pkgs.lib.makeBinPath [
                   pkgs.coreutils
                   pkgs.deno
