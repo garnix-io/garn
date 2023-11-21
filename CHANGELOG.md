@@ -7,7 +7,7 @@
 ## v0.0.16
 
 - Allow to build packages that are nested within projects with `garn build projectName.packageName`.
-- Allow to build top-level packages with `garn build packageName.
+- Allow to build top-level packages with `garn build packageName`.
 - Allow adding packages to projects with `.addPackage("packageName", "{build script writing to $out}")`.
 - Add `Project.add`, a function to apply so-called `Plugin`s to a project. This
   provides a nice way to bundle up more complex project modifications into a
