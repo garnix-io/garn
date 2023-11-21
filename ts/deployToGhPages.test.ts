@@ -86,7 +86,10 @@ describe("deployToGhPages", () => {
     gitRepo.run("commit", "-m", "Add some files");
     gitRepo.run("checkout", "main");
     assertSuccess(
-      runExecutable(project.deployToGhPages, { cwd: gitRepo.path, inSameDir: false }),
+      runExecutable(project.deployToGhPages, {
+        cwd: gitRepo.path,
+        inSameDir: false,
+      }),
     );
     gitRepo.run("checkout", "gh-pages");
     assertEquals(
@@ -113,7 +116,10 @@ describe("deployToGhPages", () => {
     gitRepo.run("add", "foo", ".hidden");
     gitRepo.run("commit", "-m", "Add some files");
     assertSuccess(
-      runExecutable(project.deployToGhPages, { cwd: gitRepo.path, inSameDir: false }),
+      runExecutable(project.deployToGhPages, {
+        cwd: gitRepo.path,
+        inSameDir: false,
+      }),
     );
     gitRepo.run("checkout", "gh-pages");
     assertEquals(
@@ -139,7 +145,10 @@ describe("deployToGhPages", () => {
       "some untracked content",
     );
     assertSuccess(
-      runExecutable(project.deployToGhPages, { cwd: gitRepo.path, inSameDir: false }),
+      runExecutable(project.deployToGhPages, {
+        cwd: gitRepo.path,
+        inSameDir: false,
+      }),
     );
     assertEquals(
       Array.from(Deno.readDirSync(gitRepo.path))
