@@ -21,7 +21,7 @@ describe("mkHaskellProject", () => {
         `${path}/Main.hs`,
         `
             main = putStrLn "yo"
-          `,
+        `,
       );
       const project = haskell
         .mkHaskellProject({

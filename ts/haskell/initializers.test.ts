@@ -60,12 +60,12 @@ Deno.test("Haskell initializer includes executables", () => {
   Deno.writeTextFileSync(
     join(tempDir, "foo.cabal"),
     `
-    name: foo
-    version: 0.0.1
+      name: foo
+      version: 0.0.1
 
-    executable bar
-      main-is: Main.hs
-  `,
+      executable bar
+        main-is: Main.hs
+    `,
   );
   const result = mkHaskellProjectInitializer(tempDir);
   assertEquals(result.tag, "ShouldRun");
