@@ -2,6 +2,7 @@ import { assertEquals } from "https://deno.land/std@0.206.0/assert/mod.ts";
 import * as garn from "./mod.ts";
 import * as nix from "./nix.ts";
 import { nixAttrSet } from "./nix.ts";
+import { mkPackage } from "./mod.ts";
 
 type Output = {
   exitCode: number;
@@ -99,4 +100,8 @@ export const runExecutable = (
       cwd: options.cwd,
     }),
   );
+};
+
+export const testPkgs = {
+  hello: mkPackage(nix.nixRaw("pkgs.hello"), "hello"),
 };
