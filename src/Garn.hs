@@ -1,8 +1,7 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
 module Garn
-  ( Env (..),
-    Garn.run,
+  ( Garn.run,
   )
 where
 
@@ -10,82 +9,84 @@ import Control.Exception (catch)
 import Control.Monad (forM_, when)
 import Cradle
 import Garn.Common (currentSystem, nixArgs)
+import Garn.Env (Env (..))
 import qualified Garn.Errors
 import Garn.GarnConfig
 import Garn.Init
 import Garn.Optparse
 import System.Directory (doesFileExist)
 import System.Exit (exitWith)
-import System.IO (Handle, hPutStrLn, stderr)
-
-data Env = Env
-  { stdin :: Handle,
-    initFileName :: FilePath,
-    userShell :: FilePath
-  }
+import System.FilePath ((</>))
+import System.IO (hPutStrLn)
 
 run :: Env -> IO ()
 run env =
-  (readOptionsAndConfig >>= runWith env)
+  (readOptionsAndConfig env >>= runWith env)
     `catch` \(Garn.Errors.UserError err) -> do
-      hPutStrLn stderr $ "[garn] Error: " <> err
+      hPutStrLn (stderr env) $ "[garn] Error: " <> err
       exitWith $ ExitFailure 1
 
-readOptionsAndConfig :: IO Options
-readOptionsAndConfig = do
-  hasGarn <- doesFileExist "garn.ts"
+readOptionsAndConfig :: Env -> IO Options
+readOptionsAndConfig env = do
+  hasGarn <- doesFileExist (workingDir env </> "garn.ts")
   if hasGarn
     then do
-      garnConfig <- readGarnConfig
-      getOpts (WithGarnTs garnConfig)
-    else getOpts WithoutGarnTs
+      garnConfig <- readGarnConfig env
+      getOpts env (WithGarnTs garnConfig)
+    else getOpts env WithoutGarnTs
 
 runWith :: Env -> Options -> IO ()
-runWith env (WithoutGarnTsOpts Init) = initGarnTs $ initFileName env
+runWith env (WithoutGarnTsOpts Init) = initGarnTs env $ initFileName env
 runWith env (WithGarnTsOpts garnConfig opts) = do
-  writeGarnConfig garnConfig
+  writeGarnConfig env garnConfig
   case opts of
     Gen -> pure ()
     Run (CommandOptions {..}) argv -> do
-      exitCode <- runNix (StdinHandle (stdin env), DelegateCtrlC, "run", ".#" <> asNixFacing target, "--", argv)
+      exitCode <- runNix env (StdinHandle (stdin env), DelegateCtrlC, "run", ".#" <> asNixFacing target, "--", argv)
       exitWith exitCode
     Enter (CommandOptions {..}) -> do
-      hPutStrLn stderr $
+      hPutStrLn (stderr env) $
         "[garn] Entering "
           <> asUserFacing target
           <> " shell. Type 'exit' to exit."
-      c <- runNix (StdinHandle (stdin env), "develop", ".#" <> asNixFacing target, "--command", userShell env)
+      c <- runNix env (StdinHandle (stdin env), "develop", ".#" <> asNixFacing target, "--command", userShell env)
       when (c /= ExitSuccess) $ exitWith c
-      hPutStrLn stderr $ "[garn] Exiting " <> asUserFacing target <> " shell."
+      hPutStrLn (stderr env) $ "[garn] Exiting " <> asUserFacing target <> " shell."
       pure ()
     Build (CommandOptions {targetConfig, target}) -> do
       case targetConfig of
         TargetConfigProject (ProjectTarget {packages}) -> do
           forM_ packages $ \package -> do
-            c <- runNix (NoStdin, "build", ".#" <> package)
+            c <- runNix env (NoStdin, "build", ".#" <> package)
             when (c /= ExitSuccess) $ exitWith c
         TargetConfigPackage (PackageTarget {}) -> do
-          c <- runNix (NoStdin, "build", ".#" <> asNixFacing target)
+          c <- runNix env (NoStdin, "build", ".#" <> asNixFacing target)
           when (c /= ExitSuccess) $ exitWith c
         TargetConfigExecutable _ -> pure ()
     Check checkOptions -> case checkOptions of
       (Qualified (CommandOptions {targetConfig})) -> do
-        checkTarget targetConfig
+        checkTarget env targetConfig
       Unqualified -> do
-        forM_ (targets garnConfig) checkTarget
+        forM_ (targets garnConfig) (checkTarget env)
 
-checkTarget :: TargetConfig -> IO ()
-checkTarget targetConfig = case targetConfig of
+checkTarget :: Env -> TargetConfig -> IO ()
+checkTarget env targetConfig = case targetConfig of
   TargetConfigProject (ProjectTarget {packages, checks}) -> do
     forM_ packages $ \package -> do
-      c <- runNix (NoStdin, "build", ".#" <> package)
+      c <- runNix env (NoStdin, "build", ".#" <> package)
       when (c /= ExitSuccess) $ exitWith c
     system <- currentSystem
     forM_ checks $ \check -> do
-      c <- runNix (NoStdin, "build", ".#checks." <> system <> "." <> check)
+      c <- runNix env (NoStdin, "build", ".#checks." <> system <> "." <> check)
       when (c /= ExitSuccess) $ exitWith c
   TargetConfigPackage _ -> pure ()
   TargetConfigExecutable _ -> pure ()
 
-runNix :: (Input a, Output b) => a -> IO b
-runNix = Cradle.run "nix" nixArgs
+runNix :: (Input a, Output b) => Env -> a -> IO b
+runNix env =
+  Cradle.run
+    (WorkingDir (workingDir env))
+    (StdoutHandle (stdout env))
+    (StderrHandle (stderr env))
+    "nix"
+    nixArgs

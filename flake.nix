@@ -5,7 +5,7 @@
   inputs.nix-tool-installer.url = "github:garnix-io/nix-tool-installer";
   inputs.call-flake.url = "github:divnix/call-flake";
   inputs.cradle = {
-    url = "github:garnix-io/cradle";
+    url = "github:garnix-io/cradle/sh/cwd";
     inputs.nixpkgs.follows = "nixpkgs";
   };
 

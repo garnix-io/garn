@@ -47,6 +47,7 @@ mkDerivation {
     containers
     cradle
     directory
+    filepath
     getopt-generics
     interpolate
     optparse-applicative
@@ -65,6 +66,7 @@ mkDerivation {
     containers
     cradle
     directory
+    filepath
     getopt-generics
     interpolate
     optparse-applicative

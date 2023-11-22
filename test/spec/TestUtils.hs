@@ -5,24 +5,25 @@ module TestUtils where
 
 import Control.Concurrent
 import Control.Concurrent.Async (waitEitherCatch, withAsync)
-import Control.Exception (SomeException, bracket, catch, throwIO)
+import Control.Exception (SomeException, bracket, catch, finally, throwIO)
 import Control.Monad (forM_, unless, when)
 import qualified Data.Aeson as Aeson
+import Data.Maybe (fromMaybe)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate
 import qualified Data.Yaml as Yaml
 import Development.Shake (CmdOption (EchoStdout), Exit (Exit), StdoutTrim (..), cmd)
 import Development.Shake.Command (CmdOption (Cwd), Stdout (Stdout))
 import Garn
+import Garn.Env
 import System.Directory (copyFile, createDirectoryIfMissing)
 import System.Environment (withArgs)
 import System.Exit
 import System.FilePath (takeDirectory, (</>))
-import System.IO (Handle, hClose, hPutStr, hPutStrLn)
+import System.IO (Handle, hClose, hGetContents, hPutStr, hPutStrLn)
 import qualified System.IO as Sys
-import System.IO.Silently (hCapture)
 import System.Posix (fdToHandle, openPseudoTerminal)
-import System.Process (ProcessHandle, interruptProcessGroupOf, waitForProcess)
+import System.Process (ProcessHandle, createPipe, interruptProcessGroupOf, waitForProcess)
 import Test.Hspec
 import Test.Mockery.Directory (inTempDirectory)
 import Text.Regex.PCRE.Heavy (compileM, (=~))
@@ -35,10 +36,10 @@ shouldMatch actual expected = case compileM (cs expected) [] of
       expectationFailure $
         "expected " <> actual <> " to match regex " <> show expected
 
-writeHaskellProject :: FilePath -> IO ()
-writeHaskellProject repoDir = do
+writeHaskellProject :: FilePath -> Maybe FilePath -> IO ()
+writeHaskellProject repoDir (fromMaybe "." -> tempDir) = do
   writeFile
-    "garn.ts"
+    (tempDir </> "garn.ts")
     [i|
       import { mkHaskellProject } from "#{repoDir}/ts/haskell/mod.ts"
 
@@ -50,13 +51,13 @@ writeHaskellProject repoDir = do
       })
     |]
   writeFile
-    "Main.hs"
+    (tempDir </> "Main.hs")
     [i|
       main :: IO ()
       main = putStrLn "haskell test output"
     |]
   writeFile
-    "package.yaml"
+    (tempDir </> "package.yaml")
     [i|
       executables:
         garn-test:
@@ -108,22 +109,43 @@ writeNpmFrontendProject repoDir = do
     |]
 
 runGarn :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
-runGarn args stdin repoDir shell = do
+runGarn = runGarnInDir "."
+
+runGarnInDir :: (HasCallStack) => FilePath -> [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
+runGarnInDir tempDir args stdin repoDir shell = do
   userShell <- maybe (fromStdoutTrim <$> cmd ("which bash" :: String)) pure shell
-  (stderr, (stdout, exitCode)) <- hCapture [Sys.stderr] $
-    hCapture [Sys.stdout] $ do
-      withStdinTty stdin $ \stdin -> do
-        withArgs args $ do
-          let env =
-                Env
-                  { stdin,
-                    userShell,
-                    initFileName = repoDir <> "/ts/internal/init.ts"
-                  }
-          let go = do
-                run env
-                return ExitSuccess
-          go `catch` \(e :: ExitCode) -> pure e
+  (stdoutReadEnd, stdoutWriteEnd) <- createPipe
+  waitForStdout <- do
+    mvar <- newEmptyMVar
+    _ <- forkIO $ do
+      hGetContents stdoutReadEnd >>= putMVar mvar
+    return $ readMVar mvar
+  (stderrReadEnd, stderrWriteEnd) <- createPipe
+  waitForStderr <- do
+    mvar <- newEmptyMVar
+    _ <- forkIO $ do
+      hGetContents stderrReadEnd >>= putMVar mvar
+    return $ readMVar mvar
+  exitCode <- do
+    withStdinTty stdin $ \stdin -> do
+      let env =
+            Env
+              { workingDir = tempDir,
+                args,
+                stdin,
+                stdout = stdoutWriteEnd,
+                stderr = stderrWriteEnd,
+                userShell,
+                initFileName = repoDir <> "/ts/internal/init.ts"
+              }
+      let go = do
+            run env `finally` do
+              hClose stdoutWriteEnd
+              hClose stderrWriteEnd
+            return ExitSuccess
+      go `catch` \(e :: ExitCode) -> pure e
+  stdout <- waitForStdout
+  stderr <- waitForStderr
   return $
     ProcResult
       { stdout,
@@ -177,9 +199,9 @@ onTestFailureLogger test = do
             acc
               ++ [ "exitcode: " <> show (exitCode x),
                    "=======",
-                   "stdout: \n" <> stdout x,
+                   "stdout: \n" <> TestUtils.stdout x,
                    "=======",
-                   "stderr: \n" <> stderr x,
+                   "stderr: \n" <> TestUtils.stderr x,
                    "======="
                  ]
   test log

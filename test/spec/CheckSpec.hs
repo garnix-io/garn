@@ -22,7 +22,7 @@ spec = do
       . around onTestFailureLogger
       $ do
         it "runs manually added checks" $ \onTestFailureLog -> do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           writeFile
             "Main.hs"
             [i|
@@ -51,7 +51,7 @@ spec = do
           stderr output `shouldContain` "Warning: Eta reduce"
 
         it "runs checks on source directories that ignore the flake.nix file" $ \onTestFailureLog -> do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           writeFile
             "garn.ts"
             [i|
@@ -110,7 +110,7 @@ spec = do
           exitCode output `shouldBe` ExitSuccess
 
         it "does not error if there are spaces in the check key name" $ \onTestFailureLog -> do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           writeFile
             "garn.ts"
             [i|
@@ -127,7 +127,7 @@ spec = do
           exitCode output `shouldBe` ExitFailure 1
 
         it "allows to use backtick syntax" $ \onTestFailureLog -> do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           writeFile
             "garn.ts"
             [i|
@@ -146,6 +146,7 @@ spec = do
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output
+          -- todo: this should be different
           stderr output `shouldContain` "error"
           exitCode output `shouldBe` ExitFailure 1
 
@@ -160,7 +161,7 @@ spec = do
                 ]
           forM_ testCases $ \(checkName, check :: String, expectedExitCode) -> do
             it ("reports exit-codes correctly for check '" <> checkName <> "'") $ \onTestFailureLog -> do
-              writeHaskellProject repoDir
+              writeHaskellProject repoDir Nothing
               writeFile
                 "garn.ts"
                 [i|
@@ -180,7 +181,7 @@ spec = do
               exitCode output `shouldBe` expectedExitCode
 
         it "runs *all* checks when no target given" $ \onTestFailureLog -> do
-          writeHaskellProject repoDir
+          writeHaskellProject repoDir Nothing
           writeFile
             "garn.ts"
             [i|

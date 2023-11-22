@@ -1,7 +1,9 @@
 module Main where
 
-import Garn (Env (..), run)
+import Garn (run)
+import Garn.Env (Env (..))
 import Paths_garn (getDataFileName)
+import System.Environment (getArgs)
 import qualified System.IO
 import qualified System.Posix.User as POSIX
 
@@ -14,9 +16,14 @@ productionEnv :: IO Env
 productionEnv = do
   initFileName <- getDataFileName "ts/internal/init.ts"
   userShell <- findUserShell
+  args <- getArgs
   pure $
     Env
-      { stdin = System.IO.stdin,
+      { workingDir = ".",
+        args,
+        stdin = System.IO.stdin,
+        stdout = System.IO.stdout,
+        stderr = System.IO.stderr,
         initFileName,
         userShell
       }

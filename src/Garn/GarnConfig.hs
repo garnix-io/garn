@@ -6,7 +6,7 @@ module Garn.GarnConfig where
 
 import Control.Exception (throwIO)
 import Control.Monad
-import Cradle (Stderr (..), StdoutUntrimmed (..), run)
+import Cradle (Stderr (..), StderrHandle (..), StdoutUntrimmed (..), run)
 import Data.Aeson
   ( FromJSON (parseJSON),
     FromJSONKey,
@@ -25,10 +25,12 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import GHC.Generics (Generic)
 import Garn.Common (garnCliVersion, nixArgs, nixpkgsInput)
+import Garn.Env (Env (..))
 import qualified Garn.Errors
-import System.Directory (doesFileExist, getCurrentDirectory)
+import System.Directory (makeAbsolute)
 import System.Exit (ExitCode (..), exitWith)
-import System.IO (hClose, hPutStr, stderr)
+import System.FilePath ((</>))
+import System.IO (hClose, hPutStr)
 import System.IO.Temp (withSystemTempFile)
 
 -- This needs to be in sync with `DenoOutput` in runner.ts
@@ -115,11 +117,10 @@ getDescription = \case
   TargetConfigPackage (PackageTarget {description}) -> description
   TargetConfigExecutable (ExecutableTarget {description}) -> description
 
-readGarnConfig :: IO GarnConfig
-readGarnConfig = do
-  checkGarnFileExists
-  dir <- getCurrentDirectory
+readGarnConfig :: Env -> IO GarnConfig
+readGarnConfig env = do
   withSystemTempFile "garn-main.js" $ \mainPath mainHandle -> do
+    dir <- makeAbsolute (workingDir env)
     hPutStr
       mainHandle
       [i|
@@ -134,7 +135,11 @@ readGarnConfig = do
         }
       |]
     hClose mainHandle
-    (exitCode, StdoutUntrimmed (cs -> out)) <- run (words "deno run --quiet --check --allow-write --allow-run --allow-read") mainPath
+    (exitCode, StdoutUntrimmed (cs -> out)) <-
+      run
+        (StderrHandle (stderr env))
+        (words "deno run --quiet --check --allow-write --allow-run --allow-read")
+        mainPath
     when (exitCode /= ExitSuccess) $ do
       exitWith exitCode
     case eitherDecode out :: Either String (Maybe DenoOutput) of
@@ -185,29 +190,8 @@ data OnlyTsLibVersion = OnlyTsLibVersion
   deriving stock (Generic)
   deriving anyclass (FromJSON)
 
-writeGarnConfig :: GarnConfig -> IO ()
-writeGarnConfig garnConfig = do
-  writeFile "flake.nix" $ flakeFile garnConfig
+writeGarnConfig :: Env -> GarnConfig -> IO ()
+writeGarnConfig env garnConfig = do
+  writeFile (workingDir env </> "flake.nix") $ flakeFile garnConfig
   (StdoutUntrimmed _, Stderr _) <- run "nix" nixArgs "run" (nixpkgsInput <> "#nixpkgs-fmt") "./flake.nix"
   pure ()
-
-checkGarnFileExists :: IO ()
-checkGarnFileExists = do
-  exists <- doesFileExist "garn.ts"
-  when (not exists) $ do
-    hPutStr stderr $
-      unindent
-        [i|
-          No `garn.ts` file found in the current directory.
-
-          Here's an example `garn.ts` file for npm frontends:
-
-            import * as garn from "http://localhost:8777/mod.ts";
-
-            export const frontend = garn.typescript.mkNpmProject({
-              src: "./.",
-              description: "An NPM frontend",
-            });
-
-        |]
-    exitWith $ ExitFailure 1

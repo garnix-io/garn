@@ -31,18 +31,19 @@ wrap spec = do
 
 spec :: Spec
 spec = do
-  describe "build" $ do
+  fdescribe "build" $ do
     repoDir <- runIO getCurrentDirectory
     wrap $ do
       it "builds packages and creates a result link" $ \runGarn -> do
-        writeHaskellProject repoDir
+        print repoDir
+        writeHaskellProject repoDir Nothing
         _ <- runGarn ["build", "foo"]
         doesDirectoryExist "result" `shouldReturn` True
         StdoutTrim output <- cmd ("result/bin/garn-test" :: String)
         output `shouldBe` ("haskell test output" :: String)
 
       it "complains about packages that cannot be built" $ \runGarn -> do
-        writeHaskellProject repoDir
+        writeHaskellProject repoDir Nothing
         writeFile
           "Main.hs"
           [i|

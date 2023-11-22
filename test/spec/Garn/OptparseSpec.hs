@@ -1,16 +1,18 @@
 module Garn.OptparseSpec where
 
 import Data.Map as Map
+import Garn.Env (Env (..))
 import Garn.GarnConfig
 import Garn.Optparse
 import System.Environment (withArgs)
 import System.Exit (ExitCode (ExitFailure))
 import System.IO (stderr)
 import System.IO.Silently (hSilence)
+import System.Process (createPipe)
 import Test.Hspec
 
-spec :: Spec
-spec = around_ (hSilence [stderr]) $ do
+spec :: Spec -- todo: don't silence
+spec = around_ (hSilence [System.IO.stderr]) $ do
   describe "Garn.Optparse" $ do
     describe "generate subcommand" $ do
       it "parses generate commands" $ do
@@ -81,7 +83,21 @@ spec = around_ (hSilence [stderr]) $ do
 
 testWithGarnTs :: [String] -> Targets -> IO WithGarnTsCommand
 testWithGarnTs args targets = do
-  options <- withArgs args $ getOpts $ WithGarnTs $ GarnConfig targets "test flake file"
+  -- todo: put into TestUtils?
+  (stdinReadEnd, _) <- createPipe
+  (_, stdoutWriteEnd) <- createPipe
+  (_, stderrWriteEnd) <- createPipe
+  let testEnv =
+        Env
+          { workingDir = ".",
+            args,
+            stdin = stdinReadEnd,
+            stdout = stdoutWriteEnd,
+            stderr = stderrWriteEnd,
+            initFileName = "",
+            userShell = ""
+          }
+  options <- getOpts testEnv $ WithGarnTs $ GarnConfig targets "test flake file"
   pure $ case options of
     WithGarnTsOpts _ command -> command
     _ -> error "Expected WithGarnTsOpts"

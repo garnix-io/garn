@@ -13,15 +13,29 @@ where
 
 import qualified Data.Map as Map
 import Garn.Common (garnCliVersion)
+import Garn.Env (Env (..))
 import Garn.GarnConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
 import qualified Options.Applicative.Help.Pretty as OA
+import System.Environment (getProgName)
+import System.Exit (ExitCode (..), exitWith)
+import System.IO (hPutStrLn)
 import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
-getOpts :: OptionType -> IO Options
-getOpts oType =
-  customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
+getOpts :: Env -> OptionType -> IO Options
+getOpts env oType = do
+  let result = execParserPure (prefs $ showHelpOnError <> showHelpOnEmpty) opts (args env)
+  case result of
+    OA.Failure failure -> do
+      programName <- getProgName
+      let (msg, exit) = renderFailure failure programName
+      case exit of
+        ExitSuccess -> hPutStrLn (stdout env) msg
+        ExitFailure _ -> hPutStrLn (stderr env) msg
+      exitWith exit
+    _ ->
+      handleParseResult result
   where
     unavailable :: OA.Doc
     unavailable =
