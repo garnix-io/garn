@@ -28,7 +28,7 @@ const mkGitRepo = () => {
     );
     return output.stdout;
   };
-  run("init");
+  run("init", "--initial-branch=main");
   run("commit", "--allow-empty", "-m", "first commit");
   return { run, path };
 };
@@ -41,6 +41,7 @@ describe("deployToGhPages", () => {
     const output = assertSuccess(
       runExecutable(project.deployToGhPages, {
         cwd: gitRepo.path,
+        inSameDir: false,
       }),
     );
     assertMatch(
@@ -83,9 +84,12 @@ describe("deployToGhPages", () => {
     Deno.writeTextFileSync(`${gitRepo.path}/.hidden`, "some hidden content");
     gitRepo.run("add", "foo", ".hidden");
     gitRepo.run("commit", "-m", "Add some files");
-    gitRepo.run("checkout", "master");
+    gitRepo.run("checkout", "main");
     assertSuccess(
-      runExecutable(project.deployToGhPages, { cwd: gitRepo.path }),
+      runExecutable(project.deployToGhPages, {
+        cwd: gitRepo.path,
+        inSameDir: false,
+      }),
     );
     gitRepo.run("checkout", "gh-pages");
     assertEquals(
@@ -112,7 +116,10 @@ describe("deployToGhPages", () => {
     gitRepo.run("add", "foo", ".hidden");
     gitRepo.run("commit", "-m", "Add some files");
     assertSuccess(
-      runExecutable(project.deployToGhPages, { cwd: gitRepo.path }),
+      runExecutable(project.deployToGhPages, {
+        cwd: gitRepo.path,
+        inSameDir: false,
+      }),
     );
     gitRepo.run("checkout", "gh-pages");
     assertEquals(
@@ -138,7 +145,10 @@ describe("deployToGhPages", () => {
       "some untracked content",
     );
     assertSuccess(
-      runExecutable(project.deployToGhPages, { cwd: gitRepo.path }),
+      runExecutable(project.deployToGhPages, {
+        cwd: gitRepo.path,
+        inSameDir: false,
+      }),
     );
     assertEquals(
       Array.from(Deno.readDirSync(gitRepo.path))
@@ -153,6 +163,7 @@ describe("deployToGhPages", () => {
     gitRepo.run("checkout", "-b", "gh-pages");
     const output = runExecutable(project.deployToGhPages, {
       cwd: gitRepo.path,
+      inSameDir: false,
     });
     assertNotEquals(output.exitCode, 0);
     assertMatch(

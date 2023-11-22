@@ -9,7 +9,7 @@ export const backend = garn.go
 
 export const haskell = garn.haskell.mkHaskellProject({
   description: "My haskell executable",
-  executable: "helloFromHaskell",
+  executables: ["hello"],
   compiler: "ghc94",
   src: "haskell",
 });
@@ -24,6 +24,6 @@ export const npmFrontend = garn.javascript
 
 export const startAll = garn.processCompose({
   backend: backend.run,
-  haskell: haskell.defaultExecutable!,
+  haskell: haskell.hello,
   frontend: npmFrontend.run,
 });

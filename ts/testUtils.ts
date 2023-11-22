@@ -56,11 +56,21 @@ export const assertStderr = (output: Output, expected: string) => {
   }
 };
 
+/*
+ * Run an Executable. If `cwd` is set, run the `nix run` command from that
+ * directory, which is also where the flake file is generated (unless
+ * `inSameDir` is `false`).
+ */
 export const runExecutable = (
   executable: garn.Executable,
-  options: { cwd?: string } = {},
+  options: { cwd?: string; inSameDir?: boolean } = {},
 ): Output => {
-  const tempDir = Deno.makeTempDirSync({ prefix: "garn-test" });
+  const inSameDir = options.inSameDir == undefined ? true : options.inSameDir;
+
+  const tempDir =
+    options.cwd && inSameDir
+      ? options.cwd
+      : Deno.makeTempDirSync({ prefix: "garn-test" });
   const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
     url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
   });

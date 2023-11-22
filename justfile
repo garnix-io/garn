@@ -135,7 +135,7 @@ run-garn example *args="": hpack
 
 check-examples:
   just run-garn haskell check
-  just run-garn haskell run helloFromHaskell
+  just run-garn haskell run helloFromHaskell.hello
   just run-garn frontend-create-react-app check
   rm examples/frontend-create-react-app/result
   just run-garn frontend-create-react-app build main

@@ -4,8 +4,8 @@ import * as nixpkgs from "http://localhost:8777/nixpkgs.ts";
 export const helloFromHaskell = garn.haskell
   .mkHaskellProject({
     description: "My haskell executable",
-    executable: "helloFromHaskell",
     compiler: "ghc94",
+    executables: ["hello"],
     src: ".",
   })
   .withDevTools([nixpkgs.hlint])
