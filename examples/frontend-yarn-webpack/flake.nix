@@ -17,7 +17,7 @@
         {
           "frontend/pkg" =
             let
-              pkgs = import "${nixpkgs}" {
+              pkgs = import "${nixpkgs-repo}" {
                 config.permittedInsecurePackages = [ ];
                 inherit system;
               };
@@ -81,7 +81,7 @@
         {
           "frontend" =
             let
-              pkgs = import "${nixpkgs}" {
+              pkgs = import "${nixpkgs-repo}" {
                 config.permittedInsecurePackages = [ ];
                 inherit system;
               };
@@ -135,7 +135,7 @@
             "type" = "app";
             "program" = "${let
         dev = let
-          pkgs = import "${nixpkgs}" {
+          pkgs = import "${nixpkgs-repo}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };
@@ -189,7 +189,7 @@
             "type" = "app";
             "program" = "${let
         dev = let
-          pkgs = import "${nixpkgs}" {
+          pkgs = import "${nixpkgs-repo}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };

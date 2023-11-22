@@ -84,7 +84,9 @@ export const runExecutable = (
           default: nixAttrSet({
             type: nix.nixStrLit`app`,
             program: nix.nixRaw`
-              let pkgs = ${pkgs};
+              let
+                pkgs = ${pkgs};
+                system = "x86_64-linux";
               in ${executable.nixExpression}
             `,
           }),
@@ -111,7 +113,9 @@ export const runCheck = (
       checks: nixAttrSet({
         "x86_64-linux": nixAttrSet({
           default: nix.nixRaw`
-            let pkgs = ${pkgs};
+            let
+              pkgs = ${pkgs};
+              system = "x86_64-linux";
             in ${check.nixExpression}
           `,
         }),
@@ -136,7 +140,9 @@ export const buildPackage = (
       packages: nixAttrSet({
         "x86_64-linux": nixAttrSet({
           default: nix.nixRaw`
-            let pkgs = ${pkgs};
+            let
+              pkgs = ${pkgs};
+              system = "x86_64-linux";
             in ${pkg.nixExpression}
           `,
         }),

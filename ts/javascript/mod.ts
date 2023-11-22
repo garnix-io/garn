@@ -39,7 +39,7 @@ const fromNodeVersion = (
   const { pkg, permittedInsecurePackages } = nodeVersions[version];
   return {
     pkgs: nixRaw`
-      import "\${nixpkgs}" {
+      import "\${nixpkgs-repo}" {
         config.permittedInsecurePackages = ${permittedInsecurePackages};
         inherit system;
       }
