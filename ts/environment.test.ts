@@ -13,19 +13,19 @@ import {
 import { assertStringIncludes } from "https://deno.land/std@0.206.0/assert/assert_string_includes.ts";
 
 describe("environments", () => {
-  it("allows to create Executables from shell snippets", () => {
+  it("allows creating Executables from shell snippets", () => {
     const env = garn.emptyEnvironment;
     const output = assertSuccess(runExecutable(env.shell("echo foo")));
     assertStdout(output, "foo\n");
   });
 
-  it("allows to add tools", () => {
+  it("allows adding tools", () => {
     const env = garn.emptyEnvironment.withDevTools([testPkgs.hello]);
     const output = assertSuccess(runExecutable(env.shell("hello")));
     assertStdout(output, "Hello, world!\n");
   });
 
-  it("allows to create Checks from shell snippets", () => {
+  it("allows creating Checks from shell snippets", () => {
     const env = garn.emptyEnvironment;
     const output = runCheck(env.check("echo test check output ; exit 1"));
     assertEquals(output.exitCode, 1);
@@ -36,7 +36,7 @@ describe("environments", () => {
   });
 
   describe("environments with source files", () => {
-    it("allows to access source files in Checks", () => {
+    it("allows accessing source files in Checks", () => {
       const src = Deno.makeTempDirSync();
       Deno.writeTextFileSync(`${src}/file`, "test source file");
       const env = garn.mkEnvironment({ src: "." });
@@ -55,7 +55,7 @@ describe("environments", () => {
       });
     });
 
-    it("allows to access source files in Packages", () => {
+    it("allows accessing source files in Packages", () => {
       const src = Deno.makeTempDirSync();
       Deno.writeTextFileSync(`${src}/file`, "test source file");
       const env = garn.mkEnvironment({ src: "." });
