@@ -98,9 +98,10 @@ export const runExecutable = (
 
 export const runCheck = (
   check: garn.Check,
-  options: { cwd?: string } = {},
+  options: { tempDir?: string } = {},
 ): Output => {
-  const tempDir = Deno.makeTempDirSync({ prefix: "garn-test" });
+  const tempDir =
+    options.tempDir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
   const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
     url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
   });
@@ -122,10 +123,45 @@ export const runCheck = (
   Deno.writeTextFileSync(`${tempDir}/flake.nix`, flakeFile);
   return runCommand(
     new Deno.Command("nix", {
-      args: ["flake", "check", tempDir],
-      cwd: options.cwd,
+      args: ["flake", "check", "-L", tempDir],
     }),
   );
+};
+
+export const buildPackage = (
+  pkg: garn.Package,
+  options: { tempDir?: string } = {},
+): string => {
+  const tempDir =
+    options.tempDir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
+  const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
+    url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
+  });
+  const flakeFile = nix.renderFlakeFile(
+    nixAttrSet({
+      packages: nixAttrSet({
+        "x86_64-linux": nixAttrSet({
+          default: nix.nixRaw`
+                  let pkgs = import ${nixpkgsInput} {
+                        config.allowUnfree = true;
+                        system = "x86_64-linux";
+                      };
+                  in ${pkg.nixExpression}
+                `,
+        }),
+      }),
+    }),
+  );
+  Deno.writeTextFileSync(`${tempDir}/flake.nix`, flakeFile);
+  assertSuccess(
+    runCommand(
+      new Deno.Command("nix", {
+        args: ["build", "-L", tempDir],
+        cwd: tempDir,
+      }),
+    ),
+  );
+  return Deno.readLinkSync(`${tempDir}/result`);
 };
 
 export const testPkgs = {

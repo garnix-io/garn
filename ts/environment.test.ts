@@ -8,6 +8,7 @@ import {
   assertStdout,
   runCheck,
   assertOnOutput,
+  buildPackage,
 } from "./testUtils.ts";
 import { assertStringIncludes } from "https://deno.land/std@0.206.0/assert/assert_string_includes.ts";
 
@@ -32,5 +33,43 @@ describe("environments", () => {
     assertOnOutput(output, () =>
       assertStringIncludes(output.stderr, "test check output"),
     );
+  });
+
+  describe("environments with source files", () => {
+    it("allows to access source files in Checks", () => {
+      const src = Deno.makeTempDirSync();
+      Deno.writeTextFileSync(`${src}/file`, "test source file");
+      const env = garn.mkEnvironment({ src: "." });
+      const output = assertSuccess(
+        runCheck(
+          env.check(`
+            # ${Date.now()}
+            cat file
+          `),
+          { tempDir: src },
+        ),
+      );
+      assertOnOutput(output, () => {
+        assertStringIncludes(output.stderr, "copying source\n");
+        assertStringIncludes(output.stderr, "test source file\n");
+      });
+    });
+
+    it("allows to access source files in Packages", () => {
+      const src = Deno.makeTempDirSync();
+      Deno.writeTextFileSync(`${src}/file`, "test source file");
+      const env = garn.mkEnvironment({ src: "." });
+      const output = buildPackage(
+        env.build(`
+            echo -n built: >> $out/artifact
+            cat file >> $out/artifact
+          `),
+        { tempDir: src },
+      );
+      assertEquals(
+        Deno.readTextFileSync(`${output}/artifact`),
+        "built:test source file",
+      );
+    });
   });
 });

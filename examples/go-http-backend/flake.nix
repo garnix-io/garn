@@ -169,11 +169,11 @@
     });
           modules = gomod2nix-toml;
         };
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )).overrideAttrs (finalAttrs: previousAttrs: {
+        in
+          (if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; }
+          )).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
@@ -228,11 +228,11 @@
     });
           modules = gomod2nix-toml;
         };
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )).overrideAttrs (finalAttrs: previousAttrs: {
+        in
+          (if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; }
+          )).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
