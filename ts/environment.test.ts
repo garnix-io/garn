@@ -7,7 +7,7 @@ import {
   runExecutable,
   assertStdout,
   runCheck,
-  assertOnOutput,
+  printOutputOnFailure,
   buildPackage,
 } from "./testUtils.ts";
 import { assertStringIncludes } from "https://deno.land/std@0.206.0/assert/assert_string_includes.ts";
@@ -30,7 +30,7 @@ describe("environments", () => {
     const output = runCheck(env.check("echo test check output ; exit 1"));
     assertEquals(output.exitCode, 1);
     assertStdout(output, "");
-    assertOnOutput(output, () =>
+    printOutputOnFailure(output, () =>
       assertStringIncludes(output.stderr, "test check output"),
     );
   });
@@ -49,7 +49,7 @@ describe("environments", () => {
           { dir: src },
         ),
       );
-      assertOnOutput(output, () => {
+      printOutputOnFailure(output, () => {
         assertStringIncludes(output.stderr, "copying source\n");
         assertStringIncludes(output.stderr, "test source file\n");
       });

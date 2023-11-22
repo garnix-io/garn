@@ -30,15 +30,15 @@ const printOutput = (output: Output) => {
 };
 
 export const assertSuccess = (output: Output): Output =>
-  assertOnOutput(output, () => assertEquals(output.exitCode, 0));
+  printOutputOnFailure(output, () => assertEquals(output.exitCode, 0));
 
 export const assertStdout = (output: Output, expected: string): Output =>
-  assertOnOutput(output, () => assertEquals(output.stdout, expected));
+  printOutputOnFailure(output, () => assertEquals(output.stdout, expected));
 
 export const assertStderr = (output: Output, expected: string): Output =>
-  assertOnOutput(output, () => assertEquals(output.stderr, expected));
+  printOutputOnFailure(output, () => assertEquals(output.stderr, expected));
 
-export const assertOnOutput = (
+export const printOutputOnFailure = (
   output: Output,
   assertion: () => void,
 ): Output => {
