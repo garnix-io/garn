@@ -4,7 +4,7 @@ module BuildSpec where
 
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
-import Development.Shake (StdoutTrim (..), cmd)
+import Development.Shake (CmdOption (EchoStdout), StdoutTrim (..), cmd, cmd_)
 import System.Directory
 import System.Exit (ExitCode (..))
 import Test.Hspec
@@ -190,3 +190,11 @@ spec = do
           output <- runGarn ["build", "project"]
           readFile "result/build-artifact" `shouldReturn` "hello from setup\n"
           exitCode output `shouldBe` ExitSuccess
+
+      it "includes untracked files when building packages" $ \runGarn -> do
+        cmd_ "git init --initial-branch=main" (EchoStdout False)
+        writeHaskellProject repoDir
+        _ <- runGarn ["build", "foo"]
+        doesDirectoryExist "result" `shouldReturn` True
+        StdoutTrim output <- cmd ("result/bin/garn-test" :: String)
+        output `shouldBe` ("haskell test output" :: String)

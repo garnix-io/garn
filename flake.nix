@@ -15,6 +15,22 @@
         pkgs = import "${nixpkgs}" {
           inherit system;
           config.allowUnfree = true;
+          overlays = [
+            (final: prev: {
+              nix = prev.nix.overrideAttrs
+                (finalAttrs: prevAttrs: {
+                  patches = (prevAttrs.patches or [ ]) ++ [
+                    (final.fetchpatch {
+                      name = "include-untracked-files.patch";
+                      url = "https://github.com/NixOS/nix/compare/2.17.1...jfroche:nix:feat/include-untracked-files-2.17.1.patch";
+                      excludes = [ "tests/functional/*" ];
+                      hash = "sha256-HCGYzArlHO3Q0jIfc7rVD6AfV2wBzqY7VeU5DavexRE=";
+                    })
+                  ];
+                  requiredSystemFeatures = (prevAttrs.requiredSystemFeatures or [ ]) ++ [ "big-parallel" ];
+                });
+            })
+          ];
         };
         strings = pkgs.lib.strings;
         lists = pkgs.lib.lists;
