@@ -37,6 +37,7 @@ type Execs<Exe extends string[]> = {
  * @param description - A short description of the project
  * @param compiler - The compiler version (e.g.: "ghc94")
  * @param executables - The name of the executables in the cabal file
+ * @param overrideDependencies - A mapping from package names to versions
  * @param src - The source directory
  */
 export function mkHaskellProject<const Executables extends string[]>(args: {
