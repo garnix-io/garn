@@ -71,5 +71,32 @@ describe("environments", () => {
         "built:test source file",
       );
     });
+
+    it("does not allow accessing source files outside of the source directory", () => {
+      const src = Deno.makeTempDirSync();
+      Deno.mkdirSync(`${src}/subdir`);
+      Deno.writeTextFileSync(
+        `${src}/subdir/file`,
+        "test source file in subdir",
+      );
+      Deno.writeTextFileSync(`${src}/file`, "test source file in parent dir");
+      const env = garn.mkEnvironment({ src: "./subdir" });
+      const output = buildPackage(
+        env.build(`
+            echo -n built: >> $out/artifact
+            cat file >> $out/artifact
+            cat ../file 2>> $out/error || true
+          `),
+        { dir: src },
+      );
+      assertEquals(
+        Deno.readTextFileSync(`${output}/artifact`),
+        "built:test source file in subdir",
+      );
+      assertEquals(
+        Deno.readTextFileSync(`${output}/error`),
+        "cat: ../file: No such file or directory\n",
+      );
+    });
   });
 });
