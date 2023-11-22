@@ -29,32 +29,26 @@ const printOutput = (output: Output) => {
   `);
 };
 
-export const assertSuccess = (output: Output): Output => {
-  try {
-    assertEquals(output.exitCode, 0);
-    return output;
-  } catch (e) {
-    printOutput(output);
-    throw e;
-  }
-};
+export const assertSuccess = (output: Output): Output =>
+  assertOnOutput(output, () => assertEquals(output.exitCode, 0));
 
-export const assertStdout = (output: Output, expected: string) => {
-  try {
-    assertEquals(output.stdout, expected);
-  } catch (e) {
-    printOutput(output);
-    throw e;
-  }
-};
+export const assertStdout = (output: Output, expected: string): Output =>
+  assertOnOutput(output, () => assertEquals(output.stdout, expected));
 
-export const assertStderr = (output: Output, expected: string) => {
+export const assertStderr = (output: Output, expected: string): Output =>
+  assertOnOutput(output, () => assertEquals(output.stderr, expected));
+
+export const assertOnOutput = (
+  output: Output,
+  assertion: () => void,
+): Output => {
   try {
-    assertEquals(output.stderr, expected);
+    assertion();
   } catch (e) {
     printOutput(output);
     throw e;
   }
+  return output;
 };
 
 /*
@@ -97,6 +91,38 @@ export const runExecutable = (
   return runCommand(
     new Deno.Command("nix", {
       args: ["run", tempDir],
+      cwd: options.cwd,
+    }),
+  );
+};
+
+export const runCheck = (
+  check: garn.Check,
+  options: { cwd?: string } = {},
+): Output => {
+  const tempDir = Deno.makeTempDirSync({ prefix: "garn-test" });
+  const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
+    url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
+  });
+  const flakeFile = nix.renderFlakeFile(
+    nixAttrSet({
+      checks: nixAttrSet({
+        "x86_64-linux": nixAttrSet({
+          default: nix.nixRaw`
+                  let pkgs = import ${nixpkgsInput} {
+                        config.allowUnfree = true;
+                        system = "x86_64-linux";
+                      };
+                  in ${check.nixExpression}
+                `,
+        }),
+      }),
+    }),
+  );
+  Deno.writeTextFileSync(`${tempDir}/flake.nix`, flakeFile);
+  return runCommand(
+    new Deno.Command("nix", {
+      args: ["flake", "check", tempDir],
       cwd: options.cwd,
     }),
   );
