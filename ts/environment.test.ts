@@ -46,7 +46,7 @@ describe("environments", () => {
             # ${Date.now()}
             cat file
           `),
-          { tempDir: src },
+          { dir: src },
         ),
       );
       assertOnOutput(output, () => {
@@ -64,7 +64,7 @@ describe("environments", () => {
             echo -n built: >> $out/artifact
             cat file >> $out/artifact
           `),
-        { tempDir: src },
+        { dir: src },
       );
       assertEquals(
         Deno.readTextFileSync(`${output}/artifact`),
