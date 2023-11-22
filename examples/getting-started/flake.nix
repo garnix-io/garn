@@ -17,7 +17,7 @@
           };
         in
         {
-          "backend_pkg" =
+          "backend/pkg" =
             let
               gomod2nix = gomod2nix-repo.legacyPackages.${system};
               gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -51,7 +51,7 @@
               );
               modules = gomod2nix-toml;
             };
-          "frontend_node_modules" =
+          "frontend/node_modules" =
             let
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
@@ -95,7 +95,7 @@
           };
         in
         {
-          "frontend_test" =
+          "frontend/test" =
             let
               dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
@@ -108,8 +108,8 @@
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "
-      touch \$out
-      ${"
+    touch \$out
+    ${"
       echo copying source
       cp -r ${(let
     lib = pkgs.lib;
@@ -133,17 +133,17 @@
       cd src
       echo copying node_modules
       cp -r ${let
-      npmlock2nix = import npmlock2nix-repo {
-        inherit pkgs;
-      };
-      pkgs = import "${nixpkgs}" {
+        npmlock2nix = import npmlock2nix-repo {
+          inherit pkgs;
+        };
+        pkgs = import "${nixpkgs}" {
         config.permittedInsecurePackages = [];
         inherit system;
       };
-    in
-    npmlock2nix.v2.node_modules
-      {
-        src = (let
+      in
+      npmlock2nix.v2.node_modules
+        {
+          src = (let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -161,12 +161,12 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     });
-        nodejs = pkgs.nodejs-18_x;
-      }}/node_modules .
+          nodejs = pkgs.nodejs-18_x;
+        }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      ${"npm test"}
-    ";
+    ${"npm test"}
+  ";
         }
       );
       devShells = forAllSystems (system:
@@ -240,7 +240,10 @@
       );
       apps = forAllSystems (system:
         let
-          pkgs = import "${nixpkgs}" { inherit system; };
+          pkgs = import "${nixpkgs}" {
+            config.allowUnfree = true;
+            inherit system;
+          };
         in
         {
           "edit" = {
@@ -254,13 +257,13 @@
 
     # copy the vscodium config
     cp -r ${let dev = pkgs.mkShell {}; in
-      pkgs.runCommand "garn-pkg" {
-        buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-      } "
-      #!\${pkgs.bash}/bin/bash
-      mkdir \$out
-      ${""}
-      ${"
+    pkgs.runCommand "garn-pkg" {
+      buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+    } "
+    #!\${pkgs.bash}/bin/bash
+    mkdir \$out
+    ${""}
+    ${"
     USER_CONFIG=.config/VSCodium/User
     if test \$(uname) = \"Darwin\" ; then
       USER_CONFIG=\"Library/Application Support/VSCodium/User\"
@@ -282,13 +285,13 @@
   }} \"\$out/\$USER_CONFIG/settings.json\"
     mkdir -p \"\$out/\$USER_CONFIG/globalStorage\"
     cp ${let dev = pkgs.mkShell {}; in
-      pkgs.runCommand "garn-pkg" {
-        buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-      } "
-      #!\${pkgs.bash}/bin/bash
-      mkdir \$out
-      ${""}
-      ${"
+    pkgs.runCommand "garn-pkg" {
+      buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
+    } "
+    #!\${pkgs.bash}/bin/bash
+    mkdir \$out
+    ${""}
+    ${"
     set -euo pipefail
     cat ${pkgs.writeTextFile {
     name = "${"sqlite-script"}";
@@ -299,9 +302,9 @@ INSERT INTO ItemTable VALUES('denoland.vscode-deno','{\"deno.welcomeShown\":true
 COMMIT;"}";
   }} | ${pkgs.sqlite}/bin/sqlite3 \$out/state.vscdb
   "}
-    "}/state.vscdb \"\$out/\$USER_CONFIG/globalStorage/state.vscdb\"
+  "}/state.vscdb \"\$out/\$USER_CONFIG/globalStorage/state.vscdb\"
   "}
-    "}/. \$TEMP_DIR
+  "}/. \$TEMP_DIR
     chmod -R u+rwX \$TEMP_DIR
 
     # copy the deno cache
