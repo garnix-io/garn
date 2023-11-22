@@ -51,6 +51,17 @@ export const assertOnOutput = (
   return output;
 };
 
+const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
+  url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
+});
+
+const pkgs = nix.nixRaw`
+  import ${nixpkgsInput} {
+    config.allowUnfree = true;
+    system = "x86_64-linux";
+  }
+`;
+
 /*
  * Run an Executable. If `cwd` is set, run the `nix run` command from that
  * directory, which is also where the flake file is generated (unless
@@ -66,9 +77,6 @@ export const runExecutable = (
     options.cwd && inSameDir
       ? options.cwd
       : Deno.makeTempDirSync({ prefix: "garn-test" });
-  const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
-    url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
-  });
   const flakeFile = nix.renderFlakeFile(
     nixAttrSet({
       apps: nixAttrSet({
@@ -76,12 +84,9 @@ export const runExecutable = (
           default: nixAttrSet({
             type: nix.nixStrLit`app`,
             program: nix.nixRaw`
-                  let pkgs = import ${nixpkgsInput} {
-                        config.allowUnfree = true;
-                        system = "x86_64-linux";
-                      };
-                  in ${executable.nixExpression}
-                `,
+              let pkgs = ${pkgs};
+              in ${executable.nixExpression}
+            `,
           }),
         }),
       }),
@@ -101,20 +106,14 @@ export const runCheck = (
   options: { dir?: string } = {},
 ): Output => {
   const dir = options.dir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
-  const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
-    url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
-  });
   const flakeFile = nix.renderFlakeFile(
     nixAttrSet({
       checks: nixAttrSet({
         "x86_64-linux": nixAttrSet({
           default: nix.nixRaw`
-                  let pkgs = import ${nixpkgsInput} {
-                        config.allowUnfree = true;
-                        system = "x86_64-linux";
-                      };
-                  in ${check.nixExpression}
-                `,
+            let pkgs = ${pkgs};
+            in ${check.nixExpression}
+          `,
         }),
       }),
     }),
@@ -132,20 +131,14 @@ export const buildPackage = (
   options: { dir?: string } = {},
 ): string => {
   const dir = options.dir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
-  const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
-    url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
-  });
   const flakeFile = nix.renderFlakeFile(
     nixAttrSet({
       packages: nixAttrSet({
         "x86_64-linux": nixAttrSet({
           default: nix.nixRaw`
-                  let pkgs = import ${nixpkgsInput} {
-                        config.allowUnfree = true;
-                        system = "x86_64-linux";
-                      };
-                  in ${pkg.nixExpression}
-                `,
+            let pkgs = ${pkgs};
+            in ${pkg.nixExpression}
+          `,
         }),
       }),
     }),
