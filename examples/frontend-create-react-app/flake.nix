@@ -66,8 +66,9 @@
     #!\${pkgs.bash}/bin/bash
     mkdir \$out
     ${"
-      echo copying source
-      cp -r ${(let
+      ${"
+    echo copying source
+    cp -r ${(let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -85,8 +86,10 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })} src
-      chmod -R u+rwX src
-      cd src
+    chmod -R u+rwX src
+    cd src
+  "}
+      ${"
       echo copying node_modules
       cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
@@ -120,6 +123,7 @@
           nodejs = pkgs.nodejs-18_x;
         }}/node_modules .
       chmod -R u+rwX node_modules
+    "}
     "}
     ${"npm run build && mv build/* \$out"}
   ";
