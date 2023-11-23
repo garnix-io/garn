@@ -210,11 +210,11 @@
          fileName != "garn.ts";
     })
         { });
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      );
+        in
+          (if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; }
+          );
         shell = "${(pkgs.haskell.packages.ghc94.callCabal2nix
         "garn-pkg"
         (let
