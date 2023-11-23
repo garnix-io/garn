@@ -199,3 +199,19 @@ spec = do
         doesDirectoryExist "result" `shouldReturn` True
         StdoutTrim output <- cmd ("result/bin/garn-test" :: String)
         output `shouldBe` ("haskell test output" :: String)
+
+      it "does not warn about dirty git directories" $ \runGarn -> do
+        cmd_ "git init --initial-branch=main" (EchoStdout False)
+        writeFile "file" "foo"
+        writeFile
+          "garn.ts"
+          [i|
+            import * as garn from "#{repoDir}/ts/mod.ts";
+
+            export const pkg = garn.build("echo built > $out/artifact");
+          |]
+        cmd_ "git add ."
+        cmd_ "git commit -m" ["test commit message"] (EchoStdout False)
+        writeFile "file" "bar"
+        output <- runGarn ["build", "pkg"]
+        stderr output `shouldNotMatch` "Git tree .* is dirty"
