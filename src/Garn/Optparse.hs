@@ -21,7 +21,7 @@ import qualified Text.PrettyPrint.ANSI.Leijen as PP
 
 getOpts :: OptionType -> IO Options
 getOpts oType =
-  customExecParser (prefs $ showHelpOnError <> showHelpOnEmpty) opts
+  customExecParser (prefs $ subparserInline <> showHelpOnError <> showHelpOnEmpty) opts
   where
     unavailable :: OA.Doc
     unavailable =

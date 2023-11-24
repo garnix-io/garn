@@ -13,6 +13,9 @@
 - Tweak the API for creating `Environment`s, making it easier to create
   `Environment`s that have a source directory
 
+- Fix needing to use `--` twice in `garn run` in order to pass arguments to
+  executables.
+
 ## v0.0.16
 
 - Allow to build packages that are nested within projects with `garn build projectName.packageName`.
