@@ -195,6 +195,17 @@ export function nixStrLit(
   };
 }
 
+export function unlinesNixStrings(list: Array<NixExpression>): NixExpression {
+  return {
+    [__nixExpressionTag]: null,
+    type: "strLit",
+    str: {
+      initial: "",
+      rest: list.map((expr) => [expr, "\n"]),
+    },
+  };
+}
+
 /**
  * Returns a `NixExpression` that renders as an identifier that refers to a
  * flake input. At the same time it registers the flake input as a dependency,

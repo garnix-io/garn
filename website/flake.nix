@@ -77,9 +77,8 @@
             pkgs.runCommand "check"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-    touch \$out
-    ${"
+              } "${"mkdir -p \$out"}
+${"
       ${"
     echo copying source
     cp -r ${(let
@@ -139,8 +138,8 @@
       chmod -R u+rwX node_modules
     "}
     "}
-    ${"npm run tsc"}
-  ";
+${"npm run tsc"}
+";
           "website/fmt-check" =
             let
               dev = ((pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -158,9 +157,8 @@
             pkgs.runCommand "check"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-    touch \$out
-    ${"
+              } "${"mkdir -p \$out"}
+${"
       ${"
     echo copying source
     cp -r ${(let
@@ -220,8 +218,8 @@
       chmod -R u+rwX node_modules
     "}
     "}
-    ${"prettier '**/*.{ts,tsx}' --check"}
-  ";
+${"prettier '**/*.{ts,tsx}' --check"}
+";
         }
       );
       devShells = forAllSystems (system:
@@ -318,14 +316,12 @@
     cp -r ${let dev = pkgs.mkShell {}; in
     pkgs.runCommand "garn-pkg" {
       buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-    } "
-    #!\${pkgs.bash}/bin/bash
-    mkdir \$out
-    ${"
+    } "${"mkdir -p \$out"}
+${"
       ${""}
       ${""}
     "}
-    ${"
+${"
     USER_CONFIG=.config/VSCodium/User
     if test \$(uname) = \"Darwin\" ; then
       USER_CONFIG=\"Library/Application Support/VSCodium/User\"
@@ -349,14 +345,12 @@
     cp ${let dev = pkgs.mkShell {}; in
     pkgs.runCommand "garn-pkg" {
       buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-    } "
-    #!\${pkgs.bash}/bin/bash
-    mkdir \$out
-    ${"
+    } "${"mkdir -p \$out"}
+${"
       ${""}
       ${""}
     "}
-    ${"
+${"
     set -euo pipefail
     cat ${pkgs.writeTextFile {
     name = "${"sqlite-script"}";
@@ -367,9 +361,9 @@ INSERT INTO ItemTable VALUES('denoland.vscode-deno','{\"deno.welcomeShown\":true
 COMMIT;"}";
   }} | ${pkgs.sqlite}/bin/sqlite3 \$out/state.vscdb
   "}
-  "}/state.vscdb \"\$out/\$USER_CONFIG/globalStorage/state.vscdb\"
+"}/state.vscdb \"\$out/\$USER_CONFIG/globalStorage/state.vscdb\"
   "}
-  "}/. \$TEMP_DIR
+"}/. \$TEMP_DIR
     chmod -R u+rwX \$TEMP_DIR
 
     # copy the deno cache

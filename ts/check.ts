@@ -1,4 +1,4 @@
-import { Environment } from "./environment.ts";
+import { Environment, buildSandboxScript } from "./environment.ts";
 import { hasTag } from "./internal/utils.ts";
 import {
   NixExpression,
@@ -30,11 +30,7 @@ export function mkCheck(
 ): Check {
   const checkScript =
     typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
-  const wrappedScript = nixStrLit`
-    touch $out
-    ${env.setup}
-    ${checkScript}
-  `;
+  const wrappedScript = buildSandboxScript(env, checkScript);
   return {
     tag: "check",
     nixExpression: nixRaw`
