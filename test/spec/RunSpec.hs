@@ -141,6 +141,19 @@ spec =
           stdout output `shouldBe` "foo bar,baz,"
           exitCode output `shouldBe` ExitSuccess
 
+        it "allows specifying options to the executable with --" $ \onTestFailureLog -> do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const main = garn.shell('printf "%s,%s,%s"');
+            |]
+          output <- runGarn ["run", "main", "--", "--bar", "--baz"] "" repoDir Nothing
+          onTestFailureLog output
+          stdout output `shouldBe` "--bar,--baz,"
+          exitCode output `shouldBe` ExitSuccess
+
         it "doesn’t format other Nix files" $ \onTestFailureLog -> do
           let unformattedNix =
                 [i|
