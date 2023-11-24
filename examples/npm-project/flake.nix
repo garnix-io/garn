@@ -74,7 +74,7 @@
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "${"mkdir -p \$out"}
 ${"
-      ${"
+        ${"
     echo copying source
     cp -r ${(let
     lib = pkgs.lib;
@@ -93,11 +93,10 @@ ${"
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })} src
-    chmod -R u+rwX src
-    cd src
+    })}/. .
+    chmod -R u+rwX .
   "}
-      ${"
+        ${"
       echo copying node_modules
       cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
@@ -132,7 +131,7 @@ ${"
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-    "}
+      "}
 ${"npm run test"}
 ";
           "project/tsc" =
@@ -149,7 +148,7 @@ ${"npm run test"}
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "${"mkdir -p \$out"}
 ${"
-      ${"
+        ${"
     echo copying source
     cp -r ${(let
     lib = pkgs.lib;
@@ -168,11 +167,10 @@ ${"
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })} src
-    chmod -R u+rwX src
-    cd src
+    })}/. .
+    chmod -R u+rwX .
   "}
-      ${"
+        ${"
       echo copying node_modules
       cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
@@ -207,7 +205,7 @@ ${"
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-    "}
+      "}
 ${"npm run tsc"}
 ";
         }
