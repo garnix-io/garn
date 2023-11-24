@@ -1,20 +1,22 @@
 let
-  pkgs = import (builtins.fetchTarball {
-    url = "https://github.com/NixOS/nixpkgs/archive/a78de4f116747585ebdb6f3d725268a7e068c554.tar.gz";
-    sha256 = "14zicikllc86aqyj7swaa3nsbnpr4lmyxm8ldsqrr7slg44s2nsh";
-  }) {};
+  pkgs = import
+    (builtins.fetchTarball {
+      url = "https://github.com/NixOS/nixpkgs/archive/a78de4f116747585ebdb6f3d725268a7e068c554.tar.gz";
+      sha256 = "14zicikllc86aqyj7swaa3nsbnpr4lmyxm8ldsqrr7slg44s2nsh";
+    })
+    { };
   settingsFile = pkgs.writeText "vscode-settings.json" ''
-   {
-    "deno.enable": true,
-    "deno.unstable": true,
-    "typescript.validate.enable": false,
-    "git.openRepositoryInParentFolders": "never",
-    "editor.formatOnSave": true,
-    "[typescript]": {
-      "editor.defaultFormatter": "denoland.vscode-deno",
-    },
-    "update.mode": "none"
-   }
+    {
+     "deno.enable": true,
+     "deno.unstable": true,
+     "typescript.validate.enable": false,
+     "git.openRepositoryInParentFolders": "never",
+     "editor.formatOnSave": true,
+     "[typescript]": {
+       "editor.defaultFormatter": "denoland.vscode-deno",
+     },
+     "update.mode": "none"
+    }
   '';
   sqliteScript = pkgs.writeText "sqliteScript" ''
     PRAGMA foreign_keys=OFF;
@@ -31,19 +33,19 @@ let
           pkgs.vscode-extensions.denoland.vscode-deno
         ];
       }
-    ;
+  ;
 
-  configDir = pkgs.runCommand "vscodium-config" {}
-  ''
-    USER_CONFIG=.config/VSCodium/User
-    if test $(uname) = "Darwin" ; then
-      USER_CONFIG="Library/Application Support/VSCodium/User"
-    fi
-    mkdir -p "$out/$USER_CONFIG/User"
-    cp ${settingsFile} "$out/$USER_CONFIG/settings.json"
-    mkdir -p "$out/$USER_CONFIG/globalStorage"
-    cat ${sqliteScript} | ${pkgs.sqlite}/bin/sqlite3 "$out/$USER_CONFIG/globalStorage/state.vscdb"
-  '';
+  configDir = pkgs.runCommand "vscodium-config" { }
+    ''
+      USER_CONFIG=.config/VSCodium/User
+      if test $(uname) = "Darwin" ; then
+        USER_CONFIG="Library/Application Support/VSCodium/User"
+      fi
+      mkdir -p "$out/$USER_CONFIG/User"
+      cp ${settingsFile} "$out/$USER_CONFIG/settings.json"
+      mkdir -p "$out/$USER_CONFIG/globalStorage"
+      cat ${sqliteScript} | ${pkgs.sqlite}/bin/sqlite3 "$out/$USER_CONFIG/globalStorage/state.vscdb"
+    '';
   editor = pkgs.writeShellScriptBin "vscodium" ''
     set -euo pipefail
 
@@ -71,4 +73,5 @@ let
 
     rm -rf $TEMP_DIR
   '';
-in editor
+in
+editor
