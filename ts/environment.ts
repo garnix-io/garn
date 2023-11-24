@@ -163,9 +163,8 @@ export function mkEnvironment(
 ): Environment {
   const copySource = (src: string) => nixStrLit`
     echo copying source
-    cp -r ${nixSource(src)} src
-    chmod -R u+rwX src
-    cd src
+    cp -r ${nixSource(src)}/. .
+    chmod -R u+rwX .
   `;
   return {
     tag: "environment",

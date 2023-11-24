@@ -97,7 +97,7 @@
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "${"mkdir -p \$out"}
 ${"
-      ${"
+        ${"
     echo copying source
     cp -r ${(let
     lib = pkgs.lib;
@@ -116,12 +116,11 @@ ${"
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })} src
-    chmod -R u+rwX src
-    cd src
+    })}/. .
+    chmod -R u+rwX .
   "}
-      ${""}
-    "}
+        ${""}
+      "}
 ${"hlint *.hs"}
 ";
         }
