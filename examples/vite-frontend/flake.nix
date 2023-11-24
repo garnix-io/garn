@@ -62,9 +62,11 @@
             pkgs.runCommand "garn-pkg"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "${"mkdir -p \$out"}
-${"
-        ${"
+              } "
+    #!\${pkgs.bash}/bin/bash
+    mkdir \$out
+    ${"
+      ${"
     echo copying source
     cp -r ${(let
     lib = pkgs.lib;
@@ -83,10 +85,11 @@ ${"
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })}/. .
-    chmod -R u+rwX .
+    })} src
+    chmod -R u+rwX src
+    cd src
   "}
-        ${"
+      ${"
       echo copying node_modules
       cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
@@ -121,8 +124,8 @@ ${"
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      "}
-${"
+    "}
+    ${"
       set -eu
 
       export PATH=${let
@@ -163,7 +166,7 @@ ${"
       fi
       vite build --outDir \$out
     "}
-";
+  ";
         }
       );
       checks = forAllSystems (system:

@@ -72,9 +72,10 @@
             pkgs.runCommand "check"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "${"mkdir -p \$out"}
-${"
-        ${"
+              } "
+    touch \$out
+    ${"
+      ${"
     echo copying source
     cp -r ${(let
     lib = pkgs.lib;
@@ -93,10 +94,11 @@ ${"
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })}/. .
-    chmod -R u+rwX .
+    })} src
+    chmod -R u+rwX src
+    cd src
   "}
-        ${"
+      ${"
       echo copying node_modules
       cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
@@ -131,9 +133,9 @@ ${"
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      "}
-${"npm run test"}
-";
+    "}
+    ${"npm run test"}
+  ";
           "project/tsc" =
             let
               dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -146,9 +148,10 @@ ${"npm run test"}
             pkgs.runCommand "check"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "${"mkdir -p \$out"}
-${"
-        ${"
+              } "
+    touch \$out
+    ${"
+      ${"
     echo copying source
     cp -r ${(let
     lib = pkgs.lib;
@@ -167,10 +170,11 @@ ${"
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })}/. .
-    chmod -R u+rwX .
+    })} src
+    chmod -R u+rwX src
+    cd src
   "}
-        ${"
+      ${"
       echo copying node_modules
       cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
@@ -205,9 +209,9 @@ ${"
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
-      "}
-${"npm run tsc"}
-";
+    "}
+    ${"npm run tsc"}
+  ";
         }
       );
       devShells = forAllSystems (system:
