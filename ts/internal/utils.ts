@@ -47,12 +47,12 @@ export const mapKeys = <T>(
  * backwards-compatible way.
  */
 export const mapValues = <T, R>(
-  f: (i: T) => R,
+  f: (i: T, key: string) => R,
   x: Record<string, T>,
 ): Record<string, R> => {
   const result: Record<string, R> = {};
   for (const [key, value] of Object.entries(x)) {
-    result[key] = f(value);
+    result[key] = f(value, key);
   }
   return result;
 };

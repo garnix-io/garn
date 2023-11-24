@@ -2,7 +2,7 @@ import { packageToEnvironment } from "../environment.ts";
 import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
 import { Executable } from "../executable.ts";
-import { nixSource } from "../internal/utils.ts";
+import { mapValues, nixSource } from "../internal/utils.ts";
 import { nixRaw, nixAttrSet } from "../nix.ts";
 
 /**
@@ -54,13 +54,11 @@ export function mkHaskellProject<const Executables extends string[]>(args: {
       haskell = pkgs.haskell.packages.${nixRaw(args.compiler)}.override {
         overrides = final: prev:
           ${nixAttrSet(
-            Object.fromEntries(
-              Object.entries(deps).map(([pkgName, pkgVersion]) => [
-                pkgName,
-                nixRaw`prev.callHackage
-                    "${nixRaw(pkgName)}" "${nixRaw(pkgVersion)}" {}
-                `,
-              ]),
+            mapValues(
+              (pkgVersion, pkgName) => nixRaw`prev.callHackage
+                "${nixRaw(pkgName)}" "${nixRaw(pkgVersion)}" {}
+              `,
+              deps,
             ),
           )}
         ;
