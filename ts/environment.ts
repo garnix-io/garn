@@ -31,6 +31,8 @@ export type Environment = {
   withDevTools(devTools: Array<Package>): Environment;
   /**
    * Creates a new shell script `Executable`, run inside this `Environment`
+   *
+   * In order to allow arguments to your script, use `"$@"` where appropriate.
    */
   shell(script: string): Executable;
   shell(

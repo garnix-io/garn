@@ -188,7 +188,7 @@
         #!${pkgs.bash}/bin/bash
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
-        ${shell} "$@"
+        ${shell}
       ''}";
           };
           "server/dev" = {
@@ -247,7 +247,7 @@
         #!${pkgs.bash}/bin/bash
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
-        ${shell} "$@"
+        ${shell}
       ''}";
           };
         }

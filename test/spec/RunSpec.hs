@@ -134,7 +134,7 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.shell('printf "%s,%s,%s"');
+              export const main = garn.shell('printf "%s,%s,%s" "$@"');
             |]
           output <- runGarn ["run", "main", "foo bar", "baz"] "" repoDir Nothing
           onTestFailureLog output
@@ -147,7 +147,7 @@ spec =
             [i|
               import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const main = garn.shell('printf "%s,%s,%s"');
+              export const main = garn.shell('printf "%s,%s,%s" "$@"');
             |]
           output <- runGarn ["run", "main", "--", "--bar", "--baz"] "" repoDir Nothing
           onTestFailureLog output
