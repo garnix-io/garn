@@ -9,6 +9,7 @@ verbatim:
   data-files: |
     ts/**/*.ts
     ts/**/*.json
+    nix/*.nix
   cabal-version: 2.4
 
 default-extensions:

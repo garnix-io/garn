@@ -6,6 +6,7 @@ module Garn.Optparse
     OptionType (..),
     WithGarnTsCommand (..),
     WithoutGarnTsCommand (..),
+    AlwaysCommand (..),
     CommandOptions (..),
     CheckCommandOptions (..),
   )
@@ -36,8 +37,12 @@ getOpts oType =
               )
     parser :: Parser Options
     parser = case oType of
-      WithGarnTs garnConfig -> WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig)
-      WithoutGarnTs -> WithoutGarnTsOpts <$> withoutGarnTsParser
+      WithGarnTs garnConfig ->
+        (WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig))
+          <|> (AlwaysAvailableOpts <$> alwaysParser)
+      WithoutGarnTs ->
+        (WithoutGarnTsOpts <$> withoutGarnTsParser)
+          <|> (AlwaysAvailableOpts <$> alwaysParser)
     version =
       infoOption garnCliVersion $
         mconcat [long "version", help ("Show garn version (" <> garnCliVersion <> ")")]
@@ -58,6 +63,7 @@ data OptionType
 data Options
   = WithGarnTsOpts GarnConfig WithGarnTsCommand
   | WithoutGarnTsOpts WithoutGarnTsCommand
+  | AlwaysAvailableOpts AlwaysCommand
 
 data WithoutGarnTsCommand
   = Init
@@ -68,6 +74,10 @@ data WithGarnTsCommand
   | Run CommandOptions [String]
   | Enter CommandOptions
   | Check CheckCommandOptions
+  deriving stock (Eq, Show)
+
+data AlwaysCommand
+  = Edit [String]
   deriving stock (Eq, Show)
 
 withGarnTsCommandInfo :: [(String, String, Targets -> Parser WithGarnTsCommand)]
@@ -138,6 +148,15 @@ withoutGarnTsParser =
       [ OA.command cmd (info runner (progDesc desc))
         | (cmd, desc, runner) <- withouGarnTsCommandInfo
       ]
+
+alwaysParser :: Parser AlwaysCommand
+alwaysParser =
+  subparser $ OA.command "edit" (info (Edit <$> argvParser) (progDesc desc))
+  where
+    argvParser :: Parser [String]
+    argvParser = many $ strArgument $ metavar "...args"
+
+    desc = "Edit garn.ts in VSCodium with extensions installed"
 
 data CommandOptions = CommandOptions
   { target :: TargetName,
