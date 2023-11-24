@@ -72,6 +72,23 @@ describe("environments", () => {
       );
     });
 
+    it("allows accessing hidden source files in Packages", () => {
+      const src = Deno.makeTempDirSync();
+      Deno.writeTextFileSync(`${src}/.file`, "hidden source file");
+      const env = garn.mkEnvironment({ src: "." });
+      const output = buildPackage(
+        env.build(`
+            echo -n built: >> $out/artifact
+            cat .file >> $out/artifact
+          `),
+        { dir: src },
+      );
+      assertEquals(
+        Deno.readTextFileSync(`${output}/artifact`),
+        "built:hidden source file",
+      );
+    });
+
     it("does not allow accessing source files outside of the source directory", () => {
       const src = Deno.makeTempDirSync();
       Deno.mkdirSync(`${src}/subdir`);

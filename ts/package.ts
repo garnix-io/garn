@@ -1,4 +1,4 @@
-import { Environment } from "./environment.ts";
+import { Environment, sandboxScript } from "./environment.ts";
 import { hasTag } from "./internal/utils.ts";
 import {
   NixExpression,
@@ -60,12 +60,7 @@ export function mkShellPackage(
 ) {
   const cmdToExecute =
     typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
-  const wrappedScript = nixStrLit`
-    #!\${pkgs.bash}/bin/bash
-    mkdir $out
-    ${env.setup}
-    ${cmdToExecute}
-  `;
+  const wrappedScript = sandboxScript(env, cmdToExecute);
   const pkg = nixRaw`
     let dev = ${env.nixExpression}; in
     pkgs.runCommand "garn-pkg" {

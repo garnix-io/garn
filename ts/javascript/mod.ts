@@ -82,7 +82,7 @@ export function mkNpmProject(args: {
   );
   const devShell: Environment = mkEnvironment({
     src: args.src,
-    setup: nixStrLit`
+    sandboxSetup: nixStrLit`
       echo copying node_modules
       cp -r ${node_modules}/node_modules .
       chmod -R u+rwX node_modules

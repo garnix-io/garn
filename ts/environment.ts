@@ -7,6 +7,7 @@ import {
   nixList,
   nixRaw,
   nixStrLit,
+  unlinesNixStrings,
 } from "./nix.ts";
 import { Package, mkShellPackage } from "./package.ts";
 
@@ -23,7 +24,7 @@ import { Package, mkShellPackage } from "./package.ts";
 export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
-  setup: NixExpression;
+  sandboxSetup: NixExpression;
 
   /**
    * Creates a new environment based on this one that includes the specified nix packages.
@@ -54,6 +55,12 @@ export type Environment = {
     ..._args: Array<NixStrLitInterpolatable>
   ): Package;
 };
+
+export const sandboxScript = (
+  env: Environment,
+  script: NixExpression,
+): NixExpression =>
+  unlinesNixStrings([nixStrLit`mkdir -p $out`, env.sandboxSetup, script]);
 
 /**
  * Creates a new shell script `Executable`, run in the `emptyEnvironment`.
@@ -120,26 +127,25 @@ export function build(
 }
 
 /**
- * A low-level helper to create new `Environment`s from `NixExpression`s.
+ * A low-level helper to create new `Environment`s.
  *
- * @param nixExpression - A nix expression to use for this environment, defaults to `pkgs.mkShell {}`
- * @param setup - An optional shell script to set up the environment. This script will be run for
- *                every `Check` before the snippet given to `Environment.check` is executed.
+ * @param nixExpression - A nix expression to use for this environment, defaults to `pkgs.mkShell {}`.
+ *   All build inputs from the given expression will be available in the created environment.
+ * @param src - An optional directory containing source files that are available in the environment.
+ *   For `Package`s and `Check`s, all (non-gitignored) files are copied from the given `src` directory
+ *   into the sandbox in which the package is built or the check is executed.
+ * @param sandboxSetup - An optional shell script to set up the environment. This script will be run for
+ *   every `Package` and `Check` before building the package or running the check.
+ *
+ * Example:
  *
  * ```typescript
- * // Create a new environment where the current working directory is available under `src`:
- * const myEnv = mkEnvironment(
- *   nixRaw`pkgs.mkShell {}`,
- *   nixStrLit`
- *     cp -r ${nixRaw`./.`} src
- *     cd src
- *   `,
- * );
- * ```
+ * // Create a new environment with the current working directory as `src`:
+ * const myEnv = mkEnvironment({
+ *   src: "."
+ * });
  *
- * Any `Check`s created from this environment will first copy the source files
- * into the `Check`'s sandbox and then run the check script snippet:
- * ```typescript
+ * // Check that there's no TODOs in the source files:
  * const check = myEnv.check("! grep -ir TODO .");
  * ```
  */
@@ -147,21 +153,20 @@ export function mkEnvironment(
   args: {
     nixExpression?: NixExpression;
     src?: string;
-    setup?: NixExpression;
+    sandboxSetup?: NixExpression;
   } = {},
 ): Environment {
   const copySource = (src: string) => nixStrLit`
     echo copying source
-    cp -r ${nixSource(src)} src
-    chmod -R u+rwX src
-    cd src
+    cp -r ${nixSource(src)}/. .
+    chmod -R u+rwX .
   `;
   return {
     tag: "environment",
     nixExpression: args.nixExpression ?? nixRaw`pkgs.mkShell {}`,
-    setup: nixStrLit`
+    sandboxSetup: nixStrLit`
       ${args.src != null ? copySource(args.src) : ""}
-      ${args.setup || nixStrLit``}
+      ${args.sandboxSetup || nixStrLit``}
     `,
     check(
       this: Environment,

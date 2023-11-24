@@ -115,7 +115,7 @@ spec = do
               import * as garn from "#{repoDir}/ts/mod.ts"
 
               const env = garn.mkEnvironment({
-                setup: garn.nix.nixStrLit`
+                sandboxSetup: garn.nix.nixStrLit`
                   mkdir dist
                   echo build-content > dist/build-artifact
                 `
@@ -182,7 +182,7 @@ spec = do
                 {
                   package: garn
                     .mkEnvironment({
-                      setup: nix.nixStrLit`SETUP_VAR="hello from setup"`,
+                      sandboxSetup: nix.nixStrLit`SETUP_VAR="hello from setup"`,
                     })
                     .build("echo $SETUP_VAR > $out/build-artifact"),
                 },
