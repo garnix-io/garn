@@ -47,7 +47,7 @@ export function mkHaskellProject<const Executables extends string[]>(args: {
   overrideDependencies?: Record<string, string>;
   src: string;
 }): Project & HaskellAddenda & Execs<Executables> {
-  const deps = args.overrideDependencies ? args.overrideDependencies : {};
+  const deps = args.overrideDependencies ?? {};
 
   const nixPkg = nixRaw`
     let
