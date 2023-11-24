@@ -13,6 +13,11 @@
 - Fix needing to use `--` twice in `garn run` in order to pass arguments to
   executables.
 
+- Require explicit passing of arguments via `"$@"` in `shell`. This allows users
+  to have much more control over the behavior of their shell commands, and
+  in particular allows multiline scripts to handle arguments (in exactly the
+  same way as normal bash scripts).
+
 ## v0.0.16
 
 - Allow to build packages that are nested within projects with `garn build projectName.packageName`.

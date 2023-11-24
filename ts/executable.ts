@@ -85,7 +85,7 @@ export function mkShellExecutable(
         #!\${pkgs.bash}/bin/bash
         export PATH=$(cat \${buildPath}):$PATH
         \${dev.shellHook}
-        \${shell} "$@"
+        \${shell}
       ''
     `;
   return mkExecutable(

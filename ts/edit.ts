@@ -108,7 +108,7 @@ export const editGarnConfig: garn.Executable = (() => {
     export XDG_CONFIG_HOME=$TEMP_DIR/.config
     export XDG_CACHE_HOME=$TEMP_DIR/.cache
 
-    ${vscodium}/bin/codium --new-window --disable-workspace-trust ./garn.ts --wait
+    ${vscodium}/bin/codium --new-window --disable-workspace-trust ./garn.ts --wait "$@"
 
     rm -rf $TEMP_DIR
   `;
