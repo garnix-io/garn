@@ -141,6 +141,7 @@ export const buildPackage = (
         "x86_64-linux": nixAttrSet({
           default: nix.nixRaw`
             let
+              nixpkgs = ${nixpkgsInput};
               pkgs = ${pkgs};
               system = "x86_64-linux";
             in ${pkg.nixExpression}
