@@ -24,7 +24,7 @@ import { Package, mkShellPackage } from "./package.ts";
 export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
-  buildSandboxSetup: Array<NixExpression>;
+  sandboxSetup: Array<NixExpression>;
 
   /**
    * Creates a new environment based on this one that includes the specified nix packages.
@@ -56,15 +56,11 @@ export type Environment = {
   ): Package;
 };
 
-export const buildSandboxScript = (
+export const sandboxScript = (
   env: Environment,
   script: NixExpression,
 ): NixExpression =>
-  unlinesNixStrings([
-    nixStrLit`mkdir -p $out`,
-    ...env.buildSandboxSetup,
-    script,
-  ]);
+  unlinesNixStrings([nixStrLit`mkdir -p $out`, ...env.sandboxSetup, script]);
 
 /**
  * Creates a new shell script `Executable`, run in the `emptyEnvironment`.
@@ -158,7 +154,7 @@ export function mkEnvironment(
   args: {
     nixExpression?: NixExpression;
     src?: string;
-    setup?: NixExpression;
+    sandboxSetup?: NixExpression;
   } = {},
 ): Environment {
   const copySource = (src: string) => nixStrLit`
@@ -169,10 +165,10 @@ export function mkEnvironment(
   return {
     tag: "environment",
     nixExpression: args.nixExpression ?? nixRaw`pkgs.mkShell {}`,
-    buildSandboxSetup: [
+    sandboxSetup: [
       nixStrLit`
         ${args.src != null ? copySource(args.src) : ""}
-        ${args.setup || nixStrLit``}
+        ${args.sandboxSetup || nixStrLit``}
       `,
     ],
     check(
