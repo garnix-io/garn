@@ -62,10 +62,8 @@
             pkgs.runCommand "garn-pkg"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-    #!\${pkgs.bash}/bin/bash
-    mkdir \$out
-    ${"
+              } "${"mkdir -p \$out"}
+${"
       ${"
     echo copying source
     cp -r ${(let
@@ -125,7 +123,7 @@
       chmod -R u+rwX node_modules
     "}
     "}
-    ${"
+${"
       set -eu
 
       export PATH=${let
@@ -166,7 +164,7 @@
       fi
       vite build --outDir \$out
     "}
-  ";
+";
         }
       );
       checks = forAllSystems (system:

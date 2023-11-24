@@ -11,6 +11,7 @@ import {
   renderNixExpression,
   renderFlakeFile,
   nixFlakeDep,
+  unlinesNixStrings,
 } from "./nix.ts";
 
 Deno.test("nixStrLit correctly serializes into a nix expression", () => {
@@ -34,6 +35,28 @@ Deno.test("nixStrLit correctly serializes into a nix expression", () => {
     '"\\"double quotes\\" are correctly escaped"',
   );
 });
+
+Deno.test(
+  "unlinesNixStrings creates a new string literal with all given lines spliced in",
+  () => {
+    assertEquals(renderNixExpression(unlinesNixStrings([])), '""');
+    assertEquals(
+      renderNixExpression(
+        unlinesNixStrings([nixStrLit`foo ${nixRaw`42`} bar`]),
+      ),
+      '"${"foo ${42} bar"}\n"',
+    );
+    assertEquals(
+      renderNixExpression(
+        unlinesNixStrings([
+          nixStrLit`foo ${nixRaw`42`} bar`,
+          nixStrLit`baz ${nixRaw`23`} boo`,
+        ]),
+      ),
+      '"${"foo ${42} bar"}\n${"baz ${23} boo"}\n"',
+    );
+  },
+);
 
 Deno.test(
   "toHumanReadable snips out incedental dependencies in string literals",

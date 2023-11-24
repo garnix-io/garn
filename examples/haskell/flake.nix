@@ -95,9 +95,8 @@
             pkgs.runCommand "check"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-    touch \$out
-    ${"
+              } "${"mkdir -p \$out"}
+${"
       ${"
     echo copying source
     cp -r ${(let
@@ -123,8 +122,8 @@
   "}
       ${""}
     "}
-    ${"hlint *.hs"}
-  ";
+${"hlint *.hs"}
+";
         }
       );
       devShells = forAllSystems (system:
