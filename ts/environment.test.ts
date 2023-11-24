@@ -116,4 +116,24 @@ describe("environments", () => {
       );
     });
   });
+
+  describe("setting environment variables", ()=>{
+    it("allows setting environment variables for Checks, Packages and Executables", ()=>{
+
+      const src = Deno.makeTempDirSync();
+      const env = garn.mkEnvironment({  });
+      const output = buildPackage(
+        env.build(`
+            echo -n built: >> $out/artifact
+            cat file >> $out/artifact
+            cat ../file 2>> $out/error || true
+          `),
+        { dir: src },
+      );
+      assertEquals(
+        Deno.readTextFileSync(`${output}/artifact`),
+        "built:test source file in subdir",
+
+    });
+  });
 });
