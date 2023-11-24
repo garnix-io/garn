@@ -80,8 +80,9 @@
               } "
     touch \$out
     ${"
-      echo copying source
-      cp -r ${(let
+      ${"
+    echo copying source
+    cp -r ${(let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -99,8 +100,10 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })} src
-      chmod -R u+rwX src
-      cd src
+    chmod -R u+rwX src
+    cd src
+  "}
+      ${"
       echo copying node_modules
       cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
@@ -135,6 +138,7 @@
         }}/node_modules .
       chmod -R u+rwX node_modules
     "}
+    "}
     ${"npm run tsc"}
   ";
           "website/fmt-check" =
@@ -157,8 +161,9 @@
               } "
     touch \$out
     ${"
-      echo copying source
-      cp -r ${(let
+      ${"
+    echo copying source
+    cp -r ${(let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -176,8 +181,10 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })} src
-      chmod -R u+rwX src
-      cd src
+    chmod -R u+rwX src
+    cd src
+  "}
+      ${"
       echo copying node_modules
       cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
@@ -211,6 +218,7 @@
           nodejs = pkgs.nodejs-18_x;
         }}/node_modules .
       chmod -R u+rwX node_modules
+    "}
     "}
     ${"prettier '**/*.{ts,tsx}' --check"}
   ";
@@ -313,7 +321,10 @@
     } "
     #!\${pkgs.bash}/bin/bash
     mkdir \$out
-    ${""}
+    ${"
+      ${""}
+      ${""}
+    "}
     ${"
     USER_CONFIG=.config/VSCodium/User
     if test \$(uname) = \"Darwin\" ; then
@@ -341,7 +352,10 @@
     } "
     #!\${pkgs.bash}/bin/bash
     mkdir \$out
-    ${""}
+    ${"
+      ${""}
+      ${""}
+    "}
     ${"
     set -euo pipefail
     cat ${pkgs.writeTextFile {

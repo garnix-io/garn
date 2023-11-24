@@ -144,13 +144,25 @@ export function build(
  * ```
  */
 export function mkEnvironment(
-  nixExpression = nixRaw`pkgs.mkShell {}`,
-  setup?: NixExpression,
+  args: {
+    nixExpression?: NixExpression;
+    src?: string;
+    setup?: NixExpression;
+  } = {},
 ): Environment {
+  const copySource = (src: string) => nixStrLit`
+    echo copying source
+    cp -r ${nixSource(src)} src
+    chmod -R u+rwX src
+    cd src
+  `;
   return {
     tag: "environment",
-    nixExpression,
-    setup: setup || nixStrLit``,
+    nixExpression: args.nixExpression ?? nixRaw`pkgs.mkShell {}`,
+    setup: nixStrLit`
+      ${args.src != null ? copySource(args.src) : ""}
+      ${args.setup || nixStrLit``}
+    `,
     check(
       this: Environment,
       s: TemplateStringsArray | string,
@@ -207,19 +219,14 @@ export const isEnvironment = (e: unknown): e is Environment => {
 };
 
 export const packageToEnvironment = (pkg: Package, src: string): Environment =>
-  mkEnvironment(
-    nixRaw`
-    let expr = ${pkg.nixExpression};
-    in
-      (if expr ? env
-        then expr.env
-        else pkgs.mkShell { inputsFrom = [ expr ]; }
-      )
-    `,
-    nixStrLit`
-      echo copying source
-      cp -r ${nixSource(src)} src
-      chmod -R u+rwX src
-      cd src
-    `,
-  );
+  mkEnvironment({
+    nixExpression: nixRaw`
+        let expr = ${pkg.nixExpression};
+        in
+          (if expr ? env
+            then expr.env
+            else pkgs.mkShell { inputsFrom = [ expr ]; }
+          )
+      `,
+    src,
+  });

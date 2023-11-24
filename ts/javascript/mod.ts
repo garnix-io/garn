@@ -80,18 +80,14 @@ export function mkNpmProject(args: {
     `,
     "node_modules",
   );
-  const devShell: Environment = mkEnvironment(
-    undefined,
-    nixStrLit`
-      echo copying source
-      cp -r ${nixSource(args.src)} src
-      chmod -R u+rwX src
-      cd src
+  const devShell: Environment = mkEnvironment({
+    src: args.src,
+    setup: nixStrLit`
       echo copying node_modules
       cp -r ${node_modules}/node_modules .
       chmod -R u+rwX node_modules
     `,
-  ).withDevTools([mkPackage(nodejs, "nodejs")]);
+  }).withDevTools([mkPackage(nodejs, "nodejs")]);
   return mkProject(
     {
       description: args.description,
@@ -148,8 +144,8 @@ export function mkYarnProject(args: {
     `,
     "startCommand",
   );
-  const devShell: Environment = mkEnvironment(
-    nixRaw`
+  const devShell: Environment = mkEnvironment({
+    nixExpression: nixRaw`
       let
           pkgs = ${pkgs};
           packageJson = pkgs.lib.importJSON ${nixRaw(args.src)}/package.json;
@@ -166,13 +162,8 @@ export function mkYarnProject(args: {
           `};
         }
     `,
-    nixStrLit`
-      echo copying source
-      cp -r ${nixSource(args.src)} src
-      chmod -R u+rwX src
-      cd src
-    `,
-  );
+    src: args.src,
+  });
   const startDev: Executable = devShell.shell`cd ${args.src} && ${startCommand}`;
   return mkProject(
     {

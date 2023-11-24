@@ -29,14 +29,16 @@ export const mkHaskellProjectInitializer: Initializer = (dir) => {
   }
   const parsedCabal = JSON.parse(decoder.decode(jsonParseResult.stdout));
 
+  const executables = parsedCabal.executables
+    ? `\n  executables: ${JSON.stringify(parsedCabal.executables)},`
+    : "";
   return {
     tag: "ShouldRun",
     makeTarget: () =>
       outdent`
       export const ${parsedCabal.name} = garn.haskell.mkHaskellProject({
         description: "${parsedCabal.synopsis || parsedCabal.description || ""}",
-        executable: "",
-        compiler: "ghc94",
+        compiler: "ghc94",${executables}
         src: "."
       })`,
   };

@@ -46,11 +46,39 @@ Deno.test(
         outdent`
           export const foo = garn.haskell.mkHaskellProject({
             description: "",
-            executable: "",
             compiler: "ghc94",
+            executables: [],
             src: "."
           })`,
       );
     }
   },
 );
+
+Deno.test("Haskell initializer includes executables", () => {
+  const tempDir = Deno.makeTempDirSync();
+  Deno.writeTextFileSync(
+    join(tempDir, "foo.cabal"),
+    `
+      name: foo
+      version: 0.0.1
+
+      executable bar
+        main-is: Main.hs
+    `,
+  );
+  const result = mkHaskellProjectInitializer(tempDir);
+  assertEquals(result.tag, "ShouldRun");
+  if (result.tag === "ShouldRun") {
+    assertEquals(
+      result.makeTarget(),
+      outdent`
+          export const foo = garn.haskell.mkHaskellProject({
+            description: "",
+            compiler: "ghc94",
+            executables: ["bar"],
+            src: "."
+          })`,
+    );
+  }
+});

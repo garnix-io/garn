@@ -39,7 +39,7 @@ spec = do
 
               export const haskell = garn.haskell.mkHaskellProject({
                 description: "mkHaskellProject-test",
-                executable: "garn-test",
+                executables: ["garn-test"],
                 compiler: "ghc94",
                 src: "."
               })
@@ -59,7 +59,7 @@ spec = do
 
               export const haskell = garn.haskell.mkHaskellProject({
                 description: "mkHaskellProject-test",
-                executable: "garn-test",
+                executables: ["garn-test"],
                 compiler: "ghc94",
                 src: "."
               })
@@ -168,7 +168,7 @@ spec = do
 
                   export const haskell = garn.haskell.mkHaskellProject({
                     description: "mkHaskellProject-test",
-                    executable: "garn-test",
+                    executables: ["garn-test"],
                     compiler: "ghc94",
                     src: "."
                   })

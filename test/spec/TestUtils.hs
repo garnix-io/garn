@@ -35,6 +35,14 @@ shouldMatch actual expected = case compileM (cs expected) [] of
       expectationFailure $
         "expected " <> actual <> " to match regex " <> show expected
 
+shouldNotMatch :: (HasCallStack) => String -> String -> Expectation
+shouldNotMatch actual expected = case compileM (cs expected) [] of
+  Left err -> expectationFailure $ "invalid regex: " <> show err
+  Right regex ->
+    when (actual =~ regex) $
+      expectationFailure $
+        "expected " <> actual <> " to *not* match regex " <> show expected
+
 writeHaskellProject :: FilePath -> IO ()
 writeHaskellProject repoDir = do
   writeFile
@@ -44,7 +52,7 @@ writeHaskellProject repoDir = do
 
       export const foo = mkHaskellProject({
         description: "mkHaskellProject-test",
-        executable: "garn-test",
+        executables: ["garn-test"],
         compiler: "ghc94",
         src: "."
       })
