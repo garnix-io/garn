@@ -17,7 +17,7 @@ spec =
           . inTempDirectory
       )
       $ do
-        it "starts VSCode with the deno extension" $ \onTestFailureLog -> do
+        it "starts VSCodium with the deno extension" $ \onTestFailureLog -> do
           output <- runGarn ["edit", "--", "--list-extensions"] "" repoDir Nothing
           onTestFailureLog output
           stdout output `shouldBe` "denoland.vscode-deno\n"

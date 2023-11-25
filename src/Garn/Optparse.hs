@@ -156,7 +156,7 @@ alwaysParser =
     argvParser :: Parser [String]
     argvParser = many $ strArgument $ metavar "...args"
 
-    desc = "Edit garn.ts in VSCodium with extensions installed"
+    desc = "Edit garn.ts in VSCodium with Deno integration set up"
 
 data CommandOptions = CommandOptions
   { target :: TargetName,
