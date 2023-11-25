@@ -13,6 +13,8 @@
 - Fix needing to use `--` twice in `garn run` in order to pass arguments to
   executables.
 - Allow entering top-level `Environment`s with `garn enter`.
+- `Environment.mkNpmProject` and `Environment.mkYarnProject` don't expose a
+  `devShell` field anymore, since that was a duplicate of `defaultEnvironment`.
 
 ## v0.0.16
 
