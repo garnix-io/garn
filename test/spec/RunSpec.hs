@@ -65,6 +65,17 @@ spec = do
       stdout output `shouldBe` "Hello, world!\n"
       exitCode output `shouldBe` ExitSuccess
 
+    it "fails informatively on syntax errors" $ \onTestFailureLog -> do
+      writeFile
+        "garn.ts"
+        [i|
+           {askd "shyntax err"
+        |]
+      output <- runGarn ["run", "foo"] "" repoDir Nothing
+      onTestFailureLog output
+      stderr output `shouldContain` "Error: Running garn.ts failed:"
+      stderr output `shouldContain` "The module's source code could not be parsed"
+
     it "runs non-default executables within projects" $ \runGarn -> do
       writeFile
         "garn.ts"

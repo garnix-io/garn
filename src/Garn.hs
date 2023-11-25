@@ -37,8 +37,9 @@ readOptionsAndConfig = do
   hasGarn <- doesFileExist "garn.ts"
   if hasGarn
     then do
-      garnConfig <- readGarnConfig
-      getOpts (WithGarnTs garnConfig)
+      readGarnConfig >>= \case
+        Right garnConfig -> getOpts (WithGarnTs garnConfig)
+        Left readGarnConfig -> getOpts (BrokenGarnTs readGarnConfig)
     else getOpts WithoutGarnTs
 
 runWith :: Env -> Options -> IO ()

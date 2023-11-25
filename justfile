@@ -120,7 +120,7 @@ test *args="": hpack
 
 # Run the tests continuously as the code changes
 watch *args="": hpack
-  ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --warnings --reload=ts
+  ghcid --command "cabal repl test:spec" --test ':main {{ args }}' --reload=ts
 
 fileserver *args="":
   nix run .#fileserver -- {{ args }}

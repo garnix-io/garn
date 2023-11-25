@@ -12,8 +12,10 @@ module Garn.Optparse
   )
 where
 
+import Control.Exception (throw)
 import qualified Data.Map as Map
 import Garn.Common (garnCliVersion)
+import qualified Garn.Errors
 import Garn.GarnConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
@@ -26,14 +28,20 @@ getOpts oType =
   where
     unavailable :: OA.Doc
     unavailable =
-      let formatCommands cmdInfo = [PP.string cmd | (cmd, _, _) <- cmdInfo]
+      let fst3 (cmd, _, _) = cmd
+          formatCommands = fmap PP.string
        in PP.nest
             2
             $ PP.vsep
               ( PP.string "Unavailable commands:"
                   : case oType of
-                    WithGarnTs _ -> formatCommands withouGarnTsCommandInfo
-                    WithoutGarnTs -> formatCommands withGarnTsCommandInfo
+                    WithGarnTs _ -> formatCommands $ fst3 <$> withoutGarnTsCommandInfo
+                    WithoutGarnTs -> formatCommands $ fst3 <$> withGarnTsCommandInfo
+                    BrokenGarnTs _ ->
+                      formatCommands
+                        ( (fst3 <$> withGarnTsCommandInfo)
+                            ++ (fst3 <$> withoutGarnTsCommandInfo)
+                        )
               )
     parser :: Parser Options
     parser = case oType of
@@ -43,6 +51,9 @@ getOpts oType =
       WithoutGarnTs ->
         (WithoutGarnTsOpts <$> withoutGarnTsParser)
           <|> (AlwaysAvailableOpts <$> alwaysParser)
+      BrokenGarnTs err ->
+        (AlwaysAvailableOpts <$> alwaysParser)
+          <|> throw (Garn.Errors.UserError $ errorMessage err)
     version =
       infoOption garnCliVersion $
         mconcat [long "version", help ("Show garn version (" <> garnCliVersion <> ")")]
@@ -58,6 +69,7 @@ getOpts oType =
 data OptionType
   = WithGarnTs GarnConfig
   | WithoutGarnTs
+  | BrokenGarnTs ReadConfigError
   deriving stock (Eq, Show)
 
 data Options
@@ -137,8 +149,8 @@ withGarnTsParser targets =
         | (cmd, desc, runner) <- withGarnTsCommandInfo
       ]
 
-withouGarnTsCommandInfo :: [(String, String, Parser WithoutGarnTsCommand)]
-withouGarnTsCommandInfo =
+withoutGarnTsCommandInfo :: [(String, String, Parser WithoutGarnTsCommand)]
+withoutGarnTsCommandInfo =
   [("init", "Infer a garn.ts file from the project layout", pure Init)]
 
 withoutGarnTsParser :: Parser WithoutGarnTsCommand
@@ -146,7 +158,7 @@ withoutGarnTsParser =
   subparser $
     mconcat
       [ OA.command cmd (info runner (progDesc desc))
-        | (cmd, desc, runner) <- withouGarnTsCommandInfo
+        | (cmd, desc, runner) <- withoutGarnTsCommandInfo
       ]
 
 alwaysParser :: Parser AlwaysCommand
