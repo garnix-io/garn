@@ -252,21 +252,44 @@ spec = do
                     topLevelEnv[ ]*
                 |]
 
-        it "allows adding descriptions to environments" $ onTestFailureLogger $ \onTestFailureLog -> do
-          writeFile
-            "garn.ts"
-            [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-
-              export const topLevelEnv =
-                garn.emptyEnvironment
-                  .setDescription("my test environment");
-            |]
-          output <- runGarn ["enter", "--help"] "" repoDir Nothing
-          onTestFailureLog output
-          stdout output
-            `shouldMatch` unindent
+        describe "--help" $ around onTestFailureLogger $ do
+          it "allows adding descriptions to environments" $ \onTestFailureLog -> do
+            writeFile
+              "garn.ts"
               [i|
-                Available commands:
-                  topLevelEnv[ ]*my test environment
+                import * as garn from "#{repoDir}/ts/mod.ts"
+
+                export const topLevelEnv =
+                  garn.emptyEnvironment
+                    .setDescription("my test environment");
               |]
+            output <- runGarn ["enter", "--help"] "" repoDir Nothing
+            onTestFailureLog output
+            stdout output
+              `shouldMatch` unindent
+                [i|
+                  Available commands:
+                    topLevelEnv[ ]*my test environment
+                |]
+
+          it "does not show (or allow entering) the default environment of projects" $ \onTestFailureLog -> do
+            writeFile
+              "garn.ts"
+              [i|
+                import * as garn from "#{repoDir}/ts/mod.ts"
+
+                export const p = garn.mkProject(
+                  {
+                    description: "",
+                    defaultEnvironment: garn.emptyEnvironment,
+                  },
+                  {},
+                );
+              |]
+            output <- runGarn ["enter", "--help"] "" repoDir Nothing
+            onTestFailureLog output
+            stdout output `shouldNotContain` "p.defaultEnvironment"
+            output <- runGarn ["enter", "p.defaultEnvironment"] "" repoDir Nothing
+            onTestFailureLog output
+            exitCode output `shouldBe` ExitFailure 1
+            stderr output `shouldContain` "Invalid argument `p.defaultEnvironment'"

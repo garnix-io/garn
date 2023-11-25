@@ -213,7 +213,8 @@ const findExportables = (
       result[name] = value;
       const nested = findExportables(value);
       for (const key in nested) {
-        if (key === "defaultExecutable") continue;
+        if (key === "defaultExecutable" || key === "defaultEnvironment")
+          continue;
         result[`${name}/${key}`] = nested[key];
       }
     } else if (isEnvironment(value)) {
