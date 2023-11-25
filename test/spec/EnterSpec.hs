@@ -249,7 +249,7 @@ spec = do
               `shouldMatch` unindent
                 [i|
                   Available commands:
-                    topLevelEnv[ ]*
+                    topLevelEnv[ ]*$
                 |]
 
         describe "--help" $ around onTestFailureLogger $ do
