@@ -15,6 +15,7 @@ import { isExecutable } from "../executable.ts";
 import { assertMayExport } from "./may_not_export.ts";
 import { UserError } from "./errors.ts";
 import { GARN_TS_LIB_VERSION } from "./version.ts";
+import { Environment, isEnvironment } from "../environment.ts";
 
 // This needs to be in sync with `DenoOutput` in GarnConfig.hs
 export type DenoOutput =
@@ -28,7 +29,11 @@ export type GarnConfig = {
 
 type Targets = Record<string, TargetConfig>;
 
-type TargetConfig = ProjectTarget | PackageTarget | ExecutableTarget;
+type TargetConfig =
+  | ProjectTarget
+  | EnvironmentTarget
+  | PackageTarget
+  | ExecutableTarget;
 
 type ProjectTarget = {
   tag: "project";
@@ -36,6 +41,10 @@ type ProjectTarget = {
   packages: Array<string>;
   checks: Array<string>;
   runnable: boolean;
+};
+
+type EnvironmentTarget = {
+  tag: "environment";
 };
 
 type PackageTarget = {
@@ -88,6 +97,10 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
         checks: Object.keys(checks),
         runnable: !!exportable.defaultExecutable,
       };
+    } else if (isEnvironment(exportable)) {
+      result[name] = {
+        tag: "environment",
+      };
     } else if (isPackage(exportable)) {
       result[name] = {
         tag: "package",
@@ -116,13 +129,15 @@ const formatFlake = (
     collectPackages(exportables),
   );
   const checks = mapValues((p) => p.nixExpression, collectChecks(exportables));
-  const shells = mapValues(
-    (exportable) =>
-      isProject(exportable) && exportable.defaultEnvironment
-        ? exportable.defaultEnvironment.nixExpression
-        : undefined,
-    exportables,
-  );
+  const shells = mapValues((exportable) => {
+    if (isProject(exportable) && exportable.defaultEnvironment) {
+      return exportable.defaultEnvironment.nixExpression;
+    } else if (isEnvironment(exportable)) {
+      return exportable.nixExpression;
+    } else {
+      return undefined;
+    }
+  }, exportables);
   const apps = mapValues((exportable) => {
     if (isProject(exportable) && exportable.defaultExecutable) {
       return nixAttrSet({
@@ -184,7 +199,7 @@ const formatFlake = (
   `;
 };
 
-type Exportable = Project | Package | Executable;
+type Exportable = Project | Environment | Package | Executable;
 
 const findExportables = (
   config: Record<string, unknown>,
@@ -199,6 +214,8 @@ const findExportables = (
         if (key === "defaultExecutable") continue;
         result[`${name}/${key}`] = nested[key];
       }
+    } else if (isEnvironment(value)) {
+      result[name] = value;
     } else if (isPackage(value)) {
       result[name] = value;
     } else if (isExecutable(value)) {

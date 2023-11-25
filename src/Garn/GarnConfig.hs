@@ -78,6 +78,7 @@ type Targets = Map TargetName TargetConfig
 
 data TargetConfig
   = TargetConfigProject ProjectTarget
+  | TargetConfigEnvironment
   | TargetConfigPackage PackageTarget
   | TargetConfigExecutable ExecutableTarget
   deriving (Generic, Eq, Show)
@@ -105,15 +106,17 @@ instance FromJSON TargetConfig where
     tag <- o .: fromString "tag"
     case tag of
       "project" -> TargetConfigProject <$> genericParseJSON defaultOptions (Object o)
+      "environment" -> pure TargetConfigEnvironment
       "package" -> TargetConfigPackage <$> genericParseJSON defaultOptions (Object o)
       "executable" -> TargetConfigExecutable <$> genericParseJSON defaultOptions (Object o)
       _ -> fail $ "Unknown target tag: " <> tag
 
-getDescription :: TargetConfig -> String
+getDescription :: TargetConfig -> Maybe String
 getDescription = \case
-  TargetConfigProject (ProjectTarget {description}) -> description
-  TargetConfigPackage (PackageTarget {description}) -> description
-  TargetConfigExecutable (ExecutableTarget {description}) -> description
+  TargetConfigProject (ProjectTarget {description}) -> Just description
+  TargetConfigEnvironment -> Nothing
+  TargetConfigPackage (PackageTarget {description}) -> Just description
+  TargetConfigExecutable (ExecutableTarget {description}) -> Just description
 
 readGarnConfig :: IO GarnConfig
 readGarnConfig = do

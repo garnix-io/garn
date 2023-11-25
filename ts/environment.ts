@@ -197,7 +197,9 @@ export function mkEnvironment(
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            ${nixList(extraDevTools.map((pkg) => pkg.nixExpression))};
+            ${nixList(
+              extraDevTools.map((pkg) => nixRaw`(${pkg.nixExpression})`),
+            )};
         })
       `,
       };

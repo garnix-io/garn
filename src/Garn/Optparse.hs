@@ -12,6 +12,7 @@ module Garn.Optparse
 where
 
 import qualified Data.Map as Map
+import Data.Maybe (fromMaybe)
 import Garn.Common (garnCliVersion)
 import Garn.GarnConfig
 import Options.Applicative hiding (command)
@@ -85,6 +86,7 @@ buildCommand targets =
   where
     isBuildable = \case
       TargetConfigProject _ -> True
+      TargetConfigEnvironment -> False
       TargetConfigPackage _ -> True
       TargetConfigExecutable _ -> False
 
@@ -98,12 +100,19 @@ runCommand targets =
     isRunnable :: TargetConfig -> Bool
     isRunnable = \case
       TargetConfigProject projectTarget -> runnable projectTarget
+      TargetConfigEnvironment -> False
       TargetConfigPackage _ -> False
       TargetConfigExecutable _ -> True
 
 enterCommand :: Targets -> Parser WithGarnTsCommand
 enterCommand targets =
-  Enter <$> commandOptionsParser (Map.filter isProject targets)
+  Enter <$> commandOptionsParser (Map.filter isEnterable targets)
+  where
+    isEnterable = \case
+      TargetConfigProject _ -> True
+      TargetConfigEnvironment -> True
+      TargetConfigPackage _ -> False
+      TargetConfigExecutable _ -> False
 
 checkCommand :: Targets -> Parser WithGarnTsCommand
 checkCommand targets =
@@ -116,6 +125,7 @@ checkCommand targets =
 isProject :: TargetConfig -> Bool
 isProject = \case
   TargetConfigProject _ -> True
+  TargetConfigEnvironment -> False
   TargetConfigPackage _ -> False
   TargetConfigExecutable _ -> False
 
@@ -154,7 +164,7 @@ commandOptionsParser targets =
               (asUserFacing target)
               ( info
                   (pure (CommandOptions target targetConfig))
-                  (progDesc $ getDescription targetConfig)
+                  (progDesc $ fromMaybe "" (getDescription targetConfig))
               )
         )
         $ Map.assocs targets
