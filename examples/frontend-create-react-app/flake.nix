@@ -62,10 +62,8 @@
             pkgs.runCommand "garn-pkg"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-    #!\${pkgs.bash}/bin/bash
-    mkdir \$out
-    ${"
+              } "${"mkdir -p \$out"}
+${"
       ${"
     echo copying source
     cp -r ${(let
@@ -85,9 +83,8 @@
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })} src
-    chmod -R u+rwX src
-    cd src
+    })}/. .
+    chmod -R u+rwX .
   "}
       ${"
       echo copying node_modules
@@ -125,8 +122,8 @@
       chmod -R u+rwX node_modules
     "}
     "}
-    ${"npm run build && mv build/* \$out"}
-  ";
+${"npm run build && mv build/* \$out"}
+";
         }
       );
       checks = forAllSystems (system:

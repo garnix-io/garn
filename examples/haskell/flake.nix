@@ -95,9 +95,8 @@
             pkgs.runCommand "check"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-    touch \$out
-    ${"
+              } "${"mkdir -p \$out"}
+${"
       ${"
     echo copying source
     cp -r ${(let
@@ -117,14 +116,13 @@
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })} src
-    chmod -R u+rwX src
-    cd src
+    })}/. .
+    chmod -R u+rwX .
   "}
       ${""}
     "}
-    ${"hlint *.hs"}
-  ";
+${"hlint *.hs"}
+";
         }
       );
       devShells = forAllSystems (system:

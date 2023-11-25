@@ -72,9 +72,8 @@
             pkgs.runCommand "check"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-    touch \$out
-    ${"
+              } "${"mkdir -p \$out"}
+${"
       ${"
     echo copying source
     cp -r ${(let
@@ -94,9 +93,8 @@
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })} src
-    chmod -R u+rwX src
-    cd src
+    })}/. .
+    chmod -R u+rwX .
   "}
       ${"
       echo copying node_modules
@@ -134,8 +132,8 @@
       chmod -R u+rwX node_modules
     "}
     "}
-    ${"npm run test"}
-  ";
+${"npm run test"}
+";
           "project/tsc" =
             let
               dev = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -148,9 +146,8 @@
             pkgs.runCommand "check"
               {
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
-              } "
-    touch \$out
-    ${"
+              } "${"mkdir -p \$out"}
+${"
       ${"
     echo copying source
     cp -r ${(let
@@ -170,9 +167,8 @@
         in
          fileName != "flake.nix" &&
          fileName != "garn.ts";
-    })} src
-    chmod -R u+rwX src
-    cd src
+    })}/. .
+    chmod -R u+rwX .
   "}
       ${"
       echo copying node_modules
@@ -210,8 +206,8 @@
       chmod -R u+rwX node_modules
     "}
     "}
-    ${"npm run tsc"}
-  ";
+${"npm run tsc"}
+";
         }
       );
       devShells = forAllSystems (system:
