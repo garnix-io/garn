@@ -11,7 +11,7 @@ import {
   renderNixExpression,
   renderFlakeFile,
   nixFlakeDep,
-  unlinesNixStrings,
+  joinNixStrings,
 } from "./nix.ts";
 
 Deno.test("nixStrLit correctly serializes into a nix expression", () => {
@@ -36,27 +36,24 @@ Deno.test("nixStrLit correctly serializes into a nix expression", () => {
   );
 });
 
-Deno.test(
-  "unlinesNixStrings creates a new string literal with all given lines spliced in",
-  () => {
-    assertEquals(renderNixExpression(unlinesNixStrings([])), '""');
-    assertEquals(
-      renderNixExpression(
-        unlinesNixStrings([nixStrLit`foo ${nixRaw`42`} bar`]),
-      ),
-      '"${"foo ${42} bar"}\n"',
-    );
-    assertEquals(
-      renderNixExpression(
-        unlinesNixStrings([
-          nixStrLit`foo ${nixRaw`42`} bar`,
-          nixStrLit`baz ${nixRaw`23`} boo`,
-        ]),
-      ),
-      '"${"foo ${42} bar"}\n${"baz ${23} boo"}\n"',
-    );
-  },
-);
+Deno.test("joinNixStrings joins strings using the given separator", () => {
+  assertEquals(renderNixExpression(joinNixStrings("sep", [])), '""');
+  assertEquals(
+    renderNixExpression(
+      joinNixStrings("sep", [nixStrLit`foo ${nixRaw`42`} bar`]),
+    ),
+    '"${"foo ${42} bar"}"',
+  );
+  assertEquals(
+    renderNixExpression(
+      joinNixStrings("sep", [
+        nixStrLit`foo ${nixRaw`42`} bar`,
+        nixStrLit`baz ${nixRaw`23`} boo`,
+      ]),
+    ),
+    '"${"foo ${42} bar"}sep${"baz ${23} boo"}"',
+  );
+});
 
 Deno.test(
   "toHumanReadable snips out incedental dependencies in string literals",

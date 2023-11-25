@@ -7,7 +7,7 @@ import {
   nixList,
   nixRaw,
   nixStrLit,
-  unlinesNixStrings,
+  joinNixStrings,
 } from "./nix.ts";
 import { Package, mkShellPackage } from "./package.ts";
 
@@ -93,7 +93,7 @@ export const commonScript = (
   env: Environment,
   script: NixExpression,
 ): NixExpression =>
-  unlinesNixStrings([
+  joinNixStrings("\n", [
     ...env.setup.filter((x) => x.tag === "common").map((x) => x.snippet),
     script,
   ]);
@@ -102,7 +102,7 @@ export const sandboxScript = (
   env: Environment,
   script: NixExpression,
 ): NixExpression =>
-  unlinesNixStrings([
+  joinNixStrings("\n", [
     nixStrLit`mkdir -p $out`,
     ...env.setup.map((x) => x.snippet),
     script,

@@ -196,13 +196,16 @@ export function nixStrLit(
   };
 }
 
-export function unlinesNixStrings(list: Array<NixExpression>): NixExpression {
+export function joinNixStrings(
+  separator: string,
+  list: Array<NixExpression>,
+): NixExpression {
   return {
     [__nixExpressionTag]: null,
     type: "strLit",
     str: {
       initial: "",
-      rest: list.map((expr) => [expr, "\n"]),
+      rest: list.map((expr, i) => [expr, i < list.length - 1 ? separator : ""]),
     },
   };
 }
