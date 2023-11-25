@@ -90,17 +90,16 @@ export const hello =
 You can run `Executable`s with `garn run`.
 
 If you would like `garn run` to pass arguments to your executable, use `"$@"`
-where you'd like to receive them. For examples
+where you'd like to receive them. For example:
 
 ```typescript
 import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
 
 export const hello =
-  garn.emptyEnvironment.shell('printf "My first two arguments were %s and %s" "$@"');
+  garn.shell('printf "My first two arguments were %s and %s" "$@"');
 ```
 
-This works exactly like bash-script arguments, so it helps to know the
-differences between `"$@"`, `$@`, and `$*`.
+This works exactly like bash-script arguments. For the exact behavior, see `man bash`, section `PARAMETERS`.
 
 ## Packages
 
