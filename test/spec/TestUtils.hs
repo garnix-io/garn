@@ -14,7 +14,7 @@ import qualified Data.Yaml as Yaml
 import Development.Shake (CmdOption (EchoStdout), Exit (Exit), StdoutTrim (..), cmd)
 import Development.Shake.Command (CmdOption (Cwd), Stdout (Stdout))
 import Garn
-import System.Directory (copyFile, createDirectoryIfMissing)
+import System.Directory (copyFile, createDirectoryIfMissing, getCurrentDirectory)
 import System.Environment (withArgs)
 import System.Exit
 import System.FilePath (takeDirectory, (</>))
@@ -25,6 +25,7 @@ import System.Posix (fdToHandle, openPseudoTerminal)
 import System.Process (ProcessHandle, interruptProcessGroupOf, waitForProcess)
 import Test.Hspec
 import Test.Mockery.Directory (inTempDirectory)
+import Test.Mockery.Environment (withModifiedEnvironment)
 import Text.Regex.PCRE.Heavy (compileM, (=~))
 
 shouldMatch :: (HasCallStack) => String -> String -> Expectation
@@ -114,6 +115,23 @@ writeNpmFrontendProject repoDir = do
         }
       }
     |]
+
+withRunGarn :: SpecWith ([String] -> IO ProcResult) -> Spec
+withRunGarn spec = do
+  repoDir <- runIO getCurrentDirectory
+  around_
+    ( withModifiedEnvironment [("NIX_CONFIG", "experimental-features =")]
+        . inTempDirectory
+    )
+    $ around
+      ( \test -> onTestFailureLogger $ \onTestFailureLog -> do
+          let runGarn' args = do
+                output <- runGarn args "" repoDir Nothing
+                onTestFailureLog output
+                return output
+          test runGarn'
+      )
+    $ spec
 
 runGarn :: (HasCallStack) => [String] -> String -> FilePath -> Maybe FilePath -> IO ProcResult
 runGarn args stdin repoDir shell = do
