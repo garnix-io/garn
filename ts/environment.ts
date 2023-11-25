@@ -25,6 +25,7 @@ export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
   sandboxSetup: NixExpression;
+  commonSetup: NixExpression;
   description?: string;
 
   /**
@@ -32,10 +33,26 @@ export type Environment = {
    */
   setDescription: (this: Environment, newDescription: string) => Environment;
   /**
-   * Appends the given bash snippet to the sandbox setup. The sandbox setup will
-   * be executed when setting up the environment for deterministic sandboxes.
-   * I.e. before every `Check` is run and before every `Package` is built. It's
-   * *not* run when for `garn run` or `garn enter`.
+   * Appends the given bash snippet to the setup. The setup will be executed
+   * when running anything in an environment:
+   *
+   * - before running a `Check`, - before building a `Package`, - before running
+   * an `Executable` and - when entering an interactive `Environment` with `garn
+   * enter`.
+   */
+  addToSetup(snippet: string): Environment;
+  /**
+   * Similar to `addToSetup`, but only affects the environment for
+   * `Check`s and `Package`s and does *not* affect `Executable`s or the shell
+   * environment you get with `garn enter`.
+   *
+   * (`Check`s and `Package`s are running in sandboxes to make them completely
+   * deterministic. That's why they have to be treated differently here. The
+   * most common example for how the `Environment` for these sandboxes works
+   * differently is, that we have to *copy* the source files into the sandbox,
+   * to allow `Check`s and `Package`s to access them. Whereas with `Executable`s
+   * and `garn enter`, your source files are already available normally through
+   * the file system.)
    */
   addToSandboxSetup(snippet: string): Environment;
   /**
@@ -70,11 +87,21 @@ export type Environment = {
   ): Package;
 };
 
+export const commonScript = (
+  env: Environment,
+  script: NixExpression,
+): NixExpression => unlinesNixStrings([env.commonSetup, script]);
+
 export const sandboxScript = (
   env: Environment,
   script: NixExpression,
 ): NixExpression =>
-  unlinesNixStrings([nixStrLit`mkdir -p $out`, env.sandboxSetup, script]);
+  unlinesNixStrings([
+    nixStrLit`mkdir -p $out`,
+    env.sandboxSetup,
+    env.commonSetup,
+    script,
+  ]);
 
 /**
  * Creates a new shell script `Executable`, run in the `emptyEnvironment`.
@@ -168,6 +195,7 @@ export function mkEnvironment(
     nixExpression?: NixExpression;
     src?: string;
     sandboxSetup?: NixExpression;
+    commonSetup?: NixExpression;
   } = {},
 ): Environment {
   const copySource = (src: string) => nixStrLit`
@@ -182,10 +210,17 @@ export function mkEnvironment(
       ${args.src != null ? copySource(args.src) : ""}
       ${args.sandboxSetup || nixStrLit``}
     `,
+    commonSetup: args.commonSetup ?? nixStrLit``,
     setDescription(this: Environment, newDescription: string): Environment {
       return {
         ...this,
         description: newDescription,
+      };
+    },
+    addToSetup(this: Environment, snippet: string): Environment {
+      return {
+        ...this,
+        commonSetup: nixStrLit`${this.commonSetup}\n${snippet}`,
       };
     },
     addToSandboxSetup(this: Environment, snippet: string): Environment {

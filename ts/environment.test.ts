@@ -45,6 +45,7 @@ describe("environments", () => {
         Deno.readTextFileSync(`${path}/artifact`),
         "env var value\n",
       );
+      assertSuccess(runCheck(env.check('test -n "$FOO"')));
     });
 
     it("doesn't affect the underlying environment", () => {
@@ -55,6 +56,45 @@ describe("environments", () => {
       assertEquals(Deno.readTextFileSync(`${path}/artifact`), "original\n");
       path = buildPackage(modified.build("echo $FOO > $out/artifact"));
       assertEquals(Deno.readTextFileSync(`${path}/artifact`), "modified\n");
+    });
+
+    it("does not affect Executables", () => {
+      const env = garn.emptyEnvironment.addToSandboxSetup(
+        'FOO="env var value"',
+      );
+      const output = assertSuccess(
+        runExecutable(env.shell('echo executable: "$FOO"')),
+      );
+      assertStdout(output, "executable: \n");
+    });
+  });
+
+  describe("addToSetup", () => {
+    it("allows adding scripts snippets to the setup for Packages, Checks & Executables", () => {
+      const env = garn.emptyEnvironment.addToSetup('FOO="env var value"');
+      const path = buildPackage(env.build("echo $FOO > $out/artifact"));
+      assertEquals(
+        Deno.readTextFileSync(`${path}/artifact`),
+        "env var value\n",
+      );
+      assertSuccess(runCheck(env.check('test -n "$FOO"')));
+      const output = assertSuccess(
+        runExecutable(env.shell('echo executable: "$FOO"')),
+      );
+      assertStdout(output, "executable: env var value\n");
+    });
+
+    it("doesn't affect the underlying environment", () => {
+      const original = garn.emptyEnvironment.addToSetup('FOO="original"');
+      const modified = original.addToSetup('FOO="modified"');
+      assertStdout(
+        assertSuccess(runExecutable(original.shell("echo $FOO"))),
+        "original\n",
+      );
+      assertStdout(
+        assertSuccess(runExecutable(modified.shell("echo $FOO"))),
+        "modified\n",
+      );
     });
   });
 
