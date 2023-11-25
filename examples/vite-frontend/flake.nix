@@ -56,7 +56,7 @@
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.nodejs-18_x ];
+                  [ (pkgs.nodejs-18_x) ];
               });
             in
             pkgs.runCommand "garn-pkg"
@@ -190,7 +190,7 @@
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.nodejs-18_x ];
+              [ (pkgs.nodejs-18_x) ];
           });
         }
       );
@@ -209,7 +209,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         });
         shell = "
       export PATH=${let
@@ -263,7 +263,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         });
         shell = "
       export PATH=${let

@@ -178,7 +178,7 @@
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.gopls ];
+              [ (pkgs.gopls) ];
           });
           "haskell" = (
             let
@@ -214,13 +214,13 @@
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.haskell.packages.ghc94.cabal-install ];
+              [ (pkgs.haskell.packages.ghc94.cabal-install) ];
           });
           "npmFrontend" = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.nodejs-18_x ];
+              [ (pkgs.nodejs-18_x) ];
           });
         }
       );
@@ -277,7 +277,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.gopls];
+            [(pkgs.gopls)];
         });
         shell = "cd backend && go run ./main.go";
         buildPath = pkgs.runCommand "build-inputs-path" {
@@ -359,7 +359,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         });
         shell = "cd frontend-npm && npm install && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
@@ -420,7 +420,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.gopls];
+            [(pkgs.gopls)];
         });
         shell = "cd backend && go run ./main.go";
         buildPath = pkgs.runCommand "build-inputs-path" {
@@ -494,7 +494,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         });
         shell = "cd frontend-npm && npm install && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {
