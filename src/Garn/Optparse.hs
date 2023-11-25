@@ -164,7 +164,7 @@ commandOptionsParser targets =
               (asUserFacing target)
               ( info
                   (pure (CommandOptions target targetConfig))
-                  (progDesc $ fromMaybe "" (getDescription targetConfig))
+                  (maybe mempty progDesc (getDescription targetConfig))
               )
         )
         $ Map.assocs targets
