@@ -56,7 +56,6 @@ export function mkNpmProject(args: {
   src: string;
   nodeVersion: NodeVersion;
 }): Project & {
-  devShell: Environment;
   node_modules: Package;
 } {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
@@ -94,7 +93,6 @@ export function mkNpmProject(args: {
       defaultEnvironment: devShell,
     },
     {
-      devShell,
       node_modules,
     },
   );
@@ -173,7 +171,6 @@ export function mkYarnProject(args: {
     },
     {
       pkg,
-      devShell,
       startDev,
     },
   );
