@@ -24,8 +24,10 @@ import { Package, mkShellPackage } from "./package.ts";
 export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
-  sandboxSetup: NixExpression;
-  commonSetup: NixExpression;
+  setup: Array<{
+    tag: "common" | "sandbox";
+    snippet: NixExpression;
+  }>;
   description?: string;
 
   /**
@@ -90,7 +92,11 @@ export type Environment = {
 export const commonScript = (
   env: Environment,
   script: NixExpression,
-): NixExpression => unlinesNixStrings([env.commonSetup, script]);
+): NixExpression =>
+  unlinesNixStrings([
+    ...env.setup.filter((x) => x.tag === "common").map((x) => x.snippet),
+    script,
+  ]);
 
 export const sandboxScript = (
   env: Environment,
@@ -98,8 +104,7 @@ export const sandboxScript = (
 ): NixExpression =>
   unlinesNixStrings([
     nixStrLit`mkdir -p $out`,
-    env.sandboxSetup,
-    env.commonSetup,
+    ...env.setup.map((x) => x.snippet),
     script,
   ]);
 
@@ -196,16 +201,22 @@ export function mkEnvironment(
     src?: string;
   } = {},
 ): Environment {
-  const copySource = (src: string) => nixStrLit`
-    echo copying source
-    cp -r ${nixSource(src)}/. .
-    chmod -R u+rwX .
-  `;
   return {
     tag: "environment",
     nixExpression: args.nixExpression ?? nixRaw`pkgs.mkShell {}`,
-    sandboxSetup: args.src != null ? copySource(args.src) : nixStrLit``,
-    commonSetup: nixStrLit``,
+    setup:
+      args.src != null
+        ? [
+            {
+              tag: "sandbox",
+              snippet: nixStrLit`
+                echo copying source
+                cp -r ${nixSource(args.src)}/. .
+                chmod -R u+rwX .
+              `,
+            },
+          ]
+        : [],
     setDescription(this: Environment, newDescription: string): Environment {
       return {
         ...this,
@@ -218,7 +229,13 @@ export function mkEnvironment(
     ): Environment {
       return {
         ...this,
-        commonSetup: nixStrLit`${this.commonSetup}\n${snippet}`,
+        setup: [
+          ...this.setup,
+          {
+            tag: "common",
+            snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
+          },
+        ],
       };
     },
     addToSandboxSetup(
@@ -227,7 +244,13 @@ export function mkEnvironment(
     ): Environment {
       return {
         ...this,
-        sandboxSetup: nixStrLit`${this.sandboxSetup}\n${snippet}`,
+        setup: [
+          ...this.setup,
+          {
+            tag: "sandbox",
+            snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
+          },
+        ],
       };
     },
     check(
