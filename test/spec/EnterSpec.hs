@@ -235,7 +235,7 @@ spec = do
             onTestFailureLog output
             stdout output `shouldBe` "test tool output\n"
 
-          it "does not show a description for top-level environments" $ \onTestFailureLog -> do
+          it "shows no description for environments that have no description" $ \onTestFailureLog -> do
             writeFile
               "garn.ts"
               [i|
