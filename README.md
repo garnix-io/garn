@@ -88,6 +88,10 @@ checks run in a sandbox. The downside of sandboxing is that these checks won't
 have access to the internet. The upside is that they'll be (almost) perfectly
 reproducible.
 
+### `garn edit`
+
+`garn edit` will start (and, if necessary, download) VSCodium, with Deno LSP configured for you. It will open `garn.ts` in the current directory. This won't clobber any of your existing VSCode/VSCodium configuration and data.
+
 ## Typescript API
 
 Documentation for the `garn` Deno library is documented

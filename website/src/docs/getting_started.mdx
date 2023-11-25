@@ -97,25 +97,11 @@ nix --extra-experimental-features 'nix-command flakes' profile install -L github
 `garn.ts` files are powered by [Deno](https://deno.com/). A lot of the
 convenience and power for editing your `garn.ts` files comes from having a
 working Deno LSP. There are two ways of setting up LSP for editing `garn.ts`
-files: using <Garn/> itself to provide a properly-configured editor with
-`editGarnConfig`, or setting up your editor yourself.
+files: using `garn edit`, or setting up your editor yourself.
 
-### `editGarnConfig`
+### `garn edit`
 
-<Garn /> offers an `Executable` called `editGarnConfig`. It will spin up a
-vscodium editor that is pre-configured for editing `garn.ts` files. It won't use
-or modify your local vscodium settings, if you have any. You can can add it to
-your `garn.ts` file like this:
-
-```typescript
-export const edit = garn.editGarnConfig;
-```
-
-And then run it with `garn run edit`.
-
-This is a very easy way to get up and running with editing `garn.ts` files. The
-disadvantage is that the editor isn't your normal configured editor. So you
-might consider installing the Deno LSP and configuring your editor:
+<Garn /> provides an `edit` command that downloads and starts a VSCodium configured with Deno LSP. It is started with it's own configuration and data directories, so as to not clobber any configuration you may already have.
 
 ### Installing the Deno LSP and configuring your editor
 

@@ -22,5 +22,3 @@ export const deno = garn.mkProject(
   },
   {},
 );
-
-export const edit = garn.editGarnConfig;

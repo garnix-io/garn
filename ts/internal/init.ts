@@ -78,12 +78,6 @@ if (initializedSections.length === 0) {
     //   defaultExecutable: myProjectEnvironment.shell\`cowsay "Hello from garn!"\`,
     // }, {});
 
-
-    // In order to get an isolated vscodium that ships with Deno and is
-    // pre-configured to use Deno's LSP, you can use the following:
-
-    // Run with \`garn run edit\`.
-    // export const edit = garn.editGarnConfig;
   `);
 } else {
   console.error("[garn] Creating a garn.ts file");

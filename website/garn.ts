@@ -21,5 +21,3 @@ export const website = garn.javascript
 export const dev = website.shell("npm install ; npm run dev");
 
 export const build = website.shell("npm install ; npm run build");
-
-export const edit = garn.editGarnConfig;
