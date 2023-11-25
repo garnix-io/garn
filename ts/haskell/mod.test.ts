@@ -24,9 +24,9 @@ describe("mkHaskellProject", () => {
           {-# LANGUAGE CPP #-}
 
           #if MIN_VERSION_string_conversions(0,4,0)
-          main = putStrLn ">= 0.4"
+          main = putStrLn "string-conversions >= 0.4"
           #else
-          main = putStrLn "< 0.4"
+          main = putStrLn "string-conversions < 0.4"
           #endif
         `,
       );
@@ -40,7 +40,7 @@ describe("mkHaskellProject", () => {
         },
       });
       let output = assertSuccess(runExecutable(project.foo, { cwd: path }));
-      assertStdout(output, "< 0.4\n");
+      assertStdout(output, "string-conversions < 0.4\n");
       project = haskell.mkHaskellProject({
         description: "",
         compiler: "ghc94",
@@ -51,7 +51,7 @@ describe("mkHaskellProject", () => {
         },
       });
       output = assertSuccess(runExecutable(project.foo, { cwd: path }));
-      assertStdout(output, ">= 0.4\n");
+      assertStdout(output, "string-conversions >= 0.4\n");
     });
   });
 
