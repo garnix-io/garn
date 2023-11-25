@@ -40,7 +40,7 @@ export type Environment = {
    * an `Executable` and - when entering an interactive `Environment` with `garn
    * enter`.
    */
-  addToSetup(snippet: string): Environment;
+  addToSetup(snippet: string | NixExpression): Environment;
   /**
    * Similar to `addToSetup`, but only affects the environment for
    * `Check`s and `Package`s and does *not* affect `Executable`s or the shell
@@ -54,7 +54,7 @@ export type Environment = {
    * and `garn enter`, your source files are already available normally through
    * the file system.)
    */
-  addToSandboxSetup(snippet: string): Environment;
+  addToSandboxSetup(snippet: string | NixExpression): Environment;
   /**
    * Creates a new environment based on this one that includes the specified nix
    * packages.
@@ -194,8 +194,6 @@ export function mkEnvironment(
   args: {
     nixExpression?: NixExpression;
     src?: string;
-    sandboxSetup?: NixExpression;
-    commonSetup?: NixExpression;
   } = {},
 ): Environment {
   const copySource = (src: string) => nixStrLit`
@@ -206,24 +204,27 @@ export function mkEnvironment(
   return {
     tag: "environment",
     nixExpression: args.nixExpression ?? nixRaw`pkgs.mkShell {}`,
-    sandboxSetup: nixStrLit`
-      ${args.src != null ? copySource(args.src) : ""}
-      ${args.sandboxSetup || nixStrLit``}
-    `,
-    commonSetup: args.commonSetup ?? nixStrLit``,
+    sandboxSetup: args.src != null ? copySource(args.src) : nixStrLit``,
+    commonSetup: nixStrLit``,
     setDescription(this: Environment, newDescription: string): Environment {
       return {
         ...this,
         description: newDescription,
       };
     },
-    addToSetup(this: Environment, snippet: string): Environment {
+    addToSetup(
+      this: Environment,
+      snippet: string | NixExpression,
+    ): Environment {
       return {
         ...this,
         commonSetup: nixStrLit`${this.commonSetup}\n${snippet}`,
       };
     },
-    addToSandboxSetup(this: Environment, snippet: string): Environment {
+    addToSandboxSetup(
+      this: Environment,
+      snippet: string | NixExpression,
+    ): Environment {
       return {
         ...this,
         sandboxSetup: nixStrLit`${this.sandboxSetup}\n${snippet}`,
