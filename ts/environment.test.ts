@@ -35,6 +35,29 @@ describe("environments", () => {
     );
   });
 
+  describe("addToSandboxSetup", () => {
+    it("allows adding scripts snippets to the sandbox setup", () => {
+      const env = garn.emptyEnvironment.addToSandboxSetup(
+        'FOO="env var value"',
+      );
+      const path = buildPackage(env.build("echo $FOO > $out/artifact"));
+      assertEquals(
+        Deno.readTextFileSync(`${path}/artifact`),
+        "env var value\n",
+      );
+    });
+
+    it("doesn't affect the underlying environment", () => {
+      const original =
+        garn.emptyEnvironment.addToSandboxSetup('FOO="original"');
+      const modified = original.addToSandboxSetup('FOO="modified"');
+      let path = buildPackage(original.build("echo $FOO > $out/artifact"));
+      assertEquals(Deno.readTextFileSync(`${path}/artifact`), "original\n");
+      path = buildPackage(modified.build("echo $FOO > $out/artifact"));
+      assertEquals(Deno.readTextFileSync(`${path}/artifact`), "modified\n");
+    });
+  });
+
   describe("environments with source files", () => {
     it("allows accessing source files in Checks", () => {
       const src = Deno.makeTempDirSync();

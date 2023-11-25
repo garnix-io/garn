@@ -31,9 +31,16 @@ export type Environment = {
    * Update the description for this `Environment`
    */
   setDescription: (this: Environment, newDescription: string) => Environment;
-
   /**
-   * Creates a new environment based on this one that includes the specified nix packages.
+   * Appends the given bash snippet to the sandbox setup. The sandbox setup will
+   * be executed when setting up the environment for deterministic sandboxes.
+   * I.e. before every `Check` is run and before every `Package` is built. It's
+   * *not* run when for `garn run` or `garn enter`.
+   */
+  addToSandboxSetup(snippet: string): Environment;
+  /**
+   * Creates a new environment based on this one that includes the specified nix
+   * packages.
    */
   withDevTools(devTools: Array<Package>): Environment;
   /**
@@ -53,7 +60,8 @@ export type Environment = {
     ..._args: Array<NixStrLitInterpolatable>
   ): Check;
   /**
-   * Creates a new `Package` built with the given shell script, run inside this `Environment`
+   * Creates a new `Package` built with the given shell script, run inside this
+   * `Environment`
    */
   build(build: string): Package;
   build(
@@ -178,6 +186,12 @@ export function mkEnvironment(
       return {
         ...this,
         description: newDescription,
+      };
+    },
+    addToSandboxSetup(this: Environment, snippet: string): Environment {
+      return {
+        ...this,
+        sandboxSetup: nixStrLit`${this.sandboxSetup}\n${snippet}`,
       };
     },
     check(
