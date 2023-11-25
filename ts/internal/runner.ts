@@ -45,6 +45,7 @@ type ProjectTarget = {
 
 type EnvironmentTarget = {
   tag: "environment";
+  description?: string;
 };
 
 type PackageTarget = {
@@ -100,6 +101,7 @@ const toTargets = (garnExports: Record<string, unknown>): Targets => {
     } else if (isEnvironment(exportable)) {
       result[name] = {
         tag: "environment",
+        description: exportable.description,
       };
     } else if (isPackage(exportable)) {
       result[name] = {

@@ -86,7 +86,7 @@ buildCommand targets =
   where
     isBuildable = \case
       TargetConfigProject _ -> True
-      TargetConfigEnvironment -> False
+      TargetConfigEnvironment _ -> False
       TargetConfigPackage _ -> True
       TargetConfigExecutable _ -> False
 
@@ -100,7 +100,7 @@ runCommand targets =
     isRunnable :: TargetConfig -> Bool
     isRunnable = \case
       TargetConfigProject projectTarget -> runnable projectTarget
-      TargetConfigEnvironment -> False
+      TargetConfigEnvironment _ -> False
       TargetConfigPackage _ -> False
       TargetConfigExecutable _ -> True
 
@@ -110,7 +110,7 @@ enterCommand targets =
   where
     isEnterable = \case
       TargetConfigProject _ -> True
-      TargetConfigEnvironment -> True
+      TargetConfigEnvironment _ -> True
       TargetConfigPackage _ -> False
       TargetConfigExecutable _ -> False
 
@@ -125,7 +125,7 @@ checkCommand targets =
 isProject :: TargetConfig -> Bool
 isProject = \case
   TargetConfigProject _ -> True
-  TargetConfigEnvironment -> False
+  TargetConfigEnvironment _ -> False
   TargetConfigPackage _ -> False
   TargetConfigExecutable _ -> False
 

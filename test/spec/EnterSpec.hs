@@ -251,3 +251,22 @@ spec = do
                   Available commands:
                     topLevelEnv[ ]*
                 |]
+
+        it "allows adding descriptions to environments" $ onTestFailureLogger $ \onTestFailureLog -> do
+          writeFile
+            "garn.ts"
+            [i|
+              import * as garn from "#{repoDir}/ts/mod.ts"
+
+              export const topLevelEnv =
+                garn.emptyEnvironment
+                  .setDescription("my test environment");
+            |]
+          output <- runGarn ["enter", "--help"] "" repoDir Nothing
+          onTestFailureLog output
+          stdout output
+            `shouldMatch` unindent
+              [i|
+                Available commands:
+                  topLevelEnv[ ]*my test environment
+              |]

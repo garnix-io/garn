@@ -64,7 +64,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
           forM_ packages $ \package -> do
             c <- runNix (NoStdin, "build", ".#" <> package)
             when (c /= ExitSuccess) $ exitWith c
-        TargetConfigEnvironment -> pure ()
+        TargetConfigEnvironment _ -> pure ()
         TargetConfigPackage (PackageTarget {}) -> do
           c <- runNix (NoStdin, "build", ".#" <> asNixFacing target)
           when (c /= ExitSuccess) $ exitWith c
@@ -85,7 +85,7 @@ checkTarget targetConfig = case targetConfig of
     forM_ checks $ \check -> do
       c <- runNix (NoStdin, "build", ".#checks." <> system <> "." <> check)
       when (c /= ExitSuccess) $ exitWith c
-  TargetConfigEnvironment -> pure ()
+  TargetConfigEnvironment _ -> pure ()
   TargetConfigPackage _ -> pure ()
   TargetConfigExecutable _ -> pure ()
 
