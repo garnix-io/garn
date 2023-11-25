@@ -94,21 +94,20 @@ spec = do
           [i|
             import * as garn from "#{repoDir}/ts/mod.ts"
 
-            const env = garn.mkEnvironment({
-              sandboxSetup: garn.nix.nixStrLit`
-                mkdir dist
-                echo build-content > dist/build-artifact
-              `
-            });
-            export const project = garn.mkProject({
-              description: "",
-              defaultEnvironment: env,
-            }, {})
-              .addPackage("build", "mv dist/build-artifact $out/build-artifact");
-          |]
-        output <- runGarn ["build", "project"]
-        readFile "result/build-artifact" `shouldReturn` "build-content\n"
-        exitCode output `shouldBe` ExitSuccess
+              const env = garn.mkEnvironment()
+                .addToSandboxSetup(garn.nix.nixStrLit`
+                  mkdir dist
+                  echo build-content > dist/build-artifact
+                `);
+              export const project = garn.mkProject({
+                description: "",
+                defaultEnvironment: env,
+              }, {})
+                .addPackage("build", "mv dist/build-artifact $out/build-artifact");
+            |]
+          output <- runGarn ["build", "project"]
+          readFile "result/build-artifact" `shouldReturn` "build-content\n"
+          exitCode output `shouldBe` ExitSuccess
 
     describe ".build" $ do
       it "builds manually specified packages" $ \runGarn -> do
@@ -157,20 +156,18 @@ spec = do
             import * as garn from "#{repoDir}/ts/mod.ts"
             import * as nix from "#{repoDir}/ts/nix.ts"
 
-            export const project = garn.mkProject(
-              { description: "" },
-              {
-                package: garn
-                  .mkEnvironment({
-                    sandboxSetup: nix.nixStrLit`SETUP_VAR="hello from setup"`,
-                  })
-                  .build("echo $SETUP_VAR > $out/build-artifact"),
-              },
-            )
-          |]
-        output <- runGarn ["build", "project"]
-        readFile "result/build-artifact" `shouldReturn` "hello from setup\n"
-        exitCode output `shouldBe` ExitSuccess
+              export const project = garn.mkProject(
+                { description: "" },
+                {
+                  package: garn
+                    .mkEnvironment().addToSandboxSetup(nix.nixStrLit`SETUP_VAR="hello from setup"`)
+                    .build("echo $SETUP_VAR > $out/build-artifact"),
+                },
+              )
+            |]
+          output <- runGarn ["build", "project"]
+          readFile "result/build-artifact" `shouldReturn` "hello from setup\n"
+          exitCode output `shouldBe` ExitSuccess
 
     it "includes untracked files when building packages" $ \runGarn -> do
       cmd_ "git init --initial-branch=main" (EchoStdout False)
