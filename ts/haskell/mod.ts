@@ -2,8 +2,8 @@ import { packageToEnvironment } from "../environment.ts";
 import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
 import { Executable } from "../executable.ts";
-import { nixSource } from "../internal/utils.ts";
-import { nixRaw } from "../nix.ts";
+import { mapValues, nixSource } from "../internal/utils.ts";
+import { nixRaw, nixAttrSet } from "../nix.ts";
 
 /**
  * Project components returned by `mkHaskellProject`
@@ -37,23 +37,38 @@ type Execs<Exe extends string[]> = {
  * @param description - A short description of the project
  * @param compiler - The compiler version (e.g.: "ghc94")
  * @param executables - The name of the executables in the cabal file
+ * @param overrideDependencies - A mapping from package names to versions
  * @param src - The source directory
  */
 export function mkHaskellProject<const Executables extends string[]>(args: {
   description: string;
   compiler: string;
   executables?: Executables;
+  overrideDependencies?: Record<string, string>;
   src: string;
 }): Project & HaskellAddenda & Execs<Executables> {
-  const pkg: Package = mkPackage(
-    nixRaw`
-      (pkgs.haskell.packages.${nixRaw(args.compiler)}.callCabal2nix
+  const deps = args.overrideDependencies ?? {};
+
+  const nixPkg = nixRaw`
+    let
+      haskell = pkgs.haskell.packages.${nixRaw(args.compiler)}.override {
+        overrides = final: prev:
+          ${nixAttrSet(
+            mapValues(
+              (pkgVersion, pkgName) => nixRaw`prev.callHackage
+                "${nixRaw(pkgName)}" "${nixRaw(pkgVersion)}" {}
+              `,
+              deps,
+            ),
+          )}
+        ;
+      };
+      in haskell.callCabal2nix
         "garn-pkg"
         ${nixSource(args.src)}
-        { })
-    `,
-    "main package",
-  );
+        {}`;
+
+  const pkg: Package = mkPackage(nixPkg, "main package");
 
   const defaultEnvironment = packageToEnvironment(pkg, args.src);
 
