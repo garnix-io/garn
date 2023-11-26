@@ -71,7 +71,7 @@ spec = do
         [i|
           {askd "shyntax err"
         |]
-      output <- runGarn ["run", "foo"] "" repoDir Nothing
+      output <- runGarn ["run", "foo"]
       stderr output `shouldContain` "Error: Running garn.ts failed:"
       stderr output `shouldContain` "The module's source code could not be parsed"
 
