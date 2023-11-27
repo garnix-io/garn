@@ -133,11 +133,11 @@
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
-        "lastModified": 1698363957,
-        "narHash": "sha256-bZH6uURHIV3uJg1UGiPKd96HSl7MjVEiETw5xcuXR5k=",
+        "lastModified": 1701104650,
+        "narHash": "sha256-GR9G++zvEMliiPGk7HhmP2BxYQ++zCSJ1U6ybHDqlpE=",
         "owner": "garnix-io",
         "repo": "nix-tool-installer",
-        "rev": "d668219025a5cb031ffe2d0ce56d0006450efc32",
+        "rev": "3ed6fd6b3c1a055212918339d8f1ecd84d835711",
         "type": "github"
       },
       "original": {
