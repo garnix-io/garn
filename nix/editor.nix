@@ -73,4 +73,4 @@ pkgs.writeShellScriptBin "vscodium" ''
   ${vscodium}/bin/codium --new-window --disable-workspace-trust ./garn.ts --wait "$@"
 
   rm -rf $TEMP_DIR
-'';
+''
