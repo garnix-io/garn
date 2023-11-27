@@ -79,8 +79,7 @@ export type Environment = {
     ..._args: Array<NixStrLitInterpolatable>
   ): Check;
   /**
-   * Creates a new `Package` built with the given shell script, run inside this
-   * `Environment`
+   * Creates a new `Package` built with the given shell script, run inside this `Environment`
    */
   build(build: string): Package;
   build(
