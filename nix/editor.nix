@@ -46,30 +46,31 @@ let
       mkdir -p "$out/$USER_CONFIG/globalStorage"
       cat ${sqliteScript} | ${pkgs.sqlite}/bin/sqlite3 "$out/$USER_CONFIG/globalStorage/state.vscdb"
     '';
-in pkgs.writeShellScriptBin "vscodium" ''
-    set -euo pipefail
+in
+pkgs.writeShellScriptBin "vscodium" ''
+  set -euo pipefail
 
-    TEMP_DIR=$(mktemp -d --suffix garn-edit)
+  TEMP_DIR=$(mktemp -d --suffix garn-edit)
 
-    # copy the vscodium config
-    cp -r ${configDir}/. $TEMP_DIR
-    chmod -R u+rwX $TEMP_DIR
+  # copy the vscodium config
+  cp -r ${configDir}/. $TEMP_DIR
+  chmod -R u+rwX $TEMP_DIR
 
-    # copy the deno cache
-    DENO_CACHE=.cache/deno
-    if test $(uname) = "Darwin" ; then
-      DENO_CACHE="Library/Caches/deno"
-    fi
-    if test -e $HOME/$DENO_CACHE; then
-      mkdir -p $(dirname $TEMP_DIR/$DENO_CACHE)
-      cp -r $HOME/$DENO_CACHE $TEMP_DIR/$DENO_CACHE
-    fi
+  # copy the deno cache
+  DENO_CACHE=.cache/deno
+  if test $(uname) = "Darwin" ; then
+    DENO_CACHE="Library/Caches/deno"
+  fi
+  if test -e $HOME/$DENO_CACHE; then
+    mkdir -p $(dirname $TEMP_DIR/$DENO_CACHE)
+    cp -r $HOME/$DENO_CACHE $TEMP_DIR/$DENO_CACHE
+  fi
 
-    export HOME=$TEMP_DIR
-    export XDG_CONFIG_HOME=$TEMP_DIR/.config
-    export XDG_CACHE_HOME=$TEMP_DIR/.cache
+  export HOME=$TEMP_DIR
+  export XDG_CONFIG_HOME=$TEMP_DIR/.config
+  export XDG_CACHE_HOME=$TEMP_DIR/.cache
 
-    ${vscodium}/bin/codium --new-window --disable-workspace-trust ./garn.ts --wait "$@"
+  ${vscodium}/bin/codium --new-window --disable-workspace-trust ./garn.ts --wait "$@"
 
-    rm -rf $TEMP_DIR
-  '';
+  rm -rf $TEMP_DIR
+'';
