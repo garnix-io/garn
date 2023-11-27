@@ -158,13 +158,20 @@
               export PATH=${pkgs.deno}/bin:$PATH
               exec ${ghc}/bin/runhaskell ${./scripts/fileserver.hs} "$@"
             '');
-          installScriptFiles = nix-tool-installer.lib.${system}.mkInstallScriptFiles {
-            toolName = "garn";
-            baseUrl = "https://garn.io";
-            flakeLocation = "github:garnix-io/garn/v0.0.16";
-            testCommand = "garn --help";
-          };
-        } // websitePackages;
+        }
+        // websitePackages
+        // (
+          if system == "x86_64-linux"
+          then {
+            installScriptFiles = nix-tool-installer.lib.${system}.mkInstallScriptFiles {
+              toolName = "garn";
+              baseUrl = "https://garn.io";
+              flakeLocation = "github:garnix-io/garn/v0.0.16";
+              testCommand = "garn --help";
+            };
+          }
+          else { }
+        );
         devShells = {
           default = pkgs.mkShell {
             shellHook =
