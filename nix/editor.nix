@@ -46,7 +46,7 @@ let
       mkdir -p "$out/$USER_CONFIG/globalStorage"
       cat ${sqliteScript} | ${pkgs.sqlite}/bin/sqlite3 "$out/$USER_CONFIG/globalStorage/state.vscdb"
     '';
-  editor = pkgs.writeShellScriptBin "vscodium" ''
+in pkgs.writeShellScriptBin "vscodium" ''
     set -euo pipefail
 
     TEMP_DIR=$(mktemp -d --suffix garn-edit)
@@ -73,5 +73,3 @@ let
 
     rm -rf $TEMP_DIR
   '';
-in
-editor
