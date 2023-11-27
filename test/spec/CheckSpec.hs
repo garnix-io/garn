@@ -134,7 +134,7 @@ spec = do
               import * as garn from "#{repoDir}/ts/mod.ts"
               import { nixRaw } from "#{repoDir}/ts/nix.ts";
 
-              const hello: garn.Package = garn.mkPackage(nixRaw`pkgs.hello`);
+              const hello: garn.Package = garn.mkPackage(nixRaw`pkgs.hello`, "hello");
 
               export const haskell = garn.mkProject(
                 {
@@ -146,6 +146,7 @@ spec = do
             |]
           output <- runGarn ["check", "haskell"] "" repoDir Nothing
           onTestFailureLog output
+          stderr output `shouldContain` "Hello, world!"
           stderr output `shouldContain` "error"
           exitCode output `shouldBe` ExitFailure 1
 
