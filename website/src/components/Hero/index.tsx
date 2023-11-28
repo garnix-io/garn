@@ -94,7 +94,7 @@ const garnTs = (
     <Keyword>import</Keyword> * as garn from{" "}
     <String>
       "
-      <Tooltip item="https://garn.io/ts/v0.0.17/mod.ts">
+      <Tooltip item="https://garn.io/ts/v0.0.18/mod.ts">
         <Garn /> uses Deno to run 'garn.ts' files. This means you can import
         dependencies directly through URLs. But you don't need to have Deno
         installed, <Garn /> takes care of that for you.
@@ -109,7 +109,7 @@ of packages, nixpkgs. If you
 need a tool or dependency,
 it's probably here`}
     </Tooltip>{" "}
-    from <String>"https://garn.io/ts/v0.0.17/nixpkgs.ts"</String>;<br />
+    from <String>"https://garn.io/ts/v0.0.18/nixpkgs.ts"</String>;<br />
     <br />
     <Export>export</Export> <Keyword>const</Keyword>{" "}
     <Tooltip item="backend">

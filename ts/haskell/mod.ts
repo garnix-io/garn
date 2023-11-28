@@ -22,8 +22,8 @@ export type HaskellAddenda = {
   ) => Omit<T, Name> & { [n in Name]: Executable };
 };
 
-type Execs<Exe extends string[]> = {
-  [e in Exe[number]]: Executable;
+type Execs<Exe extends string> = {
+  [e in Exe]: Executable;
 };
 
 /**
@@ -40,10 +40,10 @@ type Execs<Exe extends string[]> = {
  * @param overrideDependencies - A mapping from package names to versions
  * @param src - The source directory
  */
-export function mkHaskellProject<const Executables extends string[]>(args: {
+export function mkHaskellProject<Executables extends string>(args: {
   description: string;
   compiler: string;
-  executables?: Executables;
+  executables?: Array<Executables>;
   overrideDependencies?: Record<string, string>;
   src: string;
 }): Project & HaskellAddenda & Execs<Executables> {
