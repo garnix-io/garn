@@ -20,7 +20,7 @@ export const docMenuItems: { name: string; url: string }[] = [
   ...docEntries.map(([{ name, url }]) => ({ name, url: `/docs/${url}` })),
   {
     name: "typescript api",
-    url: "https://doc.deno.land/https://garn.io/ts/v0.0.17/mod.ts",
+    url: "https://doc.deno.land/https://garn.io/ts/v0.0.18/mod.ts",
   },
 ];
 
