@@ -8,6 +8,7 @@
 - `Environment.mkNpmProject` and `Environment.mkYarnProject` don't expose a
   `devShell` field anymore, since that was a duplicate of `defaultEnvironment`.
 - Fix jsdocs rendering
+- Fix type safety around `Executable`s exported from `mkHaskellProject`.
 
 ## v0.0.17
 
