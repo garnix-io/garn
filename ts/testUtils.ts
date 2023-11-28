@@ -51,7 +51,7 @@ export const printOutputOnFailure = (
   return output;
 };
 
-const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
+export const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
   url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
 });
 
@@ -84,7 +84,10 @@ export const runExecutable = (
           default: nixAttrSet({
             type: nix.nixStrLit`app`,
             program: nix.nixRaw`
-              let pkgs = ${pkgs};
+              let
+                nixpkgs = ${nixpkgsInput};
+                pkgs = ${pkgs};
+                inherit (pkgs) system;
               in ${executable.nixExpression}
             `,
           }),
@@ -111,7 +114,10 @@ export const runCheck = (
       checks: nixAttrSet({
         "x86_64-linux": nixAttrSet({
           default: nix.nixRaw`
-            let pkgs = ${pkgs};
+            let
+              nixpkgs = ${nixpkgsInput};
+              pkgs = ${pkgs};
+              inherit (pkgs) system;
             in ${check.nixExpression}
           `,
         }),
@@ -136,7 +142,10 @@ export const buildPackage = (
       packages: nixAttrSet({
         "x86_64-linux": nixAttrSet({
           default: nix.nixRaw`
-            let pkgs = ${pkgs};
+            let
+              nixpkgs = ${nixpkgsInput};
+              pkgs = ${pkgs};
+              inherit (pkgs) system;
             in ${pkg.nixExpression}
           `,
         }),
