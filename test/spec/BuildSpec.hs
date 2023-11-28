@@ -104,10 +104,10 @@ spec = do
                 defaultEnvironment: env,
               }, {})
                 .addPackage("build", "mv dist/build-artifact $out/build-artifact");
-            |]
-          output <- runGarn ["build", "project"]
-          readFile "result/build-artifact" `shouldReturn` "build-content\n"
-          exitCode output `shouldBe` ExitSuccess
+          |]
+        output <- runGarn ["build", "project"]
+        readFile "result/build-artifact" `shouldReturn` "build-content\n"
+        exitCode output `shouldBe` ExitSuccess
 
     describe ".build" $ do
       it "builds manually specified packages" $ \runGarn -> do
@@ -164,10 +164,10 @@ spec = do
                     .build("echo $SETUP_VAR > $out/build-artifact"),
                 },
               )
-            |]
-          output <- runGarn ["build", "project"]
-          readFile "result/build-artifact" `shouldReturn` "hello from setup\n"
-          exitCode output `shouldBe` ExitSuccess
+          |]
+        output <- runGarn ["build", "project"]
+        readFile "result/build-artifact" `shouldReturn` "hello from setup\n"
+        exitCode output `shouldBe` ExitSuccess
 
     it "includes untracked files when building packages" $ \runGarn -> do
       cmd_ "git init --initial-branch=main" (EchoStdout False)
