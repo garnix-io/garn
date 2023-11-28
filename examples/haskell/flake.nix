@@ -15,29 +15,37 @@
           };
         in
         {
-          "helloFromHaskell/pkg" = (pkgs.haskell.packages.ghc94.callCabal2nix
-            "garn-pkg"
-            (
-              let
-                lib = pkgs.lib;
-                lastSafe = list:
-                  if lib.lists.length list == 0
-                  then null
-                  else lib.lists.last list;
-              in
-              builtins.path
-                {
-                  path = ./.;
-                  name = "source";
-                  filter = path: type:
-                    let
-                      fileName = lastSafe (lib.strings.splitString "/" path);
-                    in
-                    fileName != "flake.nix" &&
-                    fileName != "garn.ts";
-                }
-            )
-            { });
+          "helloFromHaskell/pkg" =
+            let
+              haskell = pkgs.haskell.packages.ghc94.override {
+                overrides = final: prev:
+                  { }
+                ;
+              };
+            in
+            haskell.callCabal2nix
+              "garn-pkg"
+              (
+                let
+                  lib = pkgs.lib;
+                  lastSafe = list:
+                    if lib.lists.length list == 0
+                    then null
+                    else lib.lists.last list;
+                in
+                builtins.path
+                  {
+                    path = ./.;
+                    name = "source";
+                    filter = path: type:
+                      let
+                        fileName = lastSafe (lib.strings.splitString "/" path);
+                      in
+                      fileName != "flake.nix" &&
+                      fileName != "garn.ts";
+                  }
+              )
+              { };
         }
       );
       checks = forAllSystems (system:
@@ -52,29 +60,37 @@
             let
               dev = ((
                 let
-                  expr = (pkgs.haskell.packages.ghc94.callCabal2nix
-                    "garn-pkg"
-                    (
-                      let
-                        lib = pkgs.lib;
-                        lastSafe = list:
-                          if lib.lists.length list == 0
-                          then null
-                          else lib.lists.last list;
-                      in
-                      builtins.path
-                        {
-                          path = ./.;
-                          name = "source";
-                          filter = path: type:
-                            let
-                              fileName = lastSafe (lib.strings.splitString "/" path);
-                            in
-                            fileName != "flake.nix" &&
-                            fileName != "garn.ts";
-                        }
-                    )
-                    { });
+                  expr =
+                    let
+                      haskell = pkgs.haskell.packages.ghc94.override {
+                        overrides = final: prev:
+                          { }
+                        ;
+                      };
+                    in
+                    haskell.callCabal2nix
+                      "garn-pkg"
+                      (
+                        let
+                          lib = pkgs.lib;
+                          lastSafe = list:
+                            if lib.lists.length list == 0
+                            then null
+                            else lib.lists.last list;
+                        in
+                        builtins.path
+                          {
+                            path = ./.;
+                            name = "source";
+                            filter = path: type:
+                              let
+                                fileName = lastSafe (lib.strings.splitString "/" path);
+                              in
+                              fileName != "flake.nix" &&
+                              fileName != "garn.ts";
+                          }
+                      )
+                      { };
                 in
                 (if expr ? env
                 then expr.env
@@ -135,29 +151,37 @@ ${"hlint *.hs"}
         {
           "helloFromHaskell" = ((
             let
-              expr = (pkgs.haskell.packages.ghc94.callCabal2nix
-                "garn-pkg"
-                (
-                  let
-                    lib = pkgs.lib;
-                    lastSafe = list:
-                      if lib.lists.length list == 0
-                      then null
-                      else lib.lists.last list;
-                  in
-                  builtins.path
-                    {
-                      path = ./.;
-                      name = "source";
-                      filter = path: type:
-                        let
-                          fileName = lastSafe (lib.strings.splitString "/" path);
-                        in
-                        fileName != "flake.nix" &&
-                        fileName != "garn.ts";
-                    }
-                )
-                { });
+              expr =
+                let
+                  haskell = pkgs.haskell.packages.ghc94.override {
+                    overrides = final: prev:
+                      { }
+                    ;
+                  };
+                in
+                haskell.callCabal2nix
+                  "garn-pkg"
+                  (
+                    let
+                      lib = pkgs.lib;
+                      lastSafe = list:
+                        if lib.lists.length list == 0
+                        then null
+                        else lib.lists.last list;
+                    in
+                    builtins.path
+                      {
+                        path = ./.;
+                        name = "source";
+                        filter = path: type:
+                          let
+                            fileName = lastSafe (lib.strings.splitString "/" path);
+                          in
+                          fileName != "flake.nix" &&
+                          fileName != "garn.ts";
+                      }
+                  )
+                  { };
             in
             (if expr ? env
             then expr.env
@@ -187,7 +211,13 @@ ${"hlint *.hs"}
           "helloFromHaskell/hello" = {
             "type" = "app";
             "program" = "${let
-        dev = let expr = (pkgs.haskell.packages.ghc94.callCabal2nix
+        dev = let expr = let
+      haskell = pkgs.haskell.packages.ghc94.override {
+        overrides = final: prev:
+          {  }
+        ;
+      };
+      in haskell.callCabal2nix
         "garn-pkg"
         (let
     lib = pkgs.lib;
@@ -207,13 +237,19 @@ ${"hlint *.hs"}
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })
-        { });
+        {};
         in
           (if expr ? env
             then expr.env
             else pkgs.mkShell { inputsFrom = [ expr ]; }
           );
-        shell = "${(pkgs.haskell.packages.ghc94.callCabal2nix
+        shell = "${let
+      haskell = pkgs.haskell.packages.ghc94.override {
+        overrides = final: prev:
+          {  }
+        ;
+      };
+      in haskell.callCabal2nix
         "garn-pkg"
         (let
     lib = pkgs.lib;
@@ -233,7 +269,7 @@ ${"hlint *.hs"}
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })
-        { })}/bin/${"hello"}";
+        {}}/bin/${"hello"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";

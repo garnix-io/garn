@@ -21,7 +21,7 @@
               npmlock2nix = import npmlock2nix-repo {
                 inherit pkgs;
               };
-              pkgs = import "${nixpkgs}" {
+              pkgs = import nixpkgs-repo {
                 config.permittedInsecurePackages = [ ];
                 inherit system;
               };
@@ -102,7 +102,7 @@ ${"
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
         };
-        pkgs = import "${nixpkgs}" {
+        pkgs = import nixpkgs-repo {
         config.permittedInsecurePackages = [];
         inherit system;
       };
@@ -176,7 +176,7 @@ ${"
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
         };
-        pkgs = import "${nixpkgs}" {
+        pkgs = import nixpkgs-repo {
         config.permittedInsecurePackages = [];
         inherit system;
       };
