@@ -1,10 +1,11 @@
+{ system ? builtins.currentSystem }:
 let
   pkgs = import
     (builtins.fetchTarball {
       url = "https://github.com/NixOS/nixpkgs/archive/a78de4f116747585ebdb6f3d725268a7e068c554.tar.gz";
       sha256 = "14zicikllc86aqyj7swaa3nsbnpr4lmyxm8ldsqrr7slg44s2nsh";
     })
-    { };
+    { inherit system; };
   settingsFile = pkgs.writeText "vscode-settings.json" ''
     {
      "deno.enable": true,
