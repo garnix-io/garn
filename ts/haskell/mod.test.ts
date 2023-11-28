@@ -2,6 +2,22 @@ import { describe, it } from "https://deno.land/std@0.206.0/testing/bdd.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import * as haskell from "./mod.ts";
 import { assertStdout, assertSuccess, runExecutable } from "../testUtils.ts";
+import { Executable } from "../executable.ts";
+
+const assertTypeIsExecutable = (_e: Executable) => {};
+
+const _typeCheckTest_addsHaskellExecutablesAsProperties = () => {
+  const project = haskell.mkHaskellProject({
+    description: "",
+    compiler: "ghc94",
+    src: ".",
+    executables: ["foo", "bar"],
+  });
+  // @ts-expect-error - make sure arbitrary properties on the project do not exist
+  assertTypeIsExecutable(project.baz);
+  assertTypeIsExecutable(project.foo);
+  assertTypeIsExecutable(project.bar);
+};
 
 describe("mkHaskellProject", () => {
   describe("withVersions", () => {
