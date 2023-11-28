@@ -1,0 +1,5 @@
+{
+  "tsLibVersion": "v0.0.17",
+  "nixpkgsInputComment": "pinned to master on 2023-10-26",
+  "nixpkgsInput": "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566"
+}
