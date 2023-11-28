@@ -47,12 +47,12 @@ getOpts oType =
     parser = case oType of
       WithGarnTs garnConfig ->
         (WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig))
-          <|> (AlwaysAvailableOpts <$> alwaysParser Hidden)
+          <|> (AlwaysAvailableOpts <$> alwaysParser)
       WithoutGarnTs ->
         (WithoutGarnTsOpts <$> withoutGarnTsParser)
-          <|> (AlwaysAvailableOpts <$> alwaysParser Hidden)
+          <|> (AlwaysAvailableOpts <$> alwaysParser)
       BrokenGarnTs err ->
-        (AlwaysAvailableOpts <$> alwaysParser Hidden)
+        (AlwaysAvailableOpts <$> alwaysParser)
           <|> throw (Garn.Errors.UserError $ errorMessage err)
     version =
       infoOption garnCliVersion $
@@ -161,11 +161,10 @@ withoutGarnTsParser =
         | (cmd, desc, runner) <- withoutGarnTsCommandInfo
       ]
 
-alwaysParser :: HiddenParser -> Parser AlwaysCommand
-alwaysParser h =
+alwaysParser :: Parser AlwaysCommand
+alwaysParser =
   subparser $
-    OA.command "edit" (info (Edit <$> argvParser) (progDesc desc))
-      <> if h == Hidden then hidden else mempty
+    OA.command "edit" (info (Edit <$> argvParser) (progDesc desc)) <> hidden
   where
     argvParser :: Parser [String]
     argvParser = many $ strArgument $ metavar "...args"
@@ -197,7 +196,4 @@ commandOptionsParser targets =
 data CheckCommandOptions
   = Qualified CommandOptions
   | Unqualified
-  deriving stock (Eq, Show)
-
-data HiddenParser = Hidden | NotHidden
   deriving stock (Eq, Show)

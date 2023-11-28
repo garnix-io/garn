@@ -113,19 +113,8 @@ getDescription = \case
   TargetConfigPackage (PackageTarget {description}) -> description
   TargetConfigExecutable (ExecutableTarget {description}) -> description
 
-data ReadConfigError
-  = RunGarnFailed String
-  | VersionMismatch String
-  | NoGarnImport
-  | LiteralUserError String
+newtype ReadConfigError = ReadConfigError {errorMessage :: String}
   deriving stock (Eq, Show)
-
-errorMessage :: ReadConfigError -> String
-errorMessage e = case e of
-  RunGarnFailed msg -> "Running garn.ts failed:\n" <> msg
-  VersionMismatch msg -> msg
-  NoGarnImport -> "No garn library imported in garn.ts"
-  LiteralUserError msg -> msg
 
 readGarnConfig :: IO (Either ReadConfigError GarnConfig)
 readGarnConfig = do
@@ -151,7 +140,7 @@ readGarnConfig = do
         (words "deno run --quiet --check --allow-write --allow-run --allow-read")
         mainPath
     case exitCode of
-      ExitFailure _ -> return . Left $ RunGarnFailed err
+      ExitFailure _ -> return . Left $ ReadConfigError $ "Running garn.ts failed:\n" <> err
       ExitSuccess -> case eitherDecode out :: Either String (Maybe DenoOutput) of
         Left err -> do
           let suggestion = lines $ case eitherDecode out :: Either String OnlyTsLibVersion of
@@ -175,7 +164,7 @@ readGarnConfig = do
 
                     |]
           return . Left $
-            VersionMismatch $
+            ReadConfigError $
               intercalate
                 "\n"
                 ( "Version mismatch detected:"
@@ -185,8 +174,8 @@ readGarnConfig = do
                           <> ["(Internal details: " <> err <> ")"]
                       )
                 )
-        Right Nothing -> return $ Left NoGarnImport
-        Right (Just (UserError _tsLibVersion err)) -> return . Left $ LiteralUserError err
+        Right Nothing -> return $ Left $ ReadConfigError "No garn library imported in garn.ts"
+        Right (Just (UserError _tsLibVersion err)) -> return . Left $ ReadConfigError err
         Right (Just (Success _tsLibVersion writtenConfig)) -> return $ Right writtenConfig
 
 indent :: String -> String
