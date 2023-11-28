@@ -10,6 +10,7 @@ import {
   nixRaw,
   nixStrLit,
 } from "../nix.ts";
+import { nixpkgsInput } from "../testUtils.ts";
 
 export { plugin as vite } from "./vite.ts";
 
@@ -39,7 +40,7 @@ const fromNodeVersion = (
   const { pkg, permittedInsecurePackages } = nodeVersions[version];
   return {
     pkgs: nixRaw`
-      import "\${nixpkgs}" {
+      import ${nixpkgsInput} {
         config.permittedInsecurePackages = ${permittedInsecurePackages};
         inherit system;
       }
@@ -56,7 +57,6 @@ export function mkNpmProject(args: {
   src: string;
   nodeVersion: NodeVersion;
 }): Project & {
-  devShell: Environment;
   node_modules: Package;
 } {
   const { pkgs, nodejs } = fromNodeVersion(args.nodeVersion);
@@ -94,7 +94,6 @@ export function mkNpmProject(args: {
       defaultEnvironment: devShell,
     },
     {
-      devShell,
       node_modules,
     },
   );
@@ -173,7 +172,6 @@ export function mkYarnProject(args: {
     },
     {
       pkg,
-      devShell,
       startDev,
     },
   );

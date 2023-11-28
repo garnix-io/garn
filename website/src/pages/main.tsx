@@ -46,7 +46,7 @@ export const Info: React.FC = () => {
             <Code
               header="garn.ts"
               lineNumbers
-              code={`import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
+              code={`import * as garn from "https://garn.io/ts/v0.0.17/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "my frontend project",
@@ -84,8 +84,8 @@ v18.17.1`}
             <Code
               header="garn.ts"
               lineNumbers
-              code={`import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
-import * as nixpkgs from "https://garn.io/ts/v0.0.16/nixpkgs.ts";
+              code={`import * as garn from "https://garn.io/ts/v0.0.17/mod.ts";
+import * as nixpkgs from "https://garn.io/ts/v0.0.17/nixpkgs.ts";
 
 export const backend = garn.haskell
   .mkHaskellProject({
@@ -200,37 +200,21 @@ $ garn run backend.codegen `}
             <a href="https://deno.com/">Deno</a>. A lot of the convenience and
             power for editing your <code>garn.ts</code> files comes from having
             a working Deno LSP. There are two ways of setting up LSP for editing{" "}
-            <code>garn.ts</code> files: using <Garn /> itself to provide a
-            properly-configured editor with <code>editGarnConfig</code>, or
-            using <Garn /> to provide <code>deno</code> and setting up your
-            editor configuration yourself.
+            <code>garn.ts</code> files: using `garn edit`, which provides a
+            properly-configured editor, or using <Garn /> to provide{" "}
+            <code>deno</code> and setting up your editor configuration yourself.
           </p>
           <h3>
-            <code>editGarnConfig</code>
+            <code>garn edit</code>
           </h3>
           <p>
-            <Garn /> offers an <code>Executable</code> called{" "}
-            <code>editGarnConfig</code>. It will spin up a{" "}
+            <Garn /> can download and configure{" "}
+            <a href="https://vscodium.com/">vscodium</a> for you &mdash; just
+            type <code>garn edit</code>. It will spin up a{" "}
             <a href="https://vscodium.com/">vscodium</a> editor that is
             pre-configured for editing <code>garn.ts</code> files. It won't use
             or modify your local vscodium settings, if you have any. You can can
             add it to your <code>garn.ts</code> file like this:
-          </p>
-          <Code
-            header="garn.ts"
-            lineNumbers
-            code={`import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
-
-export const edit = garn.editGarnConfig; `}
-          />
-          <p>
-            And then run it with <code>garn run edit</code>.
-          </p>
-          <p>
-            This is a very easy way to get up and running with editing{" "}
-            <code>garn.ts</code> files. The disadvantage is that the editor
-            isn't your normal configured editor. So you might consider
-            installing the Deno LSP and configuring your editor:
           </p>
           <h3>Installing the Deno LSP and configuring your editor</h3>
           <p>
@@ -240,7 +224,7 @@ export const edit = garn.editGarnConfig; `}
           <Code
             header="garn.ts"
             lineNumbers
-            code={`import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
+            code={`import * as garn from "https://garn.io/ts/v0.0.17/mod.ts";
 
 export const deno = garn.mkProject({
   description: "garn configuration environment",

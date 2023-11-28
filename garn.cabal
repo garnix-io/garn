@@ -17,6 +17,7 @@ build-type:     Simple
 data-files:
     ts/**/*.ts
     ts/**/*.json
+    nix/*.nix
 
 source-repository head
   type: git
@@ -27,6 +28,7 @@ library
       Garn
       Garn.CodeGen
       Garn.Common
+      Garn.Edit
       Garn.Errors
       Garn.GarnConfig
       Garn.ImportVersion
@@ -212,6 +214,7 @@ test-suite spec
   other-modules:
       BuildSpec
       CheckSpec
+      EditSpec
       EnterSpec
       ExampleSpec
       Garn.CodeGenSpec
@@ -223,6 +226,7 @@ test-suite spec
       Garn
       Garn.CodeGen
       Garn.Common
+      Garn.Edit
       Garn.Errors
       Garn.GarnConfig
       Garn.ImportVersion

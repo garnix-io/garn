@@ -56,7 +56,7 @@
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.nodejs-18_x ];
+                  [ (pkgs.nodejs-18_x) ];
               });
             in
             pkgs.runCommand "garn-pkg"
@@ -147,7 +147,7 @@ ${"npm run build && mv build/* \$out"}
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.nodejs-18_x ];
+              [ (pkgs.nodejs-18_x) ];
           });
         }
       );
@@ -166,7 +166,7 @@ ${"npm run build && mv build/* \$out"}
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         });
         shell = "npm install && npm start";
         buildPath = pkgs.runCommand "build-inputs-path" {

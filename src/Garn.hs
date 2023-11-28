@@ -10,6 +10,7 @@ import Control.Exception (catch)
 import Control.Monad (forM_, when)
 import Cradle
 import Garn.Common (currentSystem, nixArgs)
+import Garn.Edit
 import qualified Garn.Errors
 import Garn.GarnConfig
 import Garn.Init
@@ -36,11 +37,13 @@ readOptionsAndConfig = do
   hasGarn <- doesFileExist "garn.ts"
   if hasGarn
     then do
-      garnConfig <- readGarnConfig
-      getOpts (WithGarnTs garnConfig)
+      readGarnConfig >>= \case
+        Right garnConfig -> getOpts (WithGarnTs garnConfig)
+        Left readGarnConfig -> getOpts (BrokenGarnTs readGarnConfig)
     else getOpts WithoutGarnTs
 
 runWith :: Env -> Options -> IO ()
+runWith _ (AlwaysAvailableOpts (Edit args)) = editGarnTs args
 runWith env (WithoutGarnTsOpts Init) = initGarnTs $ initFileName env
 runWith env (WithGarnTsOpts garnConfig opts) = do
   writeGarnConfig garnConfig
@@ -64,6 +67,7 @@ runWith env (WithGarnTsOpts garnConfig opts) = do
           forM_ packages $ \package -> do
             c <- runNix (NoStdin, "build", ".#" <> package)
             when (c /= ExitSuccess) $ exitWith c
+        TargetConfigEnvironment _ -> pure ()
         TargetConfigPackage (PackageTarget {}) -> do
           c <- runNix (NoStdin, "build", ".#" <> asNixFacing target)
           when (c /= ExitSuccess) $ exitWith c
@@ -84,6 +88,7 @@ checkTarget targetConfig = case targetConfig of
     forM_ checks $ \check -> do
       c <- runNix (NoStdin, "build", ".#checks." <> system <> "." <> check)
       when (c /= ExitSuccess) $ exitWith c
+  TargetConfigEnvironment _ -> pure ()
   TargetConfigPackage _ -> pure ()
   TargetConfigExecutable _ -> pure ()
 

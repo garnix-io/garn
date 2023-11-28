@@ -25,6 +25,12 @@ export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
   sandboxSetup: NixExpression;
+  description?: string;
+
+  /**
+   * Update the description for this `Environment`
+   */
+  setDescription: (this: Environment, newDescription: string) => Environment;
 
   /**
    * Creates a new environment based on this one that includes the specified nix packages.
@@ -107,7 +113,7 @@ export function check(
  *
  * Example:
  * ```typescript
- * import * as pkgs from "https://garn.io/ts/v0.0.16/nixpkgs.ts";
+ * import * as pkgs from "https://garn.io/ts/v0.0.17/nixpkgs.ts";
  *
  * garn.build`
  *   ${pkgs.cowsay}/bin/cowsay moo > $out/moo
@@ -168,6 +174,12 @@ export function mkEnvironment(
       ${args.src != null ? copySource(args.src) : ""}
       ${args.sandboxSetup || nixStrLit``}
     `,
+    setDescription(this: Environment, newDescription: string): Environment {
+      return {
+        ...this,
+        description: newDescription,
+      };
+    },
     check(
       this: Environment,
       s: TemplateStringsArray | string,
@@ -197,7 +209,9 @@ export function mkEnvironment(
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            ${nixList(extraDevTools.map((pkg) => pkg.nixExpression))};
+            ${nixList(
+              extraDevTools.map((pkg) => nixRaw`(${pkg.nixExpression})`),
+            )};
         })
       `,
       };
@@ -211,7 +225,7 @@ export function mkEnvironment(
  *
  * For example:
  * ```typescript
- * import * as pkgs from "https://garn.io/ts/v0.0.16/nixpkgs.ts";
+ * import * as pkgs from "https://garn.io/ts/v0.0.17/nixpkgs.ts";
  *
  * // Create an environment with nothing but go and gopls installed:
  * emptyEnvironment.withDevTools([pkgs.go, pkgs.gopls])

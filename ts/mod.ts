@@ -15,7 +15,6 @@ export {
   type Plugin,
   type ProjectHelpers,
 } from "./project.ts";
-export { editGarnConfig } from "./edit.ts";
 
 // languages
 export * as go from "./go/mod.ts";
