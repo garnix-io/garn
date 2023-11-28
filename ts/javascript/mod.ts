@@ -10,6 +10,7 @@ import {
   nixRaw,
   nixStrLit,
 } from "../nix.ts";
+import { nixpkgsInput } from "../testUtils.ts";
 
 export { plugin as vite } from "./vite.ts";
 
@@ -39,7 +40,7 @@ const fromNodeVersion = (
   const { pkg, permittedInsecurePackages } = nodeVersions[version];
   return {
     pkgs: nixRaw`
-      import "\${nixpkgs}" {
+      import ${nixpkgsInput} {
         config.permittedInsecurePackages = ${permittedInsecurePackages};
         inherit system;
       }
