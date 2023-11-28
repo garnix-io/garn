@@ -84,10 +84,12 @@ spec = do
         (cs . stripAnsiEscapeCodes . cs) (stderr output)
           `shouldBe` unindent
             [i|
+              [garn] Error: Running garn.ts failed:
               error: TS2322 [ERROR]: Type 'string' is not assignable to type 'number'.
                           const x: number = \"foo\";
                                 ^
                   at file://#{dir}/garn.ts:2:19
+
             |]
 
       it "generates formatted flakes" $ \onTestFailureLog -> do

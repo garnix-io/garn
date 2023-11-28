@@ -11,7 +11,6 @@ import Data.Aeson.Lens (atKey, key)
 import Data.String (fromString)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
-import Data.String.Interpolate.Util (unindent)
 import Data.Text (Text)
 import Development.Shake
 import Network.HTTP.Client (HttpException)

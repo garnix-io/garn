@@ -26,9 +26,9 @@ spec = do
       writeFile
         "Main.hs"
         [i|
-            main :: IO ()
-            main = "foo"
-          |]
+          main :: IO ()
+          main = "foo"
+        |]
       output <- runGarn ["build", "foo"]
       stderr output `shouldContain` "Couldn't match type"
       exitCode output `shouldBe` ExitFailure 1
@@ -37,16 +37,16 @@ spec = do
       writeFile "garn.ts" $
         unindent
           [i|
-              import * as garn from "#{repoDir}/ts/mod.ts";
+            import * as garn from "#{repoDir}/ts/mod.ts";
 
-              export const project = garn.mkProject(
-                { description: "" },
-                {
-                  foo: garn.build("echo 'foo' > $out/build-artifact"),
-                  bar: garn.build("echo 'bar' > $out/build-artifact"),
-                },
-              );
-            |]
+            export const project = garn.mkProject(
+              { description: "" },
+              {
+                foo: garn.build("echo 'foo' > $out/build-artifact"),
+                bar: garn.build("echo 'bar' > $out/build-artifact"),
+              },
+            );
+          |]
       output <- runGarn ["build", "project.foo"]
       exitCode output `shouldBe` ExitSuccess
       readFile "result/build-artifact" `shouldReturn` "foo\n"
@@ -58,10 +58,10 @@ spec = do
       writeFile "garn.ts" $
         unindent
           [i|
-              import * as garn from "#{repoDir}/ts/mod.ts";
+            import * as garn from "#{repoDir}/ts/mod.ts";
 
-              export const p = garn.build("echo 'build output' > $out/build-artifact");
-            |]
+            export const p = garn.build("echo 'build output' > $out/build-artifact");
+          |]
       output <- runGarn ["build", "p"]
       exitCode output `shouldBe` ExitSuccess
       readFile "result/build-artifact" `shouldReturn` "build output\n"
@@ -70,19 +70,19 @@ spec = do
       writeFile "garn.ts" $
         unindent
           [i|
-              import * as garn from "#{repoDir}/ts/mod.ts";
+            import * as garn from "#{repoDir}/ts/mod.ts";
 
-              export const project = garn.mkProject(
-                { description: "" },
-                {
-                  short: garn.build("short command"),
-                  longer: garn.build`
-                    # this is some longer build script:
-                    bla bla bla
-                  `,
-                },
-              );
-            |]
+            export const project = garn.mkProject(
+              { description: "" },
+              {
+                short: garn.build("short command"),
+                longer: garn.build`
+                  # this is some longer build script:
+                  bla bla bla
+                `,
+              },
+            );
+          |]
       output <- runGarn ["build"]
       stderr output `shouldMatch` "project.short \\s+ Builds short command"
       stderr output `shouldMatch` "project.longer \\s+ Builds # this is some longe\\.\\.\\."
@@ -92,20 +92,20 @@ spec = do
         writeFile
           "garn.ts"
           [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
+            import * as garn from "#{repoDir}/ts/mod.ts"
 
-              const env = garn.mkEnvironment({
-                sandboxSetup: garn.nix.nixStrLit`
-                  mkdir dist
-                  echo build-content > dist/build-artifact
-                `
-              });
-              export const project = garn.mkProject({
-                description: "",
-                defaultEnvironment: env,
-              }, {})
-                .addPackage("build", "mv dist/build-artifact $out/build-artifact");
-            |]
+            const env = garn.mkEnvironment({
+              sandboxSetup: garn.nix.nixStrLit`
+                mkdir dist
+                echo build-content > dist/build-artifact
+              `
+            });
+            export const project = garn.mkProject({
+              description: "",
+              defaultEnvironment: env,
+            }, {})
+              .addPackage("build", "mv dist/build-artifact $out/build-artifact");
+          |]
         output <- runGarn ["build", "project"]
         readFile "result/build-artifact" `shouldReturn` "build-content\n"
         exitCode output `shouldBe` ExitSuccess
@@ -115,15 +115,15 @@ spec = do
         writeFile
           "garn.ts"
           [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
+            import * as garn from "#{repoDir}/ts/mod.ts"
 
-              export const project = garn.mkProject(
-                { description: "" },
-                {
-                  package: garn.build("echo 'build-content' > $out/build-artifact"),
-                },
-              )
-            |]
+            export const project = garn.mkProject(
+              { description: "" },
+              {
+                package: garn.build("echo 'build-content' > $out/build-artifact"),
+              },
+            )
+          |]
         output <- runGarn ["build", "project"]
         readFile "result/build-artifact" `shouldReturn` "build-content\n"
         exitCode output `shouldBe` ExitSuccess
@@ -132,20 +132,20 @@ spec = do
         writeFile
           "garn.ts"
           [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-              import * as nix from "#{repoDir}/ts/nix.ts"
+            import * as garn from "#{repoDir}/ts/mod.ts"
+            import * as nix from "#{repoDir}/ts/nix.ts"
 
-              export const project = garn.mkProject(
-                { description: "" },
-                {
-                  package:
-                    garn
-                      .emptyEnvironment
-                      .withDevTools([garn.mkPackage(nix.nixRaw`pkgs.hello`, "hello")])
-                      .build("hello > $out/build-artifact"),
-                },
-              )
-            |]
+            export const project = garn.mkProject(
+              { description: "" },
+              {
+                package:
+                  garn
+                    .emptyEnvironment
+                    .withDevTools([garn.mkPackage(nix.nixRaw`pkgs.hello`, "hello")])
+                    .build("hello > $out/build-artifact"),
+              },
+            )
+          |]
         output <- runGarn ["build", "project"]
         readFile "result/build-artifact" `shouldReturn` "Hello, world!\n"
         exitCode output `shouldBe` ExitSuccess
@@ -154,20 +154,20 @@ spec = do
         writeFile
           "garn.ts"
           [i|
-              import * as garn from "#{repoDir}/ts/mod.ts"
-              import * as nix from "#{repoDir}/ts/nix.ts"
+            import * as garn from "#{repoDir}/ts/mod.ts"
+            import * as nix from "#{repoDir}/ts/nix.ts"
 
-              export const project = garn.mkProject(
-                { description: "" },
-                {
-                  package: garn
-                    .mkEnvironment({
-                      sandboxSetup: nix.nixStrLit`SETUP_VAR="hello from setup"`,
-                    })
-                    .build("echo $SETUP_VAR > $out/build-artifact"),
-                },
-              )
-            |]
+            export const project = garn.mkProject(
+              { description: "" },
+              {
+                package: garn
+                  .mkEnvironment({
+                    sandboxSetup: nix.nixStrLit`SETUP_VAR="hello from setup"`,
+                  })
+                  .build("echo $SETUP_VAR > $out/build-artifact"),
+              },
+            )
+          |]
         output <- runGarn ["build", "project"]
         readFile "result/build-artifact" `shouldReturn` "hello from setup\n"
         exitCode output `shouldBe` ExitSuccess
@@ -186,10 +186,10 @@ spec = do
       writeFile
         "garn.ts"
         [i|
-            import * as garn from "#{repoDir}/ts/mod.ts";
+          import * as garn from "#{repoDir}/ts/mod.ts";
 
-            export const pkg = garn.build("echo built > $out/artifact");
-          |]
+          export const pkg = garn.build("echo built > $out/artifact");
+        |]
       cmd_ "git add ."
       cmd_ "git commit -m" ["test commit message"] (EchoStdout False)
       writeFile "file" "bar"

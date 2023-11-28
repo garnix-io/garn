@@ -16,6 +16,10 @@
 - Fix needing to use `--` twice in `garn run` in order to pass arguments to
   executables.
 
+- Create a new `edit` command. This opens VSCodium with deno LSP already set up,
+  in exactly the same way as the old `editGarnConfig` function did. (That
+  function has now been removed.)
+
 ## v0.0.16
 
 - Allow to build packages that are nested within projects with `garn build projectName.packageName`.
