@@ -120,7 +120,7 @@
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.gopls ];
+              [ (pkgs.gopls) ];
           });
         }
       );
@@ -177,7 +177,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.gopls];
+            [(pkgs.gopls)];
         });
         shell = "go run ./scripts/migrate.go";
         buildPath = pkgs.runCommand "build-inputs-path" {
@@ -236,7 +236,7 @@
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.gopls];
+            [(pkgs.gopls)];
         });
         shell = "go run ./main.go";
         buildPath = pkgs.runCommand "build-inputs-path" {

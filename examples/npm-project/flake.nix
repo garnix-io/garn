@@ -66,7 +66,7 @@
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.nodejs-18_x ];
+                  [ (pkgs.nodejs-18_x) ];
               });
             in
             pkgs.runCommand "check"
@@ -140,7 +140,7 @@ ${"npm run test"}
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.nodejs-18_x ];
+                  [ (pkgs.nodejs-18_x) ];
               });
             in
             pkgs.runCommand "check"
@@ -222,7 +222,7 @@ ${"npm run tsc"}
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.nodejs-18_x ];
+              [ (pkgs.nodejs-18_x) ];
           });
         }
       );
@@ -241,7 +241,7 @@ ${"npm run tsc"}
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         });
         shell = "npm install ; npm run run";
         buildPath = pkgs.runCommand "build-inputs-path" {

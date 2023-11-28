@@ -84,12 +84,12 @@
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.haskell.packages.ghc94.cabal-install ];
+                  [ (pkgs.haskell.packages.ghc94.cabal-install) ];
               })).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.hlint ];
+                  [ (pkgs.hlint) ];
               });
             in
             pkgs.runCommand "check"
@@ -167,12 +167,12 @@ ${"hlint *.hs"}
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.haskell.packages.ghc94.cabal-install ];
+              [ (pkgs.haskell.packages.ghc94.cabal-install) ];
           })).overrideAttrs (finalAttrs: previousAttrs: {
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.hlint ];
+              [ (pkgs.hlint) ];
           });
         }
       );

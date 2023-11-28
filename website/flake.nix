@@ -66,12 +66,12 @@
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.nodejs-18_x ];
+                  [ (pkgs.nodejs-18_x) ];
               })).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier ];
+                  [ (pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier) ];
               });
             in
             pkgs.runCommand "check"
@@ -145,12 +145,12 @@ ${"npm run tsc"}
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.nodejs-18_x ];
+                  [ (pkgs.nodejs-18_x) ];
               })).overrideAttrs (finalAttrs: previousAttrs: {
                 nativeBuildInputs =
                   previousAttrs.nativeBuildInputs
                   ++
-                  [ pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier ];
+                  [ (pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier) ];
               });
             in
             pkgs.runCommand "check"
@@ -232,12 +232,12 @@ ${"prettier '**/*.{ts,tsx}' --check"}
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.nodejs-18_x ];
+              [ (pkgs.nodejs-18_x) ];
           })).overrideAttrs (finalAttrs: previousAttrs: {
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs
               ++
-              [ pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier ];
+              [ (pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier) ];
           });
         }
       );
@@ -256,12 +256,12 @@ ${"prettier '**/*.{ts,tsx}' --check"}
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         })).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier];
+            [(pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier)];
         });
         shell = "npm install ; npm run build";
         buildPath = pkgs.runCommand "build-inputs-path" {
@@ -282,12 +282,12 @@ ${"prettier '**/*.{ts,tsx}' --check"}
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         })).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier];
+            [(pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier)];
         });
         shell = "npm install ; npm run dev";
         buildPath = pkgs.runCommand "build-inputs-path" {
@@ -308,12 +308,12 @@ ${"prettier '**/*.{ts,tsx}' --check"}
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodejs-18_x];
+            [(pkgs.nodejs-18_x)];
         })).overrideAttrs (finalAttrs: previousAttrs: {
           nativeBuildInputs =
             previousAttrs.nativeBuildInputs
             ++
-            [pkgs.nodePackages.typescript-language-server pkgs.nodePackages.prettier];
+            [(pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier)];
         });
         shell = "prettier '**/*.{ts,tsx}' --write";
         buildPath = pkgs.runCommand "build-inputs-path" {

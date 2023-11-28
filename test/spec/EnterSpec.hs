@@ -215,3 +215,81 @@ spec = do
             stdout output `shouldStartWith` "v18."
             output <- runGarn ["enter", "frontend"] "npm --version\nexit\n" repoDir Nothing
             stdout output `shouldStartWith` "9."
+
+        describe "top-level environments" $ around onTestFailureLogger $ do
+          it "allows entering top-level environments" $ \onTestFailureLog -> do
+            writeFile
+              "garn.ts"
+              [i|
+                import * as garn from "#{repoDir}/ts/mod.ts"
+
+                const testTool = garn.build(`
+                  mkdir -p $out/bin
+                  echo 'echo test tool output' > $out/bin/test-tool
+                  chmod +x $out/bin/test-tool
+                `);
+
+                export const topLevelEnv = garn.emptyEnvironment.withDevTools([testTool]);
+              |]
+            output <- runGarn ["enter", "topLevelEnv"] "test-tool\nexit\n" repoDir Nothing
+            onTestFailureLog output
+            stdout output `shouldBe` "test tool output\n"
+
+          it "shows no description for environments that have no description" $ \onTestFailureLog -> do
+            writeFile
+              "garn.ts"
+              [i|
+                import * as garn from "#{repoDir}/ts/mod.ts"
+
+                export const topLevelEnv = garn.emptyEnvironment;
+              |]
+            output <- runGarn ["enter", "--help"] "" repoDir Nothing
+            onTestFailureLog output
+            stdout output
+              `shouldMatch` unindent
+                [i|
+                  Available commands:
+                    topLevelEnv[ ]*$
+                |]
+
+        describe "--help" $ around onTestFailureLogger $ do
+          it "allows adding descriptions to environments" $ \onTestFailureLog -> do
+            writeFile
+              "garn.ts"
+              [i|
+                import * as garn from "#{repoDir}/ts/mod.ts"
+
+                export const topLevelEnv =
+                  garn.emptyEnvironment
+                    .setDescription("my test environment");
+              |]
+            output <- runGarn ["enter", "--help"] "" repoDir Nothing
+            onTestFailureLog output
+            stdout output
+              `shouldMatch` unindent
+                [i|
+                  Available commands:
+                    topLevelEnv[ ]*my test environment
+                |]
+
+          it "does not show (or allow entering) the default environment of projects" $ \onTestFailureLog -> do
+            writeFile
+              "garn.ts"
+              [i|
+                import * as garn from "#{repoDir}/ts/mod.ts"
+
+                export const p = garn.mkProject(
+                  {
+                    description: "",
+                    defaultEnvironment: garn.emptyEnvironment,
+                  },
+                  {},
+                );
+              |]
+            output <- runGarn ["enter", "--help"] "" repoDir Nothing
+            onTestFailureLog output
+            stdout output `shouldNotContain` "p.defaultEnvironment"
+            output <- runGarn ["enter", "p.defaultEnvironment"] "" repoDir Nothing
+            onTestFailureLog output
+            exitCode output `shouldBe` ExitFailure 1
+            stderr output `shouldContain` "Invalid argument `p.defaultEnvironment'"
