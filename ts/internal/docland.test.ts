@@ -6,6 +6,6 @@ import { describe, it } from "https://deno.land/std@0.206.0/testing/bdd.ts";
 
 describe("docland", () => {
   it("is able to generate documentation for mod.ts", async () => {
-    await doc("http://localhost:8777/mod.ts");
+    await doc(new URL("../mod.ts", import.meta.url).toString());
   });
 });
