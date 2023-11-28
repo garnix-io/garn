@@ -1,6 +1,13 @@
 # Changelog
 
-## v0.0.18 (unreleased)
+## v0.0.19 (unreleased)
+
+## v0.0.18
+
+- Allow entering top-level `Environment`s with `garn enter`.
+- `Environment.mkNpmProject` and `Environment.mkYarnProject` don't expose a
+  `devShell` field anymore, since that was a duplicate of `defaultEnvironment`.
+- Fix jsdocs rendering
 
 ## v0.0.17
 
@@ -14,10 +21,6 @@
   `Environment`s that have a source directory
 - Fix needing to use `--` twice in `garn run` in order to pass arguments to
   executables.
-- Allow entering top-level `Environment`s with `garn enter`.
-- `Environment.mkNpmProject` and `Environment.mkYarnProject` don't expose a
-  `devShell` field anymore, since that was a duplicate of `defaultEnvironment`.
-
 - Create a new `edit` command. This opens VSCodium with deno LSP already set up,
   in exactly the same way as the old `editGarnConfig` function did. (That
   function has now been removed.)
