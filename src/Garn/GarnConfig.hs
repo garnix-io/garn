@@ -4,7 +4,6 @@
 
 module Garn.GarnConfig where
 
-import Control.Exception (throwIO)
 import Control.Monad
 import Cradle (Stderr (..), StdoutUntrimmed (..), run)
 import Data.Aeson
@@ -25,7 +24,6 @@ import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import GHC.Generics (Generic)
 import Garn.Common (garnCliVersion, nixArgs, nixpkgsInput)
-import qualified Garn.Errors
 import System.Directory (doesFileExist, getCurrentDirectory)
 import System.Exit (ExitCode (..), exitWith)
 import System.IO (hClose, hPutStr, stderr)
@@ -123,7 +121,10 @@ getDescription = \case
   TargetConfigPackage (PackageTarget {description}) -> Just description
   TargetConfigExecutable (ExecutableTarget {description}) -> Just description
 
-readGarnConfig :: IO GarnConfig
+newtype ReadConfigError = ReadConfigError {errorMessage :: String}
+  deriving stock (Eq, Show)
+
+readGarnConfig :: IO (Either ReadConfigError GarnConfig)
 readGarnConfig = do
   checkGarnFileExists
   dir <- getCurrentDirectory
@@ -142,45 +143,48 @@ readGarnConfig = do
         }
       |]
     hClose mainHandle
-    (exitCode, StdoutUntrimmed (cs -> out)) <- run (words "deno run --quiet --check --allow-write --allow-run --allow-read") mainPath
-    when (exitCode /= ExitSuccess) $ do
-      exitWith exitCode
-    case eitherDecode out :: Either String (Maybe DenoOutput) of
-      Left err -> do
-        let suggestion = lines $ case eitherDecode out :: Either String OnlyTsLibVersion of
-              Left err ->
-                [i|Try updating the garn typescript library! (#{err})|]
-              Right (OnlyTsLibVersion {garnTsLibVersion}) ->
-                unindent
-                  [i|
-                    garn cli tool version: #{garnCliVersion}
-                    garn typescript library version: #{garnTsLibVersion}
+    (exitCode, Stderr (cs -> err), StdoutUntrimmed (cs -> out)) <-
+      run
+        (words "deno run --quiet --check --allow-write --allow-run --allow-read")
+        mainPath
+    case exitCode of
+      ExitFailure _ -> return . Left $ ReadConfigError $ "Running garn.ts failed:\n" <> err
+      ExitSuccess -> case eitherDecode out :: Either String (Maybe DenoOutput) of
+        Left err -> do
+          let suggestion = lines $ case eitherDecode out :: Either String OnlyTsLibVersion of
+                Left err ->
+                  [i|Try updating the garn typescript library! (#{err})|]
+                Right (OnlyTsLibVersion {garnTsLibVersion}) ->
+                  unindent
+                    [i|
+                      garn cli tool version: #{garnCliVersion}
+                      garn typescript library version: #{garnTsLibVersion}
 
-                    Either:
+                      Either:
 
-                      Install version #{garnTsLibVersion} of the garn cli tool.
-                      See https://garn.io/docs/getting_started#updating-garn for how to update.
+                        Install version #{garnTsLibVersion} of the garn cli tool.
+                        See https://garn.io/docs/getting_started#updating-garn for how to update.
 
-                    Or:
+                      Or:
 
-                      Use version #{garnCliVersion} of the typescript library.
-                      E.g.: import * as garn from "https://garn.io/ts/#{garnCliVersion}/mod.ts";
+                        Use version #{garnCliVersion} of the typescript library.
+                        E.g.: import * as garn from "https://garn.io/ts/#{garnCliVersion}/mod.ts";
 
-                  |]
-        throwIO $
-          Garn.Errors.UserError $
-            intercalate
-              "\n"
-              ( "Version mismatch detected:"
-                  : map
-                    indent
-                    ( suggestion
-                        <> ["(Internal details: " <> err <> ")"]
-                    )
-              )
-      Right Nothing -> error $ "No garn library imported in garn.ts"
-      Right (Just (UserError _tsLibVersion err)) -> throwIO $ Garn.Errors.UserError err
-      Right (Just (Success _tsLibVersion writtenConfig)) -> return writtenConfig
+                    |]
+          return . Left $
+            ReadConfigError $
+              intercalate
+                "\n"
+                ( "Version mismatch detected:"
+                    : map
+                      indent
+                      ( suggestion
+                          <> ["(Internal details: " <> err <> ")"]
+                      )
+                )
+        Right Nothing -> return $ Left $ ReadConfigError "No garn library imported in garn.ts"
+        Right (Just (UserError _tsLibVersion err)) -> return . Left $ ReadConfigError err
+        Right (Just (Success _tsLibVersion writtenConfig)) -> return $ Right writtenConfig
 
 indent :: String -> String
 indent = \case

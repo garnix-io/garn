@@ -1,6 +1,8 @@
 # Changelog
 
-## v0.0.17 (unreleased)
+## v0.0.18 (unreleased)
+
+## v0.0.17
 
 - Fix locale warnings on MacOS
 - Make `executables` a list, and optional, in `mkHaskellPackage`
@@ -15,6 +17,10 @@
 - Allow entering top-level `Environment`s with `garn enter`.
 - `Environment.mkNpmProject` and `Environment.mkYarnProject` don't expose a
   `devShell` field anymore, since that was a duplicate of `defaultEnvironment`.
+
+- Create a new `edit` command. This opens VSCodium with deno LSP already set up,
+  in exactly the same way as the old `editGarnConfig` function did. (That
+  function has now been removed.)
 
 ## v0.0.16
 

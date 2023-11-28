@@ -84,10 +84,12 @@ spec = do
         (cs . stripAnsiEscapeCodes . cs) (stderr output)
           `shouldBe` unindent
             [i|
+              [garn] Error: Running garn.ts failed:
               error: TS2322 [ERROR]: Type 'string' is not assignable to type 'number'.
                           const x: number = \"foo\";
                                 ^
                   at file://#{dir}/garn.ts:2:19
+
             |]
 
       it "generates formatted flakes" $ \onTestFailureLog -> do
@@ -101,7 +103,7 @@ spec = do
       it "outputs a version with --version" $ \onTestFailureLog -> do
         output <- runGarn ["--version"] "" repoDir Nothing
         onTestFailureLog output
-        stdout output `shouldBe` "v0.0.16\n"
+        stdout output `shouldBe` "v0.0.17\n"
         stderr output `shouldBe` ""
         exitCode output `shouldBe` ExitSuccess
 
@@ -153,7 +155,7 @@ spec = do
                 `shouldBe` unindent
                   [i|
                     [garn] Error: Version mismatch detected:
-                      garn cli tool version: v0.0.16
+                      garn cli tool version: v0.0.17
                       garn typescript library version: <testTsLibVersion>
 
                       Either:
@@ -163,8 +165,8 @@ spec = do
 
                       Or:
 
-                        Use version v0.0.16 of the typescript library.
-                        E.g.: import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
+                        Use version v0.0.17 of the typescript library.
+                        E.g.: import * as garn from "https://garn.io/ts/v0.0.17/mod.ts";
 
                       (Internal details: Error in $: key \"tag\" not found)
                   |]

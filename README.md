@@ -9,7 +9,7 @@ dependencies.
 For example, with this `garn.ts` file:
 
 ```typescript
-import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
+import * as garn from "https://garn.io/ts/v0.0.17/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "My project frontend",
@@ -88,7 +88,11 @@ checks run in a sandbox. The downside of sandboxing is that these checks won't
 have access to the internet. The upside is that they'll be (almost) perfectly
 reproducible.
 
+### `garn edit`
+
+`garn edit` will start (and, if necessary, download) VSCodium, with Deno LSP configured for you. It will open `garn.ts` in the current directory. This won't clobber any of your existing VSCode/VSCodium configuration and data.
+
 ## Typescript API
 
 Documentation for the `garn` Deno library is documented
-[here](https://doc.deno.land/https://garn.io/ts/v0.0.16/mod.ts).
+[here](https://doc.deno.land/https://garn.io/ts/v0.0.17/mod.ts).

@@ -18,7 +18,7 @@ import { Plugin } from "../project.ts";
  * Here's an example:
  *
  * ```typescript
- * import * as garn from "https://garn.io/ts/v0.0.16/mod.ts";
+ * import * as garn from "https://garn.io/ts/v0.0.17/mod.ts";
  *
  * export const frontend = garn.javascript
  *   .mkNpmProject({

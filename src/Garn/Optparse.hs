@@ -6,14 +6,17 @@ module Garn.Optparse
     OptionType (..),
     WithGarnTsCommand (..),
     WithoutGarnTsCommand (..),
+    AlwaysCommand (..),
     CommandOptions (..),
     CheckCommandOptions (..),
   )
 where
 
+import Control.Exception (throw)
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
 import Garn.Common (garnCliVersion)
+import qualified Garn.Errors
 import Garn.GarnConfig
 import Options.Applicative hiding (command)
 import qualified Options.Applicative as OA
@@ -26,19 +29,32 @@ getOpts oType =
   where
     unavailable :: OA.Doc
     unavailable =
-      let formatCommands cmdInfo = [PP.string cmd | (cmd, _, _) <- cmdInfo]
+      let fst3 (a, _, _) = a
+          formatCommands = fmap PP.string
        in PP.nest
             2
             $ PP.vsep
               ( PP.string "Unavailable commands:"
                   : case oType of
-                    WithGarnTs _ -> formatCommands withouGarnTsCommandInfo
-                    WithoutGarnTs -> formatCommands withGarnTsCommandInfo
+                    WithGarnTs _ -> formatCommands $ fst3 <$> withoutGarnTsCommandInfo
+                    WithoutGarnTs -> formatCommands $ fst3 <$> withGarnTsCommandInfo
+                    BrokenGarnTs _ ->
+                      formatCommands
+                        ( (fst3 <$> withGarnTsCommandInfo)
+                            ++ (fst3 <$> withoutGarnTsCommandInfo)
+                        )
               )
     parser :: Parser Options
     parser = case oType of
-      WithGarnTs garnConfig -> WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig)
-      WithoutGarnTs -> WithoutGarnTsOpts <$> withoutGarnTsParser
+      WithGarnTs garnConfig ->
+        (WithGarnTsOpts garnConfig <$> withGarnTsParser (targets garnConfig))
+          <|> (AlwaysAvailableOpts <$> alwaysParser)
+      WithoutGarnTs ->
+        (WithoutGarnTsOpts <$> withoutGarnTsParser)
+          <|> (AlwaysAvailableOpts <$> alwaysParser)
+      BrokenGarnTs err ->
+        (AlwaysAvailableOpts <$> alwaysParser)
+          <|> throw (Garn.Errors.UserError $ errorMessage err)
     version =
       infoOption garnCliVersion $
         mconcat [long "version", help ("Show garn version (" <> garnCliVersion <> ")")]
@@ -54,11 +70,13 @@ getOpts oType =
 data OptionType
   = WithGarnTs GarnConfig
   | WithoutGarnTs
+  | BrokenGarnTs ReadConfigError
   deriving stock (Eq, Show)
 
 data Options
   = WithGarnTsOpts GarnConfig WithGarnTsCommand
   | WithoutGarnTsOpts WithoutGarnTsCommand
+  | AlwaysAvailableOpts AlwaysCommand
 
 data WithoutGarnTsCommand
   = Init
@@ -69,6 +87,10 @@ data WithGarnTsCommand
   | Run CommandOptions [String]
   | Enter CommandOptions
   | Check CheckCommandOptions
+  deriving stock (Eq, Show)
+
+data AlwaysCommand
+  = Edit [String]
   deriving stock (Eq, Show)
 
 withGarnTsCommandInfo :: [(String, String, Targets -> Parser WithGarnTsCommand)]
@@ -137,8 +159,8 @@ withGarnTsParser targets =
         | (cmd, desc, runner) <- withGarnTsCommandInfo
       ]
 
-withouGarnTsCommandInfo :: [(String, String, Parser WithoutGarnTsCommand)]
-withouGarnTsCommandInfo =
+withoutGarnTsCommandInfo :: [(String, String, Parser WithoutGarnTsCommand)]
+withoutGarnTsCommandInfo =
   [("init", "Infer a garn.ts file from the project layout", pure Init)]
 
 withoutGarnTsParser :: Parser WithoutGarnTsCommand
@@ -146,8 +168,18 @@ withoutGarnTsParser =
   subparser $
     mconcat
       [ OA.command cmd (info runner (progDesc desc))
-        | (cmd, desc, runner) <- withouGarnTsCommandInfo
+        | (cmd, desc, runner) <- withoutGarnTsCommandInfo
       ]
+
+alwaysParser :: Parser AlwaysCommand
+alwaysParser =
+  subparser $
+    OA.command "edit" (info (Edit <$> argvParser) (progDesc desc)) <> hidden
+  where
+    argvParser :: Parser [String]
+    argvParser = many $ strArgument $ metavar "...args"
+
+    desc = "Edit garn.ts in VSCodium with Deno integration set up"
 
 data CommandOptions = CommandOptions
   { target :: TargetName,
