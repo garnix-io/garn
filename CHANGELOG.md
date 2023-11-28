@@ -1,6 +1,8 @@
 # Changelog
 
-## v0.0.17 (unreleased)
+## v0.0.18 (unreleased)
+
+## v0.0.17
 
 - Fix locale warnings on MacOS
 - Make `executables` a list, and optional, in `mkHaskellPackage`

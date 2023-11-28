@@ -161,7 +161,7 @@
           installScriptFiles = nix-tool-installer.lib.${system}.mkInstallScriptFiles {
             toolName = "garn";
             baseUrl = "https://garn.io";
-            flakeLocation = "github:garnix-io/garn/v0.0.16";
+            flakeLocation = "github:garnix-io/garn/v0.0.17";
             testCommand = "garn --help";
           };
         } // websitePackages;
