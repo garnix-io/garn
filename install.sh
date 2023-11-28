@@ -112,7 +112,7 @@ else
 fi
 
 echo "installing 'garn'..."
-nix --extra-experimental-features 'nix-command flakes' profile install -L "github:garnix-io/garn/v0.0.17"
+nix --extra-experimental-features 'nix-command flakes' profile install -L "github:garnix-io/garn/v0.0.18"
 echo "testing 'garn' installation..."
 garn --help
 
