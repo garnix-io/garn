@@ -66,11 +66,7 @@ spec = do
       exitCode output `shouldBe` ExitSuccess
 
     it "fails informatively on syntax errors" $ \runGarn -> do
-      writeFile
-        "garn.ts"
-        [i|
-          {askd "shyntax err"
-        |]
+      writeFile "garn.ts" "{syntax err"
       output <- runGarn ["run", "foo"]
       stderr output `shouldContain` "Error: Running garn.ts failed:"
       stderr output `shouldContain` "The module's source code could not be parsed"

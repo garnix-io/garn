@@ -210,7 +210,7 @@ $ garn run backend.codegen `}
           <p>
             <Garn /> can download and configure{" "}
             <a href="https://vscodium.com/">vscodium</a> for you &mdash; just
-            type <code>garn edit</code> It will spin up a{" "}
+            type <code>garn edit</code>. It will spin up a{" "}
             <a href="https://vscodium.com/">vscodium</a> editor that is
             pre-configured for editing <code>garn.ts</code> files. It won't use
             or modify your local vscodium settings, if you have any. You can can

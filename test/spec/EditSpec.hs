@@ -21,8 +21,9 @@ spec =
           output <- runGarn ["edit", "--", "--list-extensions"] "" repoDir Nothing
           onTestFailureLog output
           stdout output `shouldBe` "denoland.vscode-deno\n"
+
         it "works even when garn.ts has a syntax error" $ \onTestFailureLog -> do
-          writeFile "garn.ts" "kkvjh{ shyntax err"
+          writeFile "garn.ts" "{ syntax err"
           output <- runGarn ["edit", "--", "--list-extensions"] "" repoDir Nothing
           onTestFailureLog output
           stdout output `shouldBe` "denoland.vscode-deno\n"

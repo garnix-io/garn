@@ -28,7 +28,7 @@ getOpts oType =
   where
     unavailable :: OA.Doc
     unavailable =
-      let fst3 (cmd, _, _) = cmd
+      let fst3 (a, _, _) = a
           formatCommands = fmap PP.string
        in PP.nest
             2
