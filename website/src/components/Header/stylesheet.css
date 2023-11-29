@@ -15,7 +15,7 @@ header.nav h1 {
   margin: 0;
   font-size: 32px;
   line-height: 35px;
-  font-family: "Space Mono", monospace;
+  font-family: MatterSQMono, monospace;
 }
 
 header.nav h1 a {

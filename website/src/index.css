@@ -122,7 +122,7 @@ figure.codeblock code.line-numbers:before {
 .garnix-name {
   font-size: 85%;
   font-weight: bold;
-  font-family: "Space Mono", monospace;
+  font-family: MatterSQMono, monospace;
   font-variant-ligatures: none;
 }
 
@@ -323,7 +323,6 @@ body {
   color: var(--body-fg);
   margin: 0;
   font-family: 'Montserrat', sans-serif;
-  font-variant-ligatures: none; /* inappropriate fi/fl ligatures in Space Mono */
 }
 
 a {
@@ -341,12 +340,12 @@ a {
 
 button {
   border: solid 1px black;
-  font-family: "Space Mono", monospace;
+  font-family: MatterSQMono, monospace;
   font-variant-ligatures: none;
 }
 
 code {
-  font-family: "Space Mono", monospace;
+  font-family: MatterSQMono, monospace;
   font-variant-ligatures: none;
   color: #000;
   background: var(--codeblock-bg);
@@ -618,7 +617,7 @@ input {
   padding: 2px;
   border: none;
   border-bottom: dotted 1px black;
-  font-family: "Space Mono", monospace;
+  font-family: MatterSQMono, monospace;
   font-variant-ligatures: none;
 }
 

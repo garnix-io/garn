@@ -13,7 +13,7 @@ export const Asciinema: React.FC<AsciinemaProps> = ({ src, rows }) => {
       autoplay: true,
       loop: true,
       theme: "garn",
-      terminalFontFamily: "Space Mono",
+      terminalFontFamily: "MatterSQMono",
       controls: false,
       rows: rows || 10,
       cols: 80,
