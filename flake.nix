@@ -54,7 +54,7 @@
         };
         packages = rec {
           default = self.packages.${system}.garn;
-          editor = import ./nix/editor.nix { inherit system; };
+          garnConfigEditor = import ./nix/editor.nix { inherit system; };
           garn =
             pkgs.runCommand "garn"
               {
