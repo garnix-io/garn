@@ -8,7 +8,7 @@ pre-push: fmt github-ci
 fast-pre-push: fmt update-flakefiles test check-examples typescript-check test-ts
 
 # Run checks that we can’t yet run via the flake
-github-ci: codegen test check-isolated-garn check-examples test-ts
+github-ci: (update-flakefiles "true") codegen test check-isolated-garn check-examples test-ts
 
 fmt: fmt-nix fmt-haskell fmt-typescript hpack
 
@@ -144,16 +144,27 @@ check-examples:
   just run-garn go-http-backend check
   just run-garn monorepo check
 
-update-flakefiles:
+update-flakefiles check="false":
   #!/usr/bin/env bash
+  set -euo pipefail
+  changed="false"
   for EXAMPLE in examples/* website; do
     if [ -e "$EXAMPLE/garn.ts" ]; then
-      (
         cd "$EXAMPLE"
+        old_flake=$(cat ./flake.nix)
         cabal run garn:garn -- generate
-      )
+        new_flake=$(cat ./flake.nix)
+        if [ "$old_flake" != "$new_flake" ]; then
+          echo "flake.nix changed in $EXAMPLE"
+          changed="true"
+        fi
+        cd - >/dev/null
     fi
   done
+  if [ "{{ check }}" != "false" ] && [ "$changed" = "true" ]; then
+    echo "example flake.nix files changed, please run 'just update-flakefiles'"
+    exit 1
+  fi
 
 codegen: hpack && typescript-check
   cabal run codegen
