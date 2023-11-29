@@ -8,7 +8,7 @@ pre-push: fmt github-ci
 fast-pre-push: fmt update-flakefiles test check-examples typescript-check test-ts
 
 # Run checks that we can’t yet run via the flake
-github-ci: codegen test check-isolated-garn check-examples test-ts
+github-ci: codegen test check-isolated-garn check-examples test-ts update-flakefiles check-git-is-unchanged
 
 fmt: fmt-nix fmt-haskell fmt-typescript hpack
 
@@ -154,6 +154,9 @@ update-flakefiles:
       )
     fi
   done
+
+check-git-is-unchanged:
+  test -z "$(git status --porcelain)"
 
 codegen: hpack && typescript-check
   cabal run codegen
