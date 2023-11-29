@@ -9,6 +9,34 @@ const mkConfigFile = (config: Record<string, unknown>) =>
     JSON.stringify(config),
   )})`;
 
+/**
+ * A garn plugin that adds a `format` `Executable` that formats your code using
+ * prettier, and a `Check` to verify that your code is formatted.
+ *
+ * @param opts.glob An optional glob pattern to limit what to format/check
+ * @param opts.config An optional prettier configuration
+ *
+ * It will use the version of prettier defined in your package.json, otherwise
+ * if that is not configured, it will fallback to using prettier from nixpkgs.
+ *
+ * Example:
+ * ```typescript
+ * export const myProject = mkNpmProject({ ... })
+ *   .add(garn.javascript.prettier({
+ *     glob: "./src",
+ *     config: {
+ *       trailingComma: "es5",
+ *       tabWidth: 4,
+ *       semi: false,
+ *       singleQuote: true,
+ *     },
+ *   }));
+ * ```
+ *
+ * Then running `garn run myProject.format` will format formattable files under
+ * `src` with the given config. Running `garn check myProject` will error if
+ * any files under `src` need to be formatted.
+ */
 export function plugin(
   opts: {
     glob?: string;
