@@ -14,6 +14,7 @@ import Test.Hspec.Golden (defaultGolden)
 import Test.Mockery.Directory (inTempDirectory)
 import Test.Mockery.Environment (withModifiedEnvironment)
 import TestUtils
+import Control.Monad (when)
 
 wrap :: SpecWith (ProcResult -> IO ()) -> Spec
 wrap =
@@ -103,7 +104,8 @@ spec = do
       it "outputs a version with --version" $ \onTestFailureLog -> do
         output <- runGarn ["--version"] "" repoDir Nothing
         onTestFailureLog output
-        stdout output `shouldBe` "v0.0.18\n"
+        when (stdout output /= "v0.0.18\n") $
+          expectationFailure "garn --version output wrong (consider running `cabal clean`)"
         stderr output `shouldBe` ""
         exitCode output `shouldBe` ExitSuccess
 
