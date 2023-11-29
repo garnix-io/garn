@@ -1,8 +1,4 @@
-import {
-  Environment,
-  addToSandboxSetup,
-  mkEnvironment,
-} from "../environment.ts";
+import { Environment, addToSetup, mkEnvironment } from "../environment.ts";
 import { Executable } from "../executable.ts";
 import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
@@ -85,7 +81,8 @@ export function mkNpmProject(args: {
     `,
     "node_modules",
   );
-  const devShell: Environment = addToSandboxSetup(
+  const devShell: Environment = addToSetup(
+    "sandbox",
     mkEnvironment({
       src: args.src,
     }),

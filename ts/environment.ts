@@ -25,7 +25,7 @@ export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
   setup: Array<{
-    tag: "common" | "sandbox";
+    type: "common" | "sandbox";
     snippet: NixExpression;
   }>;
   description?: string;
@@ -67,14 +67,23 @@ export type Environment = {
 
 /**
  * Appends the given bash snippet to the setup of the `Environment`. The setup
- * will be executed when running anything in an environment:
+ * will be executed when running things in an environment.
  *
- * - before running a `Check`,
- * - before building a `Package`,
- * - before running an `Executable` and
- * - when entering an interactive `Environment` with `garn enter`.
+ * If `type` is set to `"sandbox"`, it'll be executed as a setup step for
+ * `Check`s and `Package`s, but *not* for `Executable`s and `garn enter`. If
+ * `type` is set to `"common"`, the setup step is going to be executed in all 4
+ * cases.
+ *
+ * (`Check`s and `Package`s are running in sandboxes to make them completely
+ * deterministic. That's why they have to be treated differently here. The
+ * most common example for how the `Environment` for these sandboxes works
+ * differently is, that we have to *copy* the source files into the sandbox,
+ * to allow `Check`s and `Package`s to access them. Whereas with `Executable`s
+ * and `garn enter`, your source files are already available normally through
+ * the file system.)
  */
 export function addToSetup(
+  type: "sandbox" | "common",
   env: Environment,
   snippet: string | NixExpression,
 ): Environment {
@@ -83,7 +92,7 @@ export function addToSetup(
     setup: [
       ...env.setup,
       {
-        tag: "common",
+        type,
         snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
       },
     ],
@@ -99,38 +108,9 @@ export const commonScript = (
   script: NixExpression,
 ): NixExpression =>
   joinNixStrings("\n", [
-    ...env.setup.filter((x) => x.tag === "common").map((x) => x.snippet),
+    ...env.setup.filter((x) => x.type === "common").map((x) => x.snippet),
     script,
   ]);
-
-/**
- * Similar to `addToSetup`, but only affects the environment for
- * `Check`s and `Package`s and does *not* affect `Executable`s or the shell
- * environment you get with `garn enter`.
- *
- * (`Check`s and `Package`s are running in sandboxes to make them completely
- * deterministic. That's why they have to be treated differently here. The
- * most common example for how the `Environment` for these sandboxes works
- * differently is, that we have to *copy* the source files into the sandbox,
- * to allow `Check`s and `Package`s to access them. Whereas with `Executable`s
- * and `garn enter`, your source files are already available normally through
- * the file system.)
- */
-export function addToSandboxSetup(
-  env: Environment,
-  snippet: string | NixExpression,
-): Environment {
-  return {
-    ...env,
-    setup: [
-      ...env.setup,
-      {
-        tag: "sandbox",
-        snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
-      },
-    ],
-  };
-}
 
 /**
  * Add the sandbox setup of an `Environment` to a given script. This should be
@@ -246,7 +226,7 @@ export function mkEnvironment(
       args.src != null
         ? [
             {
-              tag: "sandbox",
+              type: "sandbox",
               snippet: nixStrLit`
                 echo copying source
                 cp -r ${nixSource(args.src)}/. .
