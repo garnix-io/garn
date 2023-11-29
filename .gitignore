@@ -8,3 +8,4 @@ node_modules/
 /ts/nixpkgs.ts
 /.golden/*/actual
 .direnv/
+.DS_Store

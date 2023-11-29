@@ -1,5 +1,10 @@
 @import "syntax-highlight.css";
 
+@font-face {
+  font-family: MatterSQMono;
+  src: url(/fonts/MatterSQMonoTRIAL-Light.woff);
+}
+
 :root {
   --very-light-gray: #fafbfc;
 
