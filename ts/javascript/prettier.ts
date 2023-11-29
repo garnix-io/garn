@@ -4,8 +4,16 @@ import { escapeShellArg, nixRaw, nixStrLit } from "../nix.ts";
 import { Package } from "../package.ts";
 import { Plugin } from "../project.ts";
 
+const mkConfigFile = (config: Record<string, unknown>) =>
+  nixRaw`(pkgs.writeText "prettier-config" ${nixStrLit(
+    JSON.stringify(config),
+  )})`;
+
 export function plugin(
-  source?: string,
+  opts: {
+    glob?: string;
+    config?: Record<string, unknown>;
+  } = {},
 ): Plugin<
   { format: Executable; checkPrettier: Check },
   { node_modules?: Package }
@@ -16,7 +24,10 @@ export function plugin(
         "The 'garn.javascript.prettier' plugin can only be added to projects with a default environment.",
       );
     }
-    const src = nixStrLit(source ?? ".");
+    const src = nixStrLit(opts.glob ?? ".");
+    const config = opts.config
+      ? nixStrLit`--config ${escapeShellArg(mkConfigFile(opts.config))}`
+      : nixStrLit``;
     const setup = base.node_modules
       ? nixStrLit`
           set -e
@@ -37,13 +48,13 @@ export function plugin(
     return {
       format: base.defaultEnvironment.shell`
         ${setup}
-        runPrettier --write ${escapeShellArg(src)}
+        runPrettier --write ${config} ${escapeShellArg(src)}
       `.setDescription("Uses prettier to format your project"),
 
       checkPrettier: base.defaultEnvironment.check`
         ${setup}
         cd ${nixRaw`./.`}
-        runPrettier --check ${escapeShellArg(src)} | cat
+        runPrettier --check ${config} ${escapeShellArg(src)} | cat
       `,
     };
   };

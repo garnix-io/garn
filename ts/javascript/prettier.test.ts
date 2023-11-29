@@ -41,9 +41,7 @@ describe("prettier plugin", () => {
     });
 
     it("falls back to using nixpkgs prettier if prettier isn't defined in package.json", () => {
-      const { tmpDir, project } = mkSampleNpmProject({
-        includePrettier: false,
-      });
+      const { tmpDir, project } = mkSampleNpmProject({}, false);
       Deno.writeTextFileSync(
         `${tmpDir}/needs-format.js`,
         "   console.log(\n'needs format'    )",
@@ -52,6 +50,21 @@ describe("prettier plugin", () => {
       assertEquals(
         Deno.readTextFileSync(`${tmpDir}/needs-format.js`),
         'console.log("needs format");\n',
+      );
+    });
+
+    it("allows specifying manual config", () => {
+      const { tmpDir, project } = mkSampleNpmProject({
+        config: { singleQuote: true },
+      });
+      Deno.writeTextFileSync(
+        `${tmpDir}/needs-format.js`,
+        "   console.log(\n'needs format, but leave single quotes'    )",
+      );
+      assertSuccess(runExecutable(project.format, { cwd: tmpDir }));
+      assertEquals(
+        Deno.readTextFileSync(`${tmpDir}/needs-format.js`),
+        "console.log('needs format, but leave single quotes');\n",
       );
     });
   });
@@ -113,9 +126,9 @@ const prettierLock = {
 };
 
 const mkSampleNpmProject = (
-  opts: { glob?: string; includePrettier?: boolean } = {},
+  opts?: Parameters<typeof garn.javascript.prettier>[0],
+  includePrettier = true,
 ) => {
-  const includePrettier = opts.includePrettier ?? true;
   const tmpDir = Deno.makeTempDirSync();
   const packageJson = {
     name: "sample-project",
@@ -146,6 +159,6 @@ const mkSampleNpmProject = (
       nodeVersion: "18",
       src: ".",
     })
-    .add(garn.javascript.prettier(opts.glob));
+    .add(garn.javascript.prettier(opts));
   return { tmpDir, project };
 };
