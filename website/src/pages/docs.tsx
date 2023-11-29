@@ -11,18 +11,10 @@ const docEntries: (readonly [Info, React.ReactElement])[] = Object.values(
   import.meta.glob("../docs/*.mdx", { eager: true }) as Record<
     string,
     { info: Info; default: React.FC }
-  >,
+  >
 )
   .sort((a, b) => +a.info.index - +b.info.index)
   .map(({ info, default: Component }) => [info, <Component />] as const);
-
-export const docMenuItems: { name: string; url: string }[] = [
-  ...docEntries.map(([{ name, url }]) => ({ name, url: `/docs/${url}` })),
-  {
-    name: "typescript api",
-    url: "https://doc.deno.land/https://garn.io/ts/v0.0.18/mod.ts",
-  },
-];
 
 export const Docs: React.FC<{ is_index?: boolean }> = () => {
   const params = useParams();

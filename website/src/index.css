@@ -329,7 +329,6 @@ a {
 #root {
   position: relative;
   min-height: 100vh;
-  padding-top: 50px;
   padding-bottom: calc(var(--footer-height) + 10px);
   box-sizing: border-box;
 }

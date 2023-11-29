@@ -25,7 +25,7 @@ export default defineConfig(async () => {
   };
   const vitePrerenderOpts = {
     staticDir: path.join(__dirname, "dist"),
-    routes: ["/", "/docs/concepts", "/docs/tutorial", "/docs/getting_started"],
+    routes: ["/", "/documentation"],
     renderer: new Renderer({
       args: ["--no-sandbox", "--single-process", "--disable-gpu"],
     }),
