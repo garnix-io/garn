@@ -11,7 +11,7 @@ const docEntries: (readonly [Info, React.ReactElement])[] = Object.values(
   import.meta.glob("../docs/*.mdx", { eager: true }) as Record<
     string,
     { info: Info; default: React.FC }
-  >
+  >,
 )
   .sort((a, b) => +a.info.index - +b.info.index)
   .map(({ info, default: Component }) => [info, <Component />] as const);
