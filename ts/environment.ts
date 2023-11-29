@@ -35,29 +35,6 @@ export type Environment = {
    */
   setDescription: (this: Environment, newDescription: string) => Environment;
   /**
-   * Appends the given bash snippet to the setup. The setup will be executed
-   * when running anything in an environment:
-   *
-   * - before running a `Check`, - before building a `Package`, - before running
-   * an `Executable` and - when entering an interactive `Environment` with `garn
-   * enter`.
-   */
-  addToSetup(snippet: string | NixExpression): Environment;
-  /**
-   * Similar to `addToSetup`, but only affects the environment for
-   * `Check`s and `Package`s and does *not* affect `Executable`s or the shell
-   * environment you get with `garn enter`.
-   *
-   * (`Check`s and `Package`s are running in sandboxes to make them completely
-   * deterministic. That's why they have to be treated differently here. The
-   * most common example for how the `Environment` for these sandboxes works
-   * differently is, that we have to *copy* the source files into the sandbox,
-   * to allow `Check`s and `Package`s to access them. Whereas with `Executable`s
-   * and `garn enter`, your source files are already available normally through
-   * the file system.)
-   */
-  addToSandboxSetup(snippet: string | NixExpression): Environment;
-  /**
    * Creates a new environment based on this one that includes the specified nix
    * packages.
    */
@@ -88,6 +65,35 @@ export type Environment = {
   ): Package;
 };
 
+/**
+ * Appends the given bash snippet to the setup of the `Environment`. The setup
+ * will be executed when running anything in an environment:
+ *
+ * - before running a `Check`,
+ * - before building a `Package`,
+ * - before running an `Executable` and
+ * - when entering an interactive `Environment` with `garn enter`.
+ */
+export function addToSetup(
+  env: Environment,
+  snippet: string | NixExpression,
+): Environment {
+  return {
+    ...env,
+    setup: [
+      ...env.setup,
+      {
+        tag: "common",
+        snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
+      },
+    ],
+  };
+}
+
+/**
+ * Add the common setup of an `Environment` to a given script. This should be
+ * used for `Executable`s and `garn enter`.
+ */
 export const commonScript = (
   env: Environment,
   script: NixExpression,
@@ -97,6 +103,39 @@ export const commonScript = (
     script,
   ]);
 
+/**
+ * Similar to `addToSetup`, but only affects the environment for
+ * `Check`s and `Package`s and does *not* affect `Executable`s or the shell
+ * environment you get with `garn enter`.
+ *
+ * (`Check`s and `Package`s are running in sandboxes to make them completely
+ * deterministic. That's why they have to be treated differently here. The
+ * most common example for how the `Environment` for these sandboxes works
+ * differently is, that we have to *copy* the source files into the sandbox,
+ * to allow `Check`s and `Package`s to access them. Whereas with `Executable`s
+ * and `garn enter`, your source files are already available normally through
+ * the file system.)
+ */
+export function addToSandboxSetup(
+  env: Environment,
+  snippet: string | NixExpression,
+): Environment {
+  return {
+    ...env,
+    setup: [
+      ...env.setup,
+      {
+        tag: "sandbox",
+        snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
+      },
+    ],
+  };
+}
+
+/**
+ * Add the sandbox setup of an `Environment` to a given script. This should be
+ * used for `Package`s and `Check`s.
+ */
 export const sandboxScript = (
   env: Environment,
   script: NixExpression,
@@ -220,36 +259,6 @@ export function mkEnvironment(
       return {
         ...this,
         description: newDescription,
-      };
-    },
-    addToSetup(
-      this: Environment,
-      snippet: string | NixExpression,
-    ): Environment {
-      return {
-        ...this,
-        setup: [
-          ...this.setup,
-          {
-            tag: "common",
-            snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
-          },
-        ],
-      };
-    },
-    addToSandboxSetup(
-      this: Environment,
-      snippet: string | NixExpression,
-    ): Environment {
-      return {
-        ...this,
-        setup: [
-          ...this.setup,
-          {
-            tag: "sandbox",
-            snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
-          },
-        ],
       };
     },
     check(
