@@ -41,20 +41,17 @@ export const mapKeys = <T>(
   return result;
 };
 
-/**
- * Maps an object's values. Typescript currently does not keep track of the
- * object structure, but this could easily be accomplished in the future in a
- * backwards-compatible way.
- */
-export const mapValues = <T, R>(
-  f: (i: T, key: string) => R,
-  x: Record<string, T>,
-): Record<string, R> => {
-  const result: Record<string, R> = {};
-  for (const [key, value] of Object.entries(x)) {
+export const mapValues = <T extends Record<string, unknown>, U>(
+  f: (i: T[keyof T], key: keyof T) => U,
+  x: T,
+): { [key in keyof T]: U } => {
+  const result: Partial<{ [key in keyof T]: U }> = {};
+  for (const [key, value] of Object.entries(x) as Array<
+    [keyof T, T[keyof T]]
+  >) {
     result[key] = f(value, key);
   }
-  return result;
+  return result as { [key in keyof T]: U };
 };
 
 export const filterNullValues = <T>(

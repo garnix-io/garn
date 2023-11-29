@@ -1,4 +1,7 @@
-import { assertEquals } from "https://deno.land/std@0.206.0/assert/mod.ts";
+import {
+  assertEquals,
+  assertStringIncludes,
+} from "https://deno.land/std@0.206.0/assert/mod.ts";
 import * as garn from "./mod.ts";
 import * as nix from "./nix.ts";
 import { nixAttrSet } from "./nix.ts";
@@ -37,6 +40,14 @@ export const assertStdout = (output: Output, expected: string): Output =>
 
 export const assertStderr = (output: Output, expected: string): Output =>
   printOutputOnFailure(output, () => assertEquals(output.stderr, expected));
+
+export const assertStderrContains = (
+  output: Output,
+  expected: string,
+): Output =>
+  printOutputOnFailure(output, () =>
+    assertStringIncludes(output.stderr, expected),
+  );
 
 export const printOutputOnFailure = (
   output: Output,
@@ -162,6 +173,38 @@ export const buildPackage = (
     ),
   );
   return Deno.readLinkSync(`${dir}/result`);
+};
+
+export const enterEnvironment = (
+  env: garn.Environment,
+  command: Array<string>,
+  options: { dir?: string } = {},
+) => {
+  const dir = options.dir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
+  const flakeFile = nix.renderFlakeFile(
+    nixAttrSet({
+      devShells: nixAttrSet({
+        "x86_64-linux": nixAttrSet({
+          default: nix.nixRaw`
+            let
+              nixpkgs = ${nixpkgsInput};
+              pkgs = ${pkgs};
+              inherit (pkgs) system;
+            in ${env.nixExpression}
+          `,
+        }),
+      }),
+    }),
+  );
+  Deno.writeTextFileSync(`${dir}/flake.nix`, flakeFile);
+  return assertSuccess(
+    runCommand(
+      new Deno.Command("nix", {
+        args: ["develop", "--command", "--", ...command],
+        cwd: dir,
+      }),
+    ),
+  );
 };
 
 export const testPkgs = {

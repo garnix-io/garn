@@ -1,8 +1,10 @@
-import { Environment, sandboxScript } from "./environment.ts";
+import { Environment, sandboxScript, shell } from "./environment.ts";
+import { Executable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
 import {
   NixExpression,
   NixStrLitInterpolatable,
+  escapeShellArg,
   nixRaw,
   nixStrLit,
   toHumanReadable,
@@ -26,6 +28,11 @@ export type Package = {
    * Update the description for this `Package`
    */
   setDescription: (this: Package, newDescription: string) => Package;
+
+  /**
+   * Get an executable by name within the `bin` directory of this `Package`
+   */
+  bin: (executableName: string) => Executable;
 };
 
 export function isPackage(x: unknown): x is Package {
@@ -49,6 +56,10 @@ export function mkPackage(
         ...this,
         description: newDescription,
       };
+    },
+
+    bin(this: Package, executableName: string): Executable {
+      return shell`${this}/bin/${escapeShellArg(nixStrLit(executableName))}`;
     },
   };
 }

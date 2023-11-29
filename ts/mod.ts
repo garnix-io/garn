@@ -25,3 +25,4 @@ export * as javascript from "./javascript/mod.ts";
 export { processCompose } from "./process_compose.ts";
 export { deployToGhPages } from "./deployToGhPages.ts";
 export * as nix from "./nix.ts";
+export { importFlake } from "./importFlake.ts";
