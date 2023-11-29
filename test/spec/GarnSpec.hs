@@ -3,6 +3,7 @@
 
 module GarnSpec (spec) where
 
+import Control.Monad (when)
 import Data.String.AnsiEscapeCodes.Strip.Text (stripAnsiEscapeCodes)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
@@ -14,7 +15,6 @@ import Test.Hspec.Golden (defaultGolden)
 import Test.Mockery.Directory (inTempDirectory)
 import Test.Mockery.Environment (withModifiedEnvironment)
 import TestUtils
-import Control.Monad (when)
 
 wrap :: SpecWith (ProcResult -> IO ()) -> Spec
 wrap =
@@ -105,7 +105,14 @@ spec = do
         output <- runGarn ["--version"] "" repoDir Nothing
         onTestFailureLog output
         when (stdout output /= "v0.0.18\n") $
-          expectationFailure "garn --version output wrong (consider running `cabal clean`)"
+          expectationFailure
+            ( unindent
+                [i|
+                  garn --version output wrong:
+                  #{show (stdout output)} /= "v0.0.18\n"
+                  (consider running `cabal clean`!)
+                |]
+            )
         stderr output `shouldBe` ""
         exitCode output `shouldBe` ExitSuccess
 
