@@ -13,6 +13,7 @@ import {
 import { nixpkgsInput } from "../testUtils.ts";
 
 export { plugin as vite } from "./vite.ts";
+export { plugin as prettier } from "./prettier.ts";
 
 const nodeVersions = {
   "14": {

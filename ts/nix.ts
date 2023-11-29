@@ -206,6 +206,10 @@ export function unlinesNixStrings(list: Array<NixExpression>): NixExpression {
   };
 }
 
+export function escapeShellArg(shellArg: NixExpression): NixExpression {
+  return nixRaw`(pkgs.lib.strings.escapeShellArg ${shellArg})`;
+}
+
 /**
  * Returns a `NixExpression` that renders as an identifier that refers to a
  * flake input. At the same time it registers the flake input as a dependency,

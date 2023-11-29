@@ -1,4 +1,8 @@
-import { assertEquals } from "https://deno.land/std@0.206.0/assert/mod.ts";
+import {
+  assertEquals,
+  assertNotEquals,
+  assertStringIncludes,
+} from "https://deno.land/std@0.206.0/assert/mod.ts";
 import * as garn from "./mod.ts";
 import * as nix from "./nix.ts";
 import { nixAttrSet } from "./nix.ts";
@@ -32,11 +36,22 @@ const printOutput = (output: Output) => {
 export const assertSuccess = (output: Output): Output =>
   printOutputOnFailure(output, () => assertEquals(output.exitCode, 0));
 
+export const assertFailure = (output: Output): Output =>
+  printOutputOnFailure(output, () => assertNotEquals(output.exitCode, 0));
+
 export const assertStdout = (output: Output, expected: string): Output =>
   printOutputOnFailure(output, () => assertEquals(output.stdout, expected));
 
 export const assertStderr = (output: Output, expected: string): Output =>
   printOutputOnFailure(output, () => assertEquals(output.stderr, expected));
+
+export const assertStderrContains = (
+  output: Output,
+  expected: string,
+): Output =>
+  printOutputOnFailure(output, () =>
+    assertStringIncludes(output.stderr, expected),
+  );
 
 export const printOutputOnFailure = (
   output: Output,
