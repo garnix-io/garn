@@ -179,22 +179,21 @@ export const buildPackage = (
   return Deno.readLinkSync(`${dir}/result`);
 };
 
-export const enterEnvironment = (
-  env: garn.Environment,
-  command: Array<string>,
-  options: { dir?: string } = {},
-) => {
+export const runInDevShell = (
+  devShell: garn.Environment,
+  options: { cmd: string; dir?: string } = { cmd: "true" },
+): Output => {
   const dir = options.dir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
   const flakeFile = nix.renderFlakeFile(
     nixAttrSet({
-      devShells: nixAttrSet({
+      packages: nixAttrSet({
         "x86_64-linux": nixAttrSet({
           default: nix.nixRaw`
             let
               nixpkgs = ${nixpkgsInput};
               pkgs = ${pkgs};
               inherit (pkgs) system;
-            in ${env.nixExpression}
+            in ${devShell.nixExpression}
           `,
         }),
       }),
@@ -204,7 +203,7 @@ export const enterEnvironment = (
   return assertSuccess(
     runCommand(
       new Deno.Command("nix", {
-        args: ["develop", "--command", "--", ...command],
+        args: ["develop", "-L", dir, "-c", "--", "bash", "-c", options.cmd],
         cwd: dir,
       }),
     ),

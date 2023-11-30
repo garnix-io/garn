@@ -9,7 +9,7 @@ import {
   assertStdout,
   assertSuccess,
   buildPackage,
-  enterEnvironment,
+  runInDevShell,
   runCheck,
   runCommand,
   runExecutable,
@@ -194,7 +194,7 @@ describe("importFlake", () => {
       }`);
       const flake = importFlake("./to-import");
       const env = flake.getDevShell("some-shell");
-      const output = enterEnvironment(env, ["hello"], { dir: tempDir });
+      const output = runInDevShell(env, { cmd: "hello", dir: tempDir });
       assertStdout(output, "Hello, world!\n");
     });
 
