@@ -33,7 +33,7 @@ export const Header = () => {
           garn
         </Link>
         <Link className={styles.link} href="/documentation">
-          documentation →
+          documentation &rarr;
         </Link>
       </section>
     </header>
