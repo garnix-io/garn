@@ -41,17 +41,17 @@ export const mapKeys = <T>(
   return result;
 };
 
-export const mapValues = <T extends Record<string, unknown>, U>(
-  f: (i: T[keyof T], key: keyof T) => U,
-  x: T,
-): { [key in keyof T]: U } => {
-  const result: Partial<{ [key in keyof T]: U }> = {};
+export const mapValues = <Obj extends Record<string, unknown>, FnResult>(
+  f: (i: Obj[keyof Obj], key: keyof Obj) => FnResult,
+  x: Obj,
+): { [key in keyof Obj]: FnResult } => {
+  const result: Partial<{ [key in keyof Obj]: FnResult }> = {};
   for (const [key, value] of Object.entries(x) as Array<
-    [keyof T, T[keyof T]]
+    [keyof Obj, Obj[keyof Obj]]
   >) {
     result[key] = f(value, key);
   }
-  return result as { [key in keyof T]: U };
+  return result as { [key in keyof Obj]: FnResult };
 };
 
 export const filterNullValues = <T>(

@@ -1,22 +1,28 @@
 import { Check } from "./check.ts";
 import { Environment, mkEnvironment } from "./environment.ts";
 import { Executable, mkExecutable } from "./executable.ts";
-import { NixExpression, nixFlakeDep, nixRaw, nixStrLit } from "./nix.ts";
+import {
+  getPathOrError,
+  NixExpression,
+  nixFlakeDep,
+  nixRaw,
+  nixStrLit,
+} from "./nix.ts";
 import { mkPackage, Package } from "./package.ts";
 
-function getFlake(flakeDir: string): NixExpression {
-  if (flakeDir.match(/^[.][.]?[/]/)) {
+function getFlake(flakeUrl: string): NixExpression {
+  if (flakeUrl.match(/^[.][.]?[/]/)) {
     const callFlake = nixFlakeDep("call-flake", {
       url: "github:divnix/call-flake",
     });
-    return nixRaw`(${callFlake} ${nixRaw(flakeDir)})`;
+    return nixRaw`(${callFlake} ${nixRaw(flakeUrl)})`;
   }
-  return nixFlakeDep(flakeDir.replaceAll(/[^a-zA-Z0-9]/g, "-"), {
-    url: flakeDir,
+  return nixFlakeDep(flakeUrl.replaceAll(/[^a-zA-Z0-9]/g, "-"), {
+    url: flakeUrl,
   });
 }
 
-export function importFlake(flakeDir: string): {
+export function importFlake(flakeUrl: string): {
   allChecks: Check;
   allPackages: Package;
   getApp: (appName: string) => Executable;
@@ -24,7 +30,8 @@ export function importFlake(flakeDir: string): {
   getDevShell: (devShellName: string) => Environment;
   getPackage: (packageName: string) => Package;
 } {
-  const flake = getFlake(flakeDir);
+  const flake = getFlake(flakeUrl);
+
   return {
     allChecks: {
       tag: "check",
@@ -33,31 +40,45 @@ export function importFlake(flakeDir: string): {
 
     allPackages: mkPackage(
       nixRaw`pkgs.linkFarm "all-packages" ${flake}.packages.\${system}`,
-      `All packages from flake.nix in ${flakeDir}`,
+      `All packages from flake.nix in ${flakeUrl}`,
     ),
 
     getApp: (appName) =>
       mkExecutable(
-        nixRaw`${flake}.apps.\${system}.${nixStrLit(appName)}.program`,
-        `Execute ${appName} from flake.nix in ${flakeDir}`,
+        getPathOrError(
+          flake,
+          ["apps", nixRaw`\${system}`, appName, "program"],
+          nixStrLit`The app "${appName}" was not found in ${flakeUrl}`,
+        ),
+        `Execute ${appName} from flake.nix in ${flakeUrl}`,
       ),
 
     getCheck: (checkName) => ({
       tag: "check",
-      nixExpression: nixRaw`${flake}.checks.\${system}.${nixStrLit(checkName)}`,
+      nixExpression: getPathOrError(
+        flake,
+        ["checks", nixRaw`\${system}`, checkName],
+        nixStrLit`The check "${checkName}" was not found in ${flakeUrl}`,
+      ),
     }),
 
     getDevShell: (devShellName) =>
       mkEnvironment({
-        nixExpression: nixRaw`${flake}.devShells.\${system}.${nixStrLit(
-          devShellName,
-        )}`,
+        nixExpression: getPathOrError(
+          flake,
+          ["devShells", nixRaw`\${system}`, devShellName],
+          nixStrLit`The devShell "${devShellName}" was not found in ${flakeUrl}`,
+        ),
       }),
 
     getPackage: (packageName) =>
       mkPackage(
-        nixRaw`${flake}.packages.\${system}.${nixStrLit(packageName)}`,
-        `${packageName} from flake.nix in ${flakeDir}`,
+        getPathOrError(
+          flake,
+          ["packages", nixRaw`\${system}`, packageName],
+          nixStrLit`The package "${packageName}" was not found in ${flakeUrl}`,
+        ),
+        `${packageName} from flake.nix in ${flakeUrl}`,
       ),
   };
 }

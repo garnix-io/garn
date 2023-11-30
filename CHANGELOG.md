@@ -2,6 +2,9 @@
 
 ## v0.0.19 (unreleased)
 
+- Add `garn.importFlake` helper to allow extending a flake file by local path
+  or URL.
+
 ## v0.0.18
 
 - Allow entering top-level `Environment`s with `garn enter`.

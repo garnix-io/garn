@@ -3,6 +3,7 @@ import {
   InterpolatedString,
   interpolatedStringFromString,
   interpolatedStringFromTemplate,
+  join,
   mapStrings,
   renderInterpolatedString,
 } from "./internal/interpolatedString.ts";
@@ -208,6 +209,29 @@ export function unlinesNixStrings(list: Array<NixExpression>): NixExpression {
 
 export function escapeShellArg(shellArg: NixExpression): NixExpression {
   return nixRaw`(pkgs.lib.strings.escapeShellArg ${shellArg})`;
+}
+
+export function getPathOrError(
+  attrSet: NixExpression,
+  path: Array<NixExpression | string>,
+  error: NixExpression,
+): NixExpression {
+  const pathExpr: NixExpression = {
+    [__nixExpressionTag]: null,
+    type: "raw",
+    raw: join(
+      path.map((el) => (typeof el === "string" ? nixStrLit(el) : el)),
+      ".",
+    ),
+  };
+  return nixRaw`
+    let
+      x = ${attrSet};
+    in
+      if x ? ${pathExpr}
+      then x.${pathExpr}
+      else builtins.throw ${error}
+  `;
 }
 
 /**

@@ -77,3 +77,10 @@ export function getInterpolations<T>(
 ): Array<T> {
   return interpolated.rest.map(([node, _str]) => node);
 }
+
+export function join<T>(arr: Array<T>, joiner: string): InterpolatedString<T> {
+  return {
+    initial: "",
+    rest: arr.map((el, idx) => [el, idx < arr.length - 1 ? joiner : ""]),
+  };
+}
