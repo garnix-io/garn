@@ -1,10 +1,11 @@
 import { Check } from "../check.ts";
 import { Executable } from "../executable.ts";
-import { escapeShellArg, nixRaw, nixStrLit } from "../nix.ts";
+import { NixExpression, escapeShellArg, nixRaw, nixStrLit } from "../nix.ts";
 import { Package } from "../package.ts";
 import { Plugin } from "../project.ts";
+import { Config as PrettierConfig } from "npm:prettier";
 
-const mkConfigFile = (config: Record<string, unknown>) =>
+const mkConfigFile = (config: PrettierConfig): NixExpression =>
   nixRaw`(pkgs.writeText "prettier-config" ${nixStrLit(
     JSON.stringify(config),
   )})`;
@@ -14,6 +15,7 @@ const mkConfigFile = (config: Record<string, unknown>) =>
  * prettier, and a `Check` to verify that your code is formatted.
  *
  * @param opts.glob An optional glob pattern to limit what to format/check
+ *                  relative to the src of the containing project
  * @param opts.config An optional prettier configuration
  *
  * It will use the version of prettier defined in your package.json, otherwise
@@ -40,7 +42,7 @@ const mkConfigFile = (config: Record<string, unknown>) =>
 export function plugin(
   opts: {
     glob?: string;
-    config?: Record<string, unknown>;
+    config?: PrettierConfig;
   } = {},
 ): Plugin<
   { format: Executable; checkPrettier: Check },
@@ -81,7 +83,6 @@ export function plugin(
 
       checkPrettier: base.defaultEnvironment.check`
         ${setup}
-        cd ${nixRaw`./.`}
         runPrettier --check ${config} ${escapeShellArg(src)} | cat
       `,
     };
