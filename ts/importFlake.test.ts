@@ -8,6 +8,7 @@ import {
   assertStderrContains,
   assertStdout,
   assertSuccess,
+  buildPackage,
   enterEnvironment,
   runCheck,
   runCommand,
@@ -16,6 +17,7 @@ import {
 import { importFlake } from "./importFlake.ts";
 import * as garn from "./mod.ts";
 import { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.206.0/assert/mod.ts";
 
 describe("importFlake", () => {
   let tempDir: string;
@@ -65,9 +67,8 @@ describe("importFlake", () => {
         };
       }`);
       const flake = importFlake("./to-import");
-      const exe = garn.shell`ls ${flake.getPackage("main_pkg")}`;
-      const output = assertSuccess(runExecutable(exe, { cwd: tempDir }));
-      assertStdout(output, "bar\nfoo\n");
+      const pkg = buildPackage(flake.getPackage("main_pkg"), { dir: tempDir });
+      assertEquals(getDirEntryNames(pkg), ["bar", "foo"]);
     });
 
     it("reflects changes when changing the flake source after importing", () => {
@@ -80,8 +81,7 @@ describe("importFlake", () => {
         };
       }`);
       const flake = importFlake(`./to-import`);
-      const exe = garn.shell`ls ${flake.getPackage("main_pkg")}`;
-      assertSuccess(runExecutable(exe, { cwd: tempDir }));
+      buildPackage(flake.getPackage("main_pkg"), { dir: tempDir });
       writeFlakeToImport(`{
         packages = {
           main_pkg = pkgs.runCommand "create-some-files" {} ''
@@ -90,8 +90,8 @@ describe("importFlake", () => {
           '';
         };
       }`);
-      const output = assertSuccess(runExecutable(exe, { cwd: tempDir }));
-      assertStdout(output, "modified\n");
+      const pkg = buildPackage(flake.getPackage("main_pkg"), { dir: tempDir });
+      assertEquals(getDirEntryNames(pkg), ["modified"]);
     });
 
     it("allows importing relative sources in packages", () => {
@@ -219,15 +219,10 @@ describe("importFlake", () => {
         };
       }`);
       const flake = importFlake("./to-import");
-      const pkg = flake.allPackages;
-      const assertCmd = (exe: garn.Executable, expectedStdout: string) =>
-        assertStdout(
-          assertSuccess(runExecutable(exe, { cwd: tempDir })),
-          expectedStdout,
-        );
-      assertCmd(garn.shell`ls ${pkg}`, "bar\nfoo\n");
-      assertCmd(garn.shell`cat ${pkg}/foo`, "foo-pkg\n");
-      assertCmd(garn.shell`cat ${pkg}/bar`, "bar-pkg\n");
+      const pkg = buildPackage(flake.allPackages, { dir: tempDir });
+      assertEquals(getDirEntryNames(pkg), ["bar", "foo"]);
+      assertEquals(Deno.readTextFileSync(`${pkg}/foo`), "foo-pkg\n");
+      assertEquals(Deno.readTextFileSync(`${pkg}/bar`), "bar-pkg\n");
     });
   });
 
@@ -264,3 +259,7 @@ describe("importFlake", () => {
     assertStderrContains(output, "[]");
   });
 });
+
+function getDirEntryNames(path: string) {
+  return [...Deno.readDirSync(path)].map((entry) => entry.name);
+}
