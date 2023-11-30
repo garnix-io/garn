@@ -4,6 +4,8 @@
 
 - Add `garn.javascript.prettier` plugin to automatically format and check
   javascript formatting using [prettier](https://prettier.io/).
+- Add `garn.importFlake` helper to allow extending a flake file by local path
+  or URL.
 
 ## v0.0.18
 

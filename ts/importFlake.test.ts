@@ -29,11 +29,7 @@ describe("importFlake", () => {
   });
 
   const writeFlakeToImport = (contents: string) => {
-    try {
-      Deno.mkdirSync(`${tempDir}/to-import`);
-    } catch (err) {
-      if (!(err instanceof Deno.errors.AlreadyExists)) throw err;
-    }
+    Deno.mkdirSync(`${tempDir}/to-import`, { recursive: true });
     Deno.writeTextFileSync(
       `${tempDir}/to-import/flake.nix`,
       `
@@ -79,7 +75,7 @@ describe("importFlake", () => {
         packages = {
           main_pkg = pkgs.runCommand "create-some-files" {} ''
             mkdir $out
-            touch $out/foo $out/bar
+            touch $out/original
           '';
         };
       }`);
@@ -90,12 +86,12 @@ describe("importFlake", () => {
         packages = {
           main_pkg = pkgs.runCommand "create-some-files" {} ''
             mkdir $out
-            touch $out/baz
+            touch $out/modified
           '';
         };
       }`);
       const output = assertSuccess(runExecutable(exe, { cwd: tempDir }));
-      assertStdout(output, "baz\n");
+      assertStdout(output, "modified\n");
     });
 
     it("allows importing relative sources in packages", () => {
@@ -114,6 +110,17 @@ describe("importFlake", () => {
       const exe = garn.shell`${flake.getPackage("foo")}`;
       const output = assertSuccess(runExecutable(exe, { cwd: tempDir }));
       assertStdout(output, "Hello from a js file in tempDir!\n");
+    });
+
+    it("displays a helpful error if the specified package does not exist", () => {
+      writeFlakeToImport(`{ packages = { }; }`);
+      const flake = importFlake("./to-import");
+      const exe = garn.shell`${flake.getPackage("foo")}`;
+      const output = runExecutable(exe, { cwd: tempDir });
+      assertStderrContains(
+        output,
+        'error: The package "foo" was not found in ./to-import',
+      );
     });
   });
 
@@ -134,6 +141,17 @@ describe("importFlake", () => {
       const output = assertSuccess(runExecutable(exe, { cwd: tempDir }));
       assertStdout(output, "hello from flake file\n");
     });
+
+    it("displays a helpful error if the specified app does not exist", () => {
+      writeFlakeToImport(`{ apps = { }; }`);
+      const flake = importFlake("./to-import");
+      const exe = garn.shell`${flake.getApp("foo")}`;
+      const output = runExecutable(exe, { cwd: tempDir });
+      assertStderrContains(
+        output,
+        'error: The app "foo" was not found in ./to-import',
+      );
+    });
   });
 
   describe("getCheck", () => {
@@ -152,6 +170,17 @@ describe("importFlake", () => {
       const output = assertSuccess(runCheck(check, { dir: tempDir }));
       assertStderrContains(output, "running my-check!");
     });
+
+    it("displays a helpful error if the specified check does not exist", () => {
+      writeFlakeToImport(`{ checks = { }; }`);
+      const flake = importFlake("./to-import");
+      const exe = garn.shell`${flake.getCheck("foo")}`;
+      const output = runExecutable(exe, { cwd: tempDir });
+      assertStderrContains(
+        output,
+        'error: The check "foo" was not found in ./to-import',
+      );
+    });
   });
 
   describe("getDevShell", () => {
@@ -159,7 +188,7 @@ describe("importFlake", () => {
       writeFlakeToImport(`{
         devShells = {
           some-shell = pkgs.mkShell {
-            nativeBuildInputs = with pkgs; [ hello ];
+            nativeBuildInputs = [ pkgs.hello ];
           };
         };
       }`);
@@ -168,14 +197,25 @@ describe("importFlake", () => {
       const output = enterEnvironment(env, ["hello"], { dir: tempDir });
       assertStdout(output, "Hello, world!\n");
     });
+
+    it("displays a helpful error if the specified devShell does not exist", () => {
+      writeFlakeToImport(`{ devShells = { }; }`);
+      const flake = importFlake("./to-import");
+      const exe = garn.shell`${flake.getDevShell("foo")}`;
+      const output = runExecutable(exe, { cwd: tempDir });
+      assertStderrContains(
+        output,
+        'error: The devShell "foo" was not found in ./to-import',
+      );
+    });
   });
 
   describe("allPackages", () => {
     it("returns a package with symlinks to all found packages", () => {
       writeFlakeToImport(`{
         packages = {
-          foo = pkgs.runCommand "create-foo" {} "echo foo-pkg > $out";
-          bar = pkgs.runCommand "create-bar" {} "echo bar-pkg > $out";
+          foo = pkgs.runCommand "foo" {} "echo foo-pkg > $out";
+          bar = pkgs.runCommand "bar" {} "echo bar-pkg > $out";
         };
       }`);
       const flake = importFlake("./to-import");

@@ -30,7 +30,10 @@ export type Package = {
   setDescription: (this: Package, newDescription: string) => Package;
 
   /**
-   * Get an executable by name within the `bin` directory of this `Package`
+   * Get an executable by name within the `bin` directory of this `Package`.
+   *
+   * If that executable doesn't exist this will only fail when trying to *run*
+   * the `Executable`, not before.
    */
   bin: (executableName: string) => Executable;
 };
