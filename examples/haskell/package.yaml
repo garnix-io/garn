@@ -1,9 +1,0 @@
-name: helloFromHaskell
-
-executables:
-  hello:
-    main: Main.hs
-    dependencies:
-      - base
-      - text
-      - string-conversions

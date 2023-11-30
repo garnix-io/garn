@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import * as AsciinemaPlayer from "asciinema-player";
+import "./stylesheet.css";
 
 type AsciinemaProps = {
   src: string;
