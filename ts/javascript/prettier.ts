@@ -3,9 +3,8 @@ import { Executable } from "../executable.ts";
 import { NixExpression, escapeShellArg, nixRaw, nixStrLit } from "../nix.ts";
 import { Package } from "../package.ts";
 import { Plugin } from "../project.ts";
-import { Config as PrettierConfig } from "npm:prettier";
 
-const mkConfigFile = (config: PrettierConfig): NixExpression =>
+const mkConfigFile = (config: Record<string, unknown>): NixExpression =>
   nixRaw`(pkgs.writeText "prettier-config" ${nixStrLit(
     JSON.stringify(config),
   )})`;
@@ -42,7 +41,7 @@ const mkConfigFile = (config: PrettierConfig): NixExpression =>
 export function plugin(
   opts: {
     glob?: string;
-    config?: PrettierConfig;
+    config?: Record<string, unknown>;
   } = {},
 ): Plugin<
   { format: Executable; checkPrettier: Check },
