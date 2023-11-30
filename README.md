@@ -1,6 +1,12 @@
-# garn
+<a href="https://garn.io">
+  <img src="./garn.png">
+</a>
 
-**Please note: `garn` is still in active development and experimental. Use at your own risk!**
+[![built with garnix](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Fgarnix.io%2Fapi%2Fbadges%2Fgarnix-io%2Fgarn)](https://garnix.io)
+[![](https://dcbadge.vercel.app/api/server/q2Fptb7My4?style=flat)](https://discord.gg/q2Fptb7My4)
+[![](https://img.shields.io/badge/library-v0.0.18-black)](https://doc.deno.land/https://garn.io/ts/v0.0.18/mod.ts)
+[![License](https://img.shields.io/github/license/garnix-io/garn)](LICENSE)
+
 
 garn is a build tool and development environment manager. You configure your
 project with a `garn.ts` file that declaratively describes your project and its
@@ -35,10 +41,8 @@ Anyone can run your frontend with `garn run frontend`, backend with `garn run
 backend`, or both with `garn run startAll`. All without needing to worry about
 having the correct version of `go`, `nodejs`, or anything else installed.
 
-garn is powered by [Nix](https://nixos.org/), so you get portable and
-reproducible builds and development environments -- all this while running
-natively on your developer machines without the hassle and performance penalty
-of using e.g. docker.
+**garn** is powered by [Nix](https://nixos.org/), so you get portable and
+reproducible builds and development environments.
 
 ## Getting started
 
@@ -92,7 +96,38 @@ reproducible.
 
 `garn edit` will start (and, if necessary, download) VSCodium, with Deno LSP configured for you. It will open `garn.ts` in the current directory. This won't clobber any of your existing VSCode/VSCodium configuration and data.
 
+## Languages and Stacks
+
+We currently have support for the Npm, Go, and Haskell projects.
+
+### Npm
+
+The
+
+### Go
+
+### Haskell
+
+## Core concepts
+
+* **Projects** are
+* **Environments**
+* **Checks**
+* **Packages**
+* **Executables**
+
+###
+
+## Plugins
+
+Plugins allow mixing in functionality
+
 ## Typescript API
 
-Documentation for the `garn` Deno library is documented
-[here](https://doc.deno.land/https://garn.io/ts/v0.0.18/mod.ts).
+You can find documentation for the **garn** Deno library [here](https://doc.deno.land/https://garn.io/ts/v0.0.18/mod.ts).
+
+## Similar tools
+
+There
+
+## How it works
