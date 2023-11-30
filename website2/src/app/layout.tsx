@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import "@/utils/colors.css";
 
 const MatterSQMono = localFont({
   src: "../../public/fonts/MatterSQMonoTRIAL-Light.woff",
