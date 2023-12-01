@@ -1,0 +1,40 @@
+.container {
+  border: 16px solid var(--color-black);
+  border-top: 0;
+  padding: 96px 96px 136px;
+}
+
+.content {
+  max-width: 1216px;
+  margin: 0 auto;
+  border: 1px solid var(--color-black);
+}
+
+.header {
+  border: 1px solid var(--color-black);
+  padding: 16px 40px;
+  text-transform: uppercase;
+  font-size: 24px;
+  line-height: 40px;
+}
+
+.actions {
+  display: flex;
+}
+
+.action {
+  flex: 1;
+  border: 1px solid var(--color-black);
+  padding: 40px;
+  display: flex;
+  justify-content: space-between;
+  text-transform: uppercase;
+  color: var(--color-black);
+  font-size: 24px;
+  line-height: 40px;
+}
+
+.terminal {
+  border: 1px solid var(--color-black);
+  padding: 24px;
+}
