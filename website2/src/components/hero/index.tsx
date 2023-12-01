@@ -19,12 +19,12 @@ export const Hero = () => {
         </div>
         <div className={styles.actions}>
           <Link className={styles.action} href="/documentation/get-started">
-            <div>Get started</div>
-            <div>&rarr;</div>
+            <div className={styles.text}>Get started</div>
+            <div className={styles.arrow}>&rarr;</div>
           </Link>
           <Link className={styles.action} href="/documentation/read-more">
-            <div>READ MORE</div>
-            <div>&rarr;</div>
+            <div className={styles.text}>READ MORE</div>
+            <div className={styles.arrow}>&rarr;</div>
           </Link>
         </div>
         <TerminalHeader title="garn.ts" />
