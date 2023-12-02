@@ -48,7 +48,7 @@ export const TypingText = ({ prependedText, texts }: Props) => {
     return () => clearTimeout(timeout);
   });
   return (
-    <span>
+    <span className={styles.container}>
       {prependedText} {termState.text}
       <div className={styles.cursor} />
     </span>

@@ -23,18 +23,23 @@
 }
 
 .action {
-  flex: 1;
+  flex: 1 1 0px;
   border: 1px solid var(--color-black);
   padding: 40px;
   display: flex;
   justify-content: space-between;
+  align-items: center;
   text-transform: uppercase;
   color: var(--color-black);
   font-size: 24px;
   line-height: 40px;
 }
 
-.arrow {
+.action .text {
+  margin-right: 16px;
+}
+
+.action .arrow {
   transition: transform .3s;
 }
 
@@ -56,4 +61,30 @@
 .terminal {
   border: 1px solid var(--color-black);
   padding: 24px;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    border: 0;
+    padding: 24px 16px 0;
+  }
+
+  .content {
+    border: 0;
+  }
+
+  .header, .action {
+    font-size: 16px;
+    line-height: 28px;
+    padding: 16px;
+  }
+
+  .actions {
+    display: block;
+  }
+
+  .mobileDivider {
+    margin-top: 16px;
+    border: 1px solid var(--color-black);
+  }  
 }
