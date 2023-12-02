@@ -7,6 +7,9 @@
 .content {
   max-width: 1216px;
   margin: 0 auto;
+}
+
+.section {
   border: 1px solid var(--color-black);
 }
 
@@ -69,10 +72,6 @@
     padding: 24px 16px 0;
   }
 
-  .content {
-    border: 0;
-  }
-
   .header, .action {
     font-size: 16px;
     line-height: 28px;
@@ -84,7 +83,6 @@
   }
 
   .mobileDivider {
-    margin-top: 16px;
-    border: 1px solid var(--color-black);
+    height: 16px;
   }  
 }

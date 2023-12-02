@@ -1,8 +1,17 @@
 .container {
+  border: 1px solid var(--color-black);
+}
+
+.header {
   background-color: var(--color-black);
   color: var(--color-white);
   padding: 2px 24px;
   font-size: 16px;
   line-height: 28px;
   border: 1px solid var(--color-black);
+}
+
+.content {
+  border: 1px solid var(--color-black);
+  padding: 24px;
 }

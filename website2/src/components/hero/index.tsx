@@ -1,9 +1,9 @@
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Link from "next/link";
 import styles from "./styles.module.css";
-import { TerminalHeader } from "../terminalHeader";
 import { TypingText } from "../typingText";
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { Terminal } from "../terminal";
 
 const TERMINAL_EXAMPLES = [
   "check backend.no-todos-allowed",
@@ -29,7 +29,7 @@ export const Hero = () => {
   return (
     <section className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.mobileDivider}>
+        <div className={styles.section}>
           <div className={styles.header}>
             Declaratively configure your projects, get reproducible results
           </div>
@@ -44,23 +44,28 @@ export const Hero = () => {
             </Link>
           </div>
         </div>
-        <div className={styles.mobileDivider}>
-          <TerminalHeader title="garn.ts" />
-          <div className={styles.terminal}>
+        <div className={styles.mobileDivider} />
+        <Terminal
+          title="garn.ts"
+          text={
             <SyntaxHighlighter
               language="javascript"
               style={oneLight}
-              customStyle={{ background: "transparent", padding: 0, margin: 0 }}
+              customStyle={{
+                background: "transparent",
+                padding: 0,
+                margin: 0,
+              }}
               codeTagProps={{ style: { background: "transparent" } }}
             >
               {CODE}
             </SyntaxHighlighter>
-          </div>
-          <TerminalHeader title="terminal" />
-          <div className={styles.terminal}>
-            <TypingText prependedText="$ garn" texts={TERMINAL_EXAMPLES} />
-          </div>
-        </div>
+          }
+        />
+        <Terminal
+          title="terminal"
+          text={<TypingText prependedText="$ garn" texts={TERMINAL_EXAMPLES} />}
+        />
       </div>
     </section>
   );
