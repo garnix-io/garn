@@ -213,3 +213,15 @@ export const runInDevShell = (
 export const testPkgs = {
   hello: mkPackage(nix.nixRaw("pkgs.hello"), "hello"),
 };
+
+export const assertThrowsWith = (
+  expectedErrorMessage: string,
+  fn: () => void,
+) => {
+  try {
+    fn();
+    throw `Expected fn to throw with ${expectedErrorMessage}, but it did not throw`;
+  } catch (err) {
+    assertEquals(err.message, expectedErrorMessage);
+  }
+};

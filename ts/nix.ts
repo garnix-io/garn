@@ -241,7 +241,7 @@ export function getPathOrError(
  * `renderFlakeFile` for an example.
  */
 export function nixFlakeDep(name: string, dep: FlakeDep): NixExpression {
-  if (!name.match(/^[a-zA-Z0-9-]+$/)) {
+  if (!name.match(/^[a-zA-Z][a-zA-Z0-9-_]+$/)) {
     throw Error(`flakeDep: "${name}" is not a valid nix variable name`);
   }
   return {

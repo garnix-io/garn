@@ -8,18 +8,19 @@ import {
   assertStderrContains,
   assertStdout,
   assertSuccess,
+  assertThrowsWith,
   buildPackage,
-  runInDevShell,
   runCheck,
   runCommand,
   runExecutable,
+  runInDevShell,
 } from "./testUtils.ts";
-import { importFlake } from "./importFlake.ts";
+import { callFlake, importFlake, importFromGithub } from "./importFlake.ts";
 import * as garn from "./mod.ts";
 import { existsSync } from "https://deno.land/std@0.201.0/fs/mod.ts";
 import { assertEquals } from "https://deno.land/std@0.206.0/assert/mod.ts";
 
-describe("importFlake", () => {
+describe("callFlake", () => {
   let tempDir: string;
 
   beforeEach(() => {
@@ -66,7 +67,7 @@ describe("importFlake", () => {
           '';
         };
       }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const pkg = buildPackage(flake.getPackage("main_pkg"), { dir: tempDir });
       assertEquals(getDirEntryNames(pkg), ["bar", "foo"]);
     });
@@ -80,7 +81,7 @@ describe("importFlake", () => {
           '';
         };
       }`);
-      const flake = importFlake(`./to-import`);
+      const flake = callFlake(`./to-import`);
       buildPackage(flake.getPackage("main_pkg"), { dir: tempDir });
       writeFlakeToImport(`{
         packages = {
@@ -106,7 +107,7 @@ describe("importFlake", () => {
           '';
         };
       }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const exe = garn.shell`${flake.getPackage("foo")}`;
       const output = assertSuccess(runExecutable(exe, { cwd: tempDir }));
       assertStdout(output, "Hello from a js file in tempDir!\n");
@@ -114,7 +115,7 @@ describe("importFlake", () => {
 
     it("displays a helpful error if the specified package does not exist", () => {
       writeFlakeToImport(`{ packages = { }; }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const exe = garn.shell`${flake.getPackage("foo")}`;
       const output = runExecutable(exe, { cwd: tempDir });
       assertStderrContains(
@@ -136,7 +137,7 @@ describe("importFlake", () => {
           };
         };
       }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const exe = flake.getApp("hello");
       const output = assertSuccess(runExecutable(exe, { cwd: tempDir }));
       assertStdout(output, "hello from flake file\n");
@@ -144,7 +145,7 @@ describe("importFlake", () => {
 
     it("displays a helpful error if the specified app does not exist", () => {
       writeFlakeToImport(`{ apps = { }; }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const exe = garn.shell`${flake.getApp("foo")}`;
       const output = runExecutable(exe, { cwd: tempDir });
       assertStderrContains(
@@ -165,7 +166,7 @@ describe("importFlake", () => {
           '';
         };
       }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const check = flake.getCheck("some-check");
       const output = assertSuccess(runCheck(check, { dir: tempDir }));
       assertStderrContains(output, "running my-check!");
@@ -173,7 +174,7 @@ describe("importFlake", () => {
 
     it("displays a helpful error if the specified check does not exist", () => {
       writeFlakeToImport(`{ checks = { }; }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const exe = garn.shell`${flake.getCheck("foo")}`;
       const output = runExecutable(exe, { cwd: tempDir });
       assertStderrContains(
@@ -192,7 +193,7 @@ describe("importFlake", () => {
           };
         };
       }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const env = flake.getDevShell("some-shell");
       const output = runInDevShell(env, { cmd: "hello", dir: tempDir });
       assertStdout(output, "Hello, world!\n");
@@ -200,7 +201,7 @@ describe("importFlake", () => {
 
     it("displays a helpful error if the specified devShell does not exist", () => {
       writeFlakeToImport(`{ devShells = { }; }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const exe = garn.shell`${flake.getDevShell("foo")}`;
       const output = runExecutable(exe, { cwd: tempDir });
       assertStderrContains(
@@ -218,7 +219,7 @@ describe("importFlake", () => {
           bar = pkgs.runCommand "bar" {} "echo bar-pkg > $out";
         };
       }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const pkg = buildPackage(flake.allPackages, { dir: tempDir });
       assertEquals(getDirEntryNames(pkg), ["bar", "foo"]);
       assertEquals(Deno.readTextFileSync(`${pkg}/foo`), "foo-pkg\n");
@@ -242,13 +243,15 @@ describe("importFlake", () => {
           '';
         };
       }`);
-      const flake = importFlake("./to-import");
+      const flake = callFlake("./to-import");
       const output = assertSuccess(runCheck(flake.allChecks, { dir: tempDir }));
       assertStderrContains(output, "running check foo");
       assertStderrContains(output, "running check bar");
     });
   });
+});
 
+describe("importFlake", () => {
   it("allows importing flakes from url", () => {
     const flake = importFlake(
       "github:garnix-io/debug-tools/8a4026fa6ccbfec070f96d458ffa96e7fb6112e8",
@@ -257,6 +260,25 @@ describe("importFlake", () => {
     const output = assertSuccess(runExecutable(exe));
     assertStdout(output, "");
     assertStderrContains(output, "[]");
+  });
+});
+
+describe("importFromGithub", () => {
+  it("allows importing flakes from GitHub repositories", () => {
+    const flake = importFromGithub("garnix-io/debug-tools", {
+      revOrRef: "8a4026fa6ccbfec070f96d458ffa96e7fb6112e8",
+    });
+    const exe = flake.getPackage("main_pkg").bin("debug-args");
+    const output = assertSuccess(runExecutable(exe));
+    assertStdout(output, "");
+    assertStderrContains(output, "[]");
+  });
+
+  it("throws an error if the repo is malformed", () => {
+    assertThrowsWith(
+      "The `repo` of a hosted git service should match <owner>/<repo>",
+      () => importFromGithub("/foo/bar"),
+    );
   });
 });
 
