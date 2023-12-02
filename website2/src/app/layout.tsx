@@ -4,7 +4,16 @@ import "./globals.css";
 import "@/utils/colors.css";
 
 const MatterSQMono = localFont({
-  src: "../../public/fonts/MatterSQMonoTRIAL-Light.woff",
+  src: [
+    {
+      path: "../../public/fonts/MatterSQMonoTRIAL-Light.woff",
+      weight: "300",
+    },
+    {
+      path: "../../public/fonts/MatterSQMonoTRIAL-Regular.woff",
+      weight: "400",
+    },
+  ],
 });
 
 export const metadata: Metadata = {
