@@ -93,23 +93,23 @@ reproducible builds and development environments.
 
    <details>
      <summary>Manual install (Optional)</summary>
-     If you prefer to know exactly what **garn** is doing, or if you have a
+     If you prefer to know exactly what <b>garn</b> is doing, or if you have a
      special setup not covered by our installation script, you can see
-     [this page](https://garn.io/docs/getting_started) for manual installation
+     <a href="https://garn.io/docs/getting_started">this page</a> for manual installation
      steps.
    </details>
 
    <details>
      <summary>Installing shell completion (Optional)</summary>
-     You can install shell completion scripts for the most popular shells.
-     See [this page](https://garn.io/docs/getting_started) for more information.
+     You can also install shell completion scripts for the most popular shells.
+     See <a href="https://garn.io/docs/getting_started">this page</a> for more information.
    </details>
 
    <details>
      <summary>Deno LSP for garn files (Optional)</summary>
      <b>garn</b> is much nicer with an IDE-like experience. You can use
-     `garn edit` for that or, if you prefer, you can set up your own editor.
-     See [this page](https://garn.io/docs/getting_started) for more information.
+     <code>garn edit</code> for that or, if you prefer, you can set up your own editor.
+     See <a href="https://garn.io/docs/getting_started">this page</a> for more information
    </details>
 
 2) **Create your first `garn.ts` file**:
@@ -160,12 +160,12 @@ clobber any of your existing VSCode/VSCodium configuration and data.
 
 ## Core concepts
 
-* **Environments** (also known as devshells, devenvs, virtualenvs) are
-* **Checks**
-* **Packages**
-* **Executables**
-* **Projects** are
-* **Plugins**
+* **Environments** (also known as devshells, devenvs, virtualenvs) are the context in which a command runs. That includes: packages that are installed, shell variables that are set, PATH elements. Used both for a devshell experience (think Python virtualenvs) and for giving context to `Executable`s.
+* **Packages** are recipes for building artifacts (such as binaries or JS bundles). These recipes run in an isolated environment. They also refer to the artifacts themselves.
+* **Checks** are like `Package`s, but where we don't care about the artifacts as much as the exit code.
+* **Executables** are what you already know: bash scripts or binaries that you can run. They have their own `Environment`, so often can rely on dependencies that are not available "outside".
+* **Projects** are collections of the above.
+* **Plugins** are functions that add functionality to a Project, potentially modifying existing `Checks`, `Packages`, `Executable`s and `Environment`s, or just adding new ones.
 
 
 ## Languages and Stacks
