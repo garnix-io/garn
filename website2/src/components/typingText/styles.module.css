@@ -17,5 +17,5 @@
   margin: 2px 0 0 1px;
   border-bottom: 16px solid #000;
   animation: cursor 1s infinite;
-  transform: translateY(-1px);
+  transform: translateY(3px);
 }

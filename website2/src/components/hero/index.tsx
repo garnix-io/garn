@@ -54,6 +54,7 @@ export const Hero = () => {
               customStyle={{
                 background: "transparent",
                 padding: 0,
+                paddingBottom: 8,
                 margin: 0,
               }}
               codeTagProps={{ style: { background: "transparent" } }}
