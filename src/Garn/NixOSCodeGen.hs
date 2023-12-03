@@ -17,8 +17,7 @@ import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util
 import GHC.Generics (Generic)
-import Garn.Common (currentSystem, nixpkgsInput)
-import System.Exit (ExitCode (..))
+import Garn.Common (nixpkgsInput)
 
 generateTS :: [Service] -> String
 generateTS services =
@@ -39,7 +38,7 @@ generateTS services =
         mk name opt acc = acc <> ", " <> name <> ": " <> simpleOptionType opt
     go service =
       [i|
-       set #{name service}(args: {mkType $ options service}) {
+       set #{name service}(args: #{mkType $ options service}) {
            this.config.#{name service} = args;
        }
     |]

@@ -24,7 +24,12 @@ spec = do
         generateTS
           [ Service
               { name = "blah",
-                options = Option $ Map.fromList [("enable", "bool"), ("foo", "int")]
+                options =
+                  Option $
+                    Map.fromList
+                      [ ("enable", SimpleOption "bool" "enable?"),
+                        ("foo", SimpleOption "int" "how many foo")
+                      ]
               }
           ]
         `shouldBe` unindent
