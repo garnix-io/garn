@@ -112,3 +112,8 @@ executables:
     main: exe/codegen.hs
     dependencies:
       - garn
+
+  nixos-codegen:
+    main: exe/nixos-codegen.hs
+    dependencies:
+      - garn

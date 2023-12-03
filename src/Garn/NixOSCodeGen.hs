@@ -6,50 +6,74 @@ module Garn.NixOSCodeGen
     Service (..),
     Option (..),
     SimpleOption (..),
+    run,
   )
 where
 
 import Control.Monad
-import Cradle
+import qualified Cradle
 import Data.Aeson
+import Data.List
 import qualified Data.Map as Map
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util
 import GHC.Generics (Generic)
+import Garn.CodeGen.Common (sanitize)
 import Garn.Common (nixpkgsInput)
+
+run :: IO ()
+run = do
+  fileContents <- generateTS <$> getServices
+  writeFile "ts/internal/nixos.ts" fileContents
 
 generateTS :: [Service] -> String
 generateTS services =
   unindent
     [i|
-    class Services {
+    import { nixAttrSet } from  "../nix.ts";
+
+    export class Services {
         private config: Record<string, Object>;
+
+        public __nixExpression() {
+            const str = Object.entries(this.config).map(([k, val]) => {
+                return `${k} = ${nixAttrSet(val)};`
+            })
+            return `services = ${str};`
+        }
 
         constructor() {
             this.config = {}
         }
         #{setters}
-    }|]
+    }
+
+
+    |]
   where
-    mkType (Option option) = Map.foldrWithKey mk "" option
-      where
-        mk :: String -> SimpleOption -> String -> String
-        mk name opt acc = acc <> ", " <> name <> ": " <> simpleOptionType opt
+    mkType (Option option) =
+      "{"
+        <> ( intercalate
+               ", "
+               [ sanitize k <> ": " <> simpleOptionType o
+                 | (k, o) <- Map.toList option
+               ]
+           )
+        <> "}"
     go service =
       [i|
-       set #{name service}(args: #{mkType $ options service}) {
-           this.config.#{name service} = args;
-       }
+       set #{sanitize $ name service}(args: #{mkType $ options service}) {
+           this.config["#{name service}"] = args;
+        }
     |]
     setters = concatMap go services
 
 getServices :: IO [Service]
 getServices = do
-  (exit, Stderr err, StdoutUntrimmed json) <- Cradle.run "nix" nixArgs "eval" ".#" "--json" "--apply" nixExpr
-  unless (exit == ExitSuccess) $ do
+  (exit, Cradle.Stderr err, Cradle.StdoutUntrimmed json) <- Cradle.run "nix" nixArgs "eval" ".#" "--json" "--apply" nixExpr
+  unless (exit == Cradle.ExitSuccess) $ do
     error ("err:" <> cs err)
-  writeFile "out.json" (cs json)
   case eitherDecode (cs json) of
     Right pkgs -> pure pkgs
     Left e -> error (e <> " in ")

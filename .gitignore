@@ -5,6 +5,7 @@ node_modules/
 /website/public/install.sh
 /website/public/nix-installer*
 /ts/internal/nixpkgs
+/ts/internal/nixos.ts
 /ts/nixpkgs.ts
 /.golden/*/actual
 .direnv/

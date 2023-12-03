@@ -27,6 +27,7 @@ library
   exposed-modules:
       Garn
       Garn.CodeGen
+      Garn.CodeGen.Common
       Garn.Common
       Garn.Edit
       Garn.Errors
@@ -209,6 +210,64 @@ executable garn
     , unix
   default-language: Haskell2010
 
+executable nixos-codegen
+  main-is: exe/nixos-codegen.hs
+  other-modules:
+      Paths_garn
+  autogen-modules:
+      Paths_garn
+  default-extensions:
+      BangPatterns
+      ConstraintKinds
+      DataKinds
+      DeriveAnyClass
+      DeriveFunctor
+      DeriveTraversable
+      DeriveGeneric
+      DerivingStrategies
+      DerivingVia
+      FunctionalDependencies
+      FlexibleContexts
+      FlexibleInstances
+      GADTs
+      GeneralizedNewtypeDeriving
+      InstanceSigs
+      LambdaCase
+      MultiParamTypeClasses
+      MultiWayIf
+      NamedFieldPuns
+      OverloadedLabels
+      PolyKinds
+      QuantifiedConstraints
+      RankNTypes
+      RecordWildCards
+      TupleSections
+      TypeApplications
+      TypeFamilies
+      TypeOperators
+      ScopedTypeVariables
+      StandaloneDeriving
+  ghc-options: -Wall -with-rtsopts=-T -threaded -Wno-name-shadowing
+  build-depends:
+      aeson
+    , ansi-wl-pprint
+    , base >=4.7 && <5
+    , containers
+    , cradle
+    , directory
+    , garn
+    , getopt-generics
+    , interpolate
+    , optparse-applicative
+    , pretty-simple
+    , process
+    , string-conversions
+    , template-haskell
+    , temporary
+    , text
+    , unix
+  default-language: Haskell2010
+
 test-suite spec
   type: exitcode-stdio-1.0
   main-is: Spec.hs
@@ -227,6 +286,7 @@ test-suite spec
       TestUtils
       Garn
       Garn.CodeGen
+      Garn.CodeGen.Common
       Garn.Common
       Garn.Edit
       Garn.Errors

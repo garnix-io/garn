@@ -14,8 +14,6 @@ import Control.Monad (forM_)
 import Cradle (StdoutUntrimmed (..), run)
 import Data.Aeson (FromJSON, eitherDecode, toJSON)
 import Data.Aeson.Text (encodeToLazyText)
-import Data.Char (isDigit)
-import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Map (Map, toAscList)
 import qualified Data.Map as Map
@@ -24,6 +22,7 @@ import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
 import Data.String.Interpolate.Util (unindent)
 import GHC.Generics (Generic)
+import Garn.CodeGen.Common (sanitize)
 import Garn.Common (currentSystem, nixpkgsInput)
 import System.Directory (createDirectoryIfMissing, removeDirectoryRecursive)
 import WithCli (withCli)
@@ -170,63 +169,6 @@ formatPkg (name, pkgInfo) = do
 pkgsString :: Map String PkgInfo -> String
 pkgsString pkgs =
   intercalate "\n" $ formatPkg <$> toAscList pkgs
-
-sanitize :: String -> String
-sanitize str
-  | isDigit $ head str = sanitize $ "_" <> str
-  | str `elem` tsKeywords = str <> "_"
-  | otherwise =
-      str <&> \case
-        '+' -> '_'
-        '-' -> '_'
-        '.' -> '_'
-        '/' -> '_'
-        '@' -> '_'
-        x -> x
-
-tsKeywords :: [String]
-tsKeywords =
-  [ "arguments", -- Only in strict mode
-    "break",
-    "case",
-    "catch",
-    "class",
-    "const",
-    "continue",
-    "debugger",
-    "default",
-    "delete",
-    "do",
-    "else",
-    "enum",
-    "export",
-    "extends",
-    "false",
-    "finally",
-    "for",
-    "function",
-    "if",
-    "import",
-    "in",
-    "instanceOf",
-    "interface",
-    "new",
-    "null",
-    "private",
-    "return",
-    "super",
-    "switch",
-    "this",
-    "throw",
-    "true",
-    "try",
-    "typeOf",
-    "typeof",
-    "var",
-    "void",
-    "while",
-    "with"
-  ]
 
 nixArgs :: [String]
 nixArgs = ["--extra-experimental-features", "flakes nix-command"]

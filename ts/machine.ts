@@ -1,28 +1,28 @@
+import { Machine, Services, mkMachine, MkMachineArg } from "./internal/nixos.ts"
 
-class Services {
-   private config: Record<string, Object>;
-
-   constructor() {
-       this.config = {}
-   }
-
-   set nginx(args : {enabled: boolean, port: number}) {
-       this.config.nginx = args
-   }
+export type Machine = {
+    type: "machine",
+    nixExpression(): string
 }
+
 type MkMachineArg = {
     services: Services
 }
 
-export function mkMachine(_mkr : (arg : MkMachineArg) => void) : void {
-
-}
-
-
-export const myMachine = mkMachine(arg  => {
-    arg.services.nginx = {
-        enabled: true,
-        port: 8000
+export function mkMachine(mkr : (arg : MkMachineArg) => void) : Machine {
+    const services = new Services()
+    mkr({services})
+    return {
+      type: "machine",
+      nixExpression(): string {
+         return services.__nixExpression();
+      }
     }
 }
 
+const _example = mkMachine(({services} : MkMachineArg) => {
+    services.nginx = {
+        enabled: true,
+        port: 8000
+    }
+})

@@ -41,10 +41,10 @@ spec = do
                 this.config = {}
             }
 
-            set blah(args: {enabled: boolean}) {
-                this.config.blah = args;
+            set blah(args: {enable: boolean, foo: number}) {
+               this.config.blah = args;
             }
-        }
+         }
       |]
 
   fdescribe "getServices" $ do
