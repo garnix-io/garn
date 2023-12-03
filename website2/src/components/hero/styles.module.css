@@ -1,0 +1,83 @@
+.container {
+  border: 16px solid var(--color-black);
+  border-top: 0;
+  padding: 96px 96px 136px;
+}
+
+.content {
+  max-width: 1216px;
+  margin: 0 auto;
+}
+
+.section {
+  border: 1px solid var(--color-black);
+}
+
+.header {
+  border: 1px solid var(--color-black);
+  padding: 16px 40px;
+  text-transform: uppercase;
+  font-size: 24px;
+  line-height: 40px;
+}
+
+.actions {
+  display: flex;
+}
+
+.action {
+  flex: 1 1 0px;
+  border: 1px solid var(--color-black);
+  padding: 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-transform: uppercase;
+  color: var(--color-black);
+  font-size: 24px;
+  line-height: 40px;
+}
+
+.action .text {
+  margin-right: 16px;
+}
+
+.action .arrow {
+  transition: transform .3s;
+}
+
+.action:hover .text {
+  text-decoration: underline;
+}
+
+@keyframes arrowBounce {
+  0%   { transform: translateX(0px); }
+  50%  { transform: translateX(10px); }
+  100% { transform: translateX(0px); }
+}
+
+.action:hover .arrow {
+  animation: arrowBounce 1.5s infinite;
+  animation-timing-function: linear;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    border: 0;
+    padding: 24px 16px 0;
+  }
+
+  .header, .action {
+    font-size: 16px;
+    line-height: 28px;
+    padding: 16px;
+  }
+
+  .actions {
+    display: block;
+  }
+
+  .mobileDivider {
+    height: 16px;
+  }  
+}
