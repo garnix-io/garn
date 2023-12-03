@@ -33,6 +33,7 @@ library
       Garn.GarnConfig
       Garn.ImportVersion
       Garn.Init
+      Garn.NixOSCodeGen
       Garn.Optparse
       Garn.Utils
   other-modules:
@@ -221,6 +222,7 @@ test-suite spec
       Garn.OptparseSpec
       GarnSpec
       InitSpec
+      NixOSCodeGenSpec
       RunSpec
       TestUtils
       Garn
@@ -231,6 +233,7 @@ test-suite spec
       Garn.GarnConfig
       Garn.ImportVersion
       Garn.Init
+      Garn.NixOSCodeGen
       Garn.Optparse
       Garn.Utils
       Paths_garn
