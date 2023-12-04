@@ -8,7 +8,7 @@ export { plugin as vite } from "../javascript/vite.ts";
 /**
  * Creates a pyproject based python garn Project.
  */
-export function mkPythonProjectSimple(args: {
+export function mkPythonProject(args: {
   description: string;
   src: string;
   pythonInterpreter: Package;
@@ -17,27 +17,24 @@ export function mkPythonProjectSimple(args: {
   devShell: Environment;
 } {
   const python = args.pythonInterpreter.nixExpression;
-  const pythonDependencies = nixRaw`
-    let
-      python = ${python};
-      src = ${nixSource(args.src)};
-      pyproject = builtins.fromTOML
-        (builtins.readFile "\${src}/pyproject.toml");
-      dependencies = pyproject.project.dependencies;
-      toPackages = map (dep: python.pkgs.\${dep});
-    in
-      toPackages dependencies
+  const constants = nixRaw`
+    lib = pkgs.lib;
+    python = ${python};
+    src = ${nixSource(args.src)};
+    pyproject = builtins.fromTOML
+      (builtins.readFile "\${src}/pyproject.toml");
+    dependencies = pyproject.project.dependencies;
+    pickPackage = dep: python.pkgs.\${dep} or (throw ''
+      Package not supported or not available: \${dep}
+      Dependency not found in nixpkgs python packages
+    '');
+    toPackages = map pickPackage;
+    pythonDependencies = toPackages dependencies;
   `;
   const pkg: Package = mkPackage(
     nixRaw`
       let
-        lib = pkgs.lib;
-        python = ${python};
-        src = ${nixSource(args.src)};
-        pyproject = builtins.fromTOML
-          (builtins.readFile "\${src}/pyproject.toml");
-        dependencies = pyproject.project.dependencies;
-        toPackages = map (dep: python.pkgs.\${dep});
+        ${constants}
       in
         python.pkgs.buildPythonPackage {
           pname = pyproject.project.name;
@@ -45,7 +42,7 @@ export function mkPythonProjectSimple(args: {
           src = ${nixSource(args.src)};
           format = "pyproject";
           buildInputs = toPackages pyproject.build-system.requires;
-          propagatedBuildInputs = ${pythonDependencies};
+          propagatedBuildInputs = pythonDependencies;
         }
     `,
     "package",
@@ -53,8 +50,7 @@ export function mkPythonProjectSimple(args: {
   const devShell: Environment = mkEnvironment({
     nixExpression: nixRaw`
       let
-        python = ${python};
-        pythonDependencies = ${pythonDependencies};
+        ${constants}
         pythonWithDeps = python.withPackages (ps:
           pythonDependencies
           ++ [python.pkgs.pip]

@@ -4,12 +4,21 @@ import {
   it,
 } from "https://deno.land/std@0.206.0/testing/bdd.ts";
 import * as garn from "./mod.ts";
-import { buildPackage, runCommand, runInDevShell } from "../testUtils.ts";
+import {
+  assertStderrContains,
+  buildPackage,
+  nixpkgsInput,
+  pkgs,
+  runCommand,
+  runInDevShell,
+} from "../testUtils.ts";
 import { assert } from "https://deno.land/std@0.206.0/assert/mod.ts";
 import { existsSync } from "https://deno.land/std@0.201.0/fs/exists.ts";
 import { assertStringIncludes } from "https://deno.land/std@0.206.0/assert/assert_string_includes.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import * as pythonInterpreters from "../internal/nixpkgs/pythonInterpreters/mod.ts";
+import * as nix from "../nix.ts";
+import { nixAttrSet } from "../nix.ts";
 
 const pyprojectToml = outdent`
   [build-system]
@@ -72,5 +81,54 @@ describe("mkPythonProject", () => {
       dir: tempDir,
       cmd: "python -c 'import requests; print(requests.__version__)'",
     });
+  });
+
+  it("raises informative error when dependency not available", () => {
+    const pyprojectToml = outdent`
+      [build-system]
+      requires = ["setuptools"]
+      build-backend = "setuptools.build_meta"
+
+      [project]
+      name = "my_package"
+      version = "0.0.0"
+
+      dependencies = [
+        "some-nonexistent-package"
+      ]
+    `;
+    Deno.writeTextFileSync(`${tempDir}/pyproject.toml`, pyprojectToml);
+    const project = garn.mkPythonProjectSimple({
+      src: "./.",
+      description: "A python project",
+      pythonInterpreter: pythonInterpreters.python310,
+    });
+    const pkg = project.package;
+    const flakeFile = nix.renderFlakeFile(
+      nixAttrSet({
+        packages: nixAttrSet({
+          "x86_64-linux": nixAttrSet({
+            default: nix.nixRaw`
+              let
+                nixpkgs = ${nixpkgsInput};
+                pkgs = ${pkgs};
+                inherit (pkgs) system;
+              in ${pkg.nixExpression}
+            `,
+          }),
+        }),
+      }),
+    );
+    Deno.writeTextFileSync(`${tempDir}/flake.nix`, flakeFile);
+    const output = runCommand(
+      new Deno.Command("nix", {
+        args: ["build", tempDir + "#default"],
+        cwd: tempDir,
+      }),
+    );
+    assertStderrContains(
+      output,
+      "Package not supported or not available: some-nonexistent-package",
+    );
   });
 });
