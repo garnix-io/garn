@@ -22,7 +22,7 @@ type BasicCommand = {
 type Props = {
   prependedText: string;
   commands: Command[];
-}
+};
 
 export const TypingText = ({ prependedText, commands }: Props) => {
   const [termState, setTermState] = useState<{
@@ -37,7 +37,10 @@ export const TypingText = ({ prependedText, commands }: Props) => {
   const currentCommand = commands[termState.idx];
   useEffect(() => {
     let timeout: NodeJS.Timeout;
-    const type = (delay: number, newState: Partial<typeof termState>) => {
+    const delayedUpdate = (
+      delay: number,
+      newState: Partial<typeof termState>
+    ) => {
       timeout = setTimeout(() => {
         setTermState({
           ...termState,
@@ -46,10 +49,12 @@ export const TypingText = ({ prependedText, commands }: Props) => {
       }, delay);
     };
     if (currentCommand.action === "delay") {
-      type(currentCommand.delay || 1000, { idx: (termState.idx += 1) });
+      delayedUpdate(currentCommand.delay || 1000, {
+        idx: (termState.idx += 1),
+      });
     } else if (currentCommand.action === "type") {
       if (termState.currentLine.length === 0)
-        type(currentCommand.delay || 50, {
+        delayedUpdate(currentCommand.delay || 50, {
           currentLine: `${prependedText} `,
         });
       else if (
@@ -60,11 +65,11 @@ export const TypingText = ({ prependedText, commands }: Props) => {
           termState.currentLine.length - prependedText.length - 1,
           termState.currentLine.length - prependedText.length
         );
-        type(20 + Math.random() * 45, {
+        delayedUpdate(20 + Math.random() * 45, {
           currentLine: `${termState.currentLine}${currentChar}`,
         });
       } else {
-        type(100, {
+        delayedUpdate(100, {
           idx: (termState.idx += 1),
           currentLine: "",
           lines: [...termState.lines, termState.currentLine],
@@ -72,31 +77,31 @@ export const TypingText = ({ prependedText, commands }: Props) => {
       }
     } else if (currentCommand.action === "delete") {
       if (termState.currentLine.length === 0) {
-        type(currentCommand.delay || 50, {
+        delayedUpdate(currentCommand.delay || 50, {
           lines: termState.lines.slice(0, termState.lines.length - 1),
           currentLine: termState.lines[termState.lines.length - 1],
         });
       } else if (termState.currentLine.length <= prependedText.length + 1)
-        type(100, { idx: (termState.idx += 1) });
+        delayedUpdate(100, { idx: (termState.idx += 1) });
       else
-        type(5 + Math.random() * 15, {
+        delayedUpdate(5 + Math.random() * 15, {
           currentLine: termState.currentLine.slice(
             0,
             termState.currentLine.length - 1
           ),
         });
     } else if (currentCommand.action === "response") {
-      type(currentCommand.delay || 100, {
+      delayedUpdate(currentCommand.delay || 100, {
         lines: [...termState.lines, currentCommand.text],
         idx: (termState.idx += 1),
       });
     } else if (currentCommand.action === "clear") {
-      type(currentCommand.delay || 100, {
+      delayedUpdate(currentCommand.delay || 100, {
         lines: [],
         idx: (termState.idx += 1),
       });
     } else if (currentCommand.action === "restart") {
-      type(currentCommand.delay || 100, { idx: 0 });
+      delayedUpdate(currentCommand.delay || 100, { idx: 0 });
     }
     return () => clearTimeout(timeout);
   });
