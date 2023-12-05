@@ -4,6 +4,8 @@ import styles from "./styles.module.css";
 import { TypingText } from "../typingText";
 import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Terminal } from "../terminal";
+import { SampleCode } from "../sampleCode";
+import { Text } from "../text";
 
 const TERMINAL_EXAMPLES = [
   "check backend.no-todos-allowed",
@@ -30,9 +32,9 @@ export const Hero = () => {
     <section className={styles.container}>
       <div className={styles.content}>
         <div className={styles.section}>
-          <div className={styles.header}>
+          <Text type="h1" className={styles.header}>
             Declaratively configure your projects, get reproducible results
-          </div>
+          </Text>
           <div className={styles.actions}>
             <Link className={styles.action} href="/documentation/get-started">
               <div className={styles.text}>Get started</div>
@@ -45,24 +47,7 @@ export const Hero = () => {
           </div>
         </div>
         <div className={styles.mobileDivider} />
-        <Terminal
-          title="garn.ts"
-          text={
-            <SyntaxHighlighter
-              language="javascript"
-              style={oneLight}
-              customStyle={{
-                background: "transparent",
-                padding: 0,
-                paddingBottom: 8,
-                margin: 0,
-              }}
-              codeTagProps={{ style: { background: "transparent" } }}
-            >
-              {CODE}
-            </SyntaxHighlighter>
-          }
-        />
+        <Terminal title="garn.ts" text={<SampleCode code={CODE} />} />
         <Terminal
           title="terminal"
           text={<TypingText prependedText="$ garn" texts={TERMINAL_EXAMPLES} />}

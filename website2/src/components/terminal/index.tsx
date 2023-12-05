@@ -10,7 +10,7 @@ export const Terminal = ({ title, text }: Props) => {
   return (
     <div className={styles.container}>
       <div className={styles.header}>{title}</div>
-      <div className={styles.content}>{text}</div>
+      <pre className={styles.content}>{text}</pre>
     </div>
   );
 };

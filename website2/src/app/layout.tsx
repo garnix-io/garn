@@ -1,20 +1,7 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
 import "./globals.css";
 import "@/utils/colors.css";
-
-const MatterSQMono = localFont({
-  src: [
-    {
-      path: "../../public/fonts/MatterSQMonoTRIAL-Light.woff",
-      weight: "300",
-    },
-    {
-      path: "../../public/fonts/MatterSQMonoTRIAL-Regular.woff",
-      weight: "400",
-    },
-  ],
-});
+import { MatterSQMono } from "@/utils/fonts";
 
 export const metadata: Metadata = {
   title: "garn",

@@ -14,11 +14,16 @@
 .content {
   border: 1px solid var(--color-black);
   padding: 24px;
+  overflow: scroll
 }
 
 @media only screen and (max-width: 768px) {
   .container {
     font-size: 14px;
     line-height: 26px;
+  }
+
+  .content {
+    padding: 16px;
   }
 }

@@ -1,0 +1,36 @@
+.container {
+  padding: 136px 96px;
+  border-left: 16px solid var(--color-black);
+  border-right: 16px solid var(--color-black);
+}
+
+.header {
+  max-width: 592px;
+  margin: 0 auto;
+  margin-bottom: 90px;
+}
+
+.headerTitle {
+  margin-bottom: 40px;
+}
+
+.terminalContainer {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    border: 0;
+    padding: 40px 16px;
+  }
+
+  .header {
+    margin-bottom: 40px;
+    max-width: none;
+  }
+
+  .headerTitle {
+    margin-bottom: 24px;
+  }
+}

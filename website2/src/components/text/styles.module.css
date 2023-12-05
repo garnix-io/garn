@@ -1,0 +1,23 @@
+.paragraph {
+  font-size: 18px;
+  line-height: 32px;
+  color: var(--color-gray6a);
+}
+
+.header {
+  font-size: 24px;
+  line-height: 40px;
+  text-transform: uppercase;
+}
+
+@media only screen and (max-width: 768px) {
+  .paragraph {
+    font-size: 16px;
+    line-height: 28px;
+  }
+
+  .header {
+    font-size: 16px;
+    line-height: 28px;
+  }
+}
