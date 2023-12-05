@@ -23,4 +23,8 @@
   .header {
     max-width: none;
   }
+
+  .terminalContainer {
+    margin: 40px 0;
+  }
 }
