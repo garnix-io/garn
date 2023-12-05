@@ -3,6 +3,7 @@ import {
   InterpolatedString,
   interpolatedStringFromString,
   interpolatedStringFromTemplate,
+  join,
   mapStrings,
   renderInterpolatedString,
 } from "./internal/interpolatedString.ts";
@@ -210,6 +211,29 @@ export function escapeShellArg(shellArg: NixExpression): NixExpression {
   return nixRaw`(pkgs.lib.strings.escapeShellArg ${shellArg})`;
 }
 
+export function getPathOrError(
+  attrSet: NixExpression,
+  path: Array<NixExpression | string>,
+  error: NixExpression,
+): NixExpression {
+  const pathExpr: NixExpression = {
+    [__nixExpressionTag]: null,
+    type: "raw",
+    raw: join(
+      path.map((el) => (typeof el === "string" ? nixStrLit(el) : el)),
+      ".",
+    ),
+  };
+  return nixRaw`
+    let
+      x = ${attrSet};
+    in
+      if x ? ${pathExpr}
+      then x.${pathExpr}
+      else builtins.throw ${error}
+  `;
+}
+
 /**
  * Returns a `NixExpression` that renders as an identifier that refers to a
  * flake input. At the same time it registers the flake input as a dependency,
@@ -217,7 +241,7 @@ export function escapeShellArg(shellArg: NixExpression): NixExpression {
  * `renderFlakeFile` for an example.
  */
 export function nixFlakeDep(name: string, dep: FlakeDep): NixExpression {
-  if (!name.match(/^[a-zA-Z0-9-]+$/)) {
+  if (!name.match(/^[a-zA-Z][a-zA-Z0-9-_]+$/)) {
     throw Error(`flakeDep: "${name}" is not a valid nix variable name`);
   }
   return {

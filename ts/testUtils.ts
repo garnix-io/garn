@@ -182,7 +182,7 @@ export const buildPackage = (
 export const runInDevShell = (
   devShell: garn.Environment,
   options: { cmd?: string; dir?: string } = {},
-): void => {
+): Output => {
   const cmd = options.cmd ?? "true";
   const dir = options.dir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
   const flakeFile = nix.renderFlakeFile(
@@ -201,7 +201,7 @@ export const runInDevShell = (
     }),
   );
   Deno.writeTextFileSync(`${dir}/flake.nix`, flakeFile);
-  assertSuccess(
+  return assertSuccess(
     runCommand(
       new Deno.Command("nix", {
         args: ["develop", "-L", dir, "-c", "--", "bash", "-c", cmd],
@@ -213,4 +213,16 @@ export const runInDevShell = (
 
 export const testPkgs = {
   hello: mkPackage(nix.nixRaw("pkgs.hello"), "hello"),
+};
+
+export const assertThrowsWith = (
+  expectedErrorMessage: string,
+  fn: () => void,
+) => {
+  try {
+    fn();
+    throw `Expected fn to throw with ${expectedErrorMessage}, but it did not throw`;
+  } catch (err) {
+    assertEquals(err.message, expectedErrorMessage);
+  }
 };
