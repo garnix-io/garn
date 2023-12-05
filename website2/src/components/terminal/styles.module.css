@@ -23,6 +23,10 @@
     line-height: 26px;
   }
 
+  .header {
+    padding: 2px 16px;
+  }
+
   .content {
     padding: 16px;
   }
