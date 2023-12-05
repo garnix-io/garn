@@ -1,0 +1,26 @@
+.container {
+  padding: 136px 96px;
+  border-left: 16px solid var(--color-black);
+  border-right: 16px solid var(--color-black);
+}
+
+.textContainer {
+  max-width: 592px;
+  margin: 0 auto;
+}
+
+.terminalContainer {
+  max-width: 800px;
+  margin: 88px auto;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    border: 0;
+    padding: 40px 16px;
+  }
+
+  .header {
+    max-width: none;
+  }
+}
