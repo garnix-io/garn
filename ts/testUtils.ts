@@ -181,8 +181,9 @@ export const buildPackage = (
 
 export const runInDevShell = (
   devShell: garn.Environment,
-  options: { cmd: string; dir?: string } = { cmd: "true" },
+  options: { cmd?: string; dir?: string } = {},
 ): Output => {
+  const cmd = options.cmd ?? "true";
   const dir = options.dir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
   const flakeFile = nix.renderFlakeFile(
     nixAttrSet({
@@ -203,7 +204,7 @@ export const runInDevShell = (
   return assertSuccess(
     runCommand(
       new Deno.Command("nix", {
-        args: ["develop", "-L", dir, "-c", "--", "bash", "-c", options.cmd],
+        args: ["develop", "-L", dir, "-c", "--", "bash", "-c", cmd],
         cwd: dir,
       }),
     ),

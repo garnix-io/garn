@@ -3,6 +3,7 @@
 
 module GarnSpec (spec) where
 
+import Control.Monad (when)
 import Data.String.AnsiEscapeCodes.Strip.Text (stripAnsiEscapeCodes)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
@@ -103,7 +104,15 @@ spec = do
       it "outputs a version with --version" $ \onTestFailureLog -> do
         output <- runGarn ["--version"] "" repoDir Nothing
         onTestFailureLog output
-        stdout output `shouldBe` "v0.0.18\n"
+        when (stdout output /= "v0.0.18\n") $
+          expectationFailure
+            ( unindent
+                [i|
+                  garn --version output wrong:
+                  #{show (stdout output)} /= "v0.0.18\n"
+                  (consider running `cabal clean`!)
+                |]
+            )
         stderr output `shouldBe` ""
         exitCode output `shouldBe` ExitSuccess
 
