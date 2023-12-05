@@ -39,7 +39,7 @@ describe("callFlake", () => {
         {
           inputs.nixpkgs.url = "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566";
           inputs.flake-utils.url = "github:numtide/flake-utils/ff7b65b44d01cf9ba6a71320833626af21126384";
-          outputs = { self, nixpkgs, flake-utils }: flake-utils.lib.eachDefaultSystem (system: 
+          outputs = { self, nixpkgs, flake-utils }: flake-utils.lib.eachDefaultSystem (system:
             let pkgs = import "\${nixpkgs}" { inherit system; }; in ${contents}
           );
         }
@@ -265,7 +265,8 @@ describe("importFlake", () => {
 
 describe("importFromGithub", () => {
   it("allows importing flakes from GitHub repositories", () => {
-    const flake = importFromGithub("garnix-io/debug-tools", {
+    const flake = importFromGithub({
+      repo: "garnix-io/debug-tools",
       revOrRef: "8a4026fa6ccbfec070f96d458ffa96e7fb6112e8",
     });
     const exe = flake.getPackage("main_pkg").bin("debug-args");
@@ -277,11 +278,11 @@ describe("importFromGithub", () => {
   it("throws an error if the repo is malformed", () => {
     assertThrowsWith(
       "The `repo` of a hosted git service should match <owner>/<repo>",
-      () => importFromGithub("/foo/bar"),
+      () => importFromGithub({ repo: "/foo/bar" }),
     );
   });
 });
 
 function getDirEntryNames(path: string) {
-  return [...Deno.readDirSync(path)].map((entry) => entry.name);
+  return [...Deno.readDirSync(path)].map((entry) => entry.name).sort();
 }

@@ -12,19 +12,25 @@ import {
 import { mkPackage, Package } from "./package.ts";
 
 /**
- * Options for importing flake files from GitHub/GitLab/SourceHut.
+ * Config for importing flake files from GitHub/GitLab/SourceHut.
  */
-export type HostedGitServiceOptions = {
+export type RepoConfig = {
   /**
-   * The path to a subdirectory in the repository containing the flake file to
-   * import.
+   * The full repo name, i.e. the user handle and the repo name separated by a
+   * slash, e.g. `garnix-io/garn`.
    */
-  dir?: string;
+  repo: string;
 
   /**
    * The name of a branch/tag, or a commit hash to import.
    */
   revOrRef?: string;
+
+  /**
+   * The path to a subdirectory in the repository containing the flake file to
+   * import.
+   */
+  dir?: string;
 
   /**
    * A host to fetch from other than the default for that hosted service
@@ -34,20 +40,23 @@ export type HostedGitServiceOptions = {
 };
 
 /**
- * Methods for obtaining apps, checks, dev-shells, and packages from an
- * imported flakefile to include in your garn project.
+ * Methods for obtaining apps, checks, dev-shells, and packages from an imported
+ * flake file to include in your garn project.
  */
 export type ImportedFlake = {
   /**
-   * A check that composes all checks found in the imported flake file.
+   * A check that combines all checks found in the imported flake file.
+   *
+   * I.e. `allChecks` will succeed only if *all* checks in the imported flake file
+   * succeed.
    */
   allChecks: Check;
 
   /**
-   * A package that composes all packages found in the imported flake file.
+   * A package that combines all packages found in the imported flake file.
    *
    * When building this package the result will be a directory of symlinks to
-   * all packages in the flake file.
+   * all packages in the imported flake file.
    */
   allPackages: Package;
 
@@ -55,7 +64,7 @@ export type ImportedFlake = {
    * Obtain a specific `Executable` from the `apps` section of the imported
    * flake file.
    *
-   * Throws an error if the specified `appName` does not exist.
+   * `garn` will error if the specified `appName` does not exist.
    */
   getApp: (appName: string) => Executable;
 
@@ -63,7 +72,7 @@ export type ImportedFlake = {
    * Obtain a specific `Check` from the `checks` section of the imported flake
    * file.
    *
-   * Throws an error if the specified `checkName` does not exist.
+   * `garn` will error if the specified `checkName` does not exist.
    */
   getCheck: (checkName: string) => Check;
 
@@ -71,7 +80,7 @@ export type ImportedFlake = {
    * Obtain a specific `Environment` from the `devShells` section of the
    * imported flake file.
    *
-   * Throws an error if the specified `devShellName` does not exist.
+   * `garn` will error if the specified `devShellName` does not exist.
    */
   getDevShell: (devShellName: string) => Environment;
 
@@ -79,7 +88,7 @@ export type ImportedFlake = {
    * Obtain a specific `Package` from the `packages` section of the imported
    * flake file.
    *
-   * Throws an error if the specified `packageName` does not exist.
+   * `garn` will error if the specified `packageName` does not exist.
    */
   getPackage: (packageName: string) => Package;
 };
@@ -89,11 +98,8 @@ export type ImportedFlake = {
  *
  * See `importFlake` for details.
  */
-export function importFromGithub(
-  repo: string,
-  options: HostedGitServiceOptions = {},
-): ImportedFlake {
-  return importFlakeFromHostedGitService("github", repo, options);
+export function importFromGithub(options: RepoConfig): ImportedFlake {
+  return importFlakeFromRepoConfig("github", options);
 }
 
 /**
@@ -101,11 +107,8 @@ export function importFromGithub(
  *
  * See `importFlake` for details.
  */
-export function importFromGitlab(
-  repo: string,
-  options: HostedGitServiceOptions = {},
-): ImportedFlake {
-  return importFlakeFromHostedGitService("gitlab", repo, options);
+export function importFromGitlab(options: RepoConfig): ImportedFlake {
+  return importFlakeFromRepoConfig("gitlab", options);
 }
 
 /**
@@ -113,11 +116,8 @@ export function importFromGitlab(
  *
  * See `importFlake` for details.
  */
-export function importFromSourcehut(
-  repo: string,
-  options: HostedGitServiceOptions = {},
-): ImportedFlake {
-  return importFlakeFromHostedGitService("sourcehut", repo, options);
+export function importFromSourcehut(options: RepoConfig): ImportedFlake {
+  return importFlakeFromRepoConfig("sourcehut", options);
 }
 
 /**
@@ -190,12 +190,11 @@ export function callFlake(flakeDir: string): ImportedFlake {
   return processFlake(nixRaw`(${callFlake} ${nixRaw(flakeDir)})`, flakeDir);
 }
 
-function importFlakeFromHostedGitService(
+function importFlakeFromRepoConfig(
   serviceName: string,
-  repo: string,
-  opts: HostedGitServiceOptions,
+  opts: RepoConfig,
 ): ImportedFlake {
-  if (!repo.match(/^[^/]+\/[^/]+$/)) {
+  if (!opts.repo.match(/^[^/]+\/[^/]+$/)) {
     throw new Error(
       "The `repo` of a hosted git service should match <owner>/<repo>",
     );
@@ -209,7 +208,7 @@ function importFlakeFromHostedGitService(
   return importFlake(
     serviceName +
       ":" +
-      repo +
+      opts.repo +
       (opts.revOrRef ? `/${opts.revOrRef}` : "") +
       (query ? `?${query}` : ""),
   );
