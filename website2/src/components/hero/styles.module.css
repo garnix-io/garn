@@ -16,9 +16,6 @@
 .header {
   border: 1px solid var(--color-black);
   padding: 16px 40px;
-  text-transform: uppercase;
-  font-size: 24px;
-  line-height: 40px;
 }
 
 .actions {
@@ -68,9 +65,12 @@
   }
 
   .header, .action {
+    padding: 16px;
+  }
+
+  .action {
     font-size: 16px;
     line-height: 28px;
-    padding: 16px;
   }
 
   .actions {

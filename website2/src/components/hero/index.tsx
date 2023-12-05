@@ -1,15 +1,20 @@
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import Link from "next/link";
 import styles from "./styles.module.css";
-import { TypingText } from "../typingText";
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { Terminal } from "../terminal";
+import { SampleCode } from "../sampleCode";
+import { Text } from "../text";
+import { Command, TypingText } from "../typingText";
 
-const TERMINAL_EXAMPLES = [
-  "check backend.no-todos-allowed",
-  "run backend.dev-server",
-  "enter backend",
-  "build backend",
+const COMMANDS: Command[] = [
+  { action: "type", text: "check backend.no-todos-allowed" },
+  { action: "delete", delay: 2500, showCursor: true },
+  { action: "type", text: "run backend.dev-server" },
+  { action: "delete", delay: 2500, showCursor: true },
+  { action: "type", text: "enter backend" },
+  { action: "delete", delay: 2500, showCursor: true },
+  { action: "type", text: "build backend" },
+  { action: "delete", delay: 2500, showCursor: true },
+  { action: "restart" },
 ];
 
 const CODE = `import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
@@ -30,9 +35,9 @@ export const Hero = () => {
     <section className={styles.container}>
       <div className={styles.content}>
         <div className={styles.section}>
-          <div className={styles.header}>
+          <Text type="h1" className={styles.header}>
             Declaratively configure your projects, get reproducible results
-          </div>
+          </Text>
           <div className={styles.actions}>
             <Link className={styles.action} href="/documentation/get-started">
               <div className={styles.text}>Get started</div>
@@ -45,27 +50,10 @@ export const Hero = () => {
           </div>
         </div>
         <div className={styles.mobileDivider} />
-        <Terminal
-          title="garn.ts"
-          text={
-            <SyntaxHighlighter
-              language="javascript"
-              style={oneLight}
-              customStyle={{
-                background: "transparent",
-                padding: 0,
-                paddingBottom: 8,
-                margin: 0,
-              }}
-              codeTagProps={{ style: { background: "transparent" } }}
-            >
-              {CODE}
-            </SyntaxHighlighter>
-          }
-        />
+        <Terminal title="garn.ts" text={<SampleCode code={CODE} />} />
         <Terminal
           title="terminal"
-          text={<TypingText prependedText="$ garn" texts={TERMINAL_EXAMPLES} />}
+          text={<TypingText prependedText="$ garn" commands={COMMANDS} />}
         />
       </div>
     </section>
