@@ -20,6 +20,7 @@ export {
 export * as go from "./go/mod.ts";
 export * as haskell from "./haskell/mod.ts";
 export * as javascript from "./javascript/mod.ts";
+export * as python from "./python/mod.ts";
 
 // tools
 export { processCompose } from "./process_compose.ts";

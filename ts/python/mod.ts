@@ -3,13 +3,19 @@ import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
 import { nixSource } from "../internal/utils.ts";
 import { nixRaw } from "../nix.ts";
+import * as pythonInterpreters from "../internal/nixpkgs/pythonInterpreters/mod.ts";
+import { parsePyprojectToml } from "./utils.ts";
 export { plugin as vite } from "../javascript/vite.ts";
+
+export const interpreters = pythonInterpreters;
 
 /**
  * Creates a pyproject based python garn Project.
  */
 export function mkPythonProject(args: {
-  description: string;
+  // fields like name, version, description are read from pyproject.toml
+  // We want to encourage using the upstream fields as much as possible,
+  //   as this benefits portability.
   src: string;
   pythonInterpreter: Package;
 }): Project & {
@@ -17,19 +23,28 @@ export function mkPythonProject(args: {
   devShell: Environment;
 } {
   const python = args.pythonInterpreter.nixExpression;
+  const pyproject = parsePyprojectToml(
+    Deno.readTextFileSync(`${args.src}/pyproject.toml`),
+  );
+  if (pyproject.error) {
+    throw new Error(
+      `Could not parse pyproject.toml: ${pyproject.error.message}`,
+    );
+  }
   const constants = nixRaw`
     lib = pkgs.lib;
     python = ${python};
     src = ${nixSource(args.src)};
     pyproject = builtins.fromTOML
       (builtins.readFile "\${src}/pyproject.toml");
-    dependencies = pyproject.project.dependencies;
+    dependencies = pyproject.project.dependencies or [];
     pickPackage = dep: python.pkgs.\${dep} or (throw ''
       Package not supported or not available: \${dep}
       Dependency not found in nixpkgs python packages
     '');
     toPackages = map pickPackage;
     pythonDependencies = toPackages dependencies;
+    pythonSetupDependencies = toPackages pyproject.build-system.requires or ["setuptools"];
   `;
   const pkg: Package = mkPackage(
     nixRaw`
@@ -41,7 +56,7 @@ export function mkPythonProject(args: {
           version = pyproject.project.version;
           src = ${nixSource(args.src)};
           format = "pyproject";
-          buildInputs = toPackages pyproject.build-system.requires;
+          buildInputs = pythonSetupDependencies;
           propagatedBuildInputs = pythonDependencies;
         }
     `,
@@ -53,7 +68,11 @@ export function mkPythonProject(args: {
         ${constants}
         pythonWithDeps = python.withPackages (ps:
           pythonDependencies
-          ++ [python.pkgs.pip]
+          ++ pythonSetupDependencies
+          ++ [
+            python.pkgs.pip
+            python.pkgs.wheel
+          ]
         );
         shellHook = ''
           tmp_path=$(realpath ./.pythonenv)
@@ -84,7 +103,7 @@ export function mkPythonProject(args: {
   });
   return mkProject(
     {
-      description: args.description,
+      description: pyproject.data.project?.description || "A python project",
       defaultEnvironment: devShell,
     },
     {

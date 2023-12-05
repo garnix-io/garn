@@ -19,23 +19,23 @@ import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import * as pythonInterpreters from "../internal/nixpkgs/pythonInterpreters/mod.ts";
 import * as nix from "../nix.ts";
 import { nixAttrSet } from "../nix.ts";
+import * as toml from "https://deno.land/std@0.109.0/encoding/toml.ts";
 
-const pyprojectToml = outdent`
-  [build-system]
-  requires = ["setuptools"]
-  build-backend = "setuptools.build_meta"
-
-  [project]
-  name = "my_package"
-  version = "0.0.0"
-
-  dependencies = [
-    "requests"
-  ]
-
-  [project.scripts]
-  my-script = "my_package:main"
-`;
+const pyprojectToml = toml.stringify({
+  "build-system": {
+    requires: ["setuptools"],
+    "build-backend": "setuptools.build_meta",
+  },
+  project: {
+    name: "my_package",
+    version: "0.0.0",
+    description: "A python project",
+    dependencies: ["requests"],
+    scripts: {
+      "my-script": "my_package:main",
+    },
+  },
+});
 
 const myPackagePy = outdent`
   import requests
@@ -52,14 +52,14 @@ describe("mkPythonProject", () => {
   let tempDir: string;
   beforeEach(() => {
     tempDir = Deno.makeTempDirSync({ prefix: "garn-mkPythonProject-test" });
+    Deno.chdir(tempDir);
     Deno.writeTextFileSync(`${tempDir}/pyproject.toml`, pyprojectToml);
     Deno.writeTextFileSync(`${tempDir}/my_package.py`, myPackagePy);
   });
 
   it("allows building a python project and running scripts from it", () => {
-    const project = garn.mkPythonProjectSimple({
+    const project = garn.mkPythonProject({
       src: "./.",
-      description: "A python project",
       pythonInterpreter: pythonInterpreters.python310,
     });
     const output = buildPackage(project.package, { dir: tempDir });
@@ -71,19 +71,37 @@ describe("mkPythonProject", () => {
     assertStringIncludes(myScriptOutput.stdout, "Hello, world!");
   });
 
-  it("generates a working devShell containing the python deps", () => {
-    const project = garn.mkPythonProjectSimple({
+  it("generates a working devShell containing the python deps and scripts", () => {
+    const project = garn.mkPythonProject({
       src: "./.",
-      description: "A python project",
       pythonInterpreter: pythonInterpreters.python310,
     });
     runInDevShell(project.devShell, {
       dir: tempDir,
       cmd: "python -c 'import requests; print(requests.__version__)'",
     });
+    runInDevShell(project.devShell, {
+      dir: tempDir,
+      cmd: "my-script",
+    });
   });
 
-  it("raises informative error when dependency not available", () => {
+  it("accepts minimal pyproject.toml with only name and version defined", () => {
+    const pyprojectToml = toml.stringify({
+      project: {
+        name: "my_package",
+        version: "0.0.0",
+      },
+    });
+    Deno.writeTextFileSync(`${tempDir}/pyproject.toml`, pyprojectToml);
+    const project = garn.mkPythonProject({
+      src: "./.",
+      pythonInterpreter: pythonInterpreters.python310,
+    });
+    buildPackage(project.package, { dir: tempDir });
+  });
+
+  it("raises informative error when a dependency is not available", () => {
     const pyprojectToml = outdent`
       [build-system]
       requires = ["setuptools"]
@@ -92,15 +110,15 @@ describe("mkPythonProject", () => {
       [project]
       name = "my_package"
       version = "0.0.0"
+      description = "A python project"
 
       dependencies = [
         "some-nonexistent-package"
       ]
     `;
     Deno.writeTextFileSync(`${tempDir}/pyproject.toml`, pyprojectToml);
-    const project = garn.mkPythonProjectSimple({
+    const project = garn.mkPythonProject({
       src: "./.",
-      description: "A python project",
       pythonInterpreter: pythonInterpreters.python310,
     });
     const pkg = project.package;
