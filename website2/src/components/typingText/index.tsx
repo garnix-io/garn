@@ -5,21 +5,21 @@ import styles from "./styles.module.css";
 
 export type Command = TextCommand | OtherCommand;
 
-interface TextCommand extends BasicCommand {
+type TextCommand = BasicCommand & {
   action: "type" | "response";
   text: string;
-}
+};
 
-interface OtherCommand extends BasicCommand {
+type OtherCommand = BasicCommand & {
   action: "clear" | "restart" | "delete" | "delay";
-}
+};
 
-interface BasicCommand {
+type BasicCommand = {
   delay?: number;
   showCursor?: boolean;
-}
+};
 
-interface Props {
+type Props = {
   prependedText: string;
   commands: Command[];
 }
