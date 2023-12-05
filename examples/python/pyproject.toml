@@ -1,0 +1,10 @@
+[project]
+name = "someproject"
+version = "0.1.0"
+dependencies = [
+  "requests"
+]
+
+[project.scripts]
+my-script = "main:main"
+
