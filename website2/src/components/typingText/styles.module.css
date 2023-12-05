@@ -11,8 +11,7 @@
 }
 
 .cursor {
-  position: absolute;
-  display: inline;
+  display: inline-block;
   width: 7px;
   margin: 2px 0 0 1px;
   border-bottom: 16px solid #000;

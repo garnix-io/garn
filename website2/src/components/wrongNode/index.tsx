@@ -2,7 +2,7 @@ import { Text } from "../text";
 import { SampleCode } from "../sampleCode";
 import { Terminal } from "../terminal";
 import styles from "./styles.module.css";
-import { Command, TypingText2 } from "../typingText2";
+import { Command, TypingText } from "../typingText";
 
 const CODE = `import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
 
@@ -12,25 +12,23 @@ export const frontend = garn.javascript.mkNpmProject({
   nodeVersion: "18",
 });`;
 
-const TERMINAL = `$ node
-node: command not found
-$ garn enter frontend
-[garn] Entering frontend shell. Type 'exit' to exit.
-$ node --version
-v18.17.1`;
-
-const TERMINAL2: Command[] = [
+const COMMANDS: Command[] = [
   { action: "type", text: "node" },
-  { action: "response", text: "node: command not found", delay: 300 },
-  { action: "type", text: "garn enter frontend", delay: 1000 },
+  { action: "delay", delay: 300, showCursor: true },
+  { action: "response", text: "node: command not found" },
+  { action: "delay", delay: 1000 },
+  { action: "type", text: "garn enter frontend" },
+  { action: "delay", delay: 300, showCursor: true },
   {
     action: "response",
     text: "[garn] Entering frontend shell. Type 'exit' to exit.",
-    delay: 300,
   },
-  { action: "type", text: "node --version", delay: 1000 },
-  { action: "response", text: "v18.17.1", delay: 300 },
-  { action: "clear", delay: 5000 },
+  { action: "delay", delay: 1000 },
+  { action: "type", text: "node --version" },
+  { action: "delay", delay: 300, showCursor: true },
+  { action: "response", text: "v18.17.1" },
+  { action: "delay", delay: 5000 },
+  { action: "clear" },
   { action: "restart" },
 ];
 
@@ -52,7 +50,8 @@ export const WrongNode = () => {
         <Terminal title="garn.ts" text={<SampleCode code={CODE} />} />
         <Terminal
           title="terminal"
-          text={<TypingText2 prependedText="$" commands={TERMINAL2} />}
+          text={<TypingText prependedText="$" commands={COMMANDS} />}
+          expectedLineCount={6}
         />
       </div>
     </section>

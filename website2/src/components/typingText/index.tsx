@@ -3,18 +3,38 @@
 import { useEffect, useState } from "react";
 import styles from "./styles.module.css";
 
-interface Props {
-  prependedText: string;
-  texts: string[];
+export type Command = TextCommand | OtherCommand;
+
+interface TextCommand extends BasicCommand {
+  action: "type" | "response";
+  text: string;
 }
 
-export const TypingText = ({ prependedText, texts }: Props) => {
-  const [termState, setTermState] = useState({
-    deleting: false,
+interface OtherCommand extends BasicCommand {
+  action: "clear" | "restart" | "delete" | "delay";
+}
+
+interface BasicCommand {
+  delay?: number;
+  showCursor?: boolean;
+}
+
+interface Props {
+  prependedText: string;
+  commands: Command[];
+}
+
+export const TypingText = ({ prependedText, commands }: Props) => {
+  const [termState, setTermState] = useState<{
+    idx: number;
+    lines: string[];
+    currentLine: string;
+  }>({
     idx: 0,
-    text: "",
+    lines: [],
+    currentLine: "",
   });
-  const currentExample = texts[termState.idx];
+  const currentCommand = commands[termState.idx];
   useEffect(() => {
     let timeout: NodeJS.Timeout;
     const type = (delay: number, newState: Partial<typeof termState>) => {
@@ -25,32 +45,71 @@ export const TypingText = ({ prependedText, texts }: Props) => {
         });
       }, delay);
     };
-    if (termState.deleting) {
-      if (termState.text.length > 0) {
-        type(5 + Math.random() * 15, {
-          text: currentExample.slice(0, termState.text.length - 1),
+    if (currentCommand.action === "delay") {
+      type(currentCommand.delay || 1000, { idx: (termState.idx += 1) });
+    } else if (currentCommand.action === "type") {
+      if (termState.currentLine.length === 0)
+        type(currentCommand.delay || 50, {
+          currentLine: `${prependedText} `,
         });
-      } else {
-        type(50, {
-          deleting: false,
-          idx: (termState.idx + 1) % texts.length,
-        });
-      }
-    } else {
-      if (termState.text.length < currentExample.length) {
+      else if (
+        termState.currentLine.length <
+        currentCommand.text.length + prependedText.length + 1
+      ) {
+        const currentChar = currentCommand.text.slice(
+          termState.currentLine.length - prependedText.length - 1,
+          termState.currentLine.length - prependedText.length
+        );
         type(20 + Math.random() * 45, {
-          text: currentExample.slice(0, termState.text.length + 1),
+          currentLine: `${termState.currentLine}${currentChar}`,
         });
       } else {
-        type(2500, { deleting: true });
+        type(100, {
+          idx: (termState.idx += 1),
+          currentLine: "",
+          lines: [...termState.lines, termState.currentLine],
+        });
       }
+    } else if (currentCommand.action === "delete") {
+      if (termState.currentLine.length === 0) {
+        type(currentCommand.delay || 50, {
+          lines: termState.lines.slice(0, termState.lines.length - 1),
+          currentLine: termState.lines[termState.lines.length - 1],
+        });
+      } else if (termState.currentLine.length <= prependedText.length + 1)
+        type(100, { idx: (termState.idx += 1) });
+      else
+        type(5 + Math.random() * 15, {
+          currentLine: termState.currentLine.slice(
+            0,
+            termState.currentLine.length - 1
+          ),
+        });
+    } else if (currentCommand.action === "response") {
+      type(currentCommand.delay || 100, {
+        lines: [...termState.lines, currentCommand.text],
+        idx: (termState.idx += 1),
+      });
+    } else if (currentCommand.action === "clear") {
+      type(currentCommand.delay || 100, {
+        lines: [],
+        idx: (termState.idx += 1),
+      });
+    } else if (currentCommand.action === "restart") {
+      type(currentCommand.delay || 100, { idx: 0 });
     }
     return () => clearTimeout(timeout);
   });
+  const lines =
+    termState.currentLine.length > 0
+      ? [...termState.lines, termState.currentLine]
+      : termState.lines;
   return (
-    <span className={styles.container}>
-      {prependedText} {termState.text}
-      <div className={styles.cursor} />
-    </span>
+    <pre className={styles.container}>
+      {lines.join("\n")}
+      {((["type", "delete"].includes(currentCommand.action) &&
+        termState.currentLine.length > 0) ||
+        currentCommand.showCursor) && <div className={styles.cursor} />}
+    </pre>
   );
 };
