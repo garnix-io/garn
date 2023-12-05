@@ -1,6 +1,6 @@
 import { Header } from "@/components/header";
-import { Hero } from "@/components/hero";
-import { WrongNode } from "@/components/wrongNode";
+import { Hero } from "@/components/homePage/hero";
+import { WrongNode } from "@/components/homePage/wrongNode";
 
 const Home = () => {
   return (

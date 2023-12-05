@@ -1,8 +1,8 @@
-import { Text } from "../text";
-import { SampleCode } from "../sampleCode";
-import { Terminal } from "../terminal";
+import { Text } from "../../text";
+import { SampleCode } from "../../sampleCode";
+import { Terminal } from "../../terminal";
 import styles from "./styles.module.css";
-import { Command, TypingText } from "../typingText";
+import { Command, TypingText } from "../../typingText";
 
 const CODE = `import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
 

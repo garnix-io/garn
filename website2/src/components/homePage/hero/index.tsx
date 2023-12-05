@@ -1,9 +1,9 @@
 import Link from "next/link";
 import styles from "./styles.module.css";
-import { Terminal } from "../terminal";
-import { SampleCode } from "../sampleCode";
-import { Text } from "../text";
-import { Command, TypingText } from "../typingText";
+import { Terminal } from "../../terminal";
+import { SampleCode } from "../../sampleCode";
+import { Text } from "../../text";
+import { Command, TypingText } from "../../typingText";
 
 const COMMANDS: Command[] = [
   { action: "type", text: "check backend.no-todos-allowed" },
