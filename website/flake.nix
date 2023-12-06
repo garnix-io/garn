@@ -1,7 +1,8 @@
 {
   inputs.nixpkgs-repo.url = "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566";
   inputs.npmlock2nix-repo = { url = "github:nix-community/npmlock2nix?rev=9197bbf397d76059a76310523d45df10d2e4ca81"; flake = false; };
-  outputs = { self, nixpkgs-repo, npmlock2nix-repo }:
+  inputs.importedFlake-github_martinvonz_jj_v0_11_0.url = "github:martinvonz/jj/v0.11.0";
+  outputs = { self, nixpkgs-repo, npmlock2nix-repo, importedFlake-github_martinvonz_jj_v0_11_0 }:
     let
       nixpkgs = nixpkgs-repo;
       systems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
@@ -228,6 +229,21 @@ ${"prettier '**/*.{ts,tsx}' --check"}
           };
         in
         {
+          "devEnv" = (pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
+            nativeBuildInputs =
+              previousAttrs.nativeBuildInputs
+              ++
+              [
+                (
+                  let
+                    x = importedFlake-github_martinvonz_jj_v0_11_0;
+                  in
+                  if x ? "packages".${system}."default"
+                  then x."packages".${system}."default"
+                  else builtins.throw "The package \"${"default"}\" was not found in ${"github:martinvonz/jj/v0.11.0"}"
+                )
+              ];
+          });
           "website" = ((pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
             nativeBuildInputs =
               previousAttrs.nativeBuildInputs

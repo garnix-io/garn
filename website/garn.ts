@@ -21,3 +21,12 @@ export const website = garn.javascript
 export const dev = website.shell("npm install ; npm run dev");
 
 export const build = website.shell("npm install ; npm run build");
+
+const flake = garn.importFromGithub({
+  repo: "martinvonz/jj",
+  revOrRef: "v0.11.0",
+});
+
+export const devEnv = garn.emptyEnvironment.withDevTools([
+  flake.getPackage("default"),
+]);
