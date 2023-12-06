@@ -12,8 +12,8 @@ const Home = () => {
       <Hero />
       <WrongNode />
       <CI />
-      <FAQ />
       <Bash />
+      <FAQ />
     </main>
   );
 };
