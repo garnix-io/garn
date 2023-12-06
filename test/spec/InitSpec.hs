@@ -48,8 +48,8 @@ spec = do
         readFile "garn.ts"
           `shouldReturn` unindent
             [i|
-              import * as garn from "https://garn.io/ts/v0.0.18/mod.ts";
-              import * as pkgs from "https://garn.io/ts/v0.0.18/nixpkgs.ts";
+              import * as garn from "https://garn.io/ts/v0.0.19/mod.ts";
+              import * as pkgs from "https://garn.io/ts/v0.0.19/nixpkgs.ts";
 
               export const test = garn.haskell.mkHaskellProject({
                 description: "",
@@ -89,8 +89,8 @@ spec = do
         readFile "garn.ts"
           `shouldReturn` unindent
             [i|
-              import * as garn from "https://garn.io/ts/v0.0.18/mod.ts";
-              import * as pkgs from "https://garn.io/ts/v0.0.18/nixpkgs.ts";
+              import * as garn from "https://garn.io/ts/v0.0.19/mod.ts";
+              import * as pkgs from "https://garn.io/ts/v0.0.19/nixpkgs.ts";
 
               export const someGoProject = garn.go.mkGoProject({
                 description: "My go project",
@@ -161,8 +161,8 @@ spec = do
           onTestFailureLog output
           garnFile <- lines <$> readFile "garn.ts"
           take 2 garnFile
-            `shouldBe` [ "import * as garn from \"https://garn.io/ts/v0.0.18/mod.ts\";",
-                         "import * as pkgs from \"https://garn.io/ts/v0.0.18/nixpkgs.ts\";"
+            `shouldBe` [ "import * as garn from \"https://garn.io/ts/v0.0.19/mod.ts\";",
+                         "import * as pkgs from \"https://garn.io/ts/v0.0.19/nixpkgs.ts\";"
                        ]
           forM_ (drop 2 garnFile) $ \line ->
             when (line /= "") $

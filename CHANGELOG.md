@@ -1,6 +1,8 @@
 # Changelog
 
-## v0.0.19 (unreleased)
+## v0.0.20 (unreleased)
+
+## v0.0.19
 
 - Add `garn.javascript.prettier` plugin to automatically format and check
   javascript formatting using [prettier](https://prettier.io/).
