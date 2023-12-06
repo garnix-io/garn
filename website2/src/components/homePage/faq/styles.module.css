@@ -1,0 +1,41 @@
+.container {
+  padding: 136px 96px;
+  border-left: 16px solid var(--color-black);
+  border-right: 16px solid var(--color-black);
+  background-color: var(--color-black);
+  color: var(--color-white);
+}
+
+.content {
+  max-width: 1216px;
+  margin: 0 auto;
+}
+
+.title {
+  margin-bottom: 64px;
+  text-transform: uppercase;
+}
+
+.faq {
+  padding: 24px 0;
+  margin-bottom: 32px;
+  border-top: 2px solid var(--color-gray20);
+}
+
+.faqTitle {
+  text-transform: uppercase;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.toggle {
+  font-size: 24px;
+  line-height: 40px;
+}
+
+.faqAnswer {
+  height: 0;
+  overflow: hidden;
+}
