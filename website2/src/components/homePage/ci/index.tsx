@@ -4,8 +4,8 @@ import { Terminal } from "../../terminal";
 import styles from "./styles.module.css";
 import { Command, TypingText } from "../../typingText";
 
-const CODE = `import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
-import * as nixpkgs from "https://garn.io/ts/v0.0.14/nixpkgs.ts";
+const CODE = `import * as garn from "https://garn.io/ts/v0.0.18/mod.ts";
+import * as nixpkgs from "https://garn.io/ts/v0.0.18/nixpkgs.ts";
 
 export const backend = garn.haskell
   .mkHaskellProject({
@@ -15,7 +15,7 @@ export const backend = garn.haskell
     src: ".",
   })
   .withDevTools([nixpkgs.hlint])
-  .addCheck("hlint")\`hlint *.hs\`;`;
+  .addCheck("hlint", "hlint *.hs");`;
 
 const COMMANDS: Command[] = [
   { action: "type", text: "garn check" },
