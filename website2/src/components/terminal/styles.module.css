@@ -4,6 +4,11 @@
   line-height: 28px;
 }
 
+.inverse {
+  color: var(--color-white);
+  border-color: var(--color-white);
+}
+
 .header {
   background-color: var(--color-black);
   color: var(--color-white);
@@ -11,10 +16,20 @@
   border: 1px solid var(--color-black);
 }
 
+.inverse .header {
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+  color: var(--color-black);
+}
+
 .content {
   border: 1px solid var(--color-black);
   padding: 24px;
   overflow: auto;
+}
+
+.inverse .content {
+  border: 1px solid var(--color-white);
 }
 
 @media only screen and (max-width: 768px) {
