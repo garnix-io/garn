@@ -1,15 +1,19 @@
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { oneLight } from "react-syntax-highlighter/dist/esm/styles/prism";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface Props {
   code: string;
+  inverse?: boolean;
 }
 
-export const SampleCode = ({ code }: Props) => {
+export const SampleCode = ({ code, inverse }: Props) => {
   return (
     <SyntaxHighlighter
       language="javascript"
-      style={oneLight}
+      style={inverse ? oneDark : oneLight}
       customStyle={{
         background: "transparent",
         padding: 0,

@@ -5,11 +5,17 @@ interface Props {
   title: string;
   text: ReactNode;
   expectedLineCount?: number;
+  inverse?: boolean;
 }
 
-export const Terminal = ({ title, text, expectedLineCount }: Props) => {
+export const Terminal = ({
+  title,
+  text,
+  expectedLineCount,
+  inverse,
+}: Props) => {
   return (
-    <div className={styles.container}>
+    <div className={`${styles.container} ${inverse ? styles.inverse : ""}`}>
       <div className={styles.header}>{title}</div>
       <pre
         className={styles.content}
