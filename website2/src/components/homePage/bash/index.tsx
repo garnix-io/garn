@@ -10,7 +10,7 @@ const CODE = `export const backend = garn.go.mkGoProject({
   goVersion: "1.20",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
-  .addExecutable("codegen")\`protoc --go_out=out protobufs/*.proto\`;`;
+  .addExecutable("codegen", "protoc --go_out=out protobufs/*.proto");`;
 
 const COMMANDS: Command[] = [
   { action: "type", text: "protoc protobufs/*.proto" },
