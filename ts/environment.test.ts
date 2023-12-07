@@ -37,10 +37,10 @@ describe("environments", () => {
   });
 
   describe("addToSetup", () => {
-    describe('type = "sandbox"', () => {
+    describe('type = "sandboxed"', () => {
       it("allows adding scripts snippets to the sandbox setup", () => {
         const env = addToSetup(
-          "sandbox",
+          "sandboxed",
           garn.emptyEnvironment,
           'FOO="env var value"',
         );
@@ -54,11 +54,11 @@ describe("environments", () => {
 
       it("doesn't affect the underlying environment", () => {
         const original = addToSetup(
-          "sandbox",
+          "sandboxed",
           garn.emptyEnvironment,
           'FOO="original"',
         );
-        const modified = addToSetup("sandbox", original, 'FOO="modified"');
+        const modified = addToSetup("sandboxed", original, 'FOO="modified"');
         let path = buildPackage(original.build("echo $FOO > $out/artifact"));
         assertEquals(Deno.readTextFileSync(`${path}/artifact`), "original\n");
         path = buildPackage(modified.build("echo $FOO > $out/artifact"));
@@ -67,7 +67,7 @@ describe("environments", () => {
 
       it("does not affect Executables", () => {
         const env = addToSetup(
-          "sandbox",
+          "sandboxed",
           garn.emptyEnvironment,
           'FOO="env var value"',
         );
@@ -78,10 +78,10 @@ describe("environments", () => {
       });
     });
 
-    describe('type = "common"', () => {
+    describe('type = "unsandboxed"', () => {
       it("allows adding scripts snippets to the setup for Packages, Checks & Executables", () => {
         const env = addToSetup(
-          "common",
+          "unsandboxed",
           garn.emptyEnvironment,
           'FOO="env var value"',
         );
@@ -99,11 +99,11 @@ describe("environments", () => {
 
       it("doesn't affect the underlying environment", () => {
         const original = addToSetup(
-          "common",
+          "unsandboxed",
           garn.emptyEnvironment,
           'FOO="original"',
         );
-        const modified = addToSetup("common", original, 'FOO="modified"');
+        const modified = addToSetup("unsandboxed", original, 'FOO="modified"');
         assertStdout(
           assertSuccess(runExecutable(original.shell("echo $FOO"))),
           "original\n",

@@ -6,7 +6,7 @@ import {
   NixStrLitInterpolatable,
   toHumanReadable,
 } from "./nix.ts";
-import { commonScript, Environment } from "./environment.ts";
+import { wrapUnsandboxedScript, Environment } from "./environment.ts";
 
 /**
  * `Executable`s are commands (usually shell snippets) that are being run on
@@ -71,7 +71,7 @@ export function mkShellExecutable(
   s: TemplateStringsArray | string,
   ...args: Array<NixStrLitInterpolatable>
 ): Executable {
-  const cmdToExecute = commonScript(
+  const cmdToExecute = wrapUnsandboxedScript(
     env,
     typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args),
   );

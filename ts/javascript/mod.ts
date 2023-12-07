@@ -82,7 +82,7 @@ export function mkNpmProject(args: {
     "node_modules",
   );
   const devShell: Environment = addToSetup(
-    "sandbox",
+    "sandboxed",
     mkEnvironment({
       src: args.src,
     }),
