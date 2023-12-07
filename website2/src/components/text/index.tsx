@@ -3,7 +3,7 @@ import { HTMLProps } from "react";
 import styles from "./styles.module.css";
 
 interface Props extends HTMLProps<HTMLDivElement> {
-  type?: "p" | "h1" | "h2";
+  type?: "p" | "h1" | "h2" | "h3";
 }
 
 export const Text = ({ type = "p", children, className, ...rest }: Props) => {
@@ -27,6 +27,12 @@ export const Text = ({ type = "p", children, className, ...rest }: Props) => {
       <h2 className={`${styles.header} ${className}`} {...rest}>
         {children}
       </h2>
+    );
+  else if (type === "h3")
+    return (
+      <h3 className={`${styles.header} ${className}`} {...rest}>
+        {children}
+      </h3>
     );
   else return <div>Text type not found: {type}</div>;
 };
