@@ -10,12 +10,19 @@ export { plugin as vite } from "../javascript/vite.ts";
 export const interpreters = pythonInterpreters;
 
 /**
- * Creates a pyproject based python garn Project.
+ * Creates a pyproject.toml based python project.
+ *
+ * This will create a Project with
+ *  - a `pkg` key that builds the entire python project;
+ *  - a default shell that provides all python dependencies as well as all scripts
+ *    defined via pyproject.toml
+ *
+ * Information like name, version, description are retrieved from the pyproject.toml file.
+ *
+ * @param src - The source directory
+ * @param pythonInterpreter - The python interpreter to use. Pick one from garn.python.interpreters
  */
 export function mkPythonProject(args: {
-  // fields like name, version, description are read from pyproject.toml
-  // We want to encourage using the upstream fields as much as possible,
-  //   as this benefits portability.
   src: string;
   pythonInterpreter: Package;
 }): Project & {
