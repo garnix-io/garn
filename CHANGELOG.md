@@ -9,8 +9,8 @@
 - Add `garn.callFlake` helper to allow importing flake files by local path.
 - Add `garn.importFlake` helper to allow importing flake files by url, e.g. from GitHub.
 
-- Add `Environment.addToSetup` and `Environment.addToSandboxSetup`, making setups for `Environment`s more flexible.
-- Remove `sandboxSetup` parameter from `mkEnvironment`, use `addtoSandboxSetup` instead.
+- Remove `sandboxSetup` parameter from `mkEnvironment`, add lower-level
+  `addToSetup` helper function to use instead.
 
 ## v0.0.18
 

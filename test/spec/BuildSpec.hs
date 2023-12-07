@@ -93,17 +93,21 @@ spec = do
           "garn.ts"
           [i|
             import * as garn from "#{repoDir}/ts/mod.ts"
+            import { addToSetup } from "#{repoDir}/ts/environment.ts"
 
-              const env = garn.mkEnvironment()
-                .addToSandboxSetup(garn.nix.nixStrLit`
-                  mkdir dist
-                  echo build-content > dist/build-artifact
-                `);
-              export const project = garn.mkProject({
-                description: "",
-                defaultEnvironment: env,
-              }, {})
-                .addPackage("build", "mv dist/build-artifact $out/build-artifact");
+            const env = addToSetup(
+              "sandbox",
+              garn.mkEnvironment(),
+              garn.nix.nixStrLit`
+                mkdir dist
+                echo build-content > dist/build-artifact
+              `,
+            );
+            export const project = garn.mkProject({
+              description: "",
+              defaultEnvironment: env,
+            }, {})
+              .addPackage("build", "mv dist/build-artifact $out/build-artifact");
           |]
         output <- runGarn ["build", "project"]
         readFile "result/build-artifact" `shouldReturn` "build-content\n"
@@ -155,15 +159,18 @@ spec = do
           [i|
             import * as garn from "#{repoDir}/ts/mod.ts"
             import * as nix from "#{repoDir}/ts/nix.ts"
+            import { addToSetup } from "#{repoDir}/ts/environment.ts"
 
-              export const project = garn.mkProject(
-                { description: "" },
-                {
-                  package: garn
-                    .mkEnvironment().addToSandboxSetup(nix.nixStrLit`SETUP_VAR="hello from setup"`)
-                    .build("echo $SETUP_VAR > $out/build-artifact"),
-                },
-              )
+            export const project = garn.mkProject(
+              { description: "" },
+              {
+                package: addToSetup(
+                    "sandbox",
+                    garn.mkEnvironment(),
+                    nix.nixStrLit`SETUP_VAR="hello from setup"`,
+                  ).build("echo $SETUP_VAR > $out/build-artifact"),
+              },
+            )
           |]
         output <- runGarn ["build", "project"]
         readFile "result/build-artifact" `shouldReturn` "hello from setup\n"
