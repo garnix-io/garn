@@ -107,10 +107,13 @@ export const commonScript = (
   env: Environment,
   script: NixExpression,
 ): NixExpression =>
-  joinNixStrings("\n", [
-    ...env.setup.filter((x) => x.type === "common").map((x) => x.snippet),
-    script,
-  ]);
+  joinNixStrings(
+    [
+      ...env.setup.filter((x) => x.type === "common").map((x) => x.snippet),
+      script,
+    ],
+    "\n",
+  );
 
 /**
  * Add the sandbox setup of an `Environment` to a given script. This should be
@@ -120,11 +123,10 @@ export const sandboxScript = (
   env: Environment,
   script: NixExpression,
 ): NixExpression =>
-  joinNixStrings("\n", [
-    nixStrLit`mkdir -p $out`,
-    ...env.setup.map((x) => x.snippet),
-    script,
-  ]);
+  joinNixStrings(
+    [nixStrLit`mkdir -p $out`, ...env.setup.map((x) => x.snippet), script],
+    "\n",
+  );
 
 /**
  * Creates a new shell script `Executable`, run in the `emptyEnvironment`.

@@ -197,16 +197,13 @@ export function nixStrLit(
 }
 
 export function joinNixStrings(
-  separator: string,
-  list: Array<NixExpression>,
+  arr: Array<NixExpression>,
+  joiner: string,
 ): NixExpression {
   return {
     [__nixExpressionTag]: null,
     type: "strLit",
-    str: {
-      initial: "",
-      rest: list.map((expr, i) => [expr, i < list.length - 1 ? separator : ""]),
-    },
+    str: join(arr, joiner),
   };
 }
 

@@ -37,19 +37,19 @@ Deno.test("nixStrLit correctly serializes into a nix expression", () => {
 });
 
 Deno.test("joinNixStrings joins strings using the given separator", () => {
-  assertEquals(renderNixExpression(joinNixStrings("sep", [])), '""');
+  assertEquals(renderNixExpression(joinNixStrings([], "sep")), '""');
   assertEquals(
     renderNixExpression(
-      joinNixStrings("sep", [nixStrLit`foo ${nixRaw`42`} bar`]),
+      joinNixStrings([nixStrLit`foo ${nixRaw`42`} bar`], "sep"),
     ),
     '"${"foo ${42} bar"}"',
   );
   assertEquals(
     renderNixExpression(
-      joinNixStrings("sep", [
-        nixStrLit`foo ${nixRaw`42`} bar`,
-        nixStrLit`baz ${nixRaw`23`} boo`,
-      ]),
+      joinNixStrings(
+        [nixStrLit`foo ${nixRaw`42`} bar`, nixStrLit`baz ${nixRaw`23`} boo`],
+        "sep",
+      ),
     ),
     '"${"foo ${42} bar"}sep${"baz ${23} boo"}"',
   );
