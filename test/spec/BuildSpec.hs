@@ -96,7 +96,7 @@ spec = do
             import { addToSetup } from "#{repoDir}/ts/environment.ts"
 
             const env = addToSetup(
-              "sandbox",
+              "sandboxed",
               garn.mkEnvironment(),
               garn.nix.nixStrLit`
                 mkdir dist
@@ -165,7 +165,7 @@ spec = do
               { description: "" },
               {
                 package: addToSetup(
-                    "sandbox",
+                    "sandboxed",
                     garn.mkEnvironment(),
                     nix.nixStrLit`SETUP_VAR="hello from setup"`,
                   ).build("echo $SETUP_VAR > $out/build-artifact"),
