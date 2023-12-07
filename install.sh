@@ -95,7 +95,7 @@ echo ==========================
 
 if test_cache_configured; then
   echo Hooray, the garnix cache is configured.
-else
+elif true >> /etc/nix/nix.conf; then
   echo For \'garn\' to work well, nix needs to use the garnix.io binary
   echo cache. But the cache configuration cannot be found. This
   echo installer will modify /etc/nix/nix.conf to add the garnix.io binary cache.
@@ -109,10 +109,25 @@ else
   configure_cache
   test_cache_configured || (echo "Failed to configure the garnix cache, cancelling installation." && exit 1)
   echo The garnix cache is now configured.
+else
+  echo "For 'garn' to work well, Nix needs to use the garnix.io binary"
+  echo "cache. But Nix currently isn't configured to use that cache."
+  echo
+  echo "This installer attempted to add the cache config to /etc/nix/nix.conf,"
+  echo "but that file was not writable (you may be using NixOS)."
+  echo "Please add the following lines to your Nix config and restart your nix-daemon:"
+  echo "    extra-substituters = https://cache.garnix.io"
+  echo "    extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g="
+  echo
+  echo "On non-NixOS systems you can add these lines to /etc/nix/nix.conf."
+  echo "On NixOS you can add these to nix.extraOptions in /etc/nixos/configuration.nix."
+  echo
+  echo "Once you have added these lines please re-run this installer."
+  exit 1
 fi
 
 echo "installing 'garn'..."
-nix --extra-experimental-features 'nix-command flakes' profile install -L "github:garnix-io/garn/v0.0.18"
+nix --extra-experimental-features 'nix-command flakes' profile install -L "github:garnix-io/garn/v0.0.19"
 echo "testing 'garn' installation..."
 garn --help
 
