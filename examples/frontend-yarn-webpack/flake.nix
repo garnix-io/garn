@@ -173,7 +173,7 @@
             export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
           ";
         };
-        shell = "cd ${"."} && ${"yarn start"}";
+        shell = "${"cd ${"."} && ${"yarn start"}"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -227,7 +227,7 @@
             export NODE_PATH=${nodeModulesPath}:\$NODE_PATH
           ";
         };
-        shell = "cd ${"."} && ${"yarn start"}";
+        shell = "${"cd ${"."} && ${"yarn start"}"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
