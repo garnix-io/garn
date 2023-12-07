@@ -1,9 +1,8 @@
-import Link from "next/link";
 import styles from "./styles.module.css";
 import { Terminal } from "../../terminal";
 import { SampleCode } from "../../sampleCode";
-import { Text } from "../../text";
 import { Command, TypingText } from "../../typingText";
+import { HeaderWithActions } from "@/components/headerWithActions";
 
 const COMMANDS: Command[] = [
   { action: "type", text: "check backend.no-todos-allowed" },
@@ -34,21 +33,19 @@ export const Hero = () => {
   return (
     <section className={styles.container}>
       <div className={styles.content}>
-        <div className={styles.section}>
-          <Text type="h1" className={styles.header}>
-            Declaratively configure your projects, get reproducible results
-          </Text>
-          <div className={styles.actions}>
-            <Link className={styles.action} href="/documentation/get-started">
-              <div className={styles.text}>Get started</div>
-              <div className={styles.arrow}>&rarr;</div>
-            </Link>
-            <Link className={styles.action} href="/documentation/read-more">
-              <div className={styles.text}>READ MORE</div>
-              <div className={styles.arrow}>&rarr;</div>
-            </Link>
-          </div>
-        </div>
+        <HeaderWithActions
+          title="Declaratively configure your projects, get reproducible results"
+          links={[
+            {
+              text: "Get started",
+              href: "/documentation/get-started",
+            },
+            {
+              text: "READ MORE",
+              href: "/documentation/read-more",
+            },
+          ]}
+        />
         <div className={styles.mobileDivider} />
         <Terminal title="garn.ts" text={<SampleCode code={CODE} />} />
         <Terminal
