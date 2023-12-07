@@ -1,0 +1,22 @@
+.container {
+  padding: 136px 112px;
+  text-transform: uppercase;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  display: flex;
+  gap: 16px;
+}
+
+.garnix {
+  color: var(--color-gray88);
+}
+
+.garnix:hover {
+  text-decoration: underline;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    padding: 40px 16px;
+  }
+}
