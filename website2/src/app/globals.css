@@ -52,3 +52,7 @@ a {
   * END CSS RESET
   ****************
 **/
+
+body {
+  background-color: var(--color-white);
+}
