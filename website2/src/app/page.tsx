@@ -1,3 +1,4 @@
+import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { Bash } from "@/components/homePage/bash";
 import { CI } from "@/components/homePage/ci";
@@ -16,6 +17,7 @@ const Home = () => {
       <Bash />
       <FAQ />
       <Social />
+      <Footer />
     </main>
   );
 };
