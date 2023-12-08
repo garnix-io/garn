@@ -29,7 +29,7 @@ export const Social = () => {
         src={backgroundShape}
         alt="social background d20"
         className={styles.backgroundShape}
-        fill={width > 850 ? false : true}
+        fill={width <= 850}
       />
     </section>
   );
