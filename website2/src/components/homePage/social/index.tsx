@@ -8,7 +8,6 @@ import styles from "./styles.module.css";
 
 export const Social = () => {
   const { width } = useWindowSize();
-  console.log(width);
   return (
     <section className={styles.container}>
       <HeaderWithActions
