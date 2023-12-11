@@ -179,6 +179,50 @@ export const buildPackage = (
   return Deno.readLinkSync(`${dir}/result`);
 };
 
+export const runInDevShell = (
+  devShell: garn.Environment,
+  options: { cmd?: string; dir?: string } = {},
+): Output => {
+  const cmd = options.cmd ?? "true";
+  const dir = options.dir ?? Deno.makeTempDirSync({ prefix: "garn-test" });
+  const flakeFile = nix.renderFlakeFile(
+    nixAttrSet({
+      packages: nixAttrSet({
+        "x86_64-linux": nixAttrSet({
+          default: nix.nixRaw`
+            let
+              nixpkgs = ${nixpkgsInput};
+              pkgs = ${pkgs};
+              inherit (pkgs) system;
+            in ${devShell.nixExpression}
+          `,
+        }),
+      }),
+    }),
+  );
+  Deno.writeTextFileSync(`${dir}/flake.nix`, flakeFile);
+  return assertSuccess(
+    runCommand(
+      new Deno.Command("nix", {
+        args: ["develop", "-L", dir, "-c", "--", "bash", "-c", cmd],
+        cwd: dir,
+      }),
+    ),
+  );
+};
+
 export const testPkgs = {
   hello: mkPackage(nix.nixRaw("pkgs.hello"), "hello"),
+};
+
+export const assertThrowsWith = (
+  expectedErrorMessage: string,
+  fn: () => void,
+) => {
+  try {
+    fn();
+    throw `Expected fn to throw with ${expectedErrorMessage}, but it did not throw`;
+  } catch (err) {
+    assertEquals(err.message, expectedErrorMessage);
+  }
 };

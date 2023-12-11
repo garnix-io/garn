@@ -12,7 +12,13 @@ export const BashSnippetToCopy = (props: { snippet: string }) => {
   return (
     <div className="bash-snippet-to-copy">
       <code>{props.snippet}</code>
-      <CopyToClipboard text={props.snippet} onCopy={() => setCopied(true)}>
+      <CopyToClipboard
+        text={props.snippet}
+        onCopy={() => {
+          plausible?.("click#bash-snippet-copy");
+          setCopied(true);
+        }}
+      >
         <button role="button">{copied ? "Copied" : "Copy"}</button>
       </CopyToClipboard>
     </div>

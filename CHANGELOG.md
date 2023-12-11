@@ -1,9 +1,13 @@
 # Changelog
 
-## v0.0.19 (unreleased)
+## v0.0.20 (unreleased)
+
+## v0.0.19
 
 - Add `garn.javascript.prettier` plugin to automatically format and check
   javascript formatting using [prettier](https://prettier.io/).
+- Add `garn.callFlake` helper to allow importing flake files by local path.
+- Add `garn.importFlake` helper to allow importing flake files by url, e.g. from GitHub.
 
 ## v0.0.18
 

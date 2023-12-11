@@ -3,6 +3,7 @@
 
 module GarnSpec (spec) where
 
+import Control.Monad (when)
 import Data.String.AnsiEscapeCodes.Strip.Text (stripAnsiEscapeCodes)
 import Data.String.Conversions (cs)
 import Data.String.Interpolate (i)
@@ -103,7 +104,15 @@ spec = do
       it "outputs a version with --version" $ \onTestFailureLog -> do
         output <- runGarn ["--version"] "" repoDir Nothing
         onTestFailureLog output
-        stdout output `shouldBe` "v0.0.18\n"
+        when (stdout output /= "v0.0.19\n") $
+          expectationFailure
+            ( unindent
+                [i|
+                  garn --version output wrong:
+                  #{show (stdout output)} /= "v0.0.19\n"
+                  (consider running `cabal clean`!)
+                |]
+            )
         stderr output `shouldBe` ""
         exitCode output `shouldBe` ExitSuccess
 
@@ -155,7 +164,7 @@ spec = do
                 `shouldBe` unindent
                   [i|
                     [garn] Error: Version mismatch detected:
-                      garn cli tool version: v0.0.18
+                      garn cli tool version: v0.0.19
                       garn typescript library version: <testTsLibVersion>
 
                       Either:
@@ -165,8 +174,8 @@ spec = do
 
                       Or:
 
-                        Use version v0.0.18 of the typescript library.
-                        E.g.: import * as garn from "https://garn.io/ts/v0.0.18/mod.ts";
+                        Use version v0.0.19 of the typescript library.
+                        E.g.: import * as garn from "https://garn.io/ts/v0.0.19/mod.ts";
 
                       (Internal details: Error in $: key \"tag\" not found)
                   |]
