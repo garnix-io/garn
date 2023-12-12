@@ -10,18 +10,18 @@ export const info = {
 
 # Tutorial
 
-To install <Garn/>, head over to our [getting started guide](/docs/getting_started).
+To install <Text type="proper">Garn</Text>, head over to our [getting started guide](/documentation/getting-started).
 
 ## Your first `garn.ts` config
 
 All examples in this tutorial are also available
 [here](https://github.com/garnix-io/garn/tree/main/examples/getting-started).
 
-<Garn /> projects are configured with a single `garn.ts` file. (This file is read by <Garn /> rather than run directly via `node` or `deno`.) Your `garn.ts`
+<Text type="proper">Garn</Text> projects are configured with a single `garn.ts` file. (This file is read by <Text type="proper">Garn</Text> rather than run directly via `node` or `deno`.) Your `garn.ts`
 exports a collection of `Project`s. A `Project` contains all the information
 needed to build, run, and develop your software.
 
-The <Garn/> library exports a lot of helpers that make it easy to quickly
+The <Text type="proper">Garn</Text> library exports a lot of helpers that make it easy to quickly
 construct projects for common stacks, but you can also define these yourself.
 
 Here is an example `garn.ts` file for a single node-based project:
@@ -40,8 +40,6 @@ export const frontend = garn.javascript.mkNpmProject({
 In the same directory you can now run `garn enter frontend` to enter a shell
 with `node` version 18 available.
 
-<AsideText type="hint">You may have noticed that running `garn enter frontend` generated two files, `flake.nix` and `flake.lock`. These should be committed to your repository rather than gitignored. They both ensure reproducibility, and allow Nix to be used directly rather than only via <Garn/>. </AsideText>
-
 ```bash
 > garn enter frontend
 [garn] Entering frontend shell. Type 'exit' to exit.
@@ -49,6 +47,8 @@ with `node` version 18 available.
 > node --version
 v18.17.1
 ```
+
+Hint: You may have noticed that running `garn enter frontend` generated two files, `flake.nix` and `flake.lock`. These should be committed to your repository rather than gitignored. They both ensure reproducibility, and allow Nix to be used directly rather than only via <Text type="proper">Garn</Text>.
 
 `Projects` can contain `Check`s, which can be used to run automated tests for
 your project. You can add them with `addCheck`.
@@ -67,7 +67,7 @@ Now running `garn check frontend` will run `npm test` in the frontend project
 environment. These `Check`s are pure, i.e. they are run in a build sandbox. The
 downside of sandboxing is that these checks won't have access to the internet.
 The upside is that they'll be (almost) perfectly reproducible, cacheable, and
-runnable on CI (like <a href="https://garnix.io"><Garnix /></a>, see [the
+runnable on CI (like <a href="https://garnix.io"><Text type="proper">Garnix</Text></a>, see [the
 docs](https://garnix.io/docs) for more info).
 
 ## Multi-language support
@@ -83,10 +83,10 @@ export const backend = garn.go.mkGoProject({
 });
 ```
 
-This means that you can use <Garn/> to configure bigger multi-language projects.
+This means that you can use <Text type="proper">Garn</Text> to configure bigger multi-language projects.
 This enables anyone to run, test, and develop any part of your codebase,
 without having to install any language-specific tools or learn how to use them.
 
-<Garn/> currently supports **Go**, **Npm** and **Haskell**. If you'd like to see
+<Text type="proper">Garn</Text> currently supports **Go**, **Npm** and **Haskell**. If you'd like to see
 support for other languages or toolchains please [let us
 know](https://github.com/garnix-io/garn/issues).

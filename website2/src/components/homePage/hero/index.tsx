@@ -42,7 +42,7 @@ export const Hero = () => {
             },
             {
               text: "READ MORE",
-              href: "/documentation/read-more",
+              href: "/documentation/tutorial",
             },
           ]}
         />
