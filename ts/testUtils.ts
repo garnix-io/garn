@@ -70,7 +70,7 @@ export const nixpkgsInput = nix.nixFlakeDep("nixpkgs-repo", {
   url: "github:NixOS/nixpkgs/6fc7203e423bbf1c8f84cccf1c4818d097612566",
 });
 
-const pkgs = nix.nixRaw`
+export const pkgs = nix.nixRaw`
   import ${nixpkgsInput} {
     config.allowUnfree = true;
     system = "x86_64-linux";

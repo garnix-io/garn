@@ -43,6 +43,7 @@ pkgSpec =
       phpPackages = {};
       python2Packages = {};
       python3Packages = {};
+      pythonInterpreters = {};
       rubyPackages = {};
       rustPackages = {};
     }
