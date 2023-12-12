@@ -11,6 +11,7 @@ import {
   buildPackage,
 } from "./testUtils.ts";
 import { assertStringIncludes } from "https://deno.land/std@0.206.0/assert/assert_string_includes.ts";
+import { addToSetup } from "./environment.ts";
 
 describe("environments", () => {
   it("allows creating Executables from shell snippets", () => {
@@ -33,6 +34,86 @@ describe("environments", () => {
     printOutputOnFailure(output, () =>
       assertStringIncludes(output.stderr, "test check output"),
     );
+  });
+
+  describe("addToSetup", () => {
+    describe('type = "sandboxed"', () => {
+      it("allows adding scripts snippets to the sandbox setup", () => {
+        const env = addToSetup(
+          "sandboxed",
+          garn.emptyEnvironment,
+          'FOO="env var value"',
+        );
+        const path = buildPackage(env.build("echo $FOO > $out/artifact"));
+        assertEquals(
+          Deno.readTextFileSync(`${path}/artifact`),
+          "env var value\n",
+        );
+        assertSuccess(runCheck(env.check('test -n "$FOO"')));
+      });
+
+      it("doesn't affect the underlying environment", () => {
+        const original = addToSetup(
+          "sandboxed",
+          garn.emptyEnvironment,
+          'FOO="original"',
+        );
+        const modified = addToSetup("sandboxed", original, 'FOO="modified"');
+        let path = buildPackage(original.build("echo $FOO > $out/artifact"));
+        assertEquals(Deno.readTextFileSync(`${path}/artifact`), "original\n");
+        path = buildPackage(modified.build("echo $FOO > $out/artifact"));
+        assertEquals(Deno.readTextFileSync(`${path}/artifact`), "modified\n");
+      });
+
+      it("does not affect Executables", () => {
+        const env = addToSetup(
+          "sandboxed",
+          garn.emptyEnvironment,
+          'FOO="env var value"',
+        );
+        const output = assertSuccess(
+          runExecutable(env.shell('echo executable: "$FOO"')),
+        );
+        assertStdout(output, "executable: \n");
+      });
+    });
+
+    describe('type = "unsandboxed"', () => {
+      it("allows adding scripts snippets to the setup for Packages, Checks & Executables", () => {
+        const env = addToSetup(
+          "unsandboxed",
+          garn.emptyEnvironment,
+          'FOO="env var value"',
+        );
+        const path = buildPackage(env.build("echo $FOO > $out/artifact"));
+        assertEquals(
+          Deno.readTextFileSync(`${path}/artifact`),
+          "env var value\n",
+        );
+        assertSuccess(runCheck(env.check('test -n "$FOO"')));
+        const output = assertSuccess(
+          runExecutable(env.shell('echo executable: "$FOO"')),
+        );
+        assertStdout(output, "executable: env var value\n");
+      });
+
+      it("doesn't affect the underlying environment", () => {
+        const original = addToSetup(
+          "unsandboxed",
+          garn.emptyEnvironment,
+          'FOO="original"',
+        );
+        const modified = addToSetup("unsandboxed", original, 'FOO="modified"');
+        assertStdout(
+          assertSuccess(runExecutable(original.shell("echo $FOO"))),
+          "original\n",
+        );
+        assertStdout(
+          assertSuccess(runExecutable(modified.shell("echo $FOO"))),
+          "modified\n",
+        );
+      });
+    });
   });
 
   describe("environments with source files", () => {

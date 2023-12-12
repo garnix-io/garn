@@ -113,9 +113,8 @@
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "${"mkdir -p \$out"}
 ${"
-      ${"
-    echo copying source
-    cp -r ${(let
+                echo copying source
+                cp -r ${(let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -133,12 +132,9 @@ ${"
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })}/. .
-    chmod -R u+rwX .
-  "}
-      ${""}
-    "}
-${"hlint *.hs"}
-";
+                chmod -R u+rwX .
+              "}
+${"hlint *.hs"}";
         }
       );
       devShells = forAllSystems (system:
@@ -243,7 +239,7 @@ ${"hlint *.hs"}
             then expr.env
             else pkgs.mkShell { inputsFrom = [ expr ]; }
           );
-        shell = "${let
+        shell = "${"${let
       haskell = pkgs.haskell.packages.ghc94.override {
         overrides = final: prev:
           {  }
@@ -269,7 +265,7 @@ ${"hlint *.hs"}
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })
-        {}}/bin/${"hello"}";
+        {}}/bin/${"hello"}"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";

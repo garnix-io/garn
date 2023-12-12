@@ -1,4 +1,4 @@
-import { Environment, mkEnvironment } from "../environment.ts";
+import { Environment, addToSetup, mkEnvironment } from "../environment.ts";
 import { Executable } from "../executable.ts";
 import { mkPackage, Package } from "../package.ts";
 import { mkProject, Project } from "../project.ts";
@@ -81,14 +81,17 @@ export function mkNpmProject(args: {
     `,
     "node_modules",
   );
-  const devShell: Environment = mkEnvironment({
-    src: args.src,
-    sandboxSetup: nixStrLit`
-      echo copying node_modules
-      cp -r ${node_modules}/node_modules .
-      chmod -R u+rwX node_modules
-    `,
-  }).withDevTools([mkPackage(nodejs, "nodejs")]);
+  const devShell: Environment = addToSetup(
+    "sandboxed",
+    mkEnvironment({
+      src: args.src,
+    }),
+    nixStrLit`
+        echo copying node_modules
+        cp -r ${node_modules}/node_modules .
+        chmod -R u+rwX node_modules
+      `,
+  ).withDevTools([mkPackage(nodejs, "nodejs")]);
   return mkProject(
     {
       description: args.description,

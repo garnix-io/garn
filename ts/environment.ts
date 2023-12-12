@@ -7,7 +7,7 @@ import {
   nixList,
   nixRaw,
   nixStrLit,
-  unlinesNixStrings,
+  joinNixStrings,
 } from "./nix.ts";
 import { Package, mkShellPackage } from "./package.ts";
 
@@ -24,16 +24,19 @@ import { Package, mkShellPackage } from "./package.ts";
 export type Environment = {
   tag: "environment";
   nixExpression: NixExpression;
-  sandboxSetup: NixExpression;
+  setup: Array<{
+    type: "unsandboxed" | "sandboxed";
+    snippet: NixExpression;
+  }>;
   description?: string;
 
   /**
    * Update the description for this `Environment`
    */
   setDescription: (this: Environment, newDescription: string) => Environment;
-
   /**
-   * Creates a new environment based on this one that includes the specified nix packages.
+   * Creates a new environment based on this one that includes the specified nix
+   * packages.
    */
   withDevTools(devTools: Array<Package>): Environment;
   /**
@@ -62,11 +65,70 @@ export type Environment = {
   ): Package;
 };
 
-export const sandboxScript = (
+/**
+ * Appends the given bash snippet to the setup of the `Environment`. The setup
+ * will be executed when running things in an environment.
+ *
+ * If `type` is set to `"sandboxed"`, it'll be executed as a setup step for
+ * `Check`s and `Package`s, but *not* for `Executable`s and `garn enter`. If
+ * `type` is set to `"unsandboxed"`, the setup step is going to be executed in
+ * all 4 cases.
+ *
+ * (`Check`s and `Package`s are running in sandboxes to make them completely
+ * deterministic. That's why they have to be treated differently here. The most
+ * common example for how the `Environment` for these sandboxes works
+ * differently is, that we have to *copy* the source files into the sandbox, to
+ * allow `Check`s and `Package`s to access them. Whereas with `Executable`s and
+ * `garn enter`, your source files are already available normally through the
+ * file system.)
+ */
+export function addToSetup(
+  type: "sandboxed" | "unsandboxed",
+  env: Environment,
+  snippet: string | NixExpression,
+): Environment {
+  return {
+    ...env,
+    setup: [
+      ...env.setup,
+      {
+        type,
+        snippet: typeof snippet === "string" ? nixStrLit(snippet) : snippet,
+      },
+    ],
+  };
+}
+
+/**
+ * Add the setup of an `Environment` to a given script for the unsandboxed case.
+ * This should be used for `Executable`s and `garn enter`.
+ */
+export const wrapUnsandboxedScript = (
   env: Environment,
   script: NixExpression,
 ): NixExpression =>
-  unlinesNixStrings([nixStrLit`mkdir -p $out`, env.sandboxSetup, script]);
+  joinNixStrings(
+    [
+      ...env.setup
+        .filter((x) => x.type === "unsandboxed")
+        .map((x) => x.snippet),
+      script,
+    ],
+    "\n",
+  );
+
+/**
+ * Add the setup of an `Environment` to a given script for the sandboxed case.
+ * This should be used for `Package`s and `Check`s.
+ */
+export const wrapSandboxedScript = (
+  env: Environment,
+  script: NixExpression,
+): NixExpression =>
+  joinNixStrings(
+    [nixStrLit`mkdir -p $out`, ...env.setup.map((x) => x.snippet), script],
+    "\n",
+  );
 
 /**
  * Creates a new shell script `Executable`, run in the `emptyEnvironment`.
@@ -159,21 +221,24 @@ export function mkEnvironment(
   args: {
     nixExpression?: NixExpression;
     src?: string;
-    sandboxSetup?: NixExpression;
   } = {},
 ): Environment {
-  const copySource = (src: string) => nixStrLit`
-    echo copying source
-    cp -r ${nixSource(src)}/. .
-    chmod -R u+rwX .
-  `;
   return {
     tag: "environment",
     nixExpression: args.nixExpression ?? nixRaw`pkgs.mkShell {}`,
-    sandboxSetup: nixStrLit`
-      ${args.src != null ? copySource(args.src) : ""}
-      ${args.sandboxSetup || nixStrLit``}
-    `,
+    setup:
+      args.src != null
+        ? [
+            {
+              type: "sandboxed",
+              snippet: nixStrLit`
+                echo copying source
+                cp -r ${nixSource(args.src)}/. .
+                chmod -R u+rwX .
+              `,
+            },
+          ]
+        : [],
     setDescription(this: Environment, newDescription: string): Environment {
       return {
         ...this,

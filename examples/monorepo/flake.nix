@@ -295,7 +295,7 @@
             ++
             [(pkgs.gopls)];
         });
-        shell = "cd backend && go run ./main.go";
+        shell = "${"cd backend && go run ./main.go"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -342,7 +342,7 @@
             then expr.env
             else pkgs.mkShell { inputsFrom = [ expr ]; }
           );
-        shell = "${let
+        shell = "${"${let
       haskell = pkgs.haskell.packages.ghc94.override {
         overrides = final: prev:
           {  }
@@ -368,7 +368,7 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })
-        {}}/bin/${"hello"}";
+        {}}/bin/${"hello"}"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -389,7 +389,7 @@
             ++
             [(pkgs.nodejs-18_x)];
         });
-        shell = "cd frontend-npm && npm install && npm start";
+        shell = "${"cd frontend-npm && npm install && npm start"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -405,7 +405,7 @@
             "type" = "app";
             "program" = "${let
         dev = pkgs.mkShell {};
-        shell = "${pkgs.process-compose}/bin/process-compose up -f ${pkgs.writeText "process-compose.yml" (builtins.toJSON { "version" = "0.5"; "processes" = { "backend" = { "command" = "${let
+        shell = "${"${pkgs.process-compose}/bin/process-compose up -f ${pkgs.writeText "process-compose.yml" (builtins.toJSON { "version" = "0.5"; "processes" = { "backend" = { "command" = "${let
         dev = (let expr = let
         gomod2nix = gomod2nix-repo.legacyPackages.${system};
         gomod2nix-toml = pkgs.writeText "gomod2nix-toml" "schema = 3
@@ -450,7 +450,7 @@
             ++
             [(pkgs.gopls)];
         });
-        shell = "cd backend && go run ./main.go";
+        shell = "${"cd backend && go run ./main.go"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -493,7 +493,7 @@
             then expr.env
             else pkgs.mkShell { inputsFrom = [ expr ]; }
           );
-        shell = "${let
+        shell = "${"${let
       haskell = pkgs.haskell.packages.ghc94.override {
         overrides = final: prev:
           {  }
@@ -519,7 +519,7 @@
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })
-        {}}/bin/${"hello"}";
+        {}}/bin/${"hello"}"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -536,7 +536,7 @@
             ++
             [(pkgs.nodejs-18_x)];
         });
-        shell = "cd frontend-npm && npm install && npm start";
+        shell = "${"cd frontend-npm && npm install && npm start"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -546,7 +546,7 @@
         export PATH=$(cat ${buildPath}):$PATH
         ${dev.shellHook}
         ${shell} "$@"
-      ''}"; "environment" = []; }; }; })}";
+      ''}"; "environment" = []; }; }; })}"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";

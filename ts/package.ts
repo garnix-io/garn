@@ -1,4 +1,4 @@
-import { Environment, sandboxScript, shell } from "./environment.ts";
+import { Environment, wrapSandboxedScript, shell } from "./environment.ts";
 import { Executable } from "./executable.ts";
 import { hasTag } from "./internal/utils.ts";
 import {
@@ -74,7 +74,7 @@ export function mkShellPackage(
 ) {
   const cmdToExecute =
     typeof s === "string" ? nixStrLit(s) : nixStrLit(s, ...args);
-  const wrappedScript = sandboxScript(env, cmdToExecute);
+  const wrappedScript = wrapSandboxedScript(env, cmdToExecute);
   const pkg = nixRaw`
     let dev = ${env.nixExpression}; in
     pkgs.runCommand "garn-pkg" {

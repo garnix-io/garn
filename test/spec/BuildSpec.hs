@@ -93,13 +93,16 @@ spec = do
           "garn.ts"
           [i|
             import * as garn from "#{repoDir}/ts/mod.ts"
+            import { addToSetup } from "#{repoDir}/ts/environment.ts"
 
-            const env = garn.mkEnvironment({
-              sandboxSetup: garn.nix.nixStrLit`
+            const env = addToSetup(
+              "sandboxed",
+              garn.mkEnvironment(),
+              garn.nix.nixStrLit`
                 mkdir dist
                 echo build-content > dist/build-artifact
-              `
-            });
+              `,
+            );
             export const project = garn.mkProject({
               description: "",
               defaultEnvironment: env,
@@ -156,15 +159,16 @@ spec = do
           [i|
             import * as garn from "#{repoDir}/ts/mod.ts"
             import * as nix from "#{repoDir}/ts/nix.ts"
+            import { addToSetup } from "#{repoDir}/ts/environment.ts"
 
             export const project = garn.mkProject(
               { description: "" },
               {
-                package: garn
-                  .mkEnvironment({
-                    sandboxSetup: nix.nixStrLit`SETUP_VAR="hello from setup"`,
-                  })
-                  .build("echo $SETUP_VAR > $out/build-artifact"),
+                package: addToSetup(
+                    "sandboxed",
+                    garn.mkEnvironment(),
+                    nix.nixStrLit`SETUP_VAR="hello from setup"`,
+                  ).build("echo $SETUP_VAR > $out/build-artifact"),
               },
             )
           |]
