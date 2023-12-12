@@ -14,6 +14,7 @@
   "dependencies": {
     "@next/mdx": "^14.0.4",
     "@nextui-org/react": "^2.2.9",
+    "framer-motion": "^10.16.16",
     "next": "14.0.3",
     "next-mdx-remote": "^4.4.1",
     "react": "^18",
