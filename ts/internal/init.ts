@@ -1,6 +1,7 @@
 import * as go from "../go/initializers.ts";
 import * as haskell from "../haskell/initializers.ts";
 import * as javascript from "../javascript/initializers.ts";
+import * as python from "../python/initializers.ts";
 import outdent from "https://deno.land/x/outdent@v0.8.0/mod.ts";
 import { GARN_TS_LIB_VERSION } from "./version.ts";
 
@@ -14,6 +15,7 @@ const initializers = [
   ...go.initializers,
   ...haskell.initializers,
   ...javascript.initializers,
+  ...python.initializers,
 ];
 
 for (const init of initializers) {
@@ -62,6 +64,11 @@ if (initializedSections.length === 0) {
     //   description: "My node project",
     //   src: "./my-node-project",
     //   nodeVersion: "18",
+    // });
+
+    // export const myPythonProject = garn.python.mkPythonProject({
+    //   src: "./my-python-project",
+    //   pythonInterpreter: garn.python.interpreters.python310,
     // });
 
 
