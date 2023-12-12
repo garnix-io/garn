@@ -23,24 +23,42 @@
   margin-bottom: 8px;
 }
 
-.ul {
+.ul, .ol {
   margin-top: 16px;
   margin-bottom: 16px;
-  list-style-type: disc;
   list-style-position: inside;
-  font-size: 18px;;
+  font-size: 18px;
+  line-height: 28px;
   color: var(--color-gray6a);
 }
 
+.ul {
+  list-style-type: disc;
+}
+
 .ol {
-  margin-top: 16px;
-  margin-bottom: 16px;
   list-style-type: decimal;
-  list-style-position: inside;
-  font-size: 18px;
-  color: var(--color-gray6a);
 }
 
 .li {
   margin-bottom: 8px;
+}
+
+.code {
+  text-wrap: wrap;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    padding: 40px 16px;
+  }
+
+  .h2 {
+    margin-top: 40px;
+  }
+
+  .ul, .ol {
+    font-size: 16px;
+    line-height: 28px;
+  }
 }

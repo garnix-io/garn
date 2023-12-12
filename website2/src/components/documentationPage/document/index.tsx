@@ -97,7 +97,9 @@ export const Document = ({ source }: Props) => {
                 }
               />
             ) : (
-              <Text type="code">{props.children}</Text>
+              <Text type="code" className={`${props.className} ${styles.code}`}>
+                {props.children}
+              </Text>
             ),
         }}
       />
