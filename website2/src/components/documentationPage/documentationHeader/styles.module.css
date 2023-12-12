@@ -1,0 +1,11 @@
+.container {
+  padding: 96px 96px 80px;
+  border-bottom: 2px solid var(--color-black);
+  text-transform: uppercase;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    padding: 40px 16px;
+  }
+}
