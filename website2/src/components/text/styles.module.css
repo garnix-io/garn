@@ -17,13 +17,15 @@
 
 .proper {
   text-transform: uppercase;
-  display: inline;
-  font-size: 21px;
+  display: inline-block;
+  font-size: 19px;
 }
 
 .code {
   background-color: var(--color-graydd);
   display: inline;
+  font-size: 16px;
+  padding: 2px;
 }
 
 @media only screen and (max-width: 768px) {
@@ -40,5 +42,9 @@
   .header3 {
     font-size: 14px;
     line-height: 24px;
+  }
+
+  .code {
+    font-size: 14px;
   }
 }

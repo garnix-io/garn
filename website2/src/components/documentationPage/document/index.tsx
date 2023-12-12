@@ -4,6 +4,7 @@ import { Text } from "@/components/text";
 import { Hovernote } from "@/components/documentationPage/hovernote";
 import styles from "./styles.module.css";
 import { SampleCode } from "@/components/sampleCode";
+import { Berlin } from "@/utils/fonts";
 
 type Props = {
   source: string;
@@ -26,12 +27,16 @@ export const Document = ({ source }: Props) => {
           Text,
           Hovernote,
           p: (props) => (
-            <Text type="p" {...props}>
+            <Text
+              type="p"
+              {...props}
+              className={`${props.className} ${styles.p}`}
+            >
               {props.children}
             </Text>
           ),
           h1: (props) => (
-            <Text type="h1" {...props} className={`${props.className}`}>
+            <Text type="h1" {...props}>
               {props.children}
             </Text>
           ),
@@ -54,7 +59,10 @@ export const Document = ({ source }: Props) => {
             </Text>
           ),
           ul: (props) => (
-            <ul {...props} className={`${props.className} ${styles.ul}`}>
+            <ul
+              {...props}
+              className={`${props.className} ${styles.ul} ${Berlin.className}`}
+            >
               {props.children}
             </ul>
           ),
@@ -64,7 +72,10 @@ export const Document = ({ source }: Props) => {
             </ol>
           ),
           li: (props) => (
-            <li {...props} className={`${props.className} ${styles.li}`}>
+            <li
+              {...props}
+              className={`${props.className} ${styles.li} ${Berlin.className}`}
+            >
               {props.children}
             </li>
           ),

@@ -19,11 +19,17 @@
   margin-bottom: 48px;
 }
 
+.p {
+  margin-bottom: 8px;
+}
+
 .ul {
   margin-top: 16px;
   margin-bottom: 16px;
   list-style-type: disc;
   list-style-position: inside;
+  font-size: 18px;;
+  color: var(--color-gray6a);
 }
 
 .ol {
@@ -31,6 +37,8 @@
   margin-bottom: 16px;
   list-style-type: decimal;
   list-style-position: inside;
+  font-size: 18px;
+  color: var(--color-gray6a);
 }
 
 .li {
