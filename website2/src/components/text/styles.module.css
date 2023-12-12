@@ -10,6 +10,22 @@
   text-transform: uppercase;
 }
 
+.header3 {
+  font-size: 20px;
+  line-height: 28px;
+}
+
+.proper {
+  text-transform: uppercase;
+  display: inline;
+  font-size: 21px;
+}
+
+.code {
+  background-color: var(--color-graydd);
+  display: inline;
+}
+
 @media only screen and (max-width: 768px) {
   .paragraph {
     font-size: 16px;
@@ -19,5 +35,10 @@
   .header {
     font-size: 16px;
     line-height: 28px;
+  }
+
+  .header3 {
+    font-size: 14px;
+    line-height: 24px;
   }
 }

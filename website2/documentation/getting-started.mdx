@@ -1,0 +1,166 @@
+export const info = {
+  name: "getting started",
+  url: "getting_started",
+  index: 1,
+};
+
+# Getting Started
+
+## Installation
+
+The easiest way to install <Text type="proper">Garn</Text> is with the following command:
+
+```bash
+sh <(curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh)
+```
+
+<Text type="proper">Garn</Text> works on the following platforms:
+
+- Arm Linux
+- Intel Linux
+- Intel Macs<Hovernote>While the installer technically works for
+  `x86_64-darwin`, the garnix binary cache currently doesn't build `garn` for
+  that platform. That means that the installer has to compile `garn` and a
+  whole lot of dependencies on your own machine. If you're interesting in
+  better support for `x86_64-darwin`, please let us now on Github or
+  Discord.</Hovernote>
+- M1/M2 Macs
+
+You can look at the contents of the script [here](https://garn.io/install.sh).
+
+<Text type="proper">Garn</Text> requires [Nix](https://nixos.org/). If you don't have Nix, the above
+command will install it for you.
+
+Once you have <Text type="proper">Garn</Text> installed you can head over to the
+[tutorial](/docs/tutorial) to learn how to use it.
+
+### Uninstalling
+
+To uninstall both `nix` and `garn` you can run:
+
+```bash
+/nix/nix-installer uninstall
+```
+
+### Updating `garn`
+
+To update garn to a new version you can run:
+
+```bash
+nix profile list
+# Find the index number of the entry where 'Original flake URL' starts with `github:garnix-io/garn`.
+nix profile remove <garn index number>
+nix profile install github:garnix-io/garn/v0.0.19
+```
+
+### Manual installation
+
+If you prefer, you can also manually do the steps that the above install script automates. Those are:
+
+1. **Install Nix**. To install Nix, follow the instructions [here](https://nixos.org/download).
+2. **Configure Nix to use the <Text type="proper">Garnix</Text> cache**. You can do that by adding the lines:
+
+```bash
+extra-substituters = https://cache.garnix.io
+extra-trusted-public-keys = cache.garnix.io:CTFPyKSLcx5RMJKfLo5EEPUObbA78b0YQ2DTCJXqr9g=
+```
+
+To `/etc/nix/nix.conf` (note that you'll need sudo).
+
+3. **Restart the Nix daemon**. (Only necessary for multi-user installations, which are the default.) On Linux, that is:
+
+```bash
+sudo systemctl restart nix-daemon.service
+```
+
+And on Macs, it is:
+
+```bash
+sudo launchctl kickstart -k system/org.nixos.nix-daemon
+```
+
+(You can run `nix-shell -p nix-info --run "nix-info -m"` to double-check whether you have a multi-user installation.)
+
+4. **Install <Text type="proper">Garn</Text>**. You can do that with:
+
+```bash
+nix --extra-experimental-features 'nix-command flakes' profile install -L github:garnix-io/garn
+```
+
+5. **Check that everything worked**. Run `garn --help` to confirm that <Text type="proper">Garn</Text> is installed.
+
+## Deno LSP (optional)
+
+`garn.ts` files are powered by [Deno](https://deno.com/). A lot of the
+convenience and power for editing your `garn.ts` files comes from having a
+working Deno LSP. There are two ways of setting up LSP for editing `garn.ts`
+files: using `garn edit`, or setting up your editor yourself.
+
+### `garn edit`
+
+<Text type="proper">Garn</Text> provides an `edit` command that downloads and starts a VSCodium
+configured with Deno LSP. It is started with it's own configuration and data
+directories, so as to not clobber any VSCodium or VSCode configuration you may
+already have.
+
+### Installing the Deno LSP and configuring your editor
+
+Alternatively you can install `deno` (including the Deno LSP) with <Text type="proper">Garn</Text> itself:
+
+```typescript
+export const deno = garn.mkProject(
+  {
+    description: "garn configuration environment",
+    defaultEnvironment: garn.emptyEnvironment.withDevTools([pkgs.deno]),
+  },
+  {}
+);
+```
+
+`garn enter deno` will then drop you in a shell where `deno` is available.
+
+For configuring your editor to use Deno's LSP refer to [Deno's environment setup
+documentation](https://docs.deno.com/runtime/manual/getting_started/setup_your_environment).
+
+## Shell autocompletions
+
+<Text type="proper">Garn</Text> ships with autocompletions for some popular shells. See below for
+instructions on installing them:
+
+### Bash
+
+Add the following line to your `.bashrc`:
+
+```
+source <(garn --bash-completion-script `which garn`)
+```
+
+### Zsh
+
+If you have `oh-my-zsh` installed, you likely already have a completion directory (`~/.cache/oh-my-zsh/completions` or `~/.oh-my-zsh/completions`). In that case, use:
+
+```shell
+garn --zsh-completion-script `which garn` > ~/.cache/oh-my-zsh/completions/_garn
+```
+
+Otherwise, check your `$fpath` variable to see if it already includes a directory for user-defined completions. If it does, use:
+
+```shell
+garn --zsh-completion-script `which garn` > $DIRECTORY_IN_YOUR_FPATH/_garn
+```
+
+If it does not, please refer to `zsh`s documentation about how to set up user-defined completions.
+
+### Fish
+
+Assuming `~/.config/fish/completions` exists and is in your `$fish_completion_path` (it should be), run:
+
+```shell
+garn --fish-completion-script (which garn) > ~/.config/fish/completions/garn.fish
+```
+
+## Further reading
+
+- [tutorial](/documentation/tutorial)
+- [garn concepts](/documentation/concepts)
+- [typescript api](https://doc.deno.land/https://garn.io/ts/v0.0.19/mod.ts)

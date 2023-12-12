@@ -1,0 +1,153 @@
+export const info = {
+  name: "concepts",
+  url: "concepts",
+  index: 3,
+};
+
+# Basic concepts
+
+There are 4 concepts that are fundamental to `garn`:
+
+- [`Environment`](#environments)
+- [`Check`](#checks)
+- [`Executable`](#executables)
+- [`Package`](#packages)
+
+There's another basic concept called `Project` that is used to bundle instances
+of the above entities and give them structure. `Project`s are described at the
+bottom in the [Projects](#projects) section.
+
+All of these concepts are implemented as typescript types. Feel free to browse
+the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.19/mod.ts) as well.
+
+## Environments
+
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.19/mod.ts/~/Environment).)
+
+`Environment`s define what is available to a computation. For example they can
+contain compilers and developer tools that you want to use on a project, but
+they may also define other things like environment variables that need to be
+set.
+
+Running `garn enter` in a shell will add whatever the `Enviroment` provides to
+the shell environment that you're in. That means you can still use your local
+developer tools, like your editor, etc., but will also have access to everything
+provided by the `Environment` you entered.
+
+The `garn` library provides a special environment called `emptyEnvironment`. As
+you might have guessed it's an `Environment` that doesn't provide anything.
+
+`Environment`s can also be used to create other things that then make use of
+what the `Environment`s provide. For example `Check`s, which are our next topic.
+
+## Checks
+
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.19/mod.ts/~/Check).)
+
+`Check`s are commands (usually shell commands) that are used to define
+reproducible, automated tests or other checks. They run in a sandbox, which
+means they don't have access to your locally installed tools, nor to your local
+file system. Instead they are always based on an underlying `Environment`, and
+through that will have access to exactly the tools that the environment
+provides. In addition, a _copy_ of your source files is provided in the sandbox.
+That gives you the ability to define automated `Check`s on your source files.
+
+You can run `Check`s with `garn check`.
+
+Running `Check`s in a sandbox has its downsides, for example some tests require
+internet access. The big advantage is that these `Check`s are almost perfectly
+reproducible, since the sandbox they run in is very controlled. So a `Check`
+that fails or passes on one machine will behave the same on any other machine.
+
+This also means that running these checks on a CI system (for example
+[garnix.io](https://garnix.io)) is very easy and requires no additional
+configuration.
+
+## Executables
+
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.19/mod.ts/~/Executable).)
+
+`Executable`s are commands (usually shell snippets) that are being run on your
+local machine (not in a sandbox). They are based on an underlying `Environment`,
+and can make use of e.g. the tools that `Environment`s provide. You can use
+`Executables` for a variety of purposes:
+
+- Running your projects main executable during development,
+- Running a code formatter,
+- Running a code generator,
+- Spinning up a database for development,
+- etc.
+
+Here's a small example:
+
+```typescript
+import * as garn from "https://garn.io/ts/v0.0.19/mod.ts";
+
+export const hello =
+  garn.emptyEnvironment.shell("echo Hello, world!");
+```
+
+You can run `Executable`s with `garn run`.
+
+## Packages
+
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.19/mod.ts/~/Package).)
+
+`Package`s are instructions to `garn` about how to _build_ a set of files. For
+example for a Go backend a package would define how to compile it into
+executables. For an Npm project it may define how the project can be bundled
+into a set of files that can be served by a webserver.
+
+The build scripts of `Package`s are being run in a sandbox (same as `Check`s).
+That means they have access to a _copy_ of your source files, but not to the
+internet or your local file system. This makes your builds almost perfectly
+reproducible.
+
+You can build `Package`s with `garn build`.
+
+## Projects
+
+(See also the [API docs](https://doc.deno.land/https://garn.io/ts/v0.0.19/mod.ts/~/Project).)
+
+`Project`s are used to combine `Environment`s, `Check`s, `Executable`s and
+`Package`s into a single entity. A `Project` can contain any number of these
+entities. So for example it can contain multiple `Check`s, which you can all run
+at once with `garn check <projectName>`. It can contain multiple `Packages` that
+you can all build with `garn build <projectName>`.
+
+`Project`s can have a default `Enviroment` (aptly called `defaultEnvironment`),
+which allows you to call `garn enter` on a project. Similarly they can also have
+a default `Executable` (called `defaultExecutable`), which allows you to call
+`garn run` on a project.
+
+Usually you create `Project`s through language specific helper functions, for
+example `garn.javascript.mkNpmProject`. Here's an example of an Npm `Project`
+that contains a few `Check`s and adds a developer tool to its default
+environment:
+
+```typescript
+import * as garn from "https://garn.io/ts/v0.0.19/mod.ts";
+import * as pkgs from "https://garn.io/ts/v0.0.19/nixpkgs.ts";
+
+export const project = garn.javascript
+  .mkNpmProject({
+    src: ".",
+    description: "An Npm frontend",
+    nodeVersion: "18",
+  })
+  .addCheck("test", "npm run test")
+  .addCheck("tsc", "npm run tsc")
+  .withDevTools([pkgs.ripgrep])
+  .addCheck("no todos allowed", "! rg --glob !node_modules -i todo .");
+
+export const dev = project.shell("npm install ; npm run dev");
+```
+
+With this `garn.ts` file:
+
+- `garn enter project` will enter a shell with `node`, `npm` and `ripgrep` installed.
+- `garn check project` will
+  - run the tests,
+  - typecheck the project (with `tsc`).
+  - search for `todo`s (with `ripgrep`) and fail if there are any.
+- `garn run dev` will run the server locally in dev mode.

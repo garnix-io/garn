@@ -7,12 +7,13 @@ import {
 interface Props {
   code: string;
   inverse?: boolean;
+  language?: string;
 }
 
-export const SampleCode = ({ code, inverse }: Props) => {
+export const SampleCode = ({ code, inverse, language }: Props) => {
   return (
     <SyntaxHighlighter
-      language="javascript"
+      language={language || "javascript"}
       style={inverse ? oneDark : oneLight}
       customStyle={{
         background: "transparent",

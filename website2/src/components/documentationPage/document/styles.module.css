@@ -1,0 +1,38 @@
+.container {
+  padding: 80px 96px;
+  border-left: 16px solid var(--color-black);
+  border-right: 16px solid var(--color-black);
+}
+
+.h2 {
+  margin-top: 48px;
+  margin-bottom: 16px;
+}
+
+.h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.terminal {
+  margin-top: 48px;
+  margin-bottom: 48px;
+}
+
+.ul {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  list-style-type: disc;
+  list-style-position: inside;
+}
+
+.ol {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  list-style-type: decimal;
+  list-style-position: inside;
+}
+
+.li {
+  margin-bottom: 8px;
+}
