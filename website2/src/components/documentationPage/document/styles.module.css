@@ -19,6 +19,10 @@
   margin-bottom: 48px;
 }
 
+.tooltip {
+  margin-left: 4px;
+}
+
 .p {
   margin-bottom: 8px;
 }

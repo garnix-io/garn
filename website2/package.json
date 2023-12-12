@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@next/mdx": "^14.0.4",
+    "@nextui-org/react": "^2.2.9",
     "next": "14.0.3",
     "next-mdx-remote": "^4.4.1",
     "react": "^18",

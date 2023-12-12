@@ -1,10 +1,10 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { Terminal } from "@/components/terminal";
 import { Text } from "@/components/text";
-import { Hovernote } from "@/components/documentationPage/hovernote";
 import styles from "./styles.module.css";
 import { SampleCode } from "@/components/sampleCode";
 import { Berlin } from "@/utils/fonts";
+import { ToolTip } from "@/components/tooltip/";
 
 type Props = {
   source: string;
@@ -24,8 +24,15 @@ export const Document = ({ source }: Props) => {
               {props.children}
             </Terminal>
           ),
+          ToolTip: (props) => (
+            <ToolTip
+              {...props}
+              className={`${props.className} ${styles.tooltip}`}
+            >
+              {props.children}
+            </ToolTip>
+          ),
           Text,
-          Hovernote,
           p: (props) => (
             <Text
               type="p"
