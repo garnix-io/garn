@@ -5,8 +5,6 @@ import styles from "./styles.module.css";
 import { SampleCode } from "@/components/sampleCode";
 import { Berlin } from "@/utils/fonts";
 import { ToolTip } from "@/components/tooltip/";
-import Link from "next/link";
-import { Share } from "@/components/icons/share";
 import { DocumentHeader } from "../documentHeader";
 
 type Props = {
