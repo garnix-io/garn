@@ -4,7 +4,9 @@ import styles from "./styles.module.css";
 export const DocumentationHeader = () => {
   return (
     <section className={styles.container}>
-      <Text type="h1">Documentation</Text>
+      <div className={styles.content}>
+        <Text type="h1">Documentation</Text>
+      </div>
     </section>
   );
 };

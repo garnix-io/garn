@@ -38,11 +38,11 @@ export const Hero = () => {
           links={[
             {
               text: "Get started",
-              href: "/documentation/get-started",
+              href: "/docs/getting-started",
             },
             {
               text: "READ MORE",
-              href: "/documentation/read-more",
+              href: "/docs/tutorial",
             },
           ]}
         />

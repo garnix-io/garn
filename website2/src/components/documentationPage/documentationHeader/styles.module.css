@@ -1,11 +1,21 @@
 .container {
-  padding: 96px 96px 80px;
-  border-bottom: 2px solid var(--color-black);
+  padding: 96px 96px 0;
+  border-left: 16px solid var(--color-black);
+  border-right: 16px solid var(--color-black);
   text-transform: uppercase;
+}
+
+.content {
+  border-bottom: 2px solid var(--color-black);
+  padding-bottom: 80px;
 }
 
 @media only screen and (max-width: 768px) {
   .container {
-    padding: 40px 16px;
+    padding: 40px 16px 0;
+  }
+
+  .content {
+    padding-bottom: 40px;
   }
 }

@@ -2,7 +2,7 @@ import { DocumentationHeader } from "@/components/documentationPage/documentatio
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 
-const Documentation = () => {
+const Page = () => {
   return (
     <main>
       <Header />
@@ -12,4 +12,4 @@ const Documentation = () => {
   );
 };
 
-export default Documentation;
+export default Page;
