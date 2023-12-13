@@ -1,7 +1,7 @@
 import z from "zod";
 import { Berlin, MatterSQMono } from "@/utils/fonts";
 import styles from "./styles.module.css";
-import { checkPropsRuntime } from "@/utils/checkPropsRuntime";
+import { withPropCheck } from "@/utils/withPropCheck";
 
 const PropSchema = z
   .object({
@@ -12,14 +12,9 @@ const PropSchema = z
   })
   .strict();
 
-export const Text = checkPropsRuntime(
+export const Text = withPropCheck<z.infer<typeof PropSchema>>(
   PropSchema,
-  ({
-    type = "p",
-    children,
-    className,
-    ...rest
-  }: z.infer<typeof PropSchema>) => {
+  ({ type = "p", children, className, ...rest }) => {
     if (type === "p")
       return (
         <p

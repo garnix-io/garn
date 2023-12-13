@@ -6,7 +6,7 @@ import { useWindowSize } from "usehooks-ts";
 import { z } from "zod";
 import { Text } from "@/components/text";
 import styles from "./styles.module.css";
-import { checkPropsRuntime } from "@/utils/checkPropsRuntime";
+import { withPropCheck } from "@/utils/withPropCheck";
 
 const PropSchema = z
   .object({
@@ -15,9 +15,9 @@ const PropSchema = z
   })
   .strict();
 
-export const ToolTip = checkPropsRuntime(
+export const ToolTip = withPropCheck<z.infer<typeof PropSchema>>(
   PropSchema,
-  ({ children, className }: z.infer<typeof PropSchema>) => {
+  ({ children, className }) => {
     const [isOpen, setIsOpen] = useState(false);
     const { width } = useWindowSize();
     return (

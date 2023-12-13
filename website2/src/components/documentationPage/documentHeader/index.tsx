@@ -4,7 +4,7 @@ import styles from "./styles.module.css";
 import { Share } from "@/components/icons/share";
 import Link from "next/link";
 import { z } from "zod";
-import { checkPropsRuntime } from "@/utils/checkPropsRuntime";
+import { withPropCheck } from "@/utils/withPropCheck";
 
 const PropSchema = z
   .object({
@@ -14,9 +14,9 @@ const PropSchema = z
   })
   .strict();
 
-export const DocumentHeader = checkPropsRuntime(
+export const DocumentHeader = withPropCheck<z.infer<typeof PropSchema>>(
   PropSchema,
-  ({ type, className, children }: z.infer<typeof PropSchema>) => {
+  ({ type, className, children }) => {
     const id = getId(children);
     return (
       <Text id={id} type={type} className={`${className} ${styles.container}`}>
