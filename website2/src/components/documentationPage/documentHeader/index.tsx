@@ -19,7 +19,7 @@ export const DocumentHeader = ({ type, children, ...rest }: Props) => {
       className={`${rest.className} ${styles.container}`}
     >
       <Link href={`#${id}`} className={styles.link}>
-        {children}
+        <span>{children}</span>
         <Share className={styles.share} />
       </Link>
     </Text>
