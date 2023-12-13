@@ -16,14 +16,6 @@ export const Document = ({ source }: Props) => {
       <MDXRemote
         source={source}
         components={{
-          Terminal: (props) => (
-            <Terminal
-              {...props}
-              className={`${props.className} ${styles.terminal}`}
-            >
-              {props.children}
-            </Terminal>
-          ),
           ToolTip: (props) => (
             <ToolTip
               {...props}
