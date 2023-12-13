@@ -5,6 +5,9 @@ import styles from "./styles.module.css";
 import { SampleCode } from "@/components/sampleCode";
 import { Berlin } from "@/utils/fonts";
 import { ToolTip } from "@/components/tooltip/";
+import Link from "next/link";
+import { Share } from "@/components/icons/share";
+import { DocumentHeader } from "../documentHeader";
 
 type Props = {
   source: string;
@@ -34,28 +37,20 @@ export const Document = ({ source }: Props) => {
               {props.children}
             </Text>
           ),
-          h1: (props) => (
-            <Text type="h1" {...props}>
-              {props.children}
-            </Text>
-          ),
+          h1: (props) => <DocumentHeader type="h1" {...props} />,
           h2: (props) => (
-            <Text
+            <DocumentHeader
               type="h2"
               {...props}
               className={`${props.className} ${styles.h2}`}
-            >
-              {props.children}
-            </Text>
+            />
           ),
           h3: (props) => (
-            <Text
+            <DocumentHeader
               type="h3"
               {...props}
               className={`${props.className} ${styles.h3}`}
-            >
-              {props.children}
-            </Text>
+            />
           ),
           ul: (props) => (
             <ul
