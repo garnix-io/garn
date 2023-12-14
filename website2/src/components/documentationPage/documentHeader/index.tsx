@@ -6,13 +6,11 @@ import Link from "next/link";
 import { z } from "zod";
 import { withPropCheck } from "@/utils/withPropCheck";
 
-const PropSchema = z
-  .object({
-    type: z.enum(["h1", "h2", "h3"]),
-    className: z.string().optional(),
-    children: z.custom(),
-  })
-  .strict();
+const PropSchema = z.object({
+  type: z.enum(["h1", "h2", "h3"]),
+  className: z.string().optional(),
+  children: z.custom(),
+});
 
 export const DocumentHeader = withPropCheck<z.infer<typeof PropSchema>>(
   PropSchema,

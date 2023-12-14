@@ -3,14 +3,12 @@ import { Berlin, MatterSQMono } from "@/utils/fonts";
 import styles from "./styles.module.css";
 import { withPropCheck } from "@/utils/withPropCheck";
 
-const PropSchema = z
-  .object({
-    id: z.string().optional(),
-    type: z.enum(["p", "h1", "h2", "h3", "proper", "code"]).optional(),
-    className: z.string().optional(),
-    children: z.custom(),
-  })
-  .strict();
+const PropSchema = z.object({
+  id: z.string().optional(),
+  type: z.enum(["p", "h1", "h2", "h3", "proper", "code"]).optional(),
+  className: z.string().optional(),
+  children: z.custom(),
+});
 
 export const Text = withPropCheck<z.infer<typeof PropSchema>>(
   PropSchema,

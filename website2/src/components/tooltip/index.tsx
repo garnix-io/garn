@@ -8,12 +8,10 @@ import { Text } from "@/components/text";
 import styles from "./styles.module.css";
 import { withPropCheck } from "@/utils/withPropCheck";
 
-const PropSchema = z
-  .object({
-    className: z.string().optional(),
-    children: z.custom(),
-  })
-  .strict();
+const PropSchema = z.object({
+  className: z.string().optional(),
+  children: z.custom(),
+});
 
 export const ToolTip = withPropCheck<z.infer<typeof PropSchema>>(
   PropSchema,
