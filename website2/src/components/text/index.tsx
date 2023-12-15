@@ -10,7 +10,7 @@ const PropSchema = z.object({
   children: z.custom(),
 });
 
-export const Text = withPropCheck<z.infer<typeof PropSchema>>(
+export const Text = withPropCheck(
   PropSchema,
   ({ type = "p", children, className, ...rest }) => {
     if (type === "p")

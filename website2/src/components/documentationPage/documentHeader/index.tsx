@@ -12,7 +12,7 @@ const PropSchema = z.object({
   children: z.custom(),
 });
 
-export const DocumentHeader = withPropCheck<z.infer<typeof PropSchema>>(
+export const DocumentHeader = withPropCheck(
   PropSchema,
   ({ type, className, children }) => {
     const id = getId(children);

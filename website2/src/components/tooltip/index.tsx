@@ -13,26 +13,23 @@ const PropSchema = z.object({
   children: z.custom(),
 });
 
-export const ToolTip = withPropCheck<z.infer<typeof PropSchema>>(
-  PropSchema,
-  ({ children, className }) => {
-    const [isOpen, setIsOpen] = useState(false);
-    const { width } = useWindowSize();
-    return (
-      <InternalTooltip
-        content={<Text className={styles.content}>{children}</Text>}
-        placement={width > 768 ? "right" : "top"}
-        isOpen={isOpen}
+export const ToolTip = withPropCheck(PropSchema, ({ children, className }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { width } = useWindowSize();
+  return (
+    <InternalTooltip
+      content={<Text className={styles.content}>{children}</Text>}
+      placement={width > 768 ? "right" : "top"}
+      isOpen={isOpen}
+    >
+      <div
+        className={`${className} ${styles.button}`}
+        onClick={() => setIsOpen(!isOpen)}
+        onMouseEnter={() => setIsOpen(true)}
+        onMouseLeave={() => setIsOpen(false)}
       >
-        <div
-          className={`${className} ${styles.button}`}
-          onClick={() => setIsOpen(!isOpen)}
-          onMouseEnter={() => setIsOpen(true)}
-          onMouseLeave={() => setIsOpen(false)}
-        >
-          ?
-        </div>
-      </InternalTooltip>
-    );
-  }
-);
+        ?
+      </div>
+    </InternalTooltip>
+  );
+});
