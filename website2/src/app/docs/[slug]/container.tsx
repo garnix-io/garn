@@ -16,11 +16,7 @@ export const Container = ({ source, links, active }: Props) => {
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
   return (
     <div>
-      <DocumentationHeader
-        links={links}
-        active={active}
-        onOpenChange={(open) => setIsHeaderOpen(open)}
-      />
+      <DocumentationHeader links={links} active={active} />
       <div
         className={`${styles.layout} ${isHeaderOpen ? styles.headerOpen : ""}`}
       >
