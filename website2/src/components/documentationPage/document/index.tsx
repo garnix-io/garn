@@ -10,11 +10,12 @@ type Props = {
   source: string;
 };
 
-export const Document = ({ source }: Props) => {
+export const Document = async ({ source }: Props) => {
   return (
-    <section className={styles.container}>
+    <section>
       <MDXRemote
         source={source}
+        options={{ parseFrontmatter: true }}
         components={{
           ToolTip: (props) => (
             <ToolTip

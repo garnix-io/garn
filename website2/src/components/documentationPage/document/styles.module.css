@@ -1,9 +1,3 @@
-.container {
-  padding: 80px 96px;
-  border-left: 16px solid var(--color-black);
-  border-right: 16px solid var(--color-black);
-}
-
 .h2 {
   margin-top: 48px;
   margin-bottom: 16px;
