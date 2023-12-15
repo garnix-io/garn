@@ -1,5 +1,5 @@
 import { Text } from "@/components/text";
-import { PropsWithChildren, ReactNode } from "react";
+import { PropsWithChildren, ReactNode, isValidElement } from "react";
 import styles from "./styles.module.css";
 import { Share } from "@/components/icons/share";
 import Link from "next/link";
@@ -27,5 +27,16 @@ export const DocumentHeader = ({ type, children, ...rest }: Props) => {
 };
 
 const getId = (children: ReactNode): string => {
-children.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "-")
+  if (!children) return "undefined";
+  if (["string", "number"].includes(typeof children))
+    return `${children}`
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-zA-Z0-9]+/g, "-");
+  else if (children instanceof Array) {
+    return children.map(getId).join("-");
+  } else if (isValidElement(children)) {
+    return getId(children.props.children);
+  }
+  return children.toString();
 };
