@@ -38,7 +38,7 @@ export const Hero = () => {
           links={[
             {
               text: "Get started",
-              href: "/docs/getting-started",
+              href: "/docs/getting_started",
             },
             {
               text: "READ MORE",
