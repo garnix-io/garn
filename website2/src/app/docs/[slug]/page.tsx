@@ -1,20 +1,19 @@
 import { readFile, readdir } from "fs/promises";
 import { serialize } from "next-mdx-remote/serialize";
-import { DocumentationHeader } from "@/components/documentationPage/documentationHeader";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
-import { Document } from "@/components/documentationPage/document";
 import { Link, Sidebar } from "@/components/documentationPage/sidebar";
+import { DocumentationHeader } from "@/components/documentationPage/documentationHeader";
+import { Document } from "@/components/documentationPage/document";
 import styles from "./styles.module.css";
 
 const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   const source = await readFile(`documentation/${slug}.mdx`, "utf-8");
   const links = await fetchLinks();
-  console.log(links);
   return (
     <main>
       <Header />
-      <DocumentationHeader />
+      <DocumentationHeader links={links} active={slug} />
       <div className={styles.layout}>
         <Sidebar links={links} active={slug} />
         <Document source={source} />

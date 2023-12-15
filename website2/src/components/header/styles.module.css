@@ -1,4 +1,5 @@
 .container {
+  position: relative;
   height: 72px;
   display: flex;
   justify-content: space-between;
@@ -7,6 +8,7 @@
   padding: 0 32px;
   align-items: center;
   font-weight: 300;
+  z-index: 11;
 }
 
 .section {
@@ -31,7 +33,7 @@
 
 @media only screen and (max-width: 768px) {
   .container {
-    height: 48px;
+    height: var(--header-height-mobile);
     padding: 0 16px;
   }
 

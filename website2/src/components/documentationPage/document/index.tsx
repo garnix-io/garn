@@ -10,7 +10,7 @@ type Props = {
   source: string;
 };
 
-export const Document = async ({ source }: Props) => {
+export const Document = ({ source }: Props) => {
   return (
     <section>
       <MDXRemote
