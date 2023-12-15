@@ -1,0 +1,33 @@
+.link {
+  color: var(--colors-black);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.link:visited {
+  color: var(--colors-black);
+}
+
+.share {
+  opacity: 0;
+  transition: opacity .3s;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+}
+
+.container:hover .link .share {
+  opacity: 1;
+}
+
+@media only screen and (max-width: 768px) {
+  .link {
+    justify-content: space-between;
+  }
+
+  .share {
+    opacity: 1;
+    color: var(--color-gray88)
+  }
+}
