@@ -27,5 +27,5 @@ export const DocumentHeader = ({ type, children, ...rest }: Props) => {
 };
 
 const getId = (children: ReactNode): string => {
-  return children?.toString().toLowerCase().split(" ").join("-") || "";
+children.toLowerCase().replace(/[^a-zA-Z0-9]+/g, "-")
 };
