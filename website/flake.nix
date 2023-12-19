@@ -79,9 +79,8 @@
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "${"mkdir -p \$out"}
 ${"
-      ${"
-    echo copying source
-    cp -r ${(let
+                echo copying source
+                cp -r ${(let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -99,11 +98,11 @@ ${"
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })}/. .
-    chmod -R u+rwX .
-  "}
-      ${"
-      echo copying node_modules
-      cp -r ${let
+                chmod -R u+rwX .
+              "}
+${"
+        echo copying node_modules
+        cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
         };
@@ -134,11 +133,9 @@ ${"
     });
           nodejs = pkgs.nodejs-18_x;
         }}/node_modules .
-      chmod -R u+rwX node_modules
-    "}
-    "}
-${"npm run tsc"}
-";
+        chmod -R u+rwX node_modules
+      "}
+${"npm run tsc"}";
           "website/fmt-check" =
             let
               dev = ((pkgs.mkShell { }).overrideAttrs (finalAttrs: previousAttrs: {
@@ -158,9 +155,8 @@ ${"npm run tsc"}
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "${"mkdir -p \$out"}
 ${"
-      ${"
-    echo copying source
-    cp -r ${(let
+                echo copying source
+                cp -r ${(let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -178,11 +174,11 @@ ${"
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })}/. .
-    chmod -R u+rwX .
-  "}
-      ${"
-      echo copying node_modules
-      cp -r ${let
+                chmod -R u+rwX .
+              "}
+${"
+        echo copying node_modules
+        cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
         };
@@ -213,11 +209,9 @@ ${"
     });
           nodejs = pkgs.nodejs-18_x;
         }}/node_modules .
-      chmod -R u+rwX node_modules
-    "}
-    "}
-${"prettier '**/*.{ts,tsx}' --check"}
-";
+        chmod -R u+rwX node_modules
+      "}
+${"prettier '**/*.{ts,tsx}' --check"}";
         }
       );
       devShells = forAllSystems (system:
@@ -263,7 +257,7 @@ ${"prettier '**/*.{ts,tsx}' --check"}
             ++
             [(pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier)];
         });
-        shell = "npm install ; npm run build";
+        shell = "${"npm install ; npm run build"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -289,7 +283,7 @@ ${"prettier '**/*.{ts,tsx}' --check"}
             ++
             [(pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier)];
         });
-        shell = "npm install ; npm run dev";
+        shell = "${"npm install ; npm run dev"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -315,7 +309,7 @@ ${"prettier '**/*.{ts,tsx}' --check"}
             ++
             [(pkgs.nodePackages.typescript-language-server) (pkgs.nodePackages.prettier)];
         });
-        shell = "prettier '**/*.{ts,tsx}' --write";
+        shell = "${"prettier '**/*.{ts,tsx}' --write"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";

@@ -1,5 +1,6 @@
 import { NixExpression, nixRaw, nixStrLit } from "../nix.ts";
 import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+import * as toml from "https://deno.land/std@0.109.0/encoding/toml.ts";
 
 export const nixSource = (src: string): NixExpression => nixRaw`
   (let
@@ -78,12 +79,28 @@ export const writeTextFile = (
   }
 `;
 
-type Result<T> = { data: T; error?: never } | { error: Error; data?: never };
+export type Result<T> =
+  | { data: T; error?: never }
+  | { error: Error; data?: never };
 
 export const parseJson = <T>(schema: z.Schema<T>, json: string): Result<T> => {
   let parsed: unknown;
   try {
     parsed = JSON.parse(json);
+  } catch (error) {
+    return { error };
+  }
+  const result = schema.safeParse(parsed);
+  if (!result.success) {
+    return { error: result.error };
+  }
+  return { data: result.data };
+};
+
+export const parseToml = <T>(schema: z.Schema<T>, json: string): Result<T> => {
+  let parsed: unknown;
+  try {
+    parsed = toml.parse(json);
   } catch (error) {
     return { error };
   }

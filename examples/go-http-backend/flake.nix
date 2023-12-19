@@ -179,7 +179,7 @@
             ++
             [(pkgs.gopls)];
         });
-        shell = "go run ./scripts/migrate.go";
+        shell = "${"go run ./scripts/migrate.go"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";
@@ -238,7 +238,7 @@
             ++
             [(pkgs.gopls)];
         });
-        shell = "go run ./main.go";
+        shell = "${"go run ./main.go"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";

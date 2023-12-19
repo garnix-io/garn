@@ -64,9 +64,8 @@
                 buildInputs = dev.buildInputs ++ dev.nativeBuildInputs;
               } "${"mkdir -p \$out"}
 ${"
-      ${"
-    echo copying source
-    cp -r ${(let
+                echo copying source
+                cp -r ${(let
     lib = pkgs.lib;
     lastSafe = list :
       if lib.lists.length list == 0
@@ -84,11 +83,11 @@ ${"
          fileName != "flake.nix" &&
          fileName != "garn.ts";
     })}/. .
-    chmod -R u+rwX .
-  "}
-      ${"
-      echo copying node_modules
-      cp -r ${let
+                chmod -R u+rwX .
+              "}
+${"
+        echo copying node_modules
+        cp -r ${let
         npmlock2nix = import npmlock2nix-repo {
           inherit pkgs;
         };
@@ -119,11 +118,9 @@ ${"
     });
           nodejs = pkgs.nodejs-18_x;
         }}/node_modules .
-      chmod -R u+rwX node_modules
-    "}
-    "}
-${"npm run build && mv build/* \$out"}
-";
+        chmod -R u+rwX node_modules
+      "}
+${"npm run build && mv build/* \$out"}";
         }
       );
       checks = forAllSystems (system:
@@ -168,7 +165,7 @@ ${"npm run build && mv build/* \$out"}
             ++
             [(pkgs.nodejs-18_x)];
         });
-        shell = "npm install && npm start";
+        shell = "${"npm install && npm start"}";
         buildPath = pkgs.runCommand "build-inputs-path" {
           inherit (dev) buildInputs nativeBuildInputs;
         } "echo $PATH > $out";

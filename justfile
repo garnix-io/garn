@@ -143,6 +143,7 @@ check-examples:
   just run-garn frontend-yarn-webpack check
   just run-garn go-http-backend check
   just run-garn monorepo check
+  just run-garn python check
 
 update-flakefiles:
   #!/usr/bin/env bash
