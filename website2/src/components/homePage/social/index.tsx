@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useWindowSize } from "usehooks-ts";
 import { HeaderWithActions } from "@/components/headerWithActions";
-import backgroundShape from "@/../public/shape.svg";
+import backgroundShape from "@/components/icons/shape.svg";
 import styles from "./styles.module.css";
 
 export const Social = () => {
