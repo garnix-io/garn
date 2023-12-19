@@ -26,6 +26,13 @@ export const Sidebar = ({ links, active }: Props) => {
           {link.name}
         </Link>
       ))}
+      <Link
+        className={styles.link}
+        href="https://doc.deno.land/https://garn.io/ts/v0.0.19/mod.ts"
+        target="_blank"
+      >
+        Typescript API
+      </Link>
     </section>
   );
 };
