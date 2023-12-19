@@ -104,12 +104,12 @@ spec = do
       it "outputs a version with --version" $ \onTestFailureLog -> do
         output <- runGarn ["--version"] "" repoDir Nothing
         onTestFailureLog output
-        when (stdout output /= "v0.0.19\n") $
+        when (stdout output /= "v0.0.20\n") $
           expectationFailure
             ( unindent
                 [i|
                   garn --version output wrong:
-                  #{show (stdout output)} /= "v0.0.19\n"
+                  #{show (stdout output)} /= "v0.0.20\n"
                   (consider running `cabal clean`!)
                 |]
             )
@@ -164,7 +164,7 @@ spec = do
                 `shouldBe` unindent
                   [i|
                     [garn] Error: Version mismatch detected:
-                      garn cli tool version: v0.0.19
+                      garn cli tool version: v0.0.20
                       garn typescript library version: <testTsLibVersion>
 
                       Either:
@@ -174,8 +174,8 @@ spec = do
 
                       Or:
 
-                        Use version v0.0.19 of the typescript library.
-                        E.g.: import * as garn from "https://garn.io/ts/v0.0.19/mod.ts";
+                        Use version v0.0.20 of the typescript library.
+                        E.g.: import * as garn from "https://garn.io/ts/v0.0.20/mod.ts";
 
                       (Internal details: Error in $: key \"tag\" not found)
                   |]
