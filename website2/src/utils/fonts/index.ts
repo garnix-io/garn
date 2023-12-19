@@ -3,11 +3,11 @@ import localFont from "next/font/local";
 export const MatterSQMono = localFont({
   src: [
     {
-      path: "../../public/fonts/MatterSQMonoTRIAL-Light.woff",
+      path: "./MatterSQMonoTRIAL-Light.woff",
       weight: "300",
     },
     {
-      path: "../../public/fonts/MatterSQMonoTRIAL-Regular.woff",
+      path: "./MatterSQMonoTRIAL-Regular.woff",
       weight: "400",
     },
   ],
@@ -16,7 +16,7 @@ export const MatterSQMono = localFont({
 export const Berlin = localFont({
   src: [
     {
-      path: "../../public/fonts/BerlinTypeWeb-Regular.woff",
+      path: "./BerlinTypeWeb-Regular.woff",
       weight: "400",
     },
   ],
