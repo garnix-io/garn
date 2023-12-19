@@ -23,32 +23,39 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
   );
 };
 
+const getDocs = async (): Promise<
+  Array<{ fileName: string; slug: string }>
+> => {
+  const fileNames = await readdir("documentation");
+  return fileNames.map((fileName) => ({
+    fileName,
+    slug: fileName.split(".mdx")[0],
+  }));
+};
+
 const fetchLinks = async (): Promise<Link[]> => {
-  const filenames = await readdir("documentation");
+  const docs = await getDocs();
   const metadata: Link[] = [];
-  for (let i = 0; i < filenames.length; i++) {
-    const file = await readFile(`documentation/${filenames[i]}`, "utf-8");
+  for (let i = 0; i < docs.length; i++) {
+    const file = await readFile(`documentation/${docs[i].fileName}`, "utf-8");
     const meta = await serialize<
       null,
       { index: number; name: string; link: string }
     >(file, {
       parseFrontmatter: true,
     });
-    const link = filenames[i].split(".mdx")[0];
     metadata.push({
       index: meta.frontmatter.index,
-      name: (meta.frontmatter.name as string) || link.split("_").join(" "),
-      link,
+      name:
+        (meta.frontmatter.name as string) || docs[i].slug.replaceAll("_", " "),
+      link: docs[i].slug,
     });
   }
   return metadata.sort((a, b) => a.index - b.index);
 };
 
-export const generateStaticParams = async () => {
-  const res = await readdir("documentation");
-  return res.map((document) => ({
-    slug: document.split(".mdx")[0],
-  }));
+export const generateStaticParams = () => {
+  return getDocs();
 };
 
 export default Page;
