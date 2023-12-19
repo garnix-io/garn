@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "@/utils/colors.css";
+import "@/utils/sizes.css";
 import { MatterSQMono } from "@/utils/fonts";
 
 export const metadata: Metadata = {

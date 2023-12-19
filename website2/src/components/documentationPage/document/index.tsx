@@ -13,9 +13,10 @@ type Props = {
 
 export const Document = ({ source }: Props) => {
   return (
-    <section className={styles.container}>
+    <section>
       <MDXRemote
         source={source}
+        options={{ parseFrontmatter: true }}
         components={{
           ToolTip: (props) => (
             <ToolTip

@@ -1,0 +1,17 @@
+.layout {
+  display: flex;
+  flex-direction: row;
+  gap: 104px;
+  padding: 80px 96px;
+  border-left: 16px solid var(--color-black);
+  border-right: 16px solid var(--color-black);
+}
+
+@media only screen and (max-width: 768px) {
+  .layout {
+    display: block;
+    gap: 0;
+    padding: 40px 16px;
+    overflow: hidden;
+  }
+}
