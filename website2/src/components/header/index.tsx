@@ -8,7 +8,7 @@ export const Header = () => {
         <Link className={styles.link} href="/">
           garn
         </Link>
-        <Link className={styles.link} href="/documentation">
+        <Link className={styles.link} href="/docs/getting_started">
           documentation
         </Link>
       </section>
