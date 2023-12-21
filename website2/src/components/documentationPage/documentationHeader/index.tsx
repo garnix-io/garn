@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Text } from "@/components/text";
 import { Link as LinkType } from "@/components/documentationPage/sidebar";
-import menuShape from "@/../public/menu.svg";
-import xShape from "@/../public/x.svg";
+import menuIcon from "@/components/icons/menu.svg";
+import xIcon from "@/components/icons/x.svg";
 import styles from "./styles.module.css";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -28,7 +28,7 @@ export const DocumentationHeader = ({ active, links }: Props) => {
         {isOpen ? (
           <Image
             className={styles.menuToggle}
-            src={xShape}
+            src={xIcon}
             alt="close"
             width={20}
             height={40}
@@ -37,7 +37,7 @@ export const DocumentationHeader = ({ active, links }: Props) => {
         ) : (
           <Image
             className={styles.menuToggle}
-            src={menuShape}
+            src={menuIcon}
             alt="menu"
             width={22}
             height={40}
