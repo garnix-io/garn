@@ -1,10 +1,11 @@
 import { Text } from "@/components/text";
 import { ReactNode, isValidElement } from "react";
 import styles from "./styles.module.css";
-import { Share } from "@/components/icons/share";
+import shareIcon from "@/components/icons/share.svg";
 import Link from "next/link";
 import { withPropCheck } from "@/utils/withPropCheck";
 import { z } from "zod";
+import Image from "next/image";
 
 const PropSchema = z.object({
   type: z.enum(["h1", "h2", "h3"]),
@@ -20,7 +21,13 @@ export const DocumentHeader = withPropCheck(
       <Text id={id} type={type} className={`${className} ${styles.container}`}>
         <Link href={`#${id}`} className={styles.link}>
           <span>{children}</span>
-          <Share className={styles.share} />
+          <Image
+            className={styles.share}
+            src={shareIcon}
+            alt="share"
+            width={16}
+            height={16}
+          />
         </Link>
       </Text>
     );
