@@ -12,6 +12,13 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
+      <head>
+        <script
+          defer
+          data-domain="garn.io"
+          src="https://plausible.io/js/script.outbound-links.tagged-events.js"
+        ></script>
+      </head>
       <body className={MatterSQMono.className}>{children}</body>
     </html>
   );
