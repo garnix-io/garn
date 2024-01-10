@@ -25,6 +25,14 @@
   .paragraph {
     margin-bottom: 16px;
   }
+
+  .link {
+    color: var(--color-white);
+  }
+
+  .link:hover {
+    text-decoration: underline;
+  }
 }
 
 .faq:hover .faqTitle {
@@ -49,7 +57,7 @@
 
 .toggle {
   font-size: 24px;
-  line-height: 40px;
+  line-height: 28px;
   transition: transform .3s;
   transform-origin: center;
 }
@@ -62,10 +70,11 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height .2s, padding .3s;
+  display: block;
 }
 
 .faqAnswer.open {
-  max-height: 400px;
+  max-height: 800px;
   padding: 16px 0;
 }
 
