@@ -21,6 +21,10 @@
   margin-bottom: 32px;
   border-top: 2px solid var(--color-gray20);
   cursor: pointer;
+
+  .paragraph {
+    margin-bottom: 16px;
+  }
 }
 
 .faq:hover .faqTitle {
