@@ -3,11 +3,11 @@ import localFont from "next/font/local";
 export const MatterSQMono = localFont({
   src: [
     {
-      path: "./MatterSQMonoTRIAL-Light.woff",
+      path: "./MatterSQMono-Light.woff",
       weight: "300",
     },
     {
-      path: "./MatterSQMonoTRIAL-Regular.woff",
+      path: "./MatterSQMono-Regular.woff",
       weight: "400",
     },
   ],
