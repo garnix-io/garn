@@ -5,7 +5,7 @@ import { withPropCheck } from "@/utils/withPropCheck";
 
 const PropSchema = z.object({
   id: z.string().optional(),
-  type: z.enum(["p", "h1", "h2", "h3", "proper", "code"]).optional(),
+  type: z.enum(["p", "h1", "h2", "h3", "proper", "code", "span"]).optional(),
   className: z.string().optional(),
   children: z.custom(),
 });
@@ -57,6 +57,15 @@ export const Text = withPropCheck(
         <span
           {...rest}
           className={`${styles.code} ${className} ${MatterSQMono.className}`}
+        >
+          {children}
+        </span>
+      );
+    else if (type === "span")
+      return (
+        <span
+          {...rest}
+          className={`${Berlin.className} ${styles.paragraph} ${className}`}
         >
           {children}
         </span>
