@@ -13,3 +13,13 @@
 .MatterSQMono {
   font-family: "MatterSQMono";
 }
+
+@font-face {
+  font-family: "BerlinTypeWeb";
+  src: url("./BerlinTypeWeb-Regular.woff") format("woff");
+  font-weight: 400;
+}
+
+.Berlin {
+  font-family: "BerlinTypeWeb";
+}
