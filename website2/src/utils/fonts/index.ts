@@ -1,17 +1,9 @@
 import localFont from "next/font/local";
+import fonts from "./fonts.module.css";
 
-export const MatterSQMono = localFont({
-  src: [
-    {
-      path: "./MatterSQMono-Light.woff",
-      weight: "300",
-    },
-    {
-      path: "./MatterSQMono-Regular.woff",
-      weight: "400",
-    },
-  ],
-});
+export const MatterSQMono = {
+  className: fonts.MatterSQMono,
+};
 
 export const Berlin = localFont({
   src: [
