@@ -1,12 +1,12 @@
 @font-face {
   font-family: "MatterSQMono";
-  src: url("http://localhost:8000/garn.io-fonts/MatterSQMono-Light.woff") format("woff");
+  src: url("http://localhost:8017/garn.io-fonts/MatterSQMono-Light.woff") format("woff");
   font-weight: 300;
 }
 
 @font-face {
   font-family: "MatterSQMono";
-  src: url("http://localhost:8000/garn.io-fonts/MatterSQMono-Regular.woff") format("woff");
+  src: url("http://localhost:8017/garn.io-fonts/MatterSQMono-Regular.woff") format("woff");
   font-weight: 400;
 }
 
