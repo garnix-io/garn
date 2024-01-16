@@ -1,6 +1,11 @@
 # Changelog
 
-## v0.0.20 (unreleased)
+## v0.0.21 (unreleased)
+
+## v0.0.20
+- Remove `sandboxSetup` parameter from `mkEnvironment`, add lower-level
+  `addToSetup` helper function to use instead.
+- Add support for Python projects through `garn.python.mkPythonProject`.
 
 ## v0.0.19
 
@@ -8,9 +13,6 @@
   javascript formatting using [prettier](https://prettier.io/).
 - Add `garn.callFlake` helper to allow importing flake files by local path.
 - Add `garn.importFlake` helper to allow importing flake files by url, e.g. from GitHub.
-
-- Remove `sandboxSetup` parameter from `mkEnvironment`, add lower-level
-  `addToSetup` helper function to use instead.
 
 ## v0.0.18
 
