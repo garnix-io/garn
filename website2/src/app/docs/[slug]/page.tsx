@@ -16,7 +16,7 @@ const Page = async ({ params: { slug } }: { params: { slug: string } }) => {
       <DocumentationHeader links={links} active={slug} />
       <div className={styles.layout}>
         <Sidebar links={links} active={slug} />
-        <Document source={source} />
+        <Document className={styles.document} source={source} />
       </div>
       <Footer />
     </main>

@@ -18,7 +18,6 @@ export const SampleCode = ({ code, inverse, language }: Props) => {
       customStyle={{
         background: "transparent",
         padding: 0,
-        paddingBottom: 8,
         margin: 0,
         textShadow: "none",
       }}

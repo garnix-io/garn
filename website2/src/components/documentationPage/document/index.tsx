@@ -9,11 +9,12 @@ import { DocumentHeader } from "../documentHeader";
 
 type Props = {
   source: string;
+  className?: string;
 };
 
-export const Document = ({ source }: Props) => {
+export const Document = ({ source, className }: Props) => {
   return (
-    <section>
+    <section className={className}>
       <MDXRemote
         source={source}
         options={{ parseFrontmatter: true }}

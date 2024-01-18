@@ -7,6 +7,10 @@
   border-right: 16px solid var(--color-black);
 }
 
+.document {
+  min-width: 0;
+}
+
 @media only screen and (max-width: 768px) {
   .layout {
     display: block;
