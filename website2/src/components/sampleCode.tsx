@@ -22,7 +22,6 @@ export const SampleCode = ({ code, inverse, language }: Props) => {
         textShadow: "none",
       }}
       codeTagProps={{ style: { background: "transparent" } }}
-      wrapLongLines
     >
       {code}
     </SyntaxHighlighter>
