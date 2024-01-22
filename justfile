@@ -28,9 +28,9 @@ deploy-website commit:
   git reset --hard {{ commit }}
   COMMIT=$(git rev-parse HEAD)
   just build-install-script-files
-  (cd website && npm install && npm run build)
-  ls -la website/dist
-  mv website/dist/* $DIST_DIR
+  (cd website2 && npm install && npm run build)
+  mv -v website2/out/* $DIST_DIR
+  git clean -dfx
   git checkout gh-pages
   cp -rv $DIST_DIR/* .
   git add .
@@ -171,11 +171,11 @@ check-isolated-garn:
 
 # Start the docs website server
 docs-server: build-install-script-files
-  cd website && npm install
-  cd website && npm run dev
+  cd website2 && npm install
+  cd website2 && npm run dev
 
 build-install-script-files:
   nix build -L .#installScriptFiles
-  mkdir -p website/public
-  cp -rv result/* website/public/
-  chmod -R u+rwX website/public
+  mkdir -p website2/public
+  cp -rv result/* website2/public/
+  chmod -R u+rwX website2/public
