@@ -147,7 +147,7 @@ check-examples:
 
 update-flakefiles:
   #!/usr/bin/env bash
-  for EXAMPLE in examples/* website; do
+  for EXAMPLE in examples/* website website2; do
     if [ -e "$EXAMPLE/garn.ts" ]; then
       (
         cd "$EXAMPLE"

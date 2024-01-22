@@ -1,0 +1,54 @@
+.container {
+  position: relative;
+  height: 72px;
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--color-black);
+  text-transform: uppercase;
+  padding: 0 32px;
+  align-items: center;
+  font-weight: 300;
+  z-index: 11;
+}
+
+.section {
+  display: flex;
+  gap: 32px;
+}
+
+.sectionMobile {
+  display: none;
+}
+
+.link {
+  color: var(--color-white);
+  font-family: MatterSQMono, monospace;
+  font-size: 24px;
+  line-height: 40px;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    height: var(--header-height-mobile);
+    padding: 0 16px;
+  }
+
+  .sectionDesktop {
+    display: none;
+  }
+
+  .sectionMobile {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .link {
+    font-size: 16px;
+    line-height: 28px;
+  }
+}

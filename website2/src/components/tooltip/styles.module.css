@@ -1,0 +1,22 @@
+.button {
+  border-radius: 100px;
+  background-color: var(--color-black);
+  color: var(--color-white);
+  display: inline-flex;
+  width: 14px;
+  height: 14px;
+  font-size: 11px;
+  bottom: 1px;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.content {
+  padding: 16px;
+  line-height: 28px;
+  max-width: 500px;
+  border: 1px solid var(--color-black);
+  background: var(--color-white);
+}

@@ -1,0 +1,29 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.link {
+  text-transform: uppercase;
+  font-size: 24px;
+  line-height: 40px;
+  display: block;
+  text-wrap: nowrap;
+  color: var(--color-gray88);
+  transition: color .3s;
+}
+
+.link:hover {
+  color: var(--color-gray20);
+}
+
+.link.active {
+  color: var(--color-black);
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    display: none;
+  }
+}

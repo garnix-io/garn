@@ -1,0 +1,62 @@
+.h2 {
+  margin-top: 48px;
+  margin-bottom: 16px;
+}
+
+.h3 {
+  margin-top: 24px;
+  margin-bottom: 16px;
+}
+
+.terminal {
+  margin-top: 48px;
+  margin-bottom: 48px;
+}
+
+.tooltip {
+  margin-left: 4px;
+}
+
+.p {
+  margin-bottom: 8px;
+}
+
+.ul, .ol {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  list-style-position: inside;
+  font-size: 18px;
+  line-height: 28px;
+  color: var(--color-gray6a);
+}
+
+.ul {
+  list-style-type: disc;
+}
+
+.ol {
+  list-style-type: decimal;
+}
+
+.li {
+  margin-bottom: 8px;
+}
+
+.code {
+  text-wrap: wrap;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    padding: 40px 16px;
+  }
+
+  .h2 {
+    margin-top: 40px;
+  }
+
+  .ul, .ol {
+    font-size: 16px;
+    line-height: 28px;
+  }
+}

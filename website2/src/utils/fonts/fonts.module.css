@@ -1,0 +1,25 @@
+@font-face {
+  font-family: "MatterSQMono";
+  src: url("https://garnix.io/garn.io-fonts/MatterSQMono-Light.woff") format("woff");
+  font-weight: 300;
+}
+
+@font-face {
+  font-family: "MatterSQMono";
+  src: url("https://garnix.io/garn.io-fonts/MatterSQMono-Regular.woff") format("woff");
+  font-weight: 400;
+}
+
+.MatterSQMono {
+  font-family: "MatterSQMono";
+}
+
+@font-face {
+  font-family: "BerlinTypeWeb";
+  src: url("./BerlinTypeWeb-Regular.woff") format("woff");
+  font-weight: 400;
+}
+
+.Berlin {
+  font-family: "BerlinTypeWeb";
+}

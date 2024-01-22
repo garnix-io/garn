@@ -45,6 +45,12 @@
             pkgs.lib.attrsets.mapAttrs'
               (name: value: { name = "website_${name}"; inherit value; })
               websiteFlake.packages.${system} else { };
+        website2Flake = call-flake ./website2;
+        website2Packages =
+          if system == "x86_64-linux" then
+            pkgs.lib.attrsets.mapAttrs'
+              (name: value: { name = "website2_${name}"; inherit value; })
+              website2Flake.packages.${system} else { };
       in
       {
         lib = pkgs.lib;
@@ -161,6 +167,7 @@
             '');
         }
         // websitePackages
+        // website2Packages
         // (
           if system == "x86_64-linux"
           then {
@@ -218,6 +225,11 @@
                 pkgs.lib.attrsets.mapAttrs'
                   (name: check: { name = "website_${name}"; value = check; })
                   websiteFlake.checks.${system} else { };
+            website2Checks =
+              if system == "x86_64-linux" then
+                pkgs.lib.attrsets.mapAttrs'
+                  (name: check: { name = "website2_${name}"; value = check; })
+                  website2Flake.checks.${system} else { };
           in
           {
             nix-fmt = justRecipe "fmt-nix-check" [ self.formatter.${system} ];
@@ -237,7 +249,9 @@
               fileserver --help
               touch $out
             '';
-          } // websiteChecks;
+          }
+          // websiteChecks
+          // website2Checks;
         formatter = pkgs.nixpkgs-fmt;
         apps = {
           fileserver = flake-utils.lib.mkApp

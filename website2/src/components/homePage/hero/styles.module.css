@@ -1,0 +1,21 @@
+.container {
+  border: 16px solid var(--color-black);
+  border-top: 0;
+  padding: 96px 96px 136px;
+}
+
+.content {
+  max-width: 1216px;
+  margin: 0 auto;
+}
+
+@media only screen and (max-width: 768px) {
+  .container {
+    border: 0;
+    padding: 24px 16px 0;
+  }
+
+  .mobileDivider {
+    height: 16px;
+  }  
+}
