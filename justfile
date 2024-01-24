@@ -33,6 +33,7 @@ deploy-website commit:
   git clean -dfx
   git checkout gh-pages
   cp -rv $DIST_DIR/* .
+  touch .nojekyll
   git add .
   git commit -m "Website update from commit $COMMIT"
   git show --stat
