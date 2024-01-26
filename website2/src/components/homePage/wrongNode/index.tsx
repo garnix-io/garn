@@ -4,7 +4,7 @@ import { Terminal } from "../../terminal";
 import styles from "./styles.module.css";
 import { Command, TypingText } from "../../typingText";
 
-const CODE = `import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
+const CODE = `import * as garn from "https://garn.io/ts/v0.0.20/mod.ts";
 
 export const frontend = garn.javascript.mkNpmProject({
   description: "my frontend project",

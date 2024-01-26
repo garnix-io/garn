@@ -7,7 +7,7 @@ import { Command, TypingText } from "../../typingText";
 const CODE = `export const backend = garn.go.mkGoProject({
   description: "Go backend",
   src: ".",
-  goVersion: "1.20",
+  goVersion: "1.21",
 })
   .withDevTools([pkgs.protobuf, pkgs.protoc_gen_go])
   .addExecutable("codegen", "protoc --go_out=out protobufs/*.proto");`;
