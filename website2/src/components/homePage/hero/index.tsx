@@ -16,18 +16,17 @@ const COMMANDS: Command[] = [
   { action: "restart" },
 ];
 
-const CODE = `import * as garn from "https://garn.io/ts/v0.0.14/mod.ts";
-import * as pkgs from "https://garn.io/ts/v0.0.14/nixpkgs.ts";
+const CODE = `import * as garn from "https://garn.io/ts/v0.0.20/mod.ts";
+import * as pkgs from "https://garn.io/ts/v0.0.20/nixpkgs.ts";
 
-export const backend = garn.go.mkGoProject({   
-  description: "A Go server",  
-  src: ".",  
-  goVersion: "1.20",
-})  
-  .withDevTools([pkgs.ripgrep, pkgs.air])  
-  .addCheck("no-todos-allowed")\`! rg -i todo .\`  
-  .addExecutable("dev-server")\`air main.go\`;
-`;
+export const backend = garn.go.mkGoProject({
+  description: "A Go server",
+  src: ".",
+  goVersion: "1.21",
+})
+  .withDevTools([pkgs.ripgrep, pkgs.air])
+  .addCheck("no-todos-allowed", "! rg -i todo .")
+  .addExecutable("dev-server", "air main.go");`;
 
 export const Hero = () => {
   return (
