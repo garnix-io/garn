@@ -56,7 +56,7 @@ Deno.test("joinNixStrings joins strings using the given separator", () => {
 });
 
 Deno.test(
-  "toHumanReadable snips out incedental dependencies in string literals",
+  "toHumanReadable snips out incidental dependencies in string literals",
   () => {
     assertEquals(toHumanReadable(nixStrLit`foo`), "foo");
     assertEquals(

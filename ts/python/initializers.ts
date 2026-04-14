@@ -8,8 +8,8 @@ import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
 import { parsePyprojectToml } from "./utils.ts";
 
 export const pythonInitializer: Initializer = (dir) => {
-  const existPyprojetToml = fs.existsSync(join(dir, "pyproject.toml"));
-  if (!existPyprojetToml) {
+  const existPyprojectToml = fs.existsSync(join(dir, "pyproject.toml"));
+  if (!existPyprojectToml) {
     return { tag: "ShouldNotRun" };
   }
   const contents = Deno.readTextFileSync(join(dir, "pyproject.toml"));

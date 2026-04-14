@@ -31,7 +31,7 @@ export const Sidebar = ({ links, active }: Props) => {
         href="https://doc.deno.land/https://garn.io/ts/v0.0.20/mod.ts"
         target="_blank"
       >
-        Typescript API
+        TypeScript API
       </Link>
     </section>
   );

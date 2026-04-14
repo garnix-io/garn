@@ -22,7 +22,7 @@ export function markAsMayNotExport(
 ) {
   // @ts-expect-error - SAFETY: typescript does not allow setting
   // `MAY_NOT_EXPORT` on T here. However, it is safe to set arbitrary keys on
-  // non-primative types, which `value: object` enforces.
+  // non-primitive types, which `value: object` enforces.
   value[MAY_NOT_EXPORT] = reason;
 }
 

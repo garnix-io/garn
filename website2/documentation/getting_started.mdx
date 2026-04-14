@@ -21,11 +21,11 @@ sh <(curl --proto '=https' --tlsv1.2 -sSf https://garn.io/install.sh)
   `x86_64-darwin`, the garnix binary cache currently doesn't build `garn` for
   that platform. That means that the installer has to compile `garn` and a
   whole lot of dependencies on your own machine. If you're interesting in
-  better support for `x86_64-darwin`, please let us now on Github or
+  better support for `x86_64-darwin`, please let us now on GitHub or
   Discord.</ToolTip>
 - M1/M2 Macs
 
-You can look at the contents of the script [here](https://garn.io/install.sh).
+You can look at the [contents of the script](https://garn.io/install.sh).
 
 <Text type="proper">Garn</Text> requires [Nix](https://nixos.org/). If you don't have Nix, the above
 command will install it for you.
@@ -56,7 +56,7 @@ nix profile install github:garnix-io/garn/v0.0.20
 
 If you prefer, you can also manually do the steps that the above install script automates. Those are:
 
-1. **Install Nix**. To install Nix, follow the instructions [here](https://nixos.org/download).
+1. **Install Nix**. Follow the [instructions to install Nix](https://nixos.org/download).
 2. **Configure Nix to use the <Text type="proper">Garnix</Text> cache**. You can do that by adding the lines:
 
 ```bash
@@ -98,7 +98,7 @@ files: using `garn edit`, or setting up your editor yourself.
 ### `garn edit`
 
 <Text type="proper">Garn</Text> provides an `edit` command that downloads and starts a VSCodium
-configured with Deno LSP. It is started with it's own configuration and data
+configured with Deno LSP. It is started with its own configuration and data
 directories, so as to not clobber any VSCodium or VSCode configuration you may
 already have.
 

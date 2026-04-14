@@ -19,7 +19,7 @@ export const Social = () => {
             href: "https://discord.gg/XtDrPsqpVx",
           },
           {
-            text: "Github",
+            text: "GitHub",
             href: "https://github.com/garnix-io/garn",
           },
         ]}

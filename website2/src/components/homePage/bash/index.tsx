@@ -46,7 +46,7 @@ export const Bash = () => {
       </div>
       <Text className={styles.textContainer}>
         garn allows you to add deterministic scripts to your projects that run
-        the same everywhere. Use them to run dev servers, bundle Javascript,
+        the same everywhere. Use them to run dev servers, bundle JavaScript,
         format source code, run code generators and more.
       </Text>
     </section>

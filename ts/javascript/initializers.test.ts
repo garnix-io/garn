@@ -154,7 +154,7 @@ Deno.test("adds the vite plugin if vite is in the devDependencies", () => {
 });
 
 Deno.test(
-  "doesn't add known vite scripts if superseeded by vite plugin",
+  "doesn't add known vite scripts if superseded by vite plugin",
   () => {
     const tempDir = Deno.makeTempDirSync();
     Deno.writeTextFileSync(

@@ -113,7 +113,7 @@ check> No hints`}
             Well, it was probably their fault for not having the right tools
             installed... <Garn /> allows you to add deterministic scripts to
             your projects that run the same everywhere. Use them to run dev
-            servers, bundle Javascript, format source code, run code generators
+            servers, bundle JavaScript, format source code, run code generators
             and more.
           </>
         }

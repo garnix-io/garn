@@ -17,8 +17,8 @@ const mkConfigFile = (config: Record<string, unknown>): NixExpression =>
  *                  relative to the src of the containing project
  * @param opts.config An optional prettier configuration
  *
- * It will use the version of prettier defined in your package.json, otherwise
- * if that is not configured, it will fallback to using prettier from nixpkgs.
+ * It will use the version of prettier defined in your package.json; otherwise,
+ * if that is not configured, it will fall back to using prettier from nixpkgs.
  *
  * Example:
  * ```typescript

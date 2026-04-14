@@ -24,7 +24,7 @@
 
 ## v0.0.17
 
-- Fix locale warnings on MacOS
+- Fix locale warnings on macOS
 - Make `executables` a list, and optional, in `mkHaskellPackage`
 - Add `addCabalExecutable` to Haskell projects
 - Make `garn init` on Haskell projects fill in the `executables` based on the cabal file.

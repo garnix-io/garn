@@ -59,7 +59,7 @@ export function Hero() {
         <h2>Pin down your software</h2>
         <p>Declaratively configure your projects, get reproducible results.</p>
         <div className="ctas">
-          <Link to="/docs/tutorial">Read More</Link>
+          <Link to="/docs/tutorial">Tutorial</Link>
           <Link to="/docs/getting_started">Get Started</Link>
         </div>
       </div>
